@@ -1,0 +1,19 @@
+@import "tailwindcss";
+
+@layer base {
+	body {
+		@apply h-screen w-screen bg-slate-50;
+	}
+
+	* {
+		@apply text-sm text-slate-900;
+	}
+
+	input:focus {
+		@apply outline-none;
+	}
+
+	button:hover {
+		@apply cursor-pointer;
+	}
+}
