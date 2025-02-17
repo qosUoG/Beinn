@@ -4,7 +4,7 @@
 	import ProjectPath from "$components/modules/ProjectPath.svelte";
 	import ProjectTree from "$components/modules/ProjectTree/ProjectTree.svelte";
 
-	import StartExperiment from "$components/modules/StartExperiment.svelte";
+	import ActivateScript from "$components/modules/ActivateScript.svelte";
 </script>
 
 <div class="col-4 w-full h-full p-4">
@@ -15,6 +15,6 @@
 	</div>
 	<div class="row-4 h-full min-h-0 items-start">
 		<ProjectTree />
-		<StartExperiment />
+		<ActivateScript />
 	</div>
 </div>

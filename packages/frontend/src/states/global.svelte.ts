@@ -1,5 +1,6 @@
 import type { Directory } from "shared-types";
 
+
 export let gstore:
     {
         workspace: {
@@ -13,7 +14,7 @@ export let gstore:
 
     } = $state({
         workspace: {
-            path: "/Volumes/External/QosLab/example/experiment",
+            path: import.meta.env.VITE_DEFAULT_EXPERIMENT_PATH,
             directory: { files: [], dirs: {} },
         },
         experiment: {

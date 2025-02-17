@@ -16,7 +16,7 @@ export const sendSetDirectory = (path: string) => {
     )
 }
 
-export const sendStartExperiment = (cwd: string, script_name: string) => {
+export const sendActivateExperimentScript = (cwd: string, script_name: string) => {
     send(
         {
             command: "Start-Experiment",
@@ -33,7 +33,6 @@ export const backend_socket_connect = () => {
     backend_socket.onopen = () => {
         console.log("OPENED connection to backend")
         backend_connection.connecting = true
-        sendSetDirectory("/Users/harry/Downloads")
     }
 
     backend_socket.onclose = () => {
