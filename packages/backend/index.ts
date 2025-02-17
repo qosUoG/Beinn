@@ -63,6 +63,7 @@ serve<undefined>({
                         py_map.delete(k)
                         console.log(`py proc ${k} killed`)
                     })
+
                     const pyproc = Bun.spawn(["uv", "run", msg.payload.script_name], {
                         cwd: msg.payload.cwd,
                         stdout: "inherit"
