@@ -2,11 +2,25 @@
 
 @layer base {
 	body {
-		@apply h-screen w-screen bg-slate-50;
+		@apply h-screen w-screen bg-slate-50 overflow-clip;
 	}
 
-	* {
-		@apply text-sm text-slate-900;
+	#app {
+		@apply w-full h-full;
+	}
+
+	h1,
+	h2,
+	h3,
+	h4,
+	h5,
+	h6,
+	p,
+	span,
+	div,
+	button,
+	div {
+		@apply text-slate-800 text-xs;
 	}
 
 	input:focus {
@@ -15,5 +29,47 @@
 
 	button:hover {
 		@apply cursor-pointer;
+	}
+
+	svg {
+		@apply h-full w-full box-border;
+	}
+}
+
+@layer components {
+	.wrapped {
+		@apply rounded px-2 py-1;
+	}
+
+	.icon-btn {
+		@apply rounded px-2 py-1 max-h-full w-9 text-xs;
+	}
+
+	.icon-div {
+		@apply rounded w-4 max-h-full text-xs;
+	}
+
+	.row-4 {
+		@apply flex gap-4 items-stretch;
+	}
+
+	.row-2 {
+		@apply flex gap-2 items-stretch;
+	}
+
+	.row-1 {
+		@apply flex gap-1 items-stretch;
+	}
+
+	.col-4 {
+		@apply flex flex-col gap-4 items-stretch;
+	}
+
+	.col-2 {
+		@apply flex flex-col gap-2 items-stretch;
+	}
+
+	.col-1 {
+		@apply flex flex-col gap-1 items-stretch;
 	}
 }

@@ -1,24 +1,20 @@
 <script lang="ts">
-	import { backend_socket, sendSetDirectory } from "$websockets/backend_ws";
-	import Input from "$components/reuseables/Input.svelte";
+	import BackendWsStatus from "$components/modules/BackendWsStatus.svelte";
+	import Mode from "$components/modules/Mode.svelte";
+	import ProjectPath from "$components/modules/ProjectPath.svelte";
+	import ProjectTree from "$components/modules/ProjectTree/ProjectTree.svelte";
 
-	backend_socket;
-
-	let path = $state("/Users/harry/Downloads");
+	import StartExperiment from "$components/modules/StartExperiment.svelte";
 </script>
 
-<label class="p-4 flex gap-2 items-center">
-	<div class="w-fit bg-slate-200 rounded p-1 px-2 text-nowrap">
-		Project Path
+<div class="col-4 w-full h-full p-4">
+	<div class="row-4 w-full items-stretch">
+		<Mode />
+		<ProjectPath />
+		<BackendWsStatus />
 	</div>
-	<Input
-		spellcheck="false"
-		class="flex-grow bg-slate-200 rounded p-1 px-2"
-		type="text"
-		bind:value={path} />
-	<button
-		class="bg-green-100 rounded p-1 px-2 text-green-900"
-		onclick={() => {
-			sendSetDirectory($state.snapshot(path));
-		}}>Update</button>
-</label>
+	<div class="row-4 h-full min-h-0 items-start">
+		<ProjectTree />
+		<StartExperiment />
+	</div>
+</div>
