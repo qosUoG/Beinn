@@ -28,7 +28,7 @@ export const sendActivateExperimentScript = (cwd: string, script_name: string) =
 let backend_socket: WebSocket
 
 export const backend_socket_connect = () => {
-    backend_socket = new WebSocket("ws://localhost:4000/backend", "backend")
+    backend_socket = new WebSocket("ws://localhost:8000/ws")
 
     backend_socket.onopen = () => {
         console.log("OPENED connection to backend")
