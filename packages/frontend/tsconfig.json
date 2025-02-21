@@ -11,7 +11,8 @@
 			"$workers/*": ["./workers/*"],
 			"$websockets/*": ["./websockets/*"],
 			"$components/*": ["./components/*"],
-			"$states/*": ["./states/*"]
+			"$states/*": ["./states/*"],
+			"$lib/*": ["./lib/*"]
 		}
 	}
 }

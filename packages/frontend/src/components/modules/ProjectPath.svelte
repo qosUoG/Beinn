@@ -1,8 +1,6 @@
 <script lang="ts">
 	import Input from "$components/reuseables/Input.svelte";
 	import { gstore } from "$states/global.svelte";
-	import { sendSetDirectory } from "$websockets/backend_ws.svelte";
-
 	console.log(JSON.stringify(gstore, null, 4));
 </script>
 
@@ -14,12 +12,16 @@
 		spellcheck="false"
 		class="flex-grow wrapped bg-slate-200"
 		type="text"
-		bind:value={gstore.workspace.path}
-	/>
+		bind:value={gstore.project.path} />
 	<button
 		class="wrapped text-green-800 bg-green-100"
-		onclick={() => {
-			sendSetDirectory(gstore.workspace.path);
-		}}>Update</button
-	>
+		onclick={async () => {
+			const res = await (
+				await fetch(
+					`http://localhost:8000/getDirectoryContent/${encodeURIComponent(gstore.project.path)}`
+				)
+			).json();
+
+			gstore.project.directory = { files: res, dirs: {} };
+		}}>Update</button>
 </label>

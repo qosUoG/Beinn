@@ -9,3 +9,8 @@ dependencies = [
     "pyvisa>=1.14.1",
     "websockets>=15.0",
 ]
+
+[dependency-groups]
+dev = [
+    "fastapi[standard]>=0.115.8",
+]

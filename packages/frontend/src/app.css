@@ -54,8 +54,16 @@
 		@apply rounded px-2 py-1;
 	}
 
+	.container {
+		@apply rounded p-2;
+	}
+
 	.icon-btn {
 		@apply rounded px-2 py-1 max-h-full w-9 text-xs;
+	}
+
+	.icon-btn-sm {
+		@apply rounded p-1 max-h-full w-6 text-xs;
 	}
 
 	.icon-div {
@@ -74,6 +82,10 @@
 		@apply flex gap-1 items-stretch;
 	}
 
+	.row {
+		@apply flex items-stretch;
+	}
+
 	.col-4 {
 		@apply flex flex-col gap-4 items-stretch;
 	}
@@ -84,5 +96,13 @@
 
 	.col-1 {
 		@apply flex flex-col gap-1 items-stretch;
+	}
+
+	.col {
+		@apply flex flex-col items-stretch;
+	}
+
+	.title {
+		@apply font-semibold;
 	}
 }

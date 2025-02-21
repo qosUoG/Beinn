@@ -6,6 +6,10 @@ import tailwindcss from '@tailwindcss/vite'
 // https://vite.dev/config/
 export default defineConfig({
   plugins: [svelte(), tailwindcss()],
+  build: {
+    outDir: "../backend/static",
+    emptyOutDir: true,
+  },
   resolve: {
     alias: {
       $icons: path.resolve("./src/icons"),
@@ -13,6 +17,7 @@ export default defineConfig({
       $components: path.resolve("./src/components"),
       $websockets: path.resolve("./src/websockets"),
       $states: path.resolve("./src/states"),
+      $lib: path.resolve("./src/lib"),
     },
   },
 })
