@@ -1,5 +1,7 @@
+from examplelib.src.examplelib import ExampleDriver
 from pydantic import BaseModel
-from qoslabpy import params as p
+from qoslabpy import params as p, exceptions as e
+import time
 
 
 class Examplexperiment:
@@ -11,6 +13,7 @@ class Examplexperiment:
         selectstrparam: p.SelectStrParam
         selectintparam: p.SelectIntParam
         selectfloatparam: p.SelectFloatParam
+        instanceparam: p.InstanceParam
 
     params: ParamsType = {
         "strparam": p.str_param(),
@@ -20,11 +23,18 @@ class Examplexperiment:
         "selectstrparam": p.select_str_param(["option1", "option2", "option3"]),
         "selectintparam": p.select_int_param([1, 2, 3]),
         "selectfloatparam": p.select_float_param([1.1, 2.2, 3.3]),
+        "instanceparam": p.instance_param[ExampleDriver](),
     }
 
     def __init__(self, params: ParamsType):
         self.params = params
         # Other initialisation code below
+        import pprint
 
-    def get_1(self):
-        return 1
+        pprint.pp(self.params)
+
+    def loop(self, index: int):
+        if index >= 10:
+            raise e.ExperimentEnded
+        print(self.params["instanceparam"].square(index))
+        time.sleep(1)

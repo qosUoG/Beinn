@@ -33,6 +33,11 @@ async def loadEquipment(payload: LoadEquipmentPayload):
             _class = getattr(module, classname)
             # Initilize the equipment and assign to equipments dict
             AppState.equipments[equipment.name] = _class(equipment.params)
+            # Loop and assign instances to each param
+            for equipment in AppState.equipments.values():
+                for p in equipment.params.values():
+                    if p.type == "instance":
+                        p.instance = AppState.equipments[p.instance_name]
     import pprint
 
     pprint.pp(AppState.equipments)

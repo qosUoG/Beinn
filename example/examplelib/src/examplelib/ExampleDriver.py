@@ -26,5 +26,5 @@ class ExampleEquipment:
         self.params = params
         # Other initialisation code below
 
-    def get_1(self):
-        return 1
+    def square(self, num: int):
+        return num * num

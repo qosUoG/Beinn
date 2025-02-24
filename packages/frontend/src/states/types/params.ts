@@ -41,8 +41,14 @@ export interface BoolParam {
     value: boolean
 }
 
+export interface InstanceParam {
+    type: "instance"
+    instance_name: string
+    instance: string
+}
+
 export type AllParamTypes = (
-    SelectStrParam | SelectFloatParam | SelectIntParam | IntParam | FloatParam | StrParam | BoolParam | CompositeParam
+    SelectStrParam | SelectFloatParam | SelectIntParam | IntParam | FloatParam | StrParam | BoolParam | CompositeParam | InstanceParam
 )
 
 

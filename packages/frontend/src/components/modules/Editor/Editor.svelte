@@ -15,9 +15,9 @@
 	const target: Experiment | Equipment | undefined = $derived.by(() => {
 		if (editor.id === undefined) return undefined;
 
-		if (editor.mode === "Equipment") return gstore.equipments[editor.id];
+		if (editor.mode === "equipments") return gstore.equipments[editor.id];
 
-		if (editor.mode === "Experiment") return gstore.experiments[editor.id];
+		if (editor.mode === "experiments") return gstore.experiments[editor.id];
 	});
 
 	let params_edited = $derived.by(() => {
@@ -35,9 +35,9 @@
 				<div class="row justify-between items-end">
 					<div class="title">
 						Editor -
-						{#if editor.mode === "Equipment"}
+						{#if editor.mode === "equipments"}
 							Equipment
-						{:else if editor.mode === "Experiment"}
+						{:else if editor.mode === "experiments"}
 							Experiment
 						{/if}
 					</div>
@@ -95,10 +95,10 @@
 		class="icon-btn-sm red"
 		onclick={() => {
 			switch (editor.mode) {
-				case "Equipment":
+				case "equipments":
 					delete gstore.equipments[editor.id!];
 					break;
-				case "Experiment":
+				case "experiments":
 					delete gstore.experiments[editor.id!];
 			}
 

@@ -1,6 +1,7 @@
 <script lang="ts">
 	import { autofocus, cn } from "$components/utils.svelte";
 	import type { AllParamTypes } from "$states/types/params";
+	import InstanceParam from "./InstanceParam.svelte";
 	import SelectParam from "./SelectParam.svelte";
 	import Separator from "./Separator.svelte";
 
@@ -70,5 +71,9 @@
 			{name}
 			bind:selection={param.selection}
 			options={param.options} />
+	{:else if param.type === "instance"}
+		<InstanceParam {name} bind:instance_name={param.instance_name} />
+	{:else}
+		{param.type} is not handled !!!
 	{/if}
 {/each}

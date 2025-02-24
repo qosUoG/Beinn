@@ -2,6 +2,7 @@
 	import { autofocus } from "$components/utils.svelte";
 	import Cancel from "$icons/Cancel.svelte";
 	import Edit from "$icons/Edit.svelte";
+	import Reload from "$icons/Reload.svelte";
 	import Tick from "$icons/Tick.svelte";
 	import Separator from "./Separator.svelte";
 
@@ -61,7 +62,11 @@
 			</div>
 		</div>
 		<div class="row-1">
-			<div class="icon-btn-sm"></div>
+			<button
+				class="icon-btn-sm slate"
+				onclick={() => {
+					onconfirm(path!);
+				}}><Reload /></button>
 			<button
 				class="icon-btn-sm slate"
 				onclick={() => {

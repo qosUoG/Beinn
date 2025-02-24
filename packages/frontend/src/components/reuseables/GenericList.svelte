@@ -1,4 +1,4 @@
-<script lang="ts" generics="T extends Equipment | Experiment">
+<script lang="ts">
 	import Plus from "$icons/Plus.svelte";
 
 	import { getRandomId } from "$lib/utils";
@@ -10,61 +10,68 @@
 	import Disk from "$icons/Disk.svelte";
 	import FolderQuestion from "$icons/FolderQuestion.svelte";
 	import Sign from "$icons/Sign.svelte";
-	import Usb from "$icons/USB.svelte";
-	import { loadEquipment } from "$services/backend.svelte";
-	import type { Equipment, Experiment } from "$states/types/general";
+	import Play from "$icons/Play.svelte";
+	import { startExperiments } from "$services/backend.svelte";
+
+	let { listtype }: { listtype: "equipments" | "experiments" } = $props();
+
+	const capitalised = listtype[0].toUpperCase() + String(listtype).slice(1);
 </script>
 
 <div class="container col-2 bg-slate-200">
 	<div class="row justify-between items-center">
-		<div class="title">Equipment</div>
+		<div class="title">
+			{capitalised}
+		</div>
 		<div class="row-1">
-			<button class="icon-btn-sm green" onclick={loadEquipment}>
-				<Usb />
-			</button>
+			{#if listtype === "experiments"}
+				<button class="icon-btn-sm green" onclick={startExperiments}>
+					<Play />
+				</button>
+			{/if}
 			<button
 				class="icon-btn-sm slate"
 				onclick={async () => {
-					const id = getRandomId(Object.keys(gstore.equipments));
-					gstore.equipments[id] = { id };
+					const id = getRandomId(Object.keys(gstore[listtype]));
+					gstore[listtype][id] = { id };
 
 					await tick();
 
 					editor.id = id;
-					editor.mode = "Equipment";
+					editor.mode = listtype;
 				}}><Plus /></button>
 		</div>
 	</div>
-	{#each Object.values(gstore.equipments) as equipment}
+	{#each Object.values(gstore[listtype]) as target}
 		{@const params_edited =
-			JSON.stringify(equipment!.temp_params) !==
-			JSON.stringify(equipment!.params)}
+			JSON.stringify(target.temp_params) !==
+			JSON.stringify(target.params)}
 		<button
 			class={cn(
 				"container text-start bg-white row justify-between items-center ",
-				equipment.id === editor.id
+				target.id === editor.id
 					? "outline outline-offset-2 outline-slate-600"
 					: ""
 			)}
 			onclick={() => {
-				editor.id = equipment.id;
-				editor.mode = "Equipment";
+				editor.id = target.id;
+				editor.mode = listtype;
 			}}
-			id={`equipment-${equipment.id}`}>
-			{#if equipment.name !== undefined && equipment.name !== ""}
+			id={`equipment-${target.id}`}>
+			{#if target.name !== undefined && target.name !== ""}
 				<div>
-					{equipment.name}
+					{target.name}
 				</div>
 			{:else}
-				<div class="italic text-slate-500/75">Setup Equipment</div>
+				<div class="italic text-slate-500/75">Setup {capitalised}</div>
 			{/if}
 			<div class="row-1 flex-row-reverse">
-				{#if equipment.path === undefined}
+				{#if target.path === undefined}
 					<div class="icon-btn-sm border border-red-500 text-red-500">
 						<FolderQuestion />
 					</div>
 				{:else}
-					{#if equipment.name === undefined || equipment.name === ""}
+					{#if target.name === undefined || target.name === ""}
 						<div
 							class="icon-btn-sm border border-red-500 text-red-500">
 							<Sign />

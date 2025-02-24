@@ -1,4 +1,4 @@
-export let editor: { mode: "Equipment" | "Experiment", id?: string } = $state({
-    mode: "Equipment",
+export let editor: { mode: "equipments" | "experiments", id?: string } = $state({
+    mode: "equipments",
     id: undefined
 })

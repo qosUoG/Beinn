@@ -1,4 +1,4 @@
-from typing import Literal
+from typing import Any, Literal
 from pydantic import BaseModel
 
 
@@ -70,6 +70,16 @@ def bool_param(default: bool) -> BoolParam:
     return {"type": "bool", "value": default}
 
 
+class InstanceParam(BaseModel):
+    type: Literal["instance"]
+    instance_name: str
+    instance: Any
+
+
+def instance_param() -> InstanceParam:
+    return {"type": "instance", "instance_name": "", "instance": ""}
+
+
 type AllParamTypes = (
     SelectStrParam
     | SelectFloatParam
@@ -79,6 +89,7 @@ type AllParamTypes = (
     | StrParam
     | BoolParam
     | CompositeParam
+    | InstanceParam
 )
 
 
