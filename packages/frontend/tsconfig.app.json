@@ -22,7 +22,8 @@
 			"$websockets/*": ["./websockets/*"],
 			"$components/*": ["./components/*"],
 			"$states/*": ["./states/*"],
-			"$lib/*": ["./lib/*"]
+			"$lib/*": ["./lib/*"],
+			"$services/*": ["./services/*"]
 		}
 	},
 	"include": ["./src/**/*.ts", "./src/**/*.js", "./src/**/*.svelte"]

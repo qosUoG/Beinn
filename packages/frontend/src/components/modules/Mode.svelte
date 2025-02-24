@@ -1,5 +1,5 @@
 <script lang="ts">
-	import { cn } from "$components/utils";
+	import { cn } from "$components/utils.svelte";
 	import Flask from "$icons/Flask.svelte";
 	import Settings from "$icons/Settings.svelte";
 	import { gstore } from "$states/global.svelte";

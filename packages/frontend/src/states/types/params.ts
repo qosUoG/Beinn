@@ -1,7 +1,20 @@
 
-export interface SelectParam {
-    type: "select"
+export interface SelectStrParam {
+    type: "select.str"
     options: string[]
+    selection: number
+}
+
+export interface SelectIntParam {
+    type: "select.int"
+    options: number[]
+    selection: number
+}
+
+export interface SelectFloatParam {
+    type: "select.float"
+    options: number[]
+    selection: number
 }
 
 export interface IntParam {
@@ -29,7 +42,7 @@ export interface BoolParam {
 }
 
 export type AllParamTypes = (
-    SelectParam | IntParam | FloatParam | StrParam | BoolParam | CompositeParam
+    SelectStrParam | SelectFloatParam | SelectIntParam | IntParam | FloatParam | StrParam | BoolParam | CompositeParam
 )
 
 

@@ -2,7 +2,7 @@
 	import Mode from "$components/modules/Mode.svelte";
 	import ProjectPath from "$components/modules/ProjectPath.svelte";
 
-	import Editor from "$components/modules/Editor.svelte";
+	import Editor from "$components/modules/Editor/Editor.svelte";
 	import EquipmentList from "$components/modules/EquipmentList.svelte";
 	import ExperimentList from "$components/modules/ExperimentList.svelte";
 </script>

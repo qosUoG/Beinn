@@ -1,21 +1,5 @@
-import type { Directory } from "shared-types";
-import type { AllParamTypes } from "./types/params";
 
-
-
-export interface Experiment {
-    id: string
-    name?: string
-    path?: string,
-    params?: Record<string, AllParamTypes>
-}
-
-export interface Equipment {
-    id: string
-    name?: string
-    path?: string,
-    params?: Record<string, AllParamTypes>
-}
+import type { Equipment, Experiment, Directory } from "./types/general";
 
 export let gstore:
     {

@@ -1,7 +1,7 @@
 <script lang="ts">
 	import Input from "$components/reuseables/Input.svelte";
 	import { gstore } from "$states/global.svelte";
-	console.log(JSON.stringify(gstore, null, 4));
+	import { setWorkspaceDirectory } from "$services/backend.svelte";
 </script>
 
 <label class=" row-1 flex-grow">
@@ -14,14 +14,11 @@
 		type="text"
 		bind:value={gstore.project.path} />
 	<button
-		class="wrapped text-green-800 bg-green-100"
+		class="wrapped slate"
 		onclick={async () => {
-			const res = await (
-				await fetch(
-					`http://localhost:8000/getDirectoryContent/${encodeURIComponent(gstore.project.path)}`
-				)
-			).json();
-
-			gstore.project.directory = { files: res, dirs: {} };
+			gstore.project.directory = {
+				files: await setWorkspaceDirectory(gstore.project.path),
+				dirs: {},
+			};
 		}}>Update</button>
 </label>

@@ -3,12 +3,21 @@ name = "library"
 version = "0.1.0"
 description = "Add your description here"
 readme = "README.md"
-authors = [
-    { name = "harrylaulau", email = "dev+github@harrylaulau.me" }
-]
+authors = [{ name = "harrylaulau", email = "dev+github@harrylaulau.me" }]
 requires-python = ">=3.13"
-dependencies = []
+dependencies = [
+    "qoslabpy",
+]
 
 [build-system]
 requires = ["hatchling"]
 build-backend = "hatchling.build"
+
+[tool.hatch.build.targets.wheel]
+packages = ["src/drivers"]
+
+[tool.uv.sources]
+qoslabpy = { path = "../../packages/qoslabpy", editable = true }
+
+[tool.uv]
+link-mode = "copy"

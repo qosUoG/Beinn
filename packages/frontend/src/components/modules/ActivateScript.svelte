@@ -12,12 +12,12 @@
 		<!-- {gstore.experiment.path} -->
 	</div>
 	<button
-		class="icon-btn bg-green-100 text-green-800"
+		class="icon-btn green"
 		onclick={() => {
 			// sendStartExperiment(gstore.workspace.path, gstore.experiment.path);
 		}}><ToggleRight /></button>
 	<button
-		class="icon-btn bg-green-100 text-green-800"
+		class="icon-btn green"
 		onclick={() => {
 			// sendStartExperiment();
 		}}><Play /></button>

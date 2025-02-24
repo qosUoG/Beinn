@@ -1,5 +1,5 @@
 <script lang="ts">
-	import { cn } from "$components/utils";
+	import { cn } from "$components/utils.svelte";
 	import type { Booleanish, HTMLInputTypeAttribute } from "svelte/elements";
 
 	let {

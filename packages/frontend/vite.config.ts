@@ -18,6 +18,7 @@ export default defineConfig({
       $websockets: path.resolve("./src/websockets"),
       $states: path.resolve("./src/states"),
       $lib: path.resolve("./src/lib"),
+      $services: path.resolve("./src/services"),
     },
   },
 })

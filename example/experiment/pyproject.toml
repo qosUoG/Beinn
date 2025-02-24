@@ -4,9 +4,11 @@ version = "0.1.0"
 description = "Add your description here"
 readme = "README.md"
 requires-python = ">=3.13"
-dependencies = [
-    "websockets>=15.0",
-]
+dependencies = ["websockets>=15.0", "qoslabpy", "library"]
+
+[tool.uv.sources]
+qoslabpy = { path = "../../packages/qoslabpy", editable = true }
+library = { path = "../library", editable = true }
 
 [tool.uv]
 link-mode = "copy"

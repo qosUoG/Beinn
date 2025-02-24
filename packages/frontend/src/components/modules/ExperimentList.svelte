@@ -3,22 +3,28 @@
 
 	import { getRandomId } from "$lib/utils";
 	import { gstore } from "$states/global.svelte";
-	import { editor } from "$components/modules/EditorController.svelte";
+	import { editor } from "$components/modules/Editor/EditorController.svelte";
+	import { tick } from "svelte";
 </script>
 
 <div class="container col-2 bg-slate-200">
 	<div class="row justify-between items-center">
 		<div class="title">Experiment</div>
 		<button
-			class="icon-btn-sm bg-blue-200 text-blue-800"
-			onclick={() => {
+			class="icon-btn-sm slate"
+			onclick={async () => {
 				const id = getRandomId(Object.keys(gstore.experiments));
 				gstore.experiments[id] = { id };
+
+				await tick();
+
+				editor.id = id;
+				editor.mode = "Experiment";
 			}}><Plus /></button>
 	</div>
 	{#each Object.values(gstore.experiments) as experiment}
 		{#if gstore.experiments.path !== undefined}
-			<button class="container">
+			<button class="container" id={`experiment-${experiment.id}`}>
 				<div class="row-2">
 					<div>Name</div>
 					<div>{experiment.path}</div>

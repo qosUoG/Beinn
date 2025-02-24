@@ -1,4 +1,4 @@
-<script lang="ts">
+<script lang="ts" generics="T extends Equipment | Experiment">
 	import Plus from "$icons/Plus.svelte";
 
 	import { getRandomId } from "$lib/utils";
@@ -12,6 +12,7 @@
 	import Sign from "$icons/Sign.svelte";
 	import Usb from "$icons/USB.svelte";
 	import { loadEquipment } from "$services/backend.svelte";
+	import type { Equipment, Experiment } from "$states/types/general";
 </script>
 
 <div class="container col-2 bg-slate-200">
