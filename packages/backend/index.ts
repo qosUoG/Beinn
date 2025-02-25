@@ -77,6 +77,7 @@ serve({
                     $`uv add fastapi`
                     $`uv add fastapi[standard]`
                     $`uv add uv add git+https://github.com/qosUoG/QosLab#subdirectory=packages/qoslab-lib`
+                    $`uvx copier copy git+https://github.com/qosUoG/QosLab.git ./app`
                 }
 
 
