@@ -5,6 +5,7 @@
 	import Editor from "$components/modules/Editor/Editor.svelte";
 	import EquipmentList from "$components/modules/EquipmentList.svelte";
 	import ExperimentList from "$components/modules/ExperimentList.svelte";
+	import ProjectTree from "$components/modules/ProjectTree/ProjectTree.svelte";
 </script>
 
 <div class="col-4 w-full h-full p-4">
@@ -16,10 +17,10 @@
 		<ProjectTree />
 		<ActivateScript />
 	</div> -->
-	<div class="grid grid-cols-4 min-h-0 gap-4 h-full">
+	<div class="grid grid-cols-5 min-h-0 gap-4 h-full">
+		<ProjectTree />
 		<EquipmentList />
 		<ExperimentList />
-
 		<Editor />
 	</div>
 </div>

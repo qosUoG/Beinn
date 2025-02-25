@@ -1,6 +1,6 @@
 <script lang="ts">
 	import { autofocus, cn } from "$components/utils.svelte";
-	import type { AllParamTypes } from "$states/types/params";
+	import type { AllParamTypes } from "qoslab-shared";
 	import InstanceParam from "./InstanceParam.svelte";
 	import SelectParam from "./SelectParam.svelte";
 	import Separator from "./Separator.svelte";

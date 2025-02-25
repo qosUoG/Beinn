@@ -1,0 +1,7 @@
+_subdirectory: packages/backend
+_templates_suffix: ""
+_exclude:
+    - "pyproject.toml"
+    - ".python-version"
+    - "uv.lock"
+    

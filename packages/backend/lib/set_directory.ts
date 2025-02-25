@@ -1,6 +1,6 @@
-import { readdir } from "node:fs/promises";
-import type { Directory } from "shared-types";
 
+import { access, constants, readdir } from "node:fs/promises";
+import type { Directory } from "qoslab-shared"
 
 
 export async function getDirectoryInfo(path: string) {
@@ -47,3 +47,13 @@ export async function getDirectoryInfo(path: string) {
     return root
 
 }
+
+export async function path_exist(path: string) {
+    try {
+        await access(path, constants.R_OK | constants.W_OK)
+        return true
+    } catch {
+        return false
+    }
+}
+

@@ -1,21 +1,19 @@
 [project]
-name = "backend"
+name = "qoslab-app"
 version = "0.1.0"
 description = "Add your description here"
 readme = "README.md"
 requires-python = ">=3.13"
 dependencies = [
     "fastapi>=0.115.8",
-    "pyvisa>=1.14.1",
-    "websockets>=15.0",
-    "qoslabpy",
+ "qoslab-lib",
 ]
 
 [dependency-groups]
 dev = ["fastapi[standard]>=0.115.8"]
 
 [tool.uv.sources]
-qoslabpy = { path = "../qoslabpy", editable = true }
+qoslab-lib = { path = "../qoslab-lib", editable = true }
 
 [tool.uv]
 link-mode = "copy"

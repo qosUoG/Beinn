@@ -69,6 +69,9 @@
 }
 
 @layer components {
+	.heading {
+		@apply text-xl font-bold;
+	}
 	.editor-label {
 		@apply min-w-16;
 	}
@@ -90,6 +93,10 @@
 
 	.container {
 		@apply rounded p-2;
+	}
+
+	.modal {
+		@apply absolute top-0 left-0 h-screen w-screen backdrop-blur z-10000 flex items-center justify-center flex-col gap-8;
 	}
 
 	.icon-btn {

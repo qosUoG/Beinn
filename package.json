@@ -1,0 +1,7 @@
+{
+	"name": "qos-lab",
+	"private": true,
+	"workspaces": [
+		"packages/*"
+	]
+}

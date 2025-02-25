@@ -11,7 +11,7 @@
 	import FolderQuestion from "$icons/FolderQuestion.svelte";
 	import Sign from "$icons/Sign.svelte";
 	import Play from "$icons/Play.svelte";
-	import { startExperiments } from "$services/backend.svelte";
+	import { startExperiments } from "$services/qoslab-app.svelte";
 
 	let { listtype }: { listtype: "equipments" | "experiments" } = $props();
 
@@ -20,7 +20,7 @@
 
 <div class="container col-2 bg-slate-200">
 	<div class="row justify-between items-center">
-		<div class="title">
+		<div class="title bg-white wrapped">
 			{capitalised}
 		</div>
 		<div class="row-1">
