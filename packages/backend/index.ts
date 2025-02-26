@@ -1,7 +1,7 @@
-import { $, file, randomUUIDv7, serve, write, type ServerWebSocket, type Subprocess } from "bun"
+import { $, file, serve, write } from "bun"
 import { getDirectoryInfo, path_exist } from "./lib/set_directory";
-import { Readable } from 'node:stream'
-import { access, constants, mkdir, stat } from "node:fs/promises";
+
+import { mkdir, readdir } from "node:fs/promises";
 import { parse, stringify } from 'smol-toml'
 
 // const ws_map: Map<string, ServerWebSocket<undefined>> = new Map()
@@ -62,22 +62,24 @@ serve({
                     await mkdir(payload.path)
                     // Check if uv exists
                     $.cwd(payload.path);
-                    $`uv init`
+                    await $`uv init`
+
 
                     // check if uv init successfully
                     const pyproject = file(payload.path + "/pyproject.toml")
                     if (! await pyproject.exists()) throw Error()
 
                     // add link-mode = true to pyproject.toml
-                    let parsed = parse(await pyproject.text())
-                    parsed.tools.uv['link-mode'] = true
+                    const res = await pyproject.text()
+                    let parsed = parse(res) as any
+                    parsed.tool = { uv: { "link-mode": "copy" } }
                     await write(payload.path + "/pyproject.toml", stringify(parsed))
 
                     // install all dependency
-                    $`uv add fastapi`
-                    $`uv add fastapi[standard]`
-                    $`uv add uv add git+https://github.com/qosUoG/QosLab#subdirectory=packages/qoslab-lib`
-                    $`uvx copier copy git+https://github.com/qosUoG/QosLab.git ./app`
+                    await $`uv add fastapi`
+                    await $`uv add fastapi[standard]`
+                    await $`uv add git+https://github.com/qosUoG/QosLab#subdirectory=packages/qoslab-lib`
+                    await $`uvx copier copy git+https://github.com/qosUoG/QosLab.git ./app`
                 }
 
 
