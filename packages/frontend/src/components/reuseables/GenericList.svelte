@@ -3,7 +3,7 @@
 
 	import { getRandomId } from "$lib/utils";
 	import { gstore } from "$states/global.svelte";
-	import { editor } from "$components/modules/Editor/EditorController.svelte";
+	import { eeeditor } from "$components/modules/Editor/EEEditorController.svelte";
 	import { tick } from "svelte";
 	import { cn } from "$components/utils.svelte";
 
@@ -12,6 +12,7 @@
 	import Sign from "$icons/Sign.svelte";
 	import Play from "$icons/Play.svelte";
 	import { startExperiments } from "$services/qoslab-app.svelte";
+	import { editor } from "$components/modules/Editor/EditorController.svelte";
 
 	let { listtype }: { listtype: "equipments" | "experiments" } = $props();
 
@@ -36,9 +37,9 @@
 					gstore[listtype][id] = { id };
 
 					await tick();
-
-					editor.id = id;
-					editor.mode = listtype;
+					editor.mode = "ee";
+					eeeditor.id = id;
+					eeeditor.mode = listtype;
 				}}><Plus /></button>
 		</div>
 	</div>
@@ -49,13 +50,14 @@
 		<button
 			class={cn(
 				"container text-start bg-white row justify-between items-center ",
-				target.id === editor.id
+				target.id === eeeditor.id
 					? "outline outline-offset-2 outline-slate-600"
 					: ""
 			)}
 			onclick={() => {
-				editor.id = target.id;
-				editor.mode = listtype;
+				editor.mode = "ee";
+				eeeditor.id = target.id;
+				eeeditor.mode = listtype;
 			}}
 			id={`equipment-${target.id}`}>
 			{#if target.name !== undefined && target.name !== ""}

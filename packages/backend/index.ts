@@ -1,8 +1,10 @@
-import { $, file, serve, write } from "bun"
-import { getDirectoryInfo, path_exist } from "./lib/set_directory";
+import { serve } from "bun"
+import { getDirectoryInfo, pathExist } from "./lib/fs";
 
 import { mkdir, readdir } from "node:fs/promises";
-import { parse, stringify } from 'smol-toml'
+
+import { addDependency, createProject, readDependencies, removeDependency } from "./lib/workspace";
+import { app_state } from "./lib/app_state";
 
 // const ws_map: Map<string, ServerWebSocket<undefined>> = new Map()
 
@@ -28,25 +30,12 @@ import { parse, stringify } from 'smol-toml'
 //     process.exit()
 // })
 
-let state: {
-    workspace: {
-        path: string
-    },
-    dependencies: string[]
-} = {
-    workspace: {
-        path: ""
-    },
-    dependencies: []
-}
 
-const CORS_HEADERS = {
-
+const headers = {
     'Access-Control-Allow-Origin': '*',
     'Access-Control-Allow-Methods': 'OPTIONS, POST',
     'Access-Control-Allow-Headers': 'Content-Type, Authorization',
-
-};
+}
 
 serve({
     port: 4000,
@@ -57,53 +46,42 @@ serve({
 
                 const payload = await req.json() as { path: string }
 
-                // Check if the directory exist
-                if (! await path_exist(payload.path)) {
-                    await mkdir(payload.path)
-                    // Check if uv exists
-                    $.cwd(payload.path);
-                    await $`uv init`
+                const path_exist = await pathExist(payload.path)
 
-
-                    // check if uv init successfully
-                    const pyproject = file(payload.path + "/pyproject.toml")
-                    if (! await pyproject.exists()) throw Error()
-
-                    // add link-mode = true to pyproject.toml
-                    const res = await pyproject.text()
-                    let parsed = parse(res) as any
-                    parsed.tool = { uv: { "link-mode": "copy" } }
-                    await write(payload.path + "/pyproject.toml", stringify(parsed))
-
-                    // install all dependency
-                    await $`uv add fastapi`
-                    await $`uv add fastapi[standard]`
-                    await $`uv add git+https://github.com/qosUoG/QosLab#subdirectory=packages/qoslab-lib`
-                    await $`uvx copier copy git+https://github.com/qosUoG/QosLab.git ./app`
+                const resObj = async () => {
+                    app_state.workspace.path = payload.path
+                    return Response.json(await getDirectoryInfo(payload.path), { headers })
                 }
 
 
-                state.workspace.path = payload.path
+                if (path_exist && (await readdir(payload.path, { recursive: true, withFileTypes: true })).length > 0)
+                    return await resObj()
+                else
+                    await mkdir(payload.path)
 
-
-
-                return Response.json(await getDirectoryInfo(payload.path), {
-                    headers: {
-                        ...CORS_HEADERS
-                    }
-                })
+                await createProject(payload.path)
+                return await resObj()
             }
         },
         "/workspace/add_dependency": {
             POST: async req => {
 
                 const payload = await req.json() as { path: string }
-                state.workspace.path = payload.path
-                return Response.json(await getDirectoryInfo(payload.path), {
-                    headers: {
-                        ...CORS_HEADERS
-                    }
-                })
+                await addDependency(payload.path)
+                return Response.json(await readDependencies(), { headers })
+            }
+        },
+        "/workspace/remove_dependency": {
+            POST: async req => {
+
+                const payload = await req.json() as { path: string }
+                await removeDependency(payload.path)
+                return Response.json(await readDependencies(), { headers })
+            }
+        },
+        "/workspace/read_dependency": {
+            GET: async _ => {
+                return Response.json(await readDependencies(), { headers })
             }
         }
     },
@@ -111,7 +89,7 @@ serve({
 
         // Handle CORS preflight requests
         if (req.method === 'OPTIONS') {
-            const res = new Response('', { headers: CORS_HEADERS });
+            const res = new Response('', { headers });
             return res;
         }
 

@@ -5,7 +5,7 @@
 	import Editor from "$components/modules/Editor/Editor.svelte";
 	import EquipmentList from "$components/modules/EquipmentList.svelte";
 	import ExperimentList from "$components/modules/ExperimentList.svelte";
-	import ProjectTree from "$components/modules/ProjectTree/ProjectTree.svelte";
+	import ProjectTree from "$components/modules/DependencyTree.svelte";
 </script>
 
 <div class="col-4 w-full h-full p-4">

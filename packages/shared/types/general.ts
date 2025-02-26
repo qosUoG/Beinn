@@ -20,3 +20,22 @@ export interface Directory {
     files: string[],
     dirs: Record<string, Directory>
 }
+
+export interface Dependency {
+    id: string
+    source: {
+        type: "git",
+        git: string,
+        subdirectory: string,
+    } | {
+        type: "path",
+        path: string
+        directory: Directory,
+    } | {
+        type: "pip"
+    }
+
+    name?: string,
+
+    confirmed: boolean
+}

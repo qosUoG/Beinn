@@ -5,7 +5,7 @@ description = "Add your description here"
 readme = "README.md"
 authors = [{ name = "harrylaulau", email = "dev+github@harrylaulau.me" }]
 requires-python = ">=3.13"
-dependencies = ["qoslabpy"]
+dependencies = ["qoslab-lib"]
 
 [build-system]
 requires = ["hatchling"]
@@ -15,7 +15,7 @@ build-backend = "hatchling.build"
 packages = ["src/examplelib"]
 
 [tool.uv.sources]
-qoslabpy = { path = "../../packages/qoslabpy", editable = true }
+qoslab-lib = { git = "https://github.com/qosUoG/QosLab", subdirectory = "packages/qoslab-lib" }
 
 [tool.uv]
 link-mode = "copy"

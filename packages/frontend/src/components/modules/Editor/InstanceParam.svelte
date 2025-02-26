@@ -1,7 +1,7 @@
 <script lang="ts">
 	import { clickoutside, cn } from "$components/utils.svelte";
 	import { gstore } from "$states/global.svelte";
-	import { editor } from "./EditorController.svelte";
+	import { eeeditor } from "./EEEditorController.svelte";
 	import Separator from "./Separator.svelte";
 
 	let open = $state(false);
@@ -19,14 +19,14 @@
 	let options = $derived(
 		Object.entries(gstore.equipments)
 			.filter(
-				([id, e]) => id !== editor.id && e.name && e.name.length > 0
+				([id, e]) => id !== eeeditor.id && e.name && e.name.length > 0
 			)
 			.map(([_, e]) => e.name!)
 	);
 </script>
 
 <div class=" row-2 bg-white wrapped items-center" bind:this={ParamElement}>
-	<div class="editor-label">{name}</div>
+	<div class="eeeditor-label">{name}</div>
 
 	<Separator />
 	<div class="relative flex-grow -m-2 px-2">

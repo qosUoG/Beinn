@@ -2,7 +2,6 @@
 import { access, constants, readdir } from "node:fs/promises";
 import type { Directory } from "qoslab-shared"
 
-
 export async function getDirectoryInfo(path: string) {
 
     const files = await readdir(path, { recursive: true, withFileTypes: true })
@@ -48,7 +47,7 @@ export async function getDirectoryInfo(path: string) {
 
 }
 
-export async function path_exist(path: string) {
+export async function pathExist(path: string) {
     try {
         await access(path, constants.R_OK | constants.W_OK)
         return true
