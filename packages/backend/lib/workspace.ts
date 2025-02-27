@@ -10,7 +10,6 @@ export async function createProject(path: string) {
     // init barebone project
     await $`uv init`
 
-
     // check if uv init successfully
     const pyproject = file(path + "/pyproject.toml")
     if (! await pyproject.exists()) throw Error()
@@ -26,79 +25,72 @@ export async function createProject(path: string) {
     await $`uv add fastapi[standard]`
     await $`uv add git+https://github.com/qosUoG/QosLab#subdirectory=packages/qoslablib`
     await $`uvx copier copy git+https://github.com/qosUoG/QosLab.git ./app`
-
-
-
-    app_state.workspace.path = path
-
-
-
 }
 
-export async function addDependency(identifier: string) {
-    $.cwd(app_state.workspace.path)
+export async function addDependency(identifier: string, path: string) {
+    $.cwd(path)
     // Could be from pip, git path or local path
     await $`uv add ${identifier}`
 }
 
-export async function removeDependency(name: string) {
+export async function removeDependency(name: string, path: string) {
     // Remove with the identifier
-    $.cwd(app_state.workspace.path)
+    $.cwd(path)
     await $`uv remove ${name}`
 }
 
-export async function readDependencies() {
-    // Get the list of dependencies from pyproject.toml
-    app_state.workspace.path
+// export async function readDependencies(path: string) {
+//     // Get the list of dependencies from pyproject.toml
+//     app_state.workspace.path
 
-    const pyproject = file(app_state.workspace.path + "/pyproject.toml")
-    if (! await pyproject.exists()) throw Error()
+//     const pyproject = file(app_state.workspace.path + "/pyproject.toml")
+//     if (! await pyproject.exists()) throw Error()
 
-    const parsed = parse(await pyproject.text()) as any
+//     const parsed = parse(await pyproject.text()) as any
 
-    const sources = parsed.tool?.uv?.sources
+//     const sources = parsed.tool?.uv?.sources
 
-    let res: Dependency[] = []
+//     let res: Dependency[] = []
 
-    for (const dependency of parsed.project.dependencies as string[]) {
-        let type = "pip"
-        if (!(dependency in sources)) {
-            res.push({
-                id: randomUUIDv7(),
-                source: { type: "pip" },
-                name: dependency,
-                confirmed: true
-            })
-            continue
-        }
-
-
-        if ("git" in sources[dependency])
-            type = "git"
-        else if ("path" in sources[dependency])
-            type = "path"
+//     for (const dependency of parsed.project.dependencies as string[]) {
+//         let type = "pip"
+//         if (!(dependency in sources)) {
+//             res.push({
+//                 id: randomUUIDv7(),
+//                 source: { type: "pip" },
+//                 name: dependency,
+//                 confirmed: true
+//             })
+//             continue
+//         }
 
 
-        res.push({
-            id: "",
-            name: dependency,
-            source: { type, ...sources[dependency] },
-            confirmed: true
-        })
+//         if ("git" in sources[dependency])
+//             type = "git"
+//         else if ("path" in sources[dependency])
+//             type = "path"
 
 
-    }
-    // return the list of dependencies
-    return { dependencies: res }
-}
+//         res.push({
+//             id: "",
+//             name: dependency,
+//             source: { type, ...sources[dependency] },
+//             confirmed: true
+//         })
 
-export function runProject() {
-    console.log("here")
+
+//     }
+//     // return the list of dependencies
+//     return { dependencies: res }
+// }
+
+export function runProject(path: string) {
+
     if (app_state.pyproc === undefined || app_state.pyproc.killed) {
         console.log("launched")
         app_state.pyproc = spawn(
             ["uv", "run", "fastapi", "dev", "app/main.py"],
-            { stdout: "inherit", cwd: app_state.workspace.path }
+            { stdout: "inherit", cwd: path }
         )
         console.log(app_state.pyproc.pid)
     }

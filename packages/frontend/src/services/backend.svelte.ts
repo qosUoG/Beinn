@@ -1,4 +1,5 @@
 import { getRandomId } from "$lib/utils";
+import { gstore } from "$states/global.svelte";
 import type { Dependency, Directory } from "qoslab-shared";
 
 export async function setWorkspaceDirectory(path: string): Promise<Directory> {
@@ -17,12 +18,12 @@ export async function setWorkspaceDirectory(path: string): Promise<Directory> {
     ).json();
 }
 
-export async function addDependency(identifier: string): Promise<void> {
+export async function addDependency(source: string): Promise<void> {
     await fetch(
         "http://localhost:4000/workspace/add_dependency",
         {
             method: "POST",
-            body: JSON.stringify({ identifier }),
+            body: JSON.stringify({ source, path: gstore.workspace.path }),
             headers: {
                 "Content-type": "application/json"
             },
@@ -35,7 +36,7 @@ export async function removeDependency(name: string): Promise<void> {
         "http://localhost:4000/workspace/remove_dependency",
         {
             method: "POST",
-            body: JSON.stringify({ name }),
+            body: JSON.stringify({ name, path: gstore.workspace.path }),
             headers: {
                 "Content-type": "application/json"
             },

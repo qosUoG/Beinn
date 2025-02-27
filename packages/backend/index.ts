@@ -3,7 +3,7 @@ import { getDirectoryInfo, pathExist } from "./lib/fs";
 
 import { mkdir, readdir } from "node:fs/promises";
 
-import { addDependency, createProject, readDependencies, removeDependency, runProject } from "./lib/workspace";
+import { addDependency, createProject, removeDependency, runProject } from "./lib/workspace";
 import { app_state } from "./lib/app_state";
 
 // const ws_map: Map<string, ServerWebSocket<undefined>> = new Map()
@@ -44,23 +44,23 @@ serve({
         "/workspace/set_directory": {
             POST: async req => {
 
-                const payload = await req.json() as { path: string }
+                const { path } = await req.json() as { path: string }
 
-                const path_exist = await pathExist(payload.path)
+                const path_exist = await pathExist(path)
 
                 const resObj = async () => {
-                    app_state.workspace.path = payload.path
-                    runProject()
-                    return Response.json(await getDirectoryInfo(payload.path), { headers })
+
+                    runProject(path)
+                    return Response.json(await getDirectoryInfo(path), { headers })
                 }
 
 
-                if (path_exist && (await readdir(payload.path, { recursive: true, withFileTypes: true })).length > 0)
+                if (path_exist && (await readdir(path, { recursive: true, withFileTypes: true })).length > 0)
                     return await resObj()
                 else
-                    await mkdir(payload.path)
+                    await mkdir(path)
 
-                await createProject(payload.path)
+                await createProject(path)
 
                 // run the project to serve http requests
 
@@ -70,22 +70,22 @@ serve({
         "/workspace/add_dependency": {
             POST: async req => {
 
-                const payload = await req.json() as { path: string }
-                await addDependency(payload.path)
-                return Response.json(await readDependencies(), { headers })
+                const { source, path } = await req.json() as { source: string, path: string }
+                await addDependency(source, path)
+                return Response.json({}, { headers })
             }
         },
         "/workspace/remove_dependency": {
             POST: async req => {
 
-                const payload = await req.json() as { path: string }
-                await removeDependency(payload.path)
-                return Response.json(await readDependencies(), { headers })
+                const { source, path } = await req.json() as { source: string, path: string }
+                await removeDependency(source, path)
+                return Response.json({}, { headers })
             }
         },
         "/workspace/read_dependency": {
             GET: async _ => {
-                return Response.json(await readDependencies(), { headers })
+                return Response.json({}, { headers })
             }
         }
     },
