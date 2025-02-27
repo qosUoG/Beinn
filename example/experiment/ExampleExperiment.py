@@ -1,6 +1,6 @@
 from examplelib.src.examplelib import ExampleDriver
 from pydantic import BaseModel
-from qoslabpy import params as p, exceptions as e
+from qoslab-lib import params as p, exceptions as e
 import time
 
 

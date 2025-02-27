@@ -3,7 +3,7 @@ from pydantic import BaseModel
 
 from lib.state import AppState
 from lib.utils import importFromStr
-from qoslabpy import labtype as l
+from qoslab-lib import labtype as l
 
 
 router = APIRouter()

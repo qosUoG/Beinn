@@ -3,7 +3,7 @@ import { getDirectoryInfo, pathExist } from "./lib/fs";
 
 import { mkdir, readdir } from "node:fs/promises";
 
-import { addDependency, createProject, readDependencies, removeDependency } from "./lib/workspace";
+import { addDependency, createProject, readDependencies, removeDependency, runProject } from "./lib/workspace";
 import { app_state } from "./lib/app_state";
 
 // const ws_map: Map<string, ServerWebSocket<undefined>> = new Map()
@@ -50,6 +50,7 @@ serve({
 
                 const resObj = async () => {
                     app_state.workspace.path = payload.path
+                    runProject()
                     return Response.json(await getDirectoryInfo(payload.path), { headers })
                 }
 
@@ -60,6 +61,9 @@ serve({
                     await mkdir(payload.path)
 
                 await createProject(payload.path)
+
+                // run the project to serve http requests
+
                 return await resObj()
             }
         },

@@ -1,11 +1,15 @@
+import type { Subprocess } from "bun"
+
 export let app_state: {
     workspace: {
         path: string
+        dependencies: string[],
     },
-    dependencies: string[]
+    pyproc: Subprocess | undefined
 } = {
     workspace: {
-        path: ""
+        path: "",
+        dependencies: [],
     },
-    dependencies: []
+    pyproc: undefined
 }

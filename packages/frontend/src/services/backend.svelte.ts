@@ -2,6 +2,7 @@ import { getRandomId } from "$lib/utils";
 import type { Dependency, Directory } from "qoslab-shared";
 
 export async function setWorkspaceDirectory(path: string): Promise<Directory> {
+    console.log("here")
     return await (
         await fetch(
             "http://localhost:4000/workspace/set_directory",

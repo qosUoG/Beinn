@@ -1,4 +1,4 @@
-import { $, file, randomUUIDv7, write } from "bun"
+import { $, file, randomUUIDv7, spawn, write } from "bun"
 import { app_state } from "./app_state"
 import { parse, stringify } from "smol-toml"
 import type { Dependency } from "qoslab-shared";
@@ -49,6 +49,8 @@ export async function removeDependency(name: string) {
 
 export async function readDependencies() {
     // Get the list of dependencies from pyproject.toml
+    app_state.workspace.path
+
     const pyproject = file(app_state.workspace.path + "/pyproject.toml")
     if (! await pyproject.exists()) throw Error()
 
@@ -88,4 +90,18 @@ export async function readDependencies() {
     }
     // return the list of dependencies
     return { dependencies: res }
+}
+
+export function runProject() {
+    console.log("here")
+    if (app_state.pyproc === undefined || app_state.pyproc.killed) {
+        console.log("launched")
+        app_state.pyproc = spawn(
+            ["uv", "run", "fastapi", "dev", "app/main.py"],
+            { stdout: "inherit", cwd: app_state.workspace.path }
+        )
+        console.log(app_state.pyproc.pid)
+    }
+
+
 }
