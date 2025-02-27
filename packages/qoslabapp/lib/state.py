@@ -1,6 +1,6 @@
 from threading import Event, Thread
 from typing import TypedDict
-from qoslab_lib import labtype as l, params as p, exceptions as e
+from qoslablib import labtype as l, params as p, exceptions as e
 
 
 class ExperimentThread(TypedDict):

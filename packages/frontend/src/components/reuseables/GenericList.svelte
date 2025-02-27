@@ -11,7 +11,7 @@
 	import FolderQuestion from "$icons/FolderQuestion.svelte";
 	import Sign from "$icons/Sign.svelte";
 	import Play from "$icons/Play.svelte";
-	import { startExperiments } from "$services/qoslab_app.svelte";
+	import { startExperiments } from "$services/qoslabapp.svelte";
 	import { editor } from "$components/modules/Editor/EditorController.svelte";
 
 	let { listtype }: { listtype: "equipments" | "experiments" } = $props();

@@ -16,11 +16,11 @@ name = "examplelib"
 version = "0.1.0"
 source = { editable = "." }
 dependencies = [
-    { name = "qoslab_lib" },
+    { name = "qoslablib" },
 ]
 
 [package.metadata]
-requires-dist = [{ name = "qoslab_lib", editable = "../../packages/qoslab_lib" }]
+requires-dist = [{ name = "qoslablib", editable = "../../packages/qoslablib" }]
 
 [[package]]
 name = "pydantic"
@@ -62,9 +62,9 @@ wheels = [
 ]
 
 [[package]]
-name = "qoslab_lib"
+name = "qoslablib"
 version = "0.1.0"
-source = { editable = "../../packages/qoslab_lib" }
+source = { editable = "../../packages/qoslablib" }
 dependencies = [
     { name = "pydantic" },
     { name = "websockets" },

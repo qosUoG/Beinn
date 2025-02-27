@@ -325,12 +325,12 @@ wheels = [
 ]
 
 [[package]]
-name = "qoslab_app"
+name = "qoslabapp"
 version = "0.1.0"
 source = { virtual = "." }
 dependencies = [
     { name = "fastapi" },
-    { name = "qoslab_lib" },
+    { name = "qoslablib" },
 ]
 
 [package.dev-dependencies]
@@ -341,16 +341,16 @@ dev = [
 [package.metadata]
 requires-dist = [
     { name = "fastapi", specifier = ">=0.115.8" },
-    { name = "qoslab_lib", editable = "../qoslab_lib" },
+    { name = "qoslablib", editable = "../qoslablib" },
 ]
 
 [package.metadata.requires-dev]
 dev = [{ name = "fastapi", extras = ["standard"], specifier = ">=0.115.8" }]
 
 [[package]]
-name = "qoslab_lib"
+name = "qoslablib"
 version = "0.1.0"
-source = { editable = "../qoslab_lib" }
+source = { editable = "../qoslablib" }
 dependencies = [
     { name = "pydantic" },
     { name = "websockets" },

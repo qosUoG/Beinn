@@ -6,12 +6,12 @@ readme = "README.md"
 requires-python = ">=3.13"
 dependencies = [
     "websockets>=15.0",
-    #  "qoslab_lib",
+    #  "qoslablib",
     "examplelib",
 ]
 
 [tool.uv.sources]
-# qoslab_lib = { path = "../../packages/qoslab_lib", editable = true }
+# qoslablib = { path = "../../packages/qoslablib", editable = true }
 examplelib = { path = "../examplelib", editable = true }
 
 [tool.uv]
