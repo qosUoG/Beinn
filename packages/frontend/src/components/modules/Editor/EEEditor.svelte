@@ -1,6 +1,6 @@
 <script lang="ts">
 	import Trash from "$icons/Trash.svelte";
-	import { getEquipmentParams } from "$services/qoslab-app.svelte";
+	import { getEquipmentParams } from "$services/qoslab_app.svelte";
 	import { gstore } from "$states/global.svelte";
 	import type { Equipment, Experiment } from "qoslab-shared";
 	import { tick } from "svelte";
