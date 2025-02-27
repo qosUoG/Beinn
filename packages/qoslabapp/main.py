@@ -23,4 +23,3 @@ app.include_router(equipment.router)
 app.include_router(experiment.router)
 app.include_router(workspace.router)
 
-app.mount("/", StaticFiles(directory="static", html=True), name="static")
