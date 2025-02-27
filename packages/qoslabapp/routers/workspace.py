@@ -55,3 +55,10 @@ async def start_experiments(body: StartExperimentsPayload):
 
     # Start all the threads
     AppState.start_experiments()
+    
+
+@router.get("/workspace/installed_packages")
+async def available_equipments():
+    
+    pass
+    
