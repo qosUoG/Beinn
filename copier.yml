@@ -1,4 +1,4 @@
-_subdirectory: packages/qoslab-app
+_subdirectory: packages/qoslab_app
 _templates_suffix: ""
 _exclude:
     - "pyproject.toml"

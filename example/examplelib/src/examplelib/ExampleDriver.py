@@ -1,5 +1,5 @@
 from pydantic import BaseModel
-from qoslab-lib import params as p
+from qoslab_lib import params as p
 
 
 class ExampleEquipment:

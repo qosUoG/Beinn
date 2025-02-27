@@ -1,6 +1,6 @@
 from pydantic import BaseModel
 
-from qoslab-lib.params import AllParamTypes
+from qoslab_lib.params import AllParamTypes
 
 
 class Experiment(BaseModel):

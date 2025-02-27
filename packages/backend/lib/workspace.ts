@@ -24,7 +24,7 @@ export async function createProject(path: string) {
     // install all dependency
     await $`uv add fastapi`
     await $`uv add fastapi[standard]`
-    await $`uv add git+https://github.com/qosUoG/QosLab#subdirectory=packages/qoslab-lib`
+    await $`uv add git+https://github.com/qosUoG/QosLab#subdirectory=packages/qoslab_lib`
     await $`uvx copier copy git+https://github.com/qosUoG/QosLab.git ./app`
 
 

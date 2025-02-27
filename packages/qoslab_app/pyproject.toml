@@ -1,19 +1,16 @@
 [project]
-name = "qoslab-app"
+name = "qoslab_app"
 version = "0.1.0"
 description = "Add your description here"
 readme = "README.md"
 requires-python = ">=3.13"
-dependencies = [
-    "fastapi>=0.115.8",
- "qoslab-lib",
-]
+dependencies = ["fastapi>=0.115.8", "qoslab_lib"]
 
 [dependency-groups]
 dev = ["fastapi[standard]>=0.115.8"]
 
 [tool.uv.sources]
-qoslab-lib = { path = "../qoslab-lib", editable = true }
+qoslab_lib = { path = "../qoslab_lib", editable = true }
 
 [tool.uv]
 link-mode = "copy"
