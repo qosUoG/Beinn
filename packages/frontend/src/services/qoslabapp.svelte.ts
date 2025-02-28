@@ -3,7 +3,20 @@ import { gstore } from "$states/global.svelte";
 import type { AllParamTypes } from "qoslab-shared";
 
 
-
+export async function getAvailableEquipments() {
+    return await (
+        await fetch(
+            `http://localhost:8000/workspace/available_equipments`,
+            {
+                method: "POST",
+                body: JSON.stringify({
+                    dependencies: $state.snapshot(
+                        Object.values(gstore.workspace.dependencies).map((d) => d.name)),
+                }),
+            }
+        )
+    ).json()
+}
 
 export async function getEquipmentParams(path: string): Promise<Record<string, AllParamTypes>> {
     return await (
@@ -16,20 +29,7 @@ export async function getEquipmentParams(path: string): Promise<Record<string, A
 
 
 export async function startExperiments(): Promise<void> {
-    console.log((
-        {
-            experiments: $state.snapshot(Object.values(gstore.experiments).map((experiment) => ({
-                name: experiment.name,
-                path: experiment.path,
-                params: experiment.params
-            }))),
-            equipments: $state.snapshot(Object.values(gstore.equipments).map((equipment) => ({
-                name: equipment.name,
-                path: equipment.path,
-                params: equipment.params
-            })))
-        }
-    ))
+
 
     await fetch(
         "http://localhost:8000/workspace/start_experiments",

@@ -3,7 +3,7 @@ import { getDirectoryInfo, pathExist } from "./lib/fs";
 
 import { mkdir, readdir } from "node:fs/promises";
 
-import { addDependency, createProject, removeDependency, runProject } from "./lib/workspace";
+import { addDependency, createProject, readDependencies, removeDependency, runProject } from "./lib/workspace";
 import { app_state } from "./lib/app_state";
 
 // const ws_map: Map<string, ServerWebSocket<undefined>> = new Map()
@@ -84,8 +84,9 @@ serve({
             }
         },
         "/workspace/read_dependency": {
-            GET: async _ => {
-                return Response.json({}, { headers })
+            POST: async req => {
+                const { path } = await req.json() as { path: string }
+                return Response.json(await readDependencies(path), { headers })
             }
         }
     },

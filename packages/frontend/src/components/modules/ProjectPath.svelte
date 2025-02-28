@@ -1,6 +1,10 @@
 <script lang="ts">
 	import Input from "$components/reuseables/Input.svelte";
-	import { setWorkspaceDirectory } from "$services/backend.svelte";
+	import {
+		readDependency,
+		setWorkspaceDirectory,
+	} from "$services/backend.svelte";
+	import { getAvailableEquipments } from "$services/qoslabapp.svelte";
 	import { gstore } from "$states/global.svelte";
 </script>
 
@@ -16,8 +20,16 @@
 	<button
 		class="wrapped slate"
 		onclick={async () => {
+			// set the project directory
 			gstore.workspace.directory = await setWorkspaceDirectory(
 				gstore.workspace.path
 			);
+
+			// fetch the dependency from pyproject.toml
+			gstore.workspace.dependencies = await readDependency();
+
+			// Fetch experiment and equipment
+			const eq = await getAvailableEquipments();
+			console.log(eq);
 		}}>Update</button>
 </label>

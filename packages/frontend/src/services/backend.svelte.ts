@@ -45,7 +45,7 @@ export async function removeDependency(name: string): Promise<void> {
 }
 
 export async function readDependency(): Promise<Record<string, Dependency>> {
-    const res = await (await fetch("http://localhost:4000/workspace/read_dependency")).json() as { dependencies: Dependency[] }
+    const res = await (await fetch("http://localhost:4000/workspace/read_dependency", { method: "POST", body: JSON.stringify({ path: gstore.workspace.path }) })).json() as { dependencies: Dependency[] }
 
     let dependencies: Record<string, Dependency> = {}
 
