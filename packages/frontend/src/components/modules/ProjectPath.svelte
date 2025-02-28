@@ -1,5 +1,6 @@
 <script lang="ts">
 	import Input from "$components/reuseables/Input.svelte";
+	import { retryTillSuccess } from "$components/utils.svelte";
 	import {
 		readDependency,
 		setWorkspaceDirectory,
@@ -28,8 +29,8 @@
 			// fetch the dependency from pyproject.toml
 			gstore.workspace.dependencies = await readDependency();
 
-			// Fetch experiment and equipment
-			const eq = await getAvailableEquipments();
-			console.log(eq);
+			await retryTillSuccess(5000, async () => {
+				const eq = await getAvailableEquipments();
+			});
 		}}>Update</button>
 </label>

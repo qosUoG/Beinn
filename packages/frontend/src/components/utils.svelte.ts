@@ -10,6 +10,20 @@ export function autofocus(e: FocusEvent) {
     (e.target as HTMLInputElement).select()
 }
 
+export async function retryTillSuccess(timeout_ms: number, fn: () => Promise<void> | void) {
+    const timenow = Date.now();
+    while (Date.now() - timenow <= 1000 * 5) {
+        try {
+            // Fetch experiment and equipment
+            await fn();
+
+        } catch (error) {
+            continue;
+        }
+        return
+    }
+}
+
 
 export const clickoutside: Action<
     HTMLDivElement,

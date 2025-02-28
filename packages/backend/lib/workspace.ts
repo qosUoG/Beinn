@@ -94,7 +94,7 @@ export function runProject(path: string) {
     if (app_state.pyproc === undefined || app_state.pyproc.killed) {
         console.log("launched")
         app_state.pyproc = spawn(
-            ["uv", "run", "fastapi", "dev", "app/main.py"],
+            ["uv", "run", "fastapi", "run", "app/main.py"],
             { stdout: "inherit", cwd: path }
         )
         console.log(app_state.pyproc.pid)
