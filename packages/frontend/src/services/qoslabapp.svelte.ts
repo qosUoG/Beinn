@@ -3,6 +3,10 @@ import { gstore } from "$states/global.svelte";
 import type { AllParamTypes } from "qoslab-shared";
 
 
+const headers = {
+    "Content-type": "application/json"
+}
+
 export async function getAvailableEquipments() {
     return await (
         await fetch(
@@ -10,9 +14,10 @@ export async function getAvailableEquipments() {
             {
                 method: "POST",
                 body: JSON.stringify({
-                    dependencies: $state.snapshot(
-                        Object.values(gstore.workspace.dependencies).map((d) => d.name)),
-                }),
+                    dependencies:
+                        Object.values($state.snapshot(gstore.workspace.dependencies)).map((d) => d.name)
+                    ,
+                }), headers
             }
         )
     ).json()
@@ -49,9 +54,7 @@ export async function startExperiments(): Promise<void> {
                     })))
                 }
             ),
-            headers: {
-                "Content-type": "application/json"
-            }
+            headers
         }
     )
 

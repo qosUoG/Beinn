@@ -36,6 +36,7 @@ export interface Dependency {
     }
 
     name?: string,
+    fullname?: string,
 
     confirmed: boolean
 }

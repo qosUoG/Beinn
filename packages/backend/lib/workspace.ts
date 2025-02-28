@@ -53,28 +53,33 @@ export async function readDependencies(path: string) {
     let res: Dependency[] = []
 
     for (const dependency of parsed.project.dependencies as string[]) {
+
+        const parsed_dependency = dependency.match(/[A-Za-z_]+[A-Za-z\-_0-9]+/g)![0]
+
         let type = "pip"
-        if (!(dependency in sources)) {
+        if (!(parsed_dependency in sources)) {
             res.push({
                 id: randomUUIDv7(),
                 source: { type: "pip" },
-                name: dependency,
+                name: parsed_dependency,
+                fullname: dependency,
                 confirmed: true
             })
             continue
         }
 
 
-        if ("git" in sources[dependency])
+        if ("git" in sources[parsed_dependency])
             type = "git"
-        else if ("path" in sources[dependency])
+        else if ("path" in sources[parsed_dependency])
             type = "path"
 
 
         res.push({
             id: "",
-            name: dependency,
-            source: { type, ...sources[dependency] },
+            name: parsed_dependency,
+            fullname: dependency,
+            source: { type, ...sources[parsed_dependency] },
             confirmed: true
         })
 

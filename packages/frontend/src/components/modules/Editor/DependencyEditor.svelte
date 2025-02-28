@@ -8,6 +8,7 @@
 	import Separator from "./Separator.svelte";
 	import { autofocus } from "$components/utils.svelte";
 	import Download from "$icons/Download.svelte";
+	import { addDependency, readDependency } from "$services/backend.svelte";
 
 	const dependency: Dependency | undefined = $derived.by(() => {
 		if (dependency_editor.id === undefined) return undefined;
@@ -29,9 +30,9 @@
 					<Bin />
 				</div>
 
-				<div class="row-2">
-					{#if !dependency.confirmed}
-						<label class="row-2 bg-white wrapped flex-grow">
+				{#if !dependency.confirmed}
+					<div class="row-2 w-full">
+						<label class="row-2 bg-white wrapped w-full flex-grow">
 							<div class="editor-label">Source</div>
 							<Separator />
 							<input
@@ -43,42 +44,54 @@
 
 						<button
 							class="icon-btn-sm green"
-							onclick={() => {
+							onclick={async () => {
 								if (
 									temp_source === undefined ||
 									temp_source === ""
 								)
 									return;
 								// TODO
+								await addDependency(temp_source);
+								gstore.workspace.dependencies =
+									await readDependency();
+								temp_source = "";
 								dependency.confirmed = true;
 							}}><Download /></button>
-					{:else if dependency.source.type === "pip"}
-						<div class="row-2 bg-white wrapped flex-grow">
-							<div class="editor-label">Package</div>
-							<Separator />
-							<div class="flex-grow">
-								{dependency.name}
-							</div>
+					</div>
+				{:else if dependency.source.type === "pip"}
+					<div class="row-2 bg-white wrapped w-full">
+						<div class="editor-label">Package</div>
+						<Separator />
+						<div class="">
+							{dependency.fullname}
 						</div>
-					{:else if dependency.source.type === "git"}
-						<div class="row-2 bg-white wrapped flex-grow">
-							<div class="editor-label">Git Path</div>
+					</div>
+				{:else if dependency.source.type === "git"}
+					<div class="row-2 bg-white wrapped w-full">
+						<div class="editor-label">Git Path</div>
+						<Separator />
+						<div class="">
+							{dependency.source.git}
+						</div>
+					</div>
+					{#if dependency.source.subdirectory}
+						<div class="row-2 bg-white wrapped w-full">
+							<div class="editor-label">Subdirectory</div>
 							<Separator />
-							<div class="flex-grow">
-								{dependency.source.git}
+							<div class="">
 								{dependency.source.subdirectory}
 							</div>
 						</div>
-					{:else if dependency.source.type === "path"}
-						<div class="row-2 bg-white wrapped flex-grow">
-							<div class="editor-label">Path</div>
-							<Separator />
-							<div class="flex-grow">
-								{dependency.source.path}
-							</div>
-						</div>
 					{/if}
-				</div>
+				{:else if dependency.source.type === "path"}
+					<div class="row-2 bg-white wrapped w-full">
+						<div class="editor-label">Path</div>
+						<Separator />
+						<div class="">
+							{dependency.source.path}
+						</div>
+					</div>
+				{/if}
 			</div>
 		{/if}
 	</div>
