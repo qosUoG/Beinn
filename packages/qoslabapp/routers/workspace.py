@@ -1,3 +1,4 @@
+import pkgutil
 from fastapi import APIRouter
 import os
 import sys
@@ -59,36 +60,39 @@ async def start_experiments(body: StartExperimentsPayload):
     AppState.start_experiments()
 
 
-class AvailableEquipmentsPayload(BaseModel):
-    dependencies: list[str]
-
-
-@router.post("/workspace/available_equipments")
-async def available_equipments(payload: AvailableEquipmentsPayload):
+@router.get("/workspace/available_equipments")
+async def available_equipments():
     class EquipmentModule(BaseModel):
         module_name: str
         equipment_name: str
 
     equipments: list[EquipmentModule] = []
 
-    # Check installed packages
-    for d in payload.dependencies[0:2]:
-        # Import the module
-        print(f"d: {d}")
-        if (spec := importlib.util.find_spec(d)) is not None:
-            module = importlib.util.module_from_spec(spec)
-            sys.modules[d] = module
-            spec.loader.exec_module(module)
-            print(f"d : {d} success")
+    # Check all possible paths
+    for package in pkgutil.walk_packages():
 
-            # get all the symbols and see if there is any Equipment
-            for [s_name, s_type] in inspect.getmembers(module):
-                print(f"s: {s_name}")
-                for [a_name, _] in inspect.getmembers(s_type):
-                    # print(f"{s_name}.{a_name}")
-                    if a_name == "equipment_params":
-                        equipments.append({"module_name": d, "equipment_name": s_name})
+        def get_equipments(name: str):
+            for [p, module] in inspect.getmembers(
+                importlib.__import__(name), inspect.isclass
+            ):
+                if hasattr(module, "equipment_params"):
+                    equipments.append({"module_name": p, "equipment_name": p})
 
+        get_equipments(package.name)
+
+        # if (spec := importlib.util.find_spec(d)) is not None:
+        #     module = importlib.util.module_from_spec(spec)
+        #     sys.modules[d] = module
+        #     spec.loader.exec_module(module)
+        #     print(f"d : {d} success")
+
+        #     # get all the symbols and see if there is any Equipment
+        #     for [s_name, s_type] in inspect.getmembers(module):
+        #         print(f"s: {s_name}")
+        #         for [a_name, _] in inspect.getmembers(s_type):
+        #             # print(f"{s_name}.{a_name}")
+        #             if a_name == "equipment_params":
+        #                 equipments.append({"module_name": d, "equipment_name": s_name})
     # TODO Check in local directory for project specific equipments
 
     return equipments

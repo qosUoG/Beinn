@@ -1,30 +1,15 @@
 import { gstore } from "$states/global.svelte";
 
 import type { AllParamTypes } from "qoslab-shared";
-import { readModules } from "./backend.svelte";
+
 
 
 const headers = {
     "Content-type": "application/json"
 }
 
-export async function getAvailableEquipments(modules: string[]) {
-    return await (
-        await fetch(
-            `http://localhost:8000/workspace/available_equipments`,
-            {
-                method: "POST",
-                body: JSON.stringify({
-                    dependencies:
-                        Object.values($state.snapshot(gstore.workspace.dependencies))
-                            .map((d) => d.name)
-                            .concat(modules)
-
-                    ,
-                }), headers
-            }
-        )
-    ).json()
+export async function getAvailableEquipments() {
+    return await (await fetch(`http://localhost:8000/workspace/available_equipments`, { headers })).json()
 }
 
 export async function getEquipmentParams(path: string): Promise<Record<string, AllParamTypes>> {

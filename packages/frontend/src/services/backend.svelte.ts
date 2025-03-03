@@ -63,8 +63,3 @@ export async function readDependency(): Promise<Record<string, Dependency>> {
 
 }
 
-export async function readModules() {
-    return await (await fetch("http://localhost:4000/workspace/read_modules",
-        { method: "POST", body: JSON.stringify({ path: gstore.workspace.path }) }))
-        .json() as { modules: { name: string, version: string }[] }
-}
