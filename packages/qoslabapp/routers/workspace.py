@@ -81,6 +81,7 @@ async def available_equipments(payload: AvailableEquipmentsPayload):
 
             # get all the symbols and see if there is any Equipment
             for [s_name, s_type] in inspect.getmembers(module, inspect.isclass):
+                print(s_name)
                 for [a_name, _] in inspect.getmembers(s_type):
                     print(f"{s_name}.{a_name}")
                     if a_name == "equipment_params":
