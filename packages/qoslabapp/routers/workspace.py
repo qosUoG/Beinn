@@ -84,7 +84,7 @@ async def available_equipments(payload: AvailableEquipmentsPayload):
             for [s_name, s_type] in inspect.getmembers(module, inspect.isclass):
                 print(f"s: {s_name}")
                 for [a_name, _] in inspect.getmembers(s_type):
-                    print(f"{s_name}.{a_name}")
+                    # print(f"{s_name}.{a_name}")
                     if a_name == "equipment_params":
                         equipments.append({"module_name": d, "equipment_name": s_name})
 
