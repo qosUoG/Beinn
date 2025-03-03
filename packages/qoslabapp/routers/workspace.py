@@ -74,18 +74,10 @@ async def available_equipments():
 
         def get_equipments(name: str):
             # First check the name is importable
-            if name.startswith("examplelib.ExampleDriver"):
-                print(name)
-                if importlib.util.find_spec(name):
-                    mod = importlib.__import__(name)
-                    print(mod)
-                    for [p, module] in inspect.getmembers(mod):
-                        if not p.startswith("__"):
-                            print(p, module)
-                            if hasattr(module, "equipment_params"):
-                                equipments.append(
-                                    {"module_name": p, "equipment_name": p}
-                                )
+            if importlib.util.find_spec(name):
+                for [p, module] in inspect.getmembers(importlib.import_module(name)):
+                    if hasattr(module, "equipment_params"):
+                        equipments.append({"module_name": p, "equipment_name": p})
 
         get_equipments(package.name)
 
@@ -103,5 +95,5 @@ async def available_equipments():
         #             if a_name == "equipment_params":
         #                 equipments.append({"module_name": d, "equipment_name": s_name})
     # TODO Check in local directory for project specific equipments
-
+    print(equipments)
     return equipments
