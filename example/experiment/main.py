@@ -14,7 +14,7 @@ if __name__ == "__main__":
     if importlib.util.find_spec("msvcrt"):
         print("wtf")
 
-    import idlelib.run
+    import unittest
 
     # print(getattr(examplelib.ExampleDriver.ExampleEquipment, "equipment_params"))
     # for [p, module] in inspect.getmembers(

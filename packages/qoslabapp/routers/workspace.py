@@ -88,9 +88,10 @@ async def available_equipments():
                             equipments.append({"module_name": p, "equipment_name": p})
                 except ImportError:
                     pass
-                except Exception:
-                    print(name)
-                    print(spec)
+                except Exception as e:
+                    print(e)
+                    print("name", name)
+                    print("spec", spec)
 
         get_equipments(package.name)
 
