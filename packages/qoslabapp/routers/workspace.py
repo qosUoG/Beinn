@@ -82,7 +82,7 @@ async def available_equipments(payload: AvailableEquipmentsPayload):
             print(f"d : {d} success")
 
             # get all the symbols and see if there is any Equipment
-            for [s_name, s_type] in inspect.getmembers(module):
+            for [s_name, s_type] in inspect.getmembers(module)[0:2]:
                 print(f"s: {s_name}")
                 for [a_name, _] in inspect.getmembers(s_type):
                     # print(f"{s_name}.{a_name}")
