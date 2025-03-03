@@ -3,6 +3,7 @@
 	import { retryTillSuccess } from "$components/utils.svelte";
 	import {
 		readDependency,
+		readModules,
 		setWorkspaceDirectory,
 	} from "$services/backend.svelte";
 	import { getAvailableEquipments } from "$services/qoslabapp.svelte";
@@ -29,8 +30,10 @@
 			// fetch the dependency from pyproject.toml
 			gstore.workspace.dependencies = await readDependency();
 
+			const modules = (await readModules()).modules.map((m) => m.name);
+
 			await retryTillSuccess(5000, async () => {
-				const eq = await getAvailableEquipments();
+				const eq = await getAvailableEquipments(modules);
 			});
 		}}>Update</button>
 </label>

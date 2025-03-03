@@ -8,7 +8,7 @@ const headers = {
     "Content-type": "application/json"
 }
 
-export async function getAvailableEquipments() {
+export async function getAvailableEquipments(modules: string[]) {
     return await (
         await fetch(
             `http://localhost:8000/workspace/available_equipments`,
@@ -18,8 +18,8 @@ export async function getAvailableEquipments() {
                     dependencies:
                         Object.values($state.snapshot(gstore.workspace.dependencies))
                             .map((d) => d.name)
-                            .concat((await readModules()).modules
-                                .map((m) => m.name))
+                            .concat(modules)
+
                     ,
                 }), headers
             }
