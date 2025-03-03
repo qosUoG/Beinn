@@ -82,8 +82,10 @@ async def available_equipments(payload: AvailableEquipmentsPayload):
 
             # get all the symbols and see if there is any Equipment
             for [s_name, s_type] in inspect.getmembers(module, inspect.isclass):
-                if "params" in s_type:
-                    equipments.append({"module_name": d, "equipment_name": s_name})
+                for [a_name] in inspect.getmembers(s_type):
+                    if a_name == "equipment_params":
+                        print(f'{s_name}.{a_name}')
+                        equipments.append({"module_name": d, "equipment_name": s_name})
 
     # TODO Check in local directory for project specific equipments
 

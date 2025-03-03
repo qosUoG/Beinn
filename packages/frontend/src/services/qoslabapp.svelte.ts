@@ -1,6 +1,7 @@
 import { gstore } from "$states/global.svelte";
 
 import type { AllParamTypes } from "qoslab-shared";
+import { readModules } from "./backend.svelte";
 
 
 const headers = {
@@ -15,7 +16,10 @@ export async function getAvailableEquipments() {
                 method: "POST",
                 body: JSON.stringify({
                     dependencies:
-                        Object.values($state.snapshot(gstore.workspace.dependencies)).map((d) => d.name)
+                        Object.values($state.snapshot(gstore.workspace.dependencies))
+                            .map((d) => d.name)
+                            .concat((await readModules()).modules
+                                .map((m) => m.name))
                     ,
                 }), headers
             }

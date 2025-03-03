@@ -12,7 +12,7 @@
 
 	const dependency: Dependency | undefined = $derived.by(() => {
 		if (dependency_editor.id === undefined) return undefined;
-		$inspect(gstore.workspace.dependencies[dependency_editor.id].source);
+
 		return gstore.workspace.dependencies[dependency_editor.id];
 	});
 

@@ -89,14 +89,31 @@ export async function readDependencies(path: string) {
     return { dependencies: res }
 }
 
-export function runProject(path: string) {
+export async function readModules(path: string,) {
+    await syncUvScyn(path)
+    $.cwd(path)
 
+    // Get list of modules in the venv
+    const modules = JSON.parse(await $`uv pip list --format json`.text()) as { name: string, version: string }[]
+
+    return { modules }
+
+}
+
+export async function syncUvScyn(path: string) {
+    $.cwd(path)
+    await $`uv sync`
+}
+
+export function runProject(path: string) {
+    console.log(app_state.pyproc)
     if (app_state.pyproc === undefined || app_state.pyproc.killed) {
         console.log("launched")
         app_state.pyproc = spawn(
             ["uv", "run", "fastapi", "run", "app/main.py"],
             { stdout: "inherit", cwd: path }
         )
+        console.log("launched")
         console.log(app_state.pyproc.pid)
     }
 

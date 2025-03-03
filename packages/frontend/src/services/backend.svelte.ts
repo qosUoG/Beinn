@@ -3,7 +3,7 @@ import { gstore } from "$states/global.svelte";
 import type { Dependency, Directory } from "qoslab-shared";
 
 export async function setWorkspaceDirectory(path: string): Promise<Directory> {
-    console.log("here")
+
     return await (
         await fetch(
             "http://localhost:4000/workspace/set_directory",
@@ -61,4 +61,10 @@ export async function readDependency(): Promise<Record<string, Dependency>> {
     return dependencies
 
 
+}
+
+export async function readModules() {
+    return await (await fetch("http://localhost:4000/workspace/read_modules",
+        { method: "POST", body: JSON.stringify({ path: gstore.workspace.path }) }))
+        .json() as { modules: { name: string, version: string }[] }
 }
