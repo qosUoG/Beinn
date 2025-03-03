@@ -3,6 +3,6 @@ def main():
 
 
 if __name__ == "__main__":
-    import qoslablib
+    import examplelib.ExampleDriver
 
-    print(qoslablib)
+    print(examplelib.ExampleDriver.ExampleEquipment.equipment_params)
