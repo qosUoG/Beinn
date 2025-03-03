@@ -89,7 +89,7 @@ async def available_equipments(payload: AvailableEquipmentsPayload):
                     if hasattr(module, "equipment_params"):
                         equipments.append({"module_name": name, "equipment_name": p})
             except ImportError:
-                pass
+                print("name", name)
             except Warning:
                 print("name", name)
             except Exception as e:
