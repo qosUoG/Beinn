@@ -77,7 +77,9 @@ async def available_equipments():
             if name.startswith("examplelib.ExampleDriver"):
                 print(name)
                 if importlib.util.find_spec(name):
-                    for [p, module] in inspect.getmembers(importlib.__import__(name)):
+                    mod = importlib.__import__(name)
+                    print(mod)
+                    for [p, module] in inspect.getmembers(mod):
                         if not p.startswith("__"):
                             print(p, module)
                             if hasattr(module, "equipment_params"):
