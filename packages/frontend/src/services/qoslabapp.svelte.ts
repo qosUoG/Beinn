@@ -9,7 +9,14 @@ const headers = {
 }
 
 export async function getAvailableEquipments() {
-    return await (await fetch(`http://localhost:8000/workspace/available_equipments`, { headers })).json()
+    return await (await fetch(`http://localhost:8000/workspace/available_equipments`, {
+        method: "POST",
+        body: JSON.stringify({
+            names: $state.snapshot(Object.values(gstore.workspace.dependencies).map(d => d.name))
+        }),
+
+        headers
+    })).json()
 }
 
 export async function getEquipmentParams(path: string): Promise<Record<string, AllParamTypes>> {

@@ -1,6 +1,9 @@
 from ast import Import
+from functools import reduce
 import importlib.util
 import pkgutil
+from unittest.mock import Base
+from xml.etree.ElementInclude import include
 from fastapi import APIRouter
 import os
 import sys
@@ -62,39 +65,38 @@ async def start_experiments(body: StartExperimentsPayload):
     AppState.start_experiments()
 
 
-@router.get("/workspace/available_equipments")
-async def available_equipments():
+class AvailableEquipmentsPayload(BaseModel):
+    names: list[str]
+
+
+@router.post("/workspace/available_equipments")
+async def available_equipments(payload: AvailableEquipmentsPayload):
     class EquipmentModule(BaseModel):
         module_name: str
         equipment_name: str
 
     equipments: list[EquipmentModule] = []
 
+    def get_equipments(name: str):
+        # First check the name is importable
+        if spec := importlib.util.find_spec(name):
+            try:
+                for [p, module] in inspect.getmembers(importlib.import_module(name)):
+                    if hasattr(module, "equipment_params"):
+                        equipments.append({"module_name": p, "equipment_name": p})
+            except (ImportError, ValueError):
+                pass
+            except Exception as e:
+                print(e)
+                print("name", name)
+                print("spec", spec)
+
     # Check all possible paths
     for package in pkgutil.walk_packages():
-
-        def get_equipments(name: str):
-            # First check the name is importable
-            if (
-                spec := importlib.util.find_spec(name)
-                and not name.startswith("idlelib")
-                and not name.startswith("tkinter")
-                and not name == "this"
-            ):
-                try:
-                    for [p, module] in inspect.getmembers(
-                        importlib.import_module(name)
-                    ):
-                        if hasattr(module, "equipment_params"):
-                            equipments.append({"module_name": p, "equipment_name": p})
-                except (ImportError, ValueError):
-                    pass
-                except Exception as e:
-                    print(e)
-                    print("name", name)
-                    print("spec", spec)
-
-        get_equipments(package.name)
+        for n in payload.names:
+            if package.name.startswith(n):
+                get_equipments(package.name)
+                break
 
         # if (spec := importlib.util.find_spec(d)) is not None:
         #     module = importlib.util.module_from_spec(spec)
