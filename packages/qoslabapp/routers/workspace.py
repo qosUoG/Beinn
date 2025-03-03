@@ -72,7 +72,7 @@ async def available_equipments(payload: AvailableEquipmentsPayload):
     equipments: list[EquipmentModule] = []
 
     # Check installed packages
-    for d in payload.dependencies:
+    for d in payload.dependencies[0:2]:
         # Import the module
         print(f"d: {d}")
         if (spec := importlib.util.find_spec(d)) is not None:
@@ -82,7 +82,7 @@ async def available_equipments(payload: AvailableEquipmentsPayload):
             print(f"d : {d} success")
 
             # get all the symbols and see if there is any Equipment
-            for [s_name, s_type] in inspect.getmembers(module)[0:2]:
+            for [s_name, s_type] in inspect.getmembers(module):
                 print(f"s: {s_name}")
                 for [a_name, _] in inspect.getmembers(s_type):
                     # print(f"{s_name}.{a_name}")
