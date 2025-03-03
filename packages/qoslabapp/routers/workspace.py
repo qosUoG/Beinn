@@ -75,6 +75,8 @@ async def available_equipments():
         def get_equipments(name: str):
             # First check the name is importable
             if importlib.util.find_spec(name):
+                if name.startswith("msvcrt"):
+                    print(name)
                 for [p, module] in inspect.getmembers(importlib.import_module(name)):
                     if hasattr(module, "equipment_params"):
                         equipments.append({"module_name": p, "equipment_name": p})
