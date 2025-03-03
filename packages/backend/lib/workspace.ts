@@ -106,15 +106,14 @@ export async function syncUvScyn(path: string) {
 }
 
 export function runProject(path: string) {
-    console.log(app_state.pyproc)
+
     if (app_state.pyproc === undefined || app_state.pyproc.killed) {
-        console.log("launched")
+
         app_state.pyproc = spawn(
             ["uv", "run", "fastapi", "run", "app/main.py"],
             { stdout: "inherit", cwd: path }
         )
-        console.log("launched")
-        console.log(app_state.pyproc.pid)
+
     }
 
 
