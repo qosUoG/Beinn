@@ -76,8 +76,8 @@ async def available_equipments():
             # First check the name is importable
             if spec := importlib.util.find_spec(name):
                 if name.startswith("msvcrt"):
-                    print(name)
-                    print(spec)
+                    print("name", name)
+                    print("spec", spec)
                 # for [p, module] in inspect.getmembers(importlib.import_module(name)):
                 #     if hasattr(module, "equipment_params"):
                 #         equipments.append({"module_name": p, "equipment_name": p})
@@ -98,5 +98,5 @@ async def available_equipments():
         #             if a_name == "equipment_params":
         #                 equipments.append({"module_name": d, "equipment_name": s_name})
     # TODO Check in local directory for project specific equipments
-    print(equipments)
+    print("equipments", equipments)
     return equipments
