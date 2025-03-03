@@ -75,7 +75,11 @@ async def available_equipments():
 
         def get_equipments(name: str):
             # First check the name is importable
-            if spec := importlib.util.find_spec(name):
+            if (
+                spec := importlib.util.find_spec(name)
+                and not name.startswith("idlelib")
+                and not name.startswith("tkinter")
+            ):
                 try:
                     for [p, module] in inspect.getmembers(
                         importlib.import_module(name)

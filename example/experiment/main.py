@@ -14,7 +14,7 @@ if __name__ == "__main__":
     if importlib.util.find_spec("msvcrt"):
         print("wtf")
 
-    import asyncio.windows_utils
+    import idlelib.run
 
     # print(getattr(examplelib.ExampleDriver.ExampleEquipment, "equipment_params"))
     # for [p, module] in inspect.getmembers(
