@@ -81,7 +81,7 @@ async def available_equipments(payload: AvailableEquipmentsPayload):
         # First check the name is importable
         if spec := importlib.util.find_spec(name) and not name.endswith("__main__"):
             if name.endswith("__"):
-                print(name)
+                print("__", name)
             try:
                 for [p, module] in inspect.getmembers(importlib.import_module(name)):
                     if hasattr(module, "equipment_params"):
