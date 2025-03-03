@@ -74,7 +74,9 @@ async def available_equipments():
 
         def get_equipments(name: str):
             # First check the name is importable
+
             if spec := importlib.util.find_spec(name):
+                print(name)
                 for [p, module] in inspect.getmembers(
                     importlib.util.module_from_spec(spec), inspect.isclass
                 ):
