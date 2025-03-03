@@ -85,7 +85,7 @@ async def available_equipments(payload: AvailableEquipmentsPayload):
                 for [p, module] in inspect.getmembers(importlib.import_module(name)):
                     if hasattr(module, "equipment_params"):
                         equipments.append({"module_name": name, "equipment_name": p})
-            except (ImportError, ValueError):
+            except (ImportError, RuntimeWarning):
                 pass
             except Exception as e:
                 print(e)
