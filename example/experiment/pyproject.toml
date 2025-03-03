@@ -11,8 +11,8 @@ dependencies = [
 ]
 
 [tool.uv.sources]
-qoslablib = { git = "https://github.com/qosUoG/QosLab", subdirectory = "packages/qoslablib" }
 examplelib = { path = "../examplelib" }
+qoslablib = { git = "https://github.com/qosUoG/QosLab", subdirectory = "packages/qoslablib" }
 
 [tool.uv]
 link-mode = "copy"

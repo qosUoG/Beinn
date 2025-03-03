@@ -1,3 +1,4 @@
+import importlib
 import inspect
 import pkgutil
 
@@ -5,11 +6,13 @@ import examplelib
 
 # import examplelib.ExampleDriver
 import pprint
+import msvcrt
 
 import examplelib.ExampleDriver
 
 
 if __name__ == "__main__":
+    importlib.__import__("msvcrt")
     if hasattr(examplelib.ExampleDriver, "params"):
         print("has")
     # names = set()

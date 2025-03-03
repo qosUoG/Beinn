@@ -69,7 +69,7 @@ async def available_equipments():
     equipments: list[EquipmentModule] = []
 
     # Check all possible paths
-    for package in pkgutil.walk_packages():
+    for package in pkgutil.iter_modules():
 
         def get_equipments(name: str):
             for [p, module] in inspect.getmembers(
