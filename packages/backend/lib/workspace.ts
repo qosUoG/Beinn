@@ -2,6 +2,7 @@ import { $, file, randomUUIDv7, spawn, write } from "bun"
 import { app_state } from "./app_state"
 import { parse, stringify } from "smol-toml"
 import type { Dependency } from "qoslab-shared";
+import { pathExist } from "./fs";
 
 export async function createProject(path: string) {
     $.cwd(path);
@@ -25,9 +26,16 @@ export async function createProject(path: string) {
 
 export async function copyApp(path: string) {
     $.cwd(path);
-    // make sure .app in gitignore
-    const gitignores = (await file(path + "/.gitignore").text()).split("\n")
-    if (!gitignores.includes(".app")) await write(path + "/.gitignore", [...gitignores, ".app"].join("\n"))
+    // check if .gitignore exists
+    const gitignore = file(path + "/.gitignore")
+
+    if (! await gitignore.exists())
+        await write(path + "/.gitignore", ".app")
+    else {
+        // make sure .app in gitignore
+        const gitignores = (await file(path + "/.gitignore").text()).split("\n")
+        if (!gitignores.includes(".app")) await write(path + "/.gitignore", [...gitignores, ".app"].join("\n"))
+    }
 
     // install all dependency
     await $`uv add fastapi fastapi[standard] git+https://github.com/qosUoG/QosLab#subdirectory=packages/qoslablib`

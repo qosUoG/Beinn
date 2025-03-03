@@ -1,3 +1,4 @@
+import importlib.util
 import pkgutil
 from fastapi import APIRouter
 import os
@@ -72,11 +73,13 @@ async def available_equipments():
     for package in pkgutil.iter_modules():
 
         def get_equipments(name: str):
-            for [p, module] in inspect.getmembers(
-                importlib.import_module(name), inspect.isclass
-            ):
-                if hasattr(module, "equipment_params"):
-                    equipments.append({"module_name": p, "equipment_name": p})
+            # First check the name is importable
+            if spec := importlib.util.find_spec(name):
+                for [p, module] in inspect.getmembers(
+                    importlib.util.module_from_spec(spec), inspect.isclass
+                ):
+                    if hasattr(module, "equipment_params"):
+                        equipments.append({"module_name": p, "equipment_name": p})
 
         get_equipments(package.name)
 
