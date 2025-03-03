@@ -70,7 +70,7 @@ async def available_equipments():
     equipments: list[EquipmentModule] = []
 
     # Check all possible paths
-    for package in pkgutil.iter_modules():
+    for package in pkgutil.walk_packages():
 
         def get_equipments(name: str):
             # First check the name is importable
