@@ -5,4 +5,4 @@ def main():
 if __name__ == "__main__":
     import examplelib.ExampleDriver
 
-    print(examplelib.ExampleDriver.ExampleEquipment.equipment_params)
+    print(getattr(examplelib.ExampleDriver.ExampleEquipment, "equipment_params"))

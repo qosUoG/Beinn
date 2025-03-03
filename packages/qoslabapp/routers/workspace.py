@@ -78,7 +78,7 @@ async def available_equipments():
                 print(name)
                 if importlib.util.find_spec(name):
                     for [p, module] in inspect.getmembers(importlib.__import__(name)):
-                        print(p)
+                        print(p, module)
                         if hasattr(module, "equipment_params"):
                             equipments.append({"module_name": p, "equipment_name": p})
 
