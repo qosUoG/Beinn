@@ -78,9 +78,9 @@ async def available_equipments():
                 if name.startswith("msvcrt"):
                     print("name", name)
                     print("spec", spec)
-                # for [p, module] in inspect.getmembers(importlib.import_module(name)):
-                #     if hasattr(module, "equipment_params"):
-                #         equipments.append({"module_name": p, "equipment_name": p})
+                for [p, module] in inspect.getmembers(importlib.import_module(name)):
+                    if hasattr(module, "equipment_params"):
+                        equipments.append({"module_name": p, "equipment_name": p})
 
         get_equipments(package.name)
 
