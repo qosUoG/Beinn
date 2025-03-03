@@ -1,3 +1,4 @@
+from ast import Import
 import importlib.util
 import pkgutil
 from fastapi import APIRouter
@@ -81,6 +82,8 @@ async def available_equipments():
                     ):
                         if hasattr(module, "equipment_params"):
                             equipments.append({"module_name": p, "equipment_name": p})
+                except ImportError:
+                    pass
                 except Exception:
                     print(name)
                     print(spec)
