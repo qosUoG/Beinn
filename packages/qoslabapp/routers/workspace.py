@@ -78,13 +78,12 @@ async def available_equipments(payload: AvailableEquipmentsPayload):
 
     equipments: list[EquipmentModule] = []
 
-    warnings.filterwarnings("error")
-
     def get_equipments(name: str):
         # First check the name is importable
         if spec := importlib.util.find_spec(name) and not name.endswith("__main__"):
             print("__", name)
             try:
+                warnings.filterwarnings("error")
                 for [p, module] in inspect.getmembers(importlib.import_module(name)):
                     if hasattr(module, "equipment_params"):
                         equipments.append({"module_name": name, "equipment_name": p})
@@ -96,6 +95,8 @@ async def available_equipments(payload: AvailableEquipmentsPayload):
                 print(e)
                 print("name", name)
                 print("spec", spec)
+            finally:
+                warnings.filterwarnings("default")
 
     # Check all possible paths
     for package in pkgutil.walk_packages():
