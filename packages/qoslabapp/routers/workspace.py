@@ -79,6 +79,7 @@ async def available_equipments(payload: AvailableEquipmentsPayload):
             module = importlib.util.module_from_spec(spec)
             sys.modules[d] = module
             spec.loader.exec_module(module)
+            print(f"d : {d} success")
 
             # get all the symbols and see if there is any Equipment
             for [s_name, s_type] in inspect.getmembers(module, inspect.isclass):
