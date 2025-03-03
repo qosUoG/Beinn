@@ -73,7 +73,7 @@ async def available_equipments(payload: AvailableEquipmentsPayload):
 
     # Check installed packages
     for d in payload.dependencies:
-        print(d)
+        
         # Import the module
         if d not in sys.modules and (spec := importlib.util.find_spec(d)) is not None:
             module = importlib.util.module_from_spec(spec)

@@ -8,7 +8,11 @@
 	import Separator from "./Separator.svelte";
 	import { autofocus } from "$components/utils.svelte";
 	import Download from "$icons/Download.svelte";
-	import { addDependency, readDependency } from "$services/backend.svelte";
+	import {
+		addDependency,
+		readDependency,
+		removeDependency,
+	} from "$services/backend.svelte";
 
 	const dependency: Dependency | undefined = $derived.by(() => {
 		if (dependency_editor.id === undefined) return undefined;
@@ -27,7 +31,7 @@
 					<div class="title bg-white wrapped">
 						Editor - Dependency
 					</div>
-					<Bin />
+					{@render Bin()}
 				</div>
 
 				{#if !dependency.confirmed}
@@ -50,12 +54,25 @@
 									temp_source === ""
 								)
 									return;
-								// TODO
+
 								await addDependency(temp_source);
-								gstore.workspace.dependencies =
-									await readDependency();
+
+								const current_dependencies = $state.snapshot(
+									gstore.workspace.dependencies
+								);
 								temp_source = "";
-								dependency.confirmed = true;
+
+								const res = await readDependency();
+
+								gstore.workspace.dependencies = res;
+
+								dependency_editor.id = Object.values(res).find(
+									(d) =>
+										Object.values(
+											current_dependencies
+										).find((dd) => d.name === dd.name) ===
+										undefined
+								)!.id;
 							}}><Download /></button>
 					</div>
 				{:else if dependency.source.type === "pip"}
@@ -100,8 +117,11 @@
 {#snippet Bin()}
 	<button
 		class="icon-btn-sm red"
-		onclick={() => {
-			// TODO remove dependency in python project
+		onclick={async () => {
+			console.log(dependency);
+			if (dependency?.confirmed)
+				// TODO remove dependency in python project
+				await removeDependency(dependency.name!);
 
 			delete gstore.workspace.dependencies[dependency_editor.id!];
 

@@ -78,8 +78,8 @@ serve({
         "/workspace/remove_dependency": {
             POST: async req => {
 
-                const { source, path } = await req.json() as { source: string, path: string }
-                await removeDependency(source, path)
+                const { name, path } = await req.json() as { name: string, path: string }
+                await removeDependency(name, path)
                 return Response.json({}, { headers })
             }
         },
