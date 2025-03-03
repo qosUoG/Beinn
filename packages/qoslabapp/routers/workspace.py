@@ -3,6 +3,7 @@ from functools import reduce
 import importlib.util
 import pkgutil
 from unittest.mock import Base
+import warnings
 from xml.etree.ElementInclude import include
 from fastapi import APIRouter
 import os
@@ -77,6 +78,8 @@ async def available_equipments(payload: AvailableEquipmentsPayload):
 
     equipments: list[EquipmentModule] = []
 
+    warnings.filterwarnings("error")
+
     def get_equipments(name: str):
         # First check the name is importable
         if spec := importlib.util.find_spec(name) and not name.endswith("__main__"):
@@ -85,8 +88,10 @@ async def available_equipments(payload: AvailableEquipmentsPayload):
                 for [p, module] in inspect.getmembers(importlib.import_module(name)):
                     if hasattr(module, "equipment_params"):
                         equipments.append({"module_name": name, "equipment_name": p})
-            except (ImportError, RuntimeWarning):
+            except ImportError:
                 pass
+            except Warning:
+                print("name", name)
             except Exception as e:
                 print(e)
                 print("name", name)
