@@ -99,7 +99,7 @@ async def available_equipments(payload: AvailableEquipmentsPayload):
                 warnings.filterwarnings("default")
 
     # Check all possible paths
-    for package in pkgutil.walk_packages():
+    for package in pkgutil.iter_modules():
         for n in payload.names:
             if package.name.startswith(n):
                 get_equipments(package.name)
