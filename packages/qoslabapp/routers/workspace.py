@@ -79,6 +79,7 @@ async def available_equipments():
                 spec := importlib.util.find_spec(name)
                 and not name.startswith("idlelib")
                 and not name.startswith("tkinter")
+                and not name == "this"
             ):
                 try:
                     for [p, module] in inspect.getmembers(
@@ -86,7 +87,7 @@ async def available_equipments():
                     ):
                         if hasattr(module, "equipment_params"):
                             equipments.append({"module_name": p, "equipment_name": p})
-                except ImportError:
+                except (ImportError, ValueError):
                     pass
                 except Exception as e:
                     print(e)
