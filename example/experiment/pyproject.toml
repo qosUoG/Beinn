@@ -5,14 +5,14 @@ description = "Add your description here"
 readme = "README.md"
 requires-python = ">=3.13"
 dependencies = [
-    "websockets>=15.0",
-    #  "qoslablib",
     "examplelib",
+    "fastapi[standard]>=0.115.11",
+    "qoslablib",
 ]
 
 [tool.uv.sources]
-# qoslablib = { path = "../../packages/qoslablib", editable = true }
-examplelib = { path = "../examplelib", editable = true }
+qoslablib = { git = "https://github.com/qosUoG/QosLab", subdirectory = "packages/qoslablib" }
+examplelib = { path = "../examplelib" }
 
 [tool.uv]
 link-mode = "copy"

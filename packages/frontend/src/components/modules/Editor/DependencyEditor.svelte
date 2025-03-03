@@ -118,7 +118,6 @@
 	<button
 		class="icon-btn-sm red"
 		onclick={async () => {
-			console.log(dependency);
 			if (dependency?.confirmed)
 				// TODO remove dependency in python project
 				await removeDependency(dependency.name!);

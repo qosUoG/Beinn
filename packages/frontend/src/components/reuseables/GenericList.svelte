@@ -11,8 +11,12 @@
 	import FolderQuestion from "$icons/FolderQuestion.svelte";
 	import Sign from "$icons/Sign.svelte";
 	import Play from "$icons/Play.svelte";
-	import { startExperiments } from "$services/qoslabapp.svelte";
+	import {
+		getAvailableEquipments,
+		startExperiments,
+	} from "$services/qoslabapp.svelte";
 	import { editor } from "$components/modules/Editor/EditorController.svelte";
+	import { readModules } from "$services/backend.svelte";
 
 	let { listtype }: { listtype: "equipments" | "experiments" } = $props();
 
@@ -35,6 +39,12 @@
 				onclick={async () => {
 					const id = getRandomId(Object.keys(gstore[listtype]));
 					gstore[listtype][id] = { id };
+
+					const equipments = await getAvailableEquipments(
+						(await readModules()).modules.map((m) => m.name)
+					);
+
+					console.log(equipments);
 
 					await tick();
 					editor.mode = "ee";

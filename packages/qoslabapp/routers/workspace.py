@@ -73,7 +73,6 @@ async def available_equipments(payload: AvailableEquipmentsPayload):
 
     # Check installed packages
     for d in payload.dependencies:
-        
         # Import the module
         if d not in sys.modules and (spec := importlib.util.find_spec(d)) is not None:
             module = importlib.util.module_from_spec(spec)
@@ -83,8 +82,8 @@ async def available_equipments(payload: AvailableEquipmentsPayload):
             # get all the symbols and see if there is any Equipment
             for [s_name, s_type] in inspect.getmembers(module, inspect.isclass):
                 for [a_name, _] in inspect.getmembers(s_type):
+                    print(f"{s_name}.{a_name}")
                     if a_name == "equipment_params":
-                        print(f'{s_name}.{a_name}')
                         equipments.append({"module_name": d, "equipment_name": s_name})
 
     # TODO Check in local directory for project specific equipments

@@ -20,11 +20,18 @@ export async function createProject(path: string) {
     parsed.tool = { uv: { "link-mode": "copy" } }
     await write(path + "/pyproject.toml", stringify(parsed))
 
+
+}
+
+export async function copyApp(path: string) {
+    $.cwd(path);
+    // make sure .app in gitignore
+    const gitignores = (await file(path + "/.gitignore").text()).split("\n")
+    if (!gitignores.includes(".app")) await write(path + "/.gitignore", [...gitignores, ".app"].join("\n"))
+
     // install all dependency
-    await $`uv add fastapi`
-    await $`uv add fastapi[standard]`
-    await $`uv add git+https://github.com/qosUoG/QosLab#subdirectory=packages/qoslablib`
-    await $`uvx copier copy git+https://github.com/qosUoG/QosLab.git ./app`
+    await $`uv add fastapi fastapi[standard] git+https://github.com/qosUoG/QosLab#subdirectory=packages/qoslablib`
+    await $`uvx copier copy git+https://github.com/qosUoG/QosLab.git ./.app`
 }
 
 export async function addDependency(identifier: string, path: string) {
@@ -110,7 +117,7 @@ export function runProject(path: string) {
     if (app_state.pyproc === undefined || app_state.pyproc.killed) {
 
         app_state.pyproc = spawn(
-            ["uv", "run", "fastapi", "run", "app/main.py"],
+            ["uv", "run", "fastapi", "run", "./.app/main.py"],
             { stdout: "inherit", cwd: path }
         )
 
