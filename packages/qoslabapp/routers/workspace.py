@@ -83,13 +83,12 @@ async def available_equipments(payload: AvailableEquipmentsPayload):
     def get_equipments(name: str):
         # First check the name is importable
         if importlib.util.find_spec(name) and not name.endswith("__main__"):
-            print("__", name)
             try:
                 for [p, module] in inspect.getmembers(importlib.import_module(name)):
                     if hasattr(module, "equipment_params"):
                         equipments.append({"module_name": name, "equipment_name": p})
             except Exception:
-                print("name", name)
+                print(f"Path {name} produced an exception")
 
     # Check all possible paths
     for package in pkgutil.walk_packages():
@@ -98,20 +97,6 @@ async def available_equipments(payload: AvailableEquipmentsPayload):
                 get_equipments(package.name)
                 break
 
-        # if (spec := importlib.util.find_spec(d)) is not None:
-        #     module = importlib.util.module_from_spec(spec)
-        #     sys.modules[d] = module
-        #     spec.loader.exec_module(module)
-        #     print(f"d : {d} success")
-
-        #     # get all the symbols and see if there is any Equipment
-        #     for [s_name, s_type] in inspect.getmembers(module):
-        #         print(f"s: {s_name}")
-        #         for [a_name, _] in inspect.getmembers(s_type):
-        #             # print(f"{s_name}.{a_name}")
-        #             if a_name == "equipment_params":
-        #                 equipments.append({"module_name": d, "equipment_name": s_name})
     # TODO Check in local directory for project specific equipments
-    print("equipments", equipments)
     warnings.filterwarnings("default")
     return equipments
