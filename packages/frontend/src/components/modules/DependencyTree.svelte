@@ -9,6 +9,7 @@
 	import ExclamationMark from "$icons/ExclamationMark.svelte";
 	import Reload from "$icons/Reload.svelte";
 	import { readDependency } from "$services/backend.svelte";
+	import { eeeditor } from "./Editor/EEEditorController.svelte";
 </script>
 
 <div class="container col-2 bg-slate-200">
@@ -54,6 +55,7 @@
 				onclick={() => {
 					editor.mode = "dependency";
 					dependency_editor.id = dependency.id;
+					eeeditor.id = undefined;
 				}}
 				id={`equipment-${dependency.id}`}>
 				{#if dependency.name !== undefined && dependency.name !== ""}

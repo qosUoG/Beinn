@@ -31,9 +31,9 @@
 </script>
 
 {#key eeeditor.id}
-	<div class="container bg-slate-200 col-span-2">
+	<div class="container bg-slate-200 col-span-2 min-w-0 w-full">
 		{#if eeeditor.id !== undefined}
-			<div class="col-2">
+			<div class="col-2 min-w-0 w-full">
 				<div class="row justify-between items-end">
 					<div class="title bg-white wrapped">
 						Editor -
@@ -87,7 +87,7 @@
 							{/if}
 						</div>
 					</div>
-					<div class="grid grid-cols-2 gap-2">
+					<div class="grid grid-cols-2 gap-2 min-w-0 w-full">
 						<Params bind:params={target!.temp_params} />
 					</div>
 				{/if}

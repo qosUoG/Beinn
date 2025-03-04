@@ -1,5 +1,6 @@
 <script lang="ts">
 	import { clickoutside, cn } from "$components/utils.svelte";
+	import { getRandomId } from "$lib/utils";
 	import { gstore } from "$states/global.svelte";
 	import { eeeditor } from "./EEEditorController.svelte";
 	import Separator from "./Separator.svelte";
@@ -23,6 +24,8 @@
 			)
 			.map(([_, e]) => e.name!)
 	);
+
+	const id = getRandomId([]);
 </script>
 
 <div class=" row-2 bg-white wrapped items-center" bind:this={ParamElement}>
@@ -31,6 +34,7 @@
 	<Separator />
 	<div class="relative flex-grow -m-2 px-2">
 		<button
+			{id}
 			class="w-full min-w-full block"
 			onclick={(e) => {
 				e.stopPropagation();
@@ -47,7 +51,7 @@
 
 		{#if open}
 			<div
-				use:clickoutside
+				use:clickoutside={id}
 				onoutsideclick={() => {
 					open = false;
 				}}

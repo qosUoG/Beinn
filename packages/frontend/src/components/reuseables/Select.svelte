@@ -1,5 +1,7 @@
 <script lang="ts">
 	import { clickoutside, cn } from "$components/utils.svelte";
+	import { getRandomId } from "$lib/utils";
+	import { tick } from "svelte";
 
 	let {
 		options,
@@ -10,25 +12,27 @@
 	} = $props();
 
 	let open = $state(false);
+
+	const id = getRandomId([]);
 </script>
 
 <button
-	class="min-w-0 overflow-x-scroll text-nowrap"
-	onclick={(e) => {
-		e.stopPropagation();
+	class="min-w-0 overflow-x-scroll text-nowrap w-full h-full"
+	onclick={async (e) => {
 		open = !open;
 		console.log({ open });
-	}}>
+	}}
+	{id}>
 	{value}
 </button>
 
 {#if open}
 	<div
-		use:clickoutside
+		use:clickoutside={id}
 		onoutsideclick={() => {
 			open = false;
 		}}
-		class="absolute left-0 top-6 bg-white col-1 w-fit z-10 shadow-xl rounded">
+		class="absolute left-0 top-6 bg-white col z-10 shadow-xl rounded w-full">
 		{#each options as option}
 			<button
 				class={cn(

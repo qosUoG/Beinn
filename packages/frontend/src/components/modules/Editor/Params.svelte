@@ -32,7 +32,7 @@
 			{/if}
 		</label>
 	{:else if param.type === "bool"}
-		<div class="row-2 bg-white wrapped items-center">
+		<div class="row-2 bg-white wrapped w-full">
 			<div class="editor-label">{name}</div>
 			<Separator />
 			<div class="grid grid-cols-2 flex-grow">
@@ -57,7 +57,7 @@
 			</div>
 		</div>
 	{:else if param.type === "str"}
-		<div class="row-2 bg-white wrapped items-center col-span-2">
+		<label class="row-2 bg-white wrapped col-span-2">
 			<div class="editor-label">{name}</div>
 			<Separator />
 			<input
@@ -65,7 +65,7 @@
 				class="flex-grow"
 				bind:value={param.value}
 				onfocus={autofocus} />
-		</div>
+		</label>
 	{:else if param.type === "select.str" || param.type === "select.int" || param.type === "select.float"}
 		<SelectParam {name} bind:value={param.value} options={param.options} />
 	{:else if param.type === "instance"}

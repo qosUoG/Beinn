@@ -1,0 +1,2 @@
+class ABCDE:
+    pass

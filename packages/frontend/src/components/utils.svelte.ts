@@ -26,17 +26,15 @@ export async function retryTillSuccess(timeout_ms: number, fn: () => Promise<voi
 
 
 export const clickoutside: Action<
-    HTMLDivElement,
-    undefined,
+    Element,
+    string,
     {
         onoutsideclick: (e: CustomEvent) => void;
     }
-> = (node) => {
+> = (node, id) => {
     function handleclick(e: MouseEvent) {
-        if (!node.contains(e.target as Node)) {
-
+        if (!node.contains(e.target as Node) && (e.target! as Element).id !== id)
             node.dispatchEvent(new CustomEvent("outsideclick"));
-        }
     }
 
     $effect(() => {

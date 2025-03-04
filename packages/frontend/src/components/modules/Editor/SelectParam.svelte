@@ -15,11 +15,11 @@
 	let ParamElement: HTMLDivElement;
 </script>
 
-<div class=" row-2 bg-white wrapped items-center" bind:this={ParamElement}>
+<div class=" row-2 bg-white wrapped min-w-0 h-full" bind:this={ParamElement}>
 	<div class="editor-label">{name}</div>
 
 	<Separator />
-	<div class="relative flex-grow -m-2 px-2">
+	<div class="relative flex-grow -mx-2 px-2 flex items-center min-w-0 h-full">
 		<Select bind:value {options} />
 	</div>
 </div>

@@ -71,7 +71,7 @@
 			<div class="editor-label">Path</div>
 			<div class="w-0.5 bg-slate-200 rounded-full"></div>
 			<div class="min-w-0">
-				<div class="overflow-x-scroll">{temp_path}</div>
+				<div class="overflow-x-scroll text-nowrap">{temp_path}</div>
 			</div>
 		</div>
 		<div class="row-1">
