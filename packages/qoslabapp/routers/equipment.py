@@ -2,8 +2,8 @@ import importlib
 from fastapi import APIRouter
 from pydantic import BaseModel
 
-from lib.state import AppState
-from lib.utils import importFromStr
+from ..lib.state import AppState
+from ..lib.utils import importFromStr
 from qoslablib import labtype as l
 
 

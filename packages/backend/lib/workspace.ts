@@ -30,7 +30,7 @@ export async function copyApp(path: string) {
     const gitignore = file(path + "/.gitignore")
 
     if (! await gitignore.exists())
-        await write(path + "/.gitignore", ".app")
+        await write(path + "/.gitignore", "app")
     else {
         // make sure .app in gitignore
         const gitignores = (await file(path + "/.gitignore").text()).split("\n")
@@ -39,7 +39,7 @@ export async function copyApp(path: string) {
 
     // install all dependency
     await $`uv add fastapi fastapi[standard] git+https://github.com/qosUoG/QosLab#subdirectory=packages/qoslablib`
-    await $`uvx copier copy git+https://github.com/qosUoG/QosLab.git ./.app`
+    await $`uvx copier copy git+https://github.com/qosUoG/QosLab.git ./app`
 }
 
 export async function addDependency(identifier: string, path: string) {
