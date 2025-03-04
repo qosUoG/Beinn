@@ -1,4 +1,5 @@
 import importlib
+import pkgutil
 
 
 def main():
@@ -12,8 +13,9 @@ if __name__ == "__main__":
 
     importlib.util.find_spec("fastapi_cli.utils.cli")
 
-    for [p, module] in inspect.getmembers(importlib.import_module("abcde.abcccddde")):
-        print(p)
+    for package in pkgutil.iter_modules():
+        if "abcde" in package.name:
+            print(package.name)
 
     # def inside():
     #     warnings.filterwarnings("error")
