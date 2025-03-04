@@ -1,21 +1,34 @@
-<script lang="ts">
+<script lang="ts" generics="T extends Experiment | Equipment">
 	import { autofocus } from "$components/utils.svelte";
 	import Cancel from "$icons/Cancel.svelte";
 	import Edit from "$icons/Edit.svelte";
 	import Reload from "$icons/Reload.svelte";
 	import Tick from "$icons/Tick.svelte";
+	import type { Experiment, Equipment } from "qoslab-shared";
 	import Separator from "./Separator.svelte";
+	import Select from "$components/reuseables/Select.svelte";
 
 	let {
-		path = $bindable(),
+		module = $bindable(),
+		cls = $bindable(),
+		options,
 		onconfirm,
 	}: {
-		path: string | undefined;
-		onconfirm: (path: string) => void;
+		module: string | undefined;
+		cls: string | undefined;
+		options: string[];
+		onconfirm: (path: { module: string; cls: string }) => void;
 	} = $props();
 
-	let temp_path = $state(path);
-	let editing = $state(path === undefined);
+	let target_path_defined = $derived(
+		module !== undefined && cls !== undefined && module !== "" && cls !== ""
+	);
+	let editing = $state(module === undefined || cls === undefined);
+	let temp_path = $state(
+		(() => (target_path_defined ? `${module} ${cls}` : ""))()
+	);
+
+	let open = $state(false);
 </script>
 
 <div class="row-2">
@@ -23,18 +36,14 @@
 		<label class="row-2 bg-white wrapped flex-grow">
 			<div class="editor-label">Path</div>
 			<Separator />
-			<input
-				type="text"
-				class="flex-grow"
-				bind:value={temp_path}
-				onfocus={autofocus} />
+			<Select bind:value={temp_path} {options} bind:open />
 		</label>
 		<div class="row-1">
-			{#if path !== undefined && path !== ""}
+			{#if editing && target_path_defined}
 				<button
 					class="icon-btn-sm red"
 					onclick={() => {
-						temp_path = path;
+						temp_path = `${module} ${cls}`;
 						editing = false;
 					}}><Cancel /></button>
 			{:else}
@@ -43,14 +52,17 @@
 			<button
 				class="icon-btn-sm green"
 				onclick={() => {
-					if (temp_path === undefined || temp_path === "") return;
+					if (temp_path === "") return;
 
 					editing = false;
 
-					if (temp_path === path) return;
+					if (temp_path === `${module} ${cls}`) return;
 
-					path = temp_path;
-					onconfirm(temp_path);
+					const [rmodule, rcls] = temp_path.split(" ");
+
+					module = rmodule;
+					cls = rcls;
+					onconfirm({ module: rmodule, cls: rcls });
 				}}><Tick /></button>
 		</div>
 	{:else}
@@ -65,7 +77,7 @@
 			<button
 				class="icon-btn-sm slate"
 				onclick={() => {
-					onconfirm(path!);
+					onconfirm({ module: module!, cls: cls! });
 				}}><Reload /></button>
 			<button
 				class="icon-btn-sm slate"

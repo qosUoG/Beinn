@@ -2,19 +2,19 @@
 export interface SelectStrParam {
     type: "select.str"
     options: string[]
-    selection: number
+    value: string
 }
 
 export interface SelectIntParam {
     type: "select.int"
     options: number[]
-    selection: number
+    value: number
 }
 
 export interface SelectFloatParam {
     type: "select.float"
     options: number[]
-    selection: number
+    value: number
 }
 
 export interface IntParam {

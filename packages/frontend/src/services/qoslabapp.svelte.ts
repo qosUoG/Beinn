@@ -19,10 +19,15 @@ export async function getAvailableEquipments() {
     })).json()
 }
 
-export async function getEquipmentParams(path: string): Promise<Record<string, AllParamTypes>> {
+export async function getEquipmentParams(path: { module: string, cls: string }): Promise<Record<string, AllParamTypes>> {
     return await (
         await fetch(
-            `http://localhost:8000/equipment/get_params/${encodeURIComponent(path)}`
+            `http://localhost:8000/equipment/get_params`,
+            {
+                method: "POST",
+                body: JSON.stringify(path),
+                headers
+            }
         )
     ).json()
 }
@@ -40,12 +45,12 @@ export async function startExperiments(): Promise<void> {
                 {
                     experiments: $state.snapshot(Object.values(gstore.experiments).map((experiment) => ({
                         name: experiment.name,
-                        path: experiment.path,
+                        module: experiment.module,
                         params: experiment.params
                     }))),
                     equipments: $state.snapshot(Object.values(gstore.equipments).map((equipment) => ({
                         name: equipment.name,
-                        path: equipment.path,
+                        module: equipment.module,
                         params: equipment.params
                     })))
                 }

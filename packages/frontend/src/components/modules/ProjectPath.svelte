@@ -1,12 +1,14 @@
 <script lang="ts">
 	import Input from "$components/reuseables/Input.svelte";
 	import { retryTillSuccess } from "$components/utils.svelte";
+	import { getRandomId } from "$lib/utils";
 	import {
 		readDependency,
 		setWorkspaceDirectory,
 	} from "$services/backend.svelte";
 	import { getAvailableEquipments } from "$services/qoslabapp.svelte";
 	import { gstore } from "$states/global.svelte";
+	import type { Equipment } from "qoslab-shared";
 </script>
 
 <label class=" row-1 flex-grow">
@@ -29,9 +31,15 @@
 			// fetch the dependency from pyproject.toml
 			gstore.workspace.dependencies = await readDependency();
 
+			let res: { module: string; cls: string }[] = [];
+
 			await retryTillSuccess(5000, async () => {
-				const eq = await getAvailableEquipments();
-				console.log(eq);
+				res = (await getAvailableEquipments()) as {
+					module: string;
+					cls: string;
+				}[];
 			});
+
+			gstore.workspace.available_equipments = res;
 		}}>Update</button>
 </label>

@@ -16,6 +16,7 @@
 		startExperiments,
 	} from "$services/qoslabapp.svelte";
 	import { editor } from "$components/modules/Editor/EditorController.svelte";
+	import { dependency_editor } from "$components/modules/Editor/DependencyEditorController.svelte";
 
 	let { listtype }: { listtype: "equipments" | "experiments" } = $props();
 
@@ -63,6 +64,7 @@
 			)}
 			onclick={() => {
 				editor.mode = "ee";
+				dependency_editor.id = undefined;
 				eeeditor.id = target.id;
 				eeeditor.mode = listtype;
 			}}
@@ -75,7 +77,7 @@
 				<div class="italic text-slate-500/75">Setup {capitalised}</div>
 			{/if}
 			<div class="row-1 flex-row-reverse">
-				{#if target.path === undefined}
+				{#if target.module === undefined}
 					<div class="icon-btn-sm border border-red-500 text-red-500">
 						<FolderQuestion />
 					</div>

@@ -3,7 +3,8 @@ import type { AllParamTypes } from "./params"
 export interface Experiment {
     id: string
     name?: string
-    path?: string,
+    module?: string,
+    cls?: string,
     params?: Record<string, AllParamTypes>
     temp_params?: Record<string, AllParamTypes>
 }
@@ -11,7 +12,8 @@ export interface Experiment {
 export interface Equipment {
     id: string
     name?: string
-    path?: string,
+    module?: string,
+    cls?: string,
     params?: Record<string, AllParamTypes>
     temp_params?: Record<string, AllParamTypes>
 }

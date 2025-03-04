@@ -4,11 +4,11 @@
 	let {
 		open = $bindable(),
 		options,
-		selection = $bindable(),
+		value = $bindable(),
 	}: {
 		open: boolean;
 		options: number[] | string[];
-		selection: number;
+		value: number | string;
 	} = $props();
 </script>
 
@@ -17,7 +17,7 @@
 	onclick={(e) => {
 		e.stopPropagation();
 		open = true;
-	}}>{options[selection]}</button>
+	}}>{value}</button>
 
 {#if open}
 	<div
@@ -26,16 +26,16 @@
 			open = false;
 		}}
 		class="absolute right-0 top-7 bg-white container col-1 w-full z-10 shadow-xl">
-		{#each options as option, i}
+		{#each options as option}
 			<button
 				class={cn(
 					" wrapped",
-					selection === i
+					value === option
 						? "bg-slate-400 text-slate-50"
 						: "hover:bg-slate-200"
 				)}
 				onclick={() => {
-					selection = i;
+					value = option;
 					open = false;
 				}}>{option}</button>
 		{/each}

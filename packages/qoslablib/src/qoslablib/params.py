@@ -5,31 +5,31 @@ from pydantic import BaseModel
 class SelectStrParam(BaseModel):
     type: Literal["select.str"]
     options: list[str]
-    selection: int
+    value: str
 
 
-def select_str_param(options: list[str], selection: int = 0) -> SelectStrParam:
-    return {"type": "select.str", "options": options, "selection": selection}
+def select_str_param(options: list[str], default: int = 0) -> SelectStrParam:
+    return {"type": "select.str", "options": options, "value": options[default]}
 
 
 class SelectIntParam(BaseModel):
     type: Literal["select.int"]
     options: list[int]
-    selection: int
+    value: int
 
 
-def select_int_param(options: list[int], selection: int = 0) -> SelectIntParam:
-    return {"type": "select.int", "options": options, "selection": selection}
+def select_int_param(options: list[int], default: int = 0) -> SelectIntParam:
+    return {"type": "select.int", "options": options, "value": options[default]}
 
 
 class SelectFloatParam(BaseModel):
     type: Literal["select.float"]
     options: list[float]
-    selection: int
+    value: int
 
 
-def select_float_param(options: list[float], selection: int = 0) -> SelectFloatParam:
-    return {"type": "select.float", "options": options, "selection": selection}
+def select_float_param(options: list[float], default: int = 0) -> SelectFloatParam:
+    return {"type": "select.float", "options": options, "value": options[default]}
 
 
 class IntParam(BaseModel):

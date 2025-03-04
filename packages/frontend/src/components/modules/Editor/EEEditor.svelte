@@ -47,8 +47,12 @@
 				</div>
 
 				<Path
-					bind:path={target!.path}
-					onconfirm={async (path: string) => {
+					bind:module={target!.module}
+					bind:cls={target!.cls}
+					options={gstore.workspace[
+						`available_${eeeditor.mode!}`
+					].map(({ module, cls }) => `${module} ${cls}`)}
+					onconfirm={async (path) => {
 						target!.params = await getEquipmentParams(path);
 						await tick();
 						target!.temp_params = JSON.parse(
@@ -56,7 +60,7 @@
 						);
 					}} />
 
-				{#if target!.path}
+				{#if target!.module && target!.cls}
 					<Name bind:name={target!.name} />
 				{/if}
 				{#if target!.temp_params}

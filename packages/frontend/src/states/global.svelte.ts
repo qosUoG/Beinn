@@ -7,8 +7,8 @@ export let gstore:
             path: string,
             directory: Directory,
             dependencies: Record<string, Dependency>
-            available_equipment_paths: string[]
-            available_experiment_paths: string[]
+            available_equipments: { module: string, cls: string }[]
+            available_experiments: { module: string, cls: string }[]
         }
         equipments: Record<string, Equipment>
         experiments: Record<string, Experiment>
@@ -20,8 +20,8 @@ export let gstore:
             path: import.meta.env.VITE_DEFAULT_EXPERIMENT_PATH,
             directory: { files: [], dirs: {} },
             dependencies: {},
-            available_equipment_paths: [],
-            available_experiment_paths: [],
+            available_equipments: [],
+            available_experiments: [],
         },
         equipments: {},
         experiments: {},

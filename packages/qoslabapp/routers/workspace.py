@@ -73,22 +73,24 @@ class AvailableEquipmentsPayload(BaseModel):
 @router.post("/workspace/available_equipments")
 async def available_equipments(payload: AvailableEquipmentsPayload):
     class EquipmentModule(BaseModel):
-        module_name: str
-        equipment_name: str
+        module: str
+        cls: str
 
     equipments: list[EquipmentModule] = []
 
     warnings.filterwarnings("ignore")
 
-    def get_equipments(name: str):
-        # First check the name is importable
-        if importlib.util.find_spec(name) and not name.endswith("__main__"):
+    def get_equipments(module: str):
+        # First check the module is importable
+        if importlib.util.find_spec(module) and not module.endswith("__main__"):
             try:
-                for [p, module] in inspect.getmembers(importlib.import_module(name)):
+                for [cls, module] in inspect.getmembers(
+                    importlib.import_module(module)
+                ):
                     if hasattr(module, "equipment_params"):
-                        equipments.append({"module_name": name, "equipment_name": p})
+                        equipments.append({"module": module, "cls": cls})
             except Exception:
-                print(f"Path {name} produced an exception")
+                print(f"Path {module} produced an exception")
 
     # Check all possible paths
     for package in pkgutil.walk_packages():

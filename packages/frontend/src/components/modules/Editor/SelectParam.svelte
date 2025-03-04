@@ -7,11 +7,11 @@
 	let {
 		name,
 		options = $bindable(),
-		selection = $bindable(),
+		value = $bindable(),
 	}: {
 		name: string;
 		options: string[] | number[];
-		selection: number;
+		value: number | string;
 	} = $props();
 
 	let ParamElement: HTMLDivElement;
@@ -22,6 +22,6 @@
 
 	<Separator />
 	<div class="relative flex-grow -m-2 px-2">
-		<Select bind:open bind:selection {options} />
+		<Select bind:open bind:value {options} />
 	</div>
 </div>

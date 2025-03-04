@@ -2,7 +2,7 @@ import { $, file, randomUUIDv7, spawn, write } from "bun"
 import { app_state } from "./app_state"
 import { parse, stringify } from "smol-toml"
 import type { Dependency } from "qoslab-shared";
-import { pathExist } from "./fs";
+
 
 export async function createProject(path: string) {
     $.cwd(path);
