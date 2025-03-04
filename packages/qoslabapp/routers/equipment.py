@@ -18,7 +18,7 @@ class GetParamPayload(BaseModel):
 @router.post("/equipment/get_params")
 async def get_params(payload: GetParamPayload):
     return getattr(
-        getattr(payload.cls, importlib.import_module(payload.module)),
+        getattr(importlib.import_module(payload.module), payload.cls),
         "equipment_params",
     )
 
