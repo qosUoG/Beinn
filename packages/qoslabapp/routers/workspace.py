@@ -93,7 +93,7 @@ async def available_equipments(payload: AvailableEquipmentsPayload):
     # Check all possible paths
     for package in pkgutil.walk_packages():
         for n in payload.names:
-            if package.name.startswith("abcde"):
+            if "abcde" in package.name:
                 print(package.name)
             if package.name.startswith(n):
                 get_equipments(package.name)
