@@ -84,10 +84,8 @@ async def available_equipments(payload: AvailableEquipmentsPayload):
         # First check the module is importable
         if importlib.util.find_spec(module) and not module.endswith("__main__"):
             try:
-                for [cls, module] in inspect.getmembers(
-                    importlib.import_module(module)
-                ):
-                    if hasattr(module, "equipment_params"):
+                for [cls, clsT] in inspect.getmembers(importlib.import_module(module)):
+                    if hasattr(clsT, "equipment_params"):
                         equipments.append({"module": module, "cls": cls})
             except Exception:
                 print(f"Path {module} produced an exception")
