@@ -92,13 +92,18 @@ async def available_equipments(payload: AvailableEquipmentsPayload):
 
     # Check all possible paths
     for package in pkgutil.walk_packages():
+        if "abcde" in package.name:
+            print(package.name)
         for n in payload.names:
-            if "abcde" in package.name:
-                print(package.name)
             if package.name.startswith(n):
                 get_equipments(package.name)
                 break
 
     # TODO Check in local directory for project specific equipments
+
+    for package in pkgutil.iter_modules():
+        if "abcde" in package.name:
+            print(package.name)
+
     warnings.filterwarnings("default")
     return equipments

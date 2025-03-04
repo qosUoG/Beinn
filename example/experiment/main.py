@@ -12,8 +12,8 @@ if __name__ == "__main__":
 
     importlib.util.find_spec("fastapi_cli.utils.cli")
 
-    for [p, module] in inspect.getmembers(importlib.import_module("qoslablib")):
-        pass
+    for [p, module] in inspect.getmembers(importlib.import_module("abcde.abcccddde")):
+        print(p)
 
     # def inside():
     #     warnings.filterwarnings("error")
