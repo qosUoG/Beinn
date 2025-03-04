@@ -2,8 +2,6 @@
 	import Select from "$components/reuseables/Select.svelte";
 	import Separator from "./Separator.svelte";
 
-	let open = $state(false);
-
 	let {
 		name,
 		options = $bindable(),
@@ -22,6 +20,6 @@
 
 	<Separator />
 	<div class="relative flex-grow -m-2 px-2">
-		<Select bind:open bind:value {options} />
+		<Select bind:value {options} />
 	</div>
 </div>

@@ -2,22 +2,25 @@
 	import { clickoutside, cn } from "$components/utils.svelte";
 
 	let {
-		open = $bindable(),
 		options,
 		value = $bindable(),
 	}: {
-		open: boolean;
 		options: number[] | string[];
 		value: number | string;
 	} = $props();
+
+	let open = $state(false);
 </script>
 
 <button
-	class="w-full"
+	class="min-w-0 overflow-x-scroll text-nowrap"
 	onclick={(e) => {
 		e.stopPropagation();
-		open = true;
-	}}>{value}</button>
+		open = !open;
+		console.log({ open });
+	}}>
+	{value}
+</button>
 
 {#if open}
 	<div
@@ -25,11 +28,11 @@
 		onoutsideclick={() => {
 			open = false;
 		}}
-		class="absolute right-0 top-7 bg-white container col-1 w-full z-10 shadow-xl">
+		class="absolute left-0 top-6 bg-white col-1 w-fit z-10 shadow-xl rounded">
 		{#each options as option}
 			<button
 				class={cn(
-					" wrapped",
+					" wrapped  text-nowrap",
 					value === option
 						? "bg-slate-400 text-slate-50"
 						: "hover:bg-slate-200"
@@ -37,6 +40,7 @@
 				onclick={() => {
 					value = option;
 					open = false;
+					console.log({ open });
 				}}>{option}</button>
 		{/each}
 	</div>

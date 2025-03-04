@@ -17,8 +17,10 @@ class GetParamPayload(BaseModel):
 
 @router.post("/equipment/get_params")
 async def get_params(payload: GetParamPayload):
-    _class = importlib.import_module(payload.cls, payload.module)
-    return getattr(_class, "equipment_params")
+    return getattr(
+        getattr(payload.cls, importlib.import_module(payload.module)),
+        "equipment_params",
+    )
 
 
 class LoadEquipmentPayload(BaseModel):
