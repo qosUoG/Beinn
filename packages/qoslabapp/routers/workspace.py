@@ -90,7 +90,7 @@ async def available_equipments(payload: AvailableEquipmentsPayload):
 
     # Check all possible paths
     for package in pkgutil.walk_packages():
-        if "abcde" in package.name:
+        if "lib" in package.name:
             print(package.name)
         for n in payload.names:
             if package.name.startswith(n):
@@ -99,9 +99,45 @@ async def available_equipments(payload: AvailableEquipmentsPayload):
 
     # TODO Check in local directory for project specific equipments
 
-    for package in pkgutil.iter_modules():
-        if "abcde" in package.name:
-            print(package.name)
-
     warnings.filterwarnings("default")
     return equipments
+
+
+class AvailableExperimentsPayload(BaseModel):
+    names: list[str]
+
+
+@router.post("/workspace/available_experiments")
+async def available_experiments(payload: AvailableExperimentsPayload):
+    class ExperimentModule(BaseModel):
+        module: str
+        cls: str
+
+    experiments: list[ExperimentModule] = []
+
+    warnings.filterwarnings("ignore")
+
+    def get_experiments(module: str):
+        # First check the module is importable
+        if importlib.util.find_spec(module) and not module.endswith("__main__"):
+            try:
+                for [cls, clsT] in inspect.getmembers(importlib.import_module(module)):
+                    if hasattr(clsT, "experiment_params"):
+                        experiments.append({"module": module, "cls": cls})
+            except Exception as e:
+                print(f"Path {module} produced an exception")
+                print(e)
+
+    # Check all possible paths
+    for package in pkgutil.walk_packages():
+        if "lib" in package.name:
+            print(package.name)
+        for n in payload.names:
+            if package.name.startswith(n):
+                get_experiments(package.name)
+                break
+
+    # TODO Check in local directory for project specific experiments
+
+    warnings.filterwarnings("default")
+    return experiments
