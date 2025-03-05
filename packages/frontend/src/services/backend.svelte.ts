@@ -63,3 +63,16 @@ export async function readDependency(): Promise<Record<string, Dependency>> {
 
 }
 
+
+export async function checkDependency(source: string): Promise<boolean> {
+    return (await (await fetch(
+        "http://localhost:4000/workspace/check_dependency",
+        {
+            method: "POST",
+            body: JSON.stringify({ source, path: gstore.workspace.path }),
+            headers: {
+                "Content-type": "application/json"
+            },
+        }
+    )).json()).success
+}

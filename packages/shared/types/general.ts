@@ -25,16 +25,17 @@ export interface Directory {
 
 export interface Dependency {
     id: string
-    source: {
+    source?: {
         type: "git",
         git: string,
         subdirectory: string,
     } | {
         type: "path",
         path: string
-        directory: Directory,
     } | {
         type: "pip"
+    } | {
+        type: "local",
     }
 
     name?: string,

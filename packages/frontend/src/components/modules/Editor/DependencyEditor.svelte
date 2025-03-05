@@ -10,9 +10,11 @@
 	import Download from "$icons/Download.svelte";
 	import {
 		addDependency,
+		checkDependency,
 		readDependency,
 		removeDependency,
 	} from "$services/backend.svelte";
+	import { getRandomId } from "$lib/utils";
 
 	const dependency: Dependency | undefined = $derived.by(() => {
 		if (dependency_editor.id === undefined) return undefined;
@@ -31,7 +33,22 @@
 					<div class="title bg-white wrapped">
 						Editor - Dependency
 					</div>
-					{@render Bin()}
+					<button
+						class="icon-btn-sm red"
+						onclick={async () => {
+							if (
+								dependency?.confirmed &&
+								dependency.source?.type !== "local"
+							)
+								// TODO remove dependency in python project
+								await removeDependency(dependency.name!);
+
+							delete gstore.workspace.dependencies[
+								dependency_editor.id!
+							];
+
+							dependency_editor.id = undefined;
+						}}><Trash /></button>
 				</div>
 
 				{#if !dependency.confirmed}
@@ -55,6 +72,30 @@
 								)
 									return;
 
+								if (temp_source.startsWith("local:")) {
+									const res = temp_source.split(":");
+									if (res.length > 2) return;
+
+									const path = res[1];
+									const valid = await checkDependency(path);
+									if (!valid) return;
+
+									gstore.workspace.dependencies[
+										dependency_editor.id!
+									].source = { type: "local" };
+									gstore.workspace.dependencies[
+										dependency_editor.id!
+									].confirmed = true;
+									gstore.workspace.dependencies[
+										dependency_editor.id!
+									].name = path;
+									gstore.workspace.dependencies[
+										dependency_editor.id!
+									].fullname = `local:${path}`;
+
+									return;
+								}
+
 								await addDependency(temp_source);
 
 								const current_dependencies = $state.snapshot(
@@ -62,7 +103,20 @@
 								);
 								temp_source = "";
 
-								const res = await readDependency();
+								let res = await readDependency();
+
+								// Add all local: dependencies
+								Object.values(current_dependencies).forEach(
+									(d) => {
+										if (d.source?.type === "local") {
+											const id = getRandomId(
+												Object.keys(res)
+											);
+
+											res[id] = { ...d, id };
+										}
+									}
+								);
 
 								gstore.workspace.dependencies = res;
 
@@ -75,7 +129,7 @@
 								)!.id;
 							}}><Download /></button>
 					</div>
-				{:else if dependency.source.type === "pip"}
+				{:else if dependency.source!.type === "pip"}
 					<div class="row-2 bg-white wrapped w-full">
 						<div class="editor-label">Package</div>
 						<Separator />
@@ -83,29 +137,37 @@
 							{dependency.fullname}
 						</div>
 					</div>
-				{:else if dependency.source.type === "git"}
+				{:else if dependency.source!.type === "git"}
 					<div class="row-2 bg-white wrapped w-full">
 						<div class="editor-label">Git Path</div>
 						<Separator />
 						<div class="">
-							{dependency.source.git}
+							{dependency.source!.git}
 						</div>
 					</div>
-					{#if dependency.source.subdirectory}
+					{#if dependency.source!.subdirectory}
 						<div class="row-2 bg-white wrapped w-full">
 							<div class="editor-label">Subdirectory</div>
 							<Separator />
 							<div class="">
-								{dependency.source.subdirectory}
+								{dependency.source!.subdirectory}
 							</div>
 						</div>
 					{/if}
-				{:else if dependency.source.type === "path"}
+				{:else if dependency.source!.type === "path"}
 					<div class="row-2 bg-white wrapped w-full">
 						<div class="editor-label">Path</div>
 						<Separator />
 						<div class="">
-							{dependency.source.path}
+							{dependency.source!.path}
+						</div>
+					</div>
+				{:else if dependency.source!.type === "local"}
+					<div class="row-2 bg-white wrapped w-full">
+						<div class="editor-label">Local</div>
+						<Separator />
+						<div class="">
+							{dependency.name}
 						</div>
 					</div>
 				{/if}
@@ -113,17 +175,3 @@
 		{/if}
 	</div>
 {/key}
-
-{#snippet Bin()}
-	<button
-		class="icon-btn-sm red"
-		onclick={async () => {
-			if (dependency?.confirmed)
-				// TODO remove dependency in python project
-				await removeDependency(dependency.name!);
-
-			delete gstore.workspace.dependencies[dependency_editor.id!];
-
-			dependency_editor.id = undefined;
-		}}><Trash /></button>
-{/snippet}

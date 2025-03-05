@@ -5,7 +5,7 @@
 	import Editor from "$components/modules/Editor/Editor.svelte";
 	import EquipmentList from "$components/modules/EquipmentList.svelte";
 	import ExperimentList from "$components/modules/ExperimentList.svelte";
-	import ProjectTree from "$components/modules/DependencyTree.svelte";
+	import DependencyList from "$components/modules/DependencyList.svelte";
 </script>
 
 <div class="col-4 w-full h-full p-4">
@@ -14,11 +14,11 @@
 		<ProjectPath />
 	</div>
 	<!-- <div class="row-4 h-full min-h-0 items-start">
-		<ProjectTree />
+		<DependencyList />
 		<ActivateScript />
 	</div> -->
 	<div class="grid grid-cols-5 min-h-0 gap-4 h-full">
-		<ProjectTree />
+		<DependencyList />
 		<EquipmentList />
 		<ExperimentList />
 		<Editor />

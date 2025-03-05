@@ -31,9 +31,6 @@
 						gstore.workspace.dependencies[id] = {
 							id,
 							confirmed: false,
-							source: {
-								type: "pip",
-							},
 						};
 
 						await tick();

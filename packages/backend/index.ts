@@ -3,7 +3,7 @@ import { getDirectoryInfo, pathExist } from "./lib/fs";
 
 import { mkdir, readdir } from "node:fs/promises";
 
-import { addDependency, copyApp, createProject, readDependencies, readModules, removeDependency, runProject } from "./lib/workspace";
+import { addDependency, checkDependency, copyApp, createProject, readDependencies, readModules, removeDependency, runProject } from "./lib/workspace";
 import { app_state } from "./lib/app_state";
 
 // const ws_map: Map<string, ServerWebSocket<undefined>> = new Map()
@@ -54,7 +54,7 @@ serve({
 
                 }
 
-                if (!await pathExist(path + "/.app"))
+                if (!await pathExist(path + "/app"))
                     await copyApp(path)
 
 
@@ -62,19 +62,27 @@ serve({
                 return Response.json(await getDirectoryInfo(path), { headers })
             }
         },
+        "/workspace/check_dependency": {
+            POST: async req => {
+
+                const { path, source } = await req.json() as { source: string, path: string }
+
+                return Response.json({ success: await checkDependency(path, source) }, { headers })
+            }
+        },
         "/workspace/add_dependency": {
             POST: async req => {
 
-                const { source, path } = await req.json() as { source: string, path: string }
-                await addDependency(source, path)
+                const { path, source } = await req.json() as { source: string, path: string }
+                await addDependency(path, source)
                 return Response.json({}, { headers })
             }
         },
         "/workspace/remove_dependency": {
             POST: async req => {
 
-                const { name, path } = await req.json() as { name: string, path: string }
-                await removeDependency(name, path)
+                const { path, name } = await req.json() as { name: string, path: string }
+                await removeDependency(path, name)
                 return Response.json({}, { headers })
             }
         },

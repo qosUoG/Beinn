@@ -34,7 +34,7 @@ export async function copyApp(path: string) {
     else {
         // make sure .app in gitignore
         const gitignores = (await file(path + "/.gitignore").text()).split("\n")
-        if (!gitignores.includes(".app")) await write(path + "/.gitignore", [...gitignores, ".app"].join("\n"))
+        if (!gitignores.includes("app")) await write(path + "/.gitignore", [...gitignores, "app"].join("\n"))
     }
 
     // install all dependency
@@ -42,13 +42,13 @@ export async function copyApp(path: string) {
     await $`uvx copier copy git+https://github.com/qosUoG/QosLab.git ./app`
 }
 
-export async function addDependency(identifier: string, path: string) {
+export async function addDependency(path: string, identifier: string) {
     $.cwd(path)
     // Could be from pip, git path or local path
     await $`uv add ${identifier}`
 }
 
-export async function removeDependency(name: string, path: string) {
+export async function removeDependency(path: string, name: string) {
     // Remove with the identifier
     $.cwd(path)
     await $`uv remove ${name}`
@@ -132,4 +132,9 @@ export function runProject(path: string) {
     }
 
 
+}
+
+export async function checkDependency(path: string, source: string) {
+
+    return await file(path + "/" + source + "/__init__.py").exists()
 }
