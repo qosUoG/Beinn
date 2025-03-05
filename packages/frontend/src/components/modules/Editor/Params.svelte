@@ -7,8 +7,6 @@
 
 	let { params = $bindable() }: { params: Record<string, AllParamTypes> } =
 		$props();
-
-	$inspect(params);
 </script>
 
 {#each Object.entries(params) as [name, param]}

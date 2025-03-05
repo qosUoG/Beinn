@@ -23,7 +23,7 @@ class Examplexperiment:
         "selectstrparam": p.select_str_param(["option1", "option2", "option3"]),
         "selectintparam": p.select_int_param([1, 2, 3]),
         "selectfloatparam": p.select_float_param([1.1, 2.2, 3.3]),
-        "instanceparam": p.instance_param[ExampleEquipment](),
+        "instanceparam": p.instance_param(),
     }
 
     def __init__(self, params: ParamsType):
