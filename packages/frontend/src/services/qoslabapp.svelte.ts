@@ -12,11 +12,14 @@ export async function getAvailableEquipments() {
     return await (await fetch(`http://localhost:8000/workspace/available_equipments`, {
         method: "POST",
         body: JSON.stringify({
-            names: $state.snapshot(Object.values(gstore.workspace.dependencies).map(d => d.name))
+            names: $state.snapshot(Object.values(gstore.workspace.dependencies).filter(d => d.confirmed).map(d => d.name))
         }),
 
         headers
-    })).json()
+    })).json() as {
+        module: string;
+        cls: string;
+    }[]
 }
 
 export async function getEquipmentParams(path: { module: string, cls: string }): Promise<Record<string, AllParamTypes>> {

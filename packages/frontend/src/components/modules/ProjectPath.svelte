@@ -34,10 +34,7 @@
 			let res: { module: string; cls: string }[] = [];
 
 			await retryTillSuccess(5000, async () => {
-				res = (await getAvailableEquipments()) as {
-					module: string;
-					cls: string;
-				}[];
+				res = await getAvailableEquipments();
 			});
 
 			gstore.workspace.available_equipments = res;

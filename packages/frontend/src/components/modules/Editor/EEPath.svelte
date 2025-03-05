@@ -31,14 +31,14 @@
 
 <div class="row-2 min-w-0">
 	{#if editing}
-		<label class="row-2 bg-white wrapped flex-grow min-w-0">
+		<div class="row-2 bg-white wrapped flex-grow min-w-0 h-full">
 			<div class="editor-label">Path</div>
 			<Separator />
 			<div
 				class="relative flex-grow -mx-2 px-2 flex items-center min-w-0">
 				<Select bind:value={temp_path} {options} />
 			</div>
-		</label>
+		</div>
 		<div class="row-1">
 			{#if editing && target_path_defined}
 				<button

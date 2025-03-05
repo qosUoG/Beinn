@@ -40,14 +40,14 @@
 					const id = getRandomId(Object.keys(gstore[listtype]));
 					gstore[listtype][id] = { id };
 
-					const equipments = await getAvailableEquipments();
-
-					console.log(equipments);
+					gstore.workspace.available_equipments =
+						await getAvailableEquipments();
 
 					await tick();
 					editor.mode = "ee";
 					eeeditor.id = id;
 					eeeditor.mode = listtype;
+					dependency_editor.id = undefined;
 				}}><Plus /></button>
 		</div>
 	</div>

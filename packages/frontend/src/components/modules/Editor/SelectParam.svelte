@@ -11,11 +11,9 @@
 		options: string[] | number[];
 		value: number | string;
 	} = $props();
-
-	let ParamElement: HTMLDivElement;
 </script>
 
-<div class=" row-2 bg-white wrapped min-w-0 h-full" bind:this={ParamElement}>
+<div class=" row-2 bg-white wrapped min-w-0 h-full">
 	<div class="editor-label">{name}</div>
 
 	<Separator />

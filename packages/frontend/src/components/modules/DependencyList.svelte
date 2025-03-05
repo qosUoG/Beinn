@@ -36,6 +36,7 @@
 						await tick();
 
 						editor.mode = "dependency";
+						eeeditor.id = undefined;
 						dependency_editor.id = id;
 					}}><Plus /></button>
 			</div>

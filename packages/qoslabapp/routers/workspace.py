@@ -84,8 +84,9 @@ async def available_equipments(payload: AvailableEquipmentsPayload):
                 for [cls, clsT] in inspect.getmembers(importlib.import_module(module)):
                     if hasattr(clsT, "equipment_params"):
                         equipments.append({"module": module, "cls": cls})
-            except Exception:
+            except Exception as e:
                 print(f"Path {module} produced an exception")
+                print(e)
 
     # Check all possible paths
     for package in pkgutil.walk_packages():

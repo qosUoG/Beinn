@@ -20,7 +20,6 @@
 	class="min-w-0 overflow-x-scroll text-nowrap w-full h-full"
 	onclick={async (e) => {
 		open = !open;
-		console.log({ open });
 	}}
 	{id}>
 	{value}
@@ -32,7 +31,7 @@
 		onoutsideclick={() => {
 			open = false;
 		}}
-		class="absolute left-0 top-6 bg-white col z-10 shadow-xl rounded w-full">
+		class="absolute left-0 top-6 bg-white col z-10 shadow-xl rounded">
 		{#each options as option}
 			<button
 				class={cn(
@@ -44,7 +43,6 @@
 				onclick={() => {
 					value = option;
 					open = false;
-					console.log({ open });
 				}}>{option}</button>
 		{/each}
 	</div>
