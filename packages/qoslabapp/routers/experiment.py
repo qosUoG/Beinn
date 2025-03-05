@@ -1,4 +1,6 @@
+import importlib
 from fastapi import APIRouter
+from pydantic import BaseModel
 
 from ..lib.utils import importFromStr
 
@@ -6,13 +8,17 @@ from ..lib.utils import importFromStr
 router = APIRouter()
 
 
-@router.get("/experiment/get_params/{filepath:path}")
-async def get_params(filepath: str):
-    with open(filepath, mode="r", encoding="utf-8") as raw:
-        [module, classname] = importFromStr(raw.read())
-        _class = getattr(module, classname)
+class GetParamPayload(BaseModel):
+    module: str
+    cls: str
 
-        return _class.params
+
+@router.post("/experiment/get_params")
+async def get_params(payload: GetParamPayload):
+    return getattr(
+        getattr(importlib.import_module(payload.module), payload.cls),
+        "experiment_params",
+    )
 
 
 # class StartExperimentPayload(BaseModel):

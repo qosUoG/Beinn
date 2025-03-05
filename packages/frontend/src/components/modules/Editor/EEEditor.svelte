@@ -1,6 +1,9 @@
 <script lang="ts">
 	import Trash from "$icons/Trash.svelte";
-	import { getEquipmentParams } from "$services/qoslabapp.svelte";
+	import {
+		getEquipmentParams,
+		getExperimentParams,
+	} from "$services/qoslabapp.svelte";
 	import { gstore } from "$states/global.svelte";
 	import type { Equipment, Experiment } from "qoslab-shared";
 	import { tick } from "svelte";
@@ -53,7 +56,10 @@
 						`available_${eeeditor.mode!}`
 					].map(({ module, cls }) => `${module} ${cls}`)}
 					onconfirm={async (path) => {
-						target!.params = await getEquipmentParams(path);
+						if (eeeditor.mode === "equipments")
+							target!.params = await getEquipmentParams(path);
+						else if (eeeditor.mode === "experiments")
+							target!.params = await getExperimentParams(path);
 						await tick();
 						target!.temp_params = JSON.parse(
 							JSON.stringify(target!.params)

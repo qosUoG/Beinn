@@ -49,7 +49,18 @@ export async function getEquipmentParams(path: { module: string, cls: string }):
     ).json()
 }
 
-
+export async function getExperimentParams(path: { module: string, cls: string }): Promise<Record<string, AllParamTypes>> {
+    return await (
+        await fetch(
+            `http://localhost:8000/experiment/get_params`,
+            {
+                method: "POST",
+                body: JSON.stringify(path),
+                headers
+            }
+        )
+    ).json()
+}
 
 export async function startExperiments(): Promise<void> {
 
