@@ -13,6 +13,7 @@
 	import Play from "$icons/Play.svelte";
 	import {
 		getAvailableEquipments,
+		getAvailableExperiments,
 		startExperiments,
 	} from "$services/qoslabapp.svelte";
 	import { editor } from "$components/modules/Editor/EditorController.svelte";
@@ -40,8 +41,12 @@
 					const id = getRandomId(Object.keys(gstore[listtype]));
 					gstore[listtype][id] = { id };
 
-					gstore.workspace.available_equipments =
-						await getAvailableEquipments();
+					if (listtype === "equipments")
+						gstore.workspace.available_equipments =
+							await getAvailableEquipments();
+					else if (listtype === "experiments")
+						gstore.workspace.available_experiments =
+							await getAvailableExperiments();
 
 					await tick();
 					editor.mode = "ee";

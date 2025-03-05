@@ -90,8 +90,6 @@ async def available_equipments(payload: AvailableEquipmentsPayload):
 
     # Check all possible paths
     for package in pkgutil.walk_packages():
-        if "lib" in package.name:
-            print(package.name)
         for n in payload.names:
             if package.name.startswith(n):
                 get_equipments(package.name)
@@ -130,8 +128,6 @@ async def available_experiments(payload: AvailableExperimentsPayload):
 
     # Check all possible paths
     for package in pkgutil.walk_packages():
-        if "lib" in package.name:
-            print(package.name)
         for n in payload.names:
             if package.name.startswith(n):
                 get_experiments(package.name)

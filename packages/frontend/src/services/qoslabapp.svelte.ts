@@ -22,6 +22,20 @@ export async function getAvailableEquipments() {
     }[]
 }
 
+export async function getAvailableExperiments() {
+    return await (await fetch(`http://localhost:8000/workspace/available_experiments`, {
+        method: "POST",
+        body: JSON.stringify({
+            names: $state.snapshot(Object.values(gstore.workspace.dependencies).filter(d => d.confirmed).map(d => d.name))
+        }),
+
+        headers
+    })).json() as {
+        module: string;
+        cls: string;
+    }[]
+}
+
 export async function getEquipmentParams(path: { module: string, cls: string }): Promise<Record<string, AllParamTypes>> {
     return await (
         await fetch(
