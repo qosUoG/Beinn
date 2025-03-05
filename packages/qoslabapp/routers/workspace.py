@@ -121,6 +121,7 @@ async def available_experiments(payload: AvailableExperimentsPayload):
             try:
                 for [cls, clsT] in inspect.getmembers(importlib.import_module(module)):
                     if hasattr(clsT, "experiment_params"):
+                        print("hi")
                         experiments.append({"module": module, "cls": cls})
             except Exception as e:
                 print(f"Path {module} produced an exception")

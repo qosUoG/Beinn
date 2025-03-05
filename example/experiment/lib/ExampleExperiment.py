@@ -15,7 +15,7 @@ class Examplexperiment:
         selectfloatparam: p.SelectFloatParam
         instanceparam: p.InstanceParam
 
-    params: ParamsType = {
+    experiment_params: ParamsType = {
         "strparam": p.str_param(),
         "floatparam": p.float_param(suffix="W"),
         "intparam": p.int_param(),
