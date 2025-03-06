@@ -31,7 +31,7 @@
 		onoutsideclick={() => {
 			open = false;
 		}}
-		class="absolute left-0 top-6 bg-white col z-10 shadow-xl rounded">
+		class="absolute left-0 top-6 bg-white col z-10 shadow-xl rounded min-w-full">
 		{#each options as option}
 			<button
 				class={cn(

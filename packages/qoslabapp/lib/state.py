@@ -1,4 +1,6 @@
-from threading import Event, Thread
+from asyncio import Task
+import asyncio
+from threading import Condition, Event, Thread
 from typing import TypedDict
 from qoslablib import labtype as l, params as p, exceptions as e
 
@@ -11,43 +13,49 @@ class ExperimentThread(TypedDict):
 class AppState:
     project = {"path": ""}
     equipments: dict[str, l.Equipment] = {}
-    experiments_threads: dict[str, ExperimentThread] = {}
+    experiments: dict[str, l.Experiment] = {}
+    experiment_tasks: dict[str, Task] = {}
+    experiment_stop_events: dict[str, Event] = {}
+    experiment_pause_events: dict[str, Event] = {}
 
     @classmethod
-    def reset_dicts(cls):
-        for et in cls.experiments_threads.values():
-            et["end_event"].set()
-            et["t"].join()
-        cls.experiments_threads.clear()
-        cls.equipments.clear()
-
-    @classmethod
-    def register_experiment[T](
-        cls, name: str, params: dict[str, p.AllParamTypes], eCls: type[T]
-    ):
-        cls.experiments_threads[name] = {"end_event": Event()}
-        cls.experiments_threads[name]["t"] = Thread(
-            target=cls.experiment_runner,
-            args=(cls.experiments_threads[name]["end_event"], params, eCls),
+    def start_experiment(cls, name: str):
+        cls.experiment_stop_events[name] = Event()
+        cls.experiment_pause_events[name] = Event()
+        cls.experiment_tasks[name] = asyncio.create_task(
+            asyncio.to_thread(
+                _experiment_runner,
+                cls.experiments[name],
+                cls.experiment_stop_events[name],
+                cls.experiment_pause_events[name],
+            )
         )
 
     @classmethod
-    def start_experiments(cls):
-        for et in cls.experiments_threads.values():
-            et["t"].start()
+    def pause_experiment(cls, name: str):
+        cls.experiment_pause_events[name].set()
 
-    def experiment_runner[T](
-        event: Event, params: dict[str, p.AllParamTypes], eCls: type[T]
-    ):
-        _inst = eCls(params)
-        index = 0
-        while True:
+    @classmethod
+    def continue_experiment(cls, name: str):
+        cls.experiment_pause_events[name].clear()
+
+    @classmethod
+    def stop_experiment(cls, name: str):
+        cls.experiment_stop_events[name].set()
+
+
+def _experiment_runner[T](_inst: type[T], stop_event: Event, pause_event: Event):
+    index = 0
+    while True:
+        if stop_event.is_set():
+            print("experiment stopped")
+            return
+
+        if not pause_event.is_set():
             try:
                 _inst.loop(index)
                 index += 1
-                if event.is_set():
-                    print("experiment stopped")
-                    return
+
             except e.ExperimentEnded:
                 print("experiment ended")
                 return

@@ -2,6 +2,8 @@ import importlib
 from fastapi import APIRouter
 from pydantic import BaseModel
 
+from ..lib.state import AppState
+from qoslablib import labtype as l
 from ..lib.utils import importFromStr
 
 
@@ -21,23 +23,42 @@ async def get_params(payload: GetParamPayload):
     )
 
 
-# class StartExperimentPayload(BaseModel):
-#     path: str
-#     methodname: str
-#     params: dict[str, AllParamTypes]
+class StartExperimentsPayload(BaseModel):
+    equipments: list[l.Equipment]
+    experiments: list[l.Experiment]
 
 
-# @router.post("/experiment/start")
-# async def startExperiment(payload: StartExperimentPayload):
-#     """
-#     Start Experiment
-#     """
-#     with open(payload.path, mode="r", encoding="utf-8") as raw:
-#         # Read the definition code from the source file
-#         exec(raw.read())
-#         # Create the experiment in a separate thread
-#         exec(
-#             f"AppState.experiment_threads['{payload.methodname}'] = Thread(target={payload.methodname}, args={payload.params})"
-#         )
-#         # Start running the experiment
-#         exec(f"AppState.experiment_threads['{payload.methodname}'].start()")
+@router.post("/workspace/start_experiments")
+async def start_experiments(body: StartExperimentsPayload):
+    # Instantiate equipments
+    for equipment in body.equipments:
+        # Skip already created equipments
+        if equipment.name in AppState.equipments:
+            continue
+
+        # Read the definition code from the source file
+        _class = getattr(importlib.import_module(equipment.module), equipment.cls)
+        # Initilize the equipment and assign to equipments dict
+        AppState.equipments[equipment.name] = _class(equipment.params)
+
+    # Replace instances with actual equipments
+    for equipment in AppState.equipments.values():
+        for p in equipment.params.values():
+            if p.type == "instance":
+                p.instance = AppState.equipments[p.instance_name]
+
+    # Instantiate experiments
+    for experiment in body.experiments:
+        # Read the definition code from the source file
+        _class = getattr(importlib.import_module(experiment.module), experiment.cls)
+
+    # Replace instances with actual equipments
+    # TODO accept experiment instance for playlist
+    for experiment in AppState.experiments.values():
+        for p in experiment.params.values():
+            if p.type == "instance":
+                p.instance = AppState.equipments[p.instance_name]
+
+    # Initilize the equipment and assign to equipments dict
+    for experiment in body.experiments:
+        AppState.experiments[experiment.name] = _class(experiment.params)

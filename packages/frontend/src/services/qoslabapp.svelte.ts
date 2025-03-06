@@ -1,6 +1,6 @@
 import { gstore } from "$states/global.svelte";
 
-import type { AllParamTypes } from "qoslab-shared";
+import type { AllParamTypes, Experiment } from "qoslab-shared";
 
 
 
@@ -62,20 +62,16 @@ export async function getExperimentParams(path: { module: string, cls: string })
     ).json()
 }
 
-export async function startExperiments(): Promise<void> {
+export async function startExperiment(experiments: Experiment[]): Promise<void> {
 
 
     await fetch(
-        "http://localhost:8000/workspace/start_experiments",
+        "http://localhost:8000/workspace/start_experiment",
         {
             method: "POST",
             body: JSON.stringify(
                 {
-                    experiments: $state.snapshot(Object.values(gstore.experiments).map((experiment) => ({
-                        name: experiment.name,
-                        module: experiment.module,
-                        params: experiment.params
-                    }))),
+                    experiment: experiments.map(({ name, module, params, cls }) => ({ name, module, params, cls })),
                     equipments: $state.snapshot(Object.values(gstore.equipments).map((equipment) => ({
                         name: equipment.name,
                         module: equipment.module,

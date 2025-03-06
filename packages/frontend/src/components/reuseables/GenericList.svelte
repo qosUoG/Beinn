@@ -29,32 +29,26 @@
 		<div class="title bg-white wrapped">
 			{capitalised}
 		</div>
-		<div class="row-1">
-			{#if listtype === "experiments"}
-				<button class="icon-btn-sm green" onclick={startExperiments}>
-					<Play />
-				</button>
-			{/if}
-			<button
-				class="icon-btn-sm slate"
-				onclick={async () => {
-					const id = getRandomId(Object.keys(gstore[listtype]));
-					gstore[listtype][id] = { id };
 
-					if (listtype === "equipments")
-						gstore.workspace.available_equipments =
-							await getAvailableEquipments();
-					else if (listtype === "experiments")
-						gstore.workspace.available_experiments =
-							await getAvailableExperiments();
+		<button
+			class="icon-btn-sm slate"
+			onclick={async () => {
+				const id = getRandomId(Object.keys(gstore[listtype]));
+				gstore[listtype][id] = { id };
 
-					await tick();
-					editor.mode = "ee";
-					eeeditor.id = id;
-					eeeditor.mode = listtype;
-					dependency_editor.id = undefined;
-				}}><Plus /></button>
-		</div>
+				if (listtype === "equipments")
+					gstore.workspace.available_equipments =
+						await getAvailableEquipments();
+				else if (listtype === "experiments")
+					gstore.workspace.available_experiments =
+						await getAvailableExperiments();
+
+				await tick();
+				editor.mode = "ee";
+				eeeditor.id = id;
+				eeeditor.mode = listtype;
+				dependency_editor.id = undefined;
+			}}><Plus /></button>
 	</div>
 	{#each Object.values(gstore[listtype]) as target}
 		{@const params_edited =
