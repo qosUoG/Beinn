@@ -20,7 +20,7 @@ dependencies = [
 ]
 
 [package.metadata]
-requires-dist = [{ name = "qoslablib", editable = "../../packages/qoslablib" }]
+requires-dist = [{ name = "qoslablib", git = "https://github.com/qosUoG/QosLab?subdirectory=packages%2Fqoslablib" }]
 
 [[package]]
 name = "pydantic"
@@ -64,16 +64,10 @@ wheels = [
 [[package]]
 name = "qoslablib"
 version = "0.1.0"
-source = { editable = "../../packages/qoslablib" }
+source = { git = "https://github.com/qosUoG/QosLab?subdirectory=packages%2Fqoslablib#3eecbe8dc71c0bbc34b46c3015c8d136792ff5d3" }
 dependencies = [
     { name = "pydantic" },
     { name = "websockets" },
-]
-
-[package.metadata]
-requires-dist = [
-    { name = "pydantic", specifier = ">=2.10.6" },
-    { name = "websockets", specifier = ">=15.0" },
 ]
 
 [[package]]

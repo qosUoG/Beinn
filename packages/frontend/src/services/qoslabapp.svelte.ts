@@ -9,7 +9,7 @@ const headers = {
 }
 
 export async function getAvailableEquipments() {
-    return await (await fetch(`http://localhost:8000/workspace/available_equipments`, {
+    return await (await fetch(`http://localhost:8000/equipment/available_equipments`, {
         method: "POST",
         body: JSON.stringify({
             names: $state.snapshot(Object.values(gstore.workspace.dependencies).filter(d => d.confirmed).map(d => d.name))
@@ -23,7 +23,7 @@ export async function getAvailableEquipments() {
 }
 
 export async function getAvailableExperiments() {
-    return await (await fetch(`http://localhost:8000/workspace/available_experiments`, {
+    return await (await fetch(`http://localhost:8000/experiment/available_experiments`, {
         method: "POST",
         body: JSON.stringify({
             names: $state.snapshot(Object.values(gstore.workspace.dependencies).filter(d => d.confirmed).map(d => d.name))

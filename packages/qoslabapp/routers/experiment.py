@@ -1,13 +1,56 @@
 import importlib
+import inspect
+import pkgutil
+import warnings
 from fastapi import APIRouter
 from pydantic import BaseModel
 
 from ..lib.state import AppState
 from qoslablib import labtype as l
-from ..lib.utils import importFromStr
 
 
 router = APIRouter()
+
+
+class AvailableExperimentsPayload(BaseModel):
+    names: list[str]
+
+
+@router.post("/experiment/available_experiments")
+async def available_experiments(payload: AvailableExperimentsPayload):
+    class ExperimentModule(BaseModel):
+        module: str
+        cls: str
+
+    experiments: list[ExperimentModule] = []
+
+    warnings.filterwarnings("ignore")
+
+    def get_experiments(module: str):
+        # First check the module is importable
+        if importlib.util.find_spec(module) and not module.endswith("__main__"):
+            try:
+                for [cls, clsT] in inspect.getmembers(importlib.import_module(module)):
+                    if (
+                        hasattr(clsT, "_qoslab_type")
+                        and getattr(clsT, "qoslab_type") == "experiment"
+                    ):
+                        experiments.append({"module": module, "cls": cls})
+            except Exception as e:
+                print(f"Path {module} produced an exception")
+                print(e)
+
+    # Check all possible paths
+    for package in pkgutil.walk_packages():
+        for n in payload.names:
+            if package.name.startswith(n):
+                get_experiments(package.name)
+                break
+
+    # TODO Check in local directory for project specific experiments
+
+    warnings.filterwarnings("default")
+    return experiments
 
 
 class GetParamPayload(BaseModel):
@@ -61,4 +104,6 @@ async def start_experiments(body: StartExperimentsPayload):
 
     # Initilize the equipment and assign to equipments dict
     for experiment in body.experiments:
-        AppState.experiments[experiment.name] = _class(experiment.params)
+        AppState.experiments[experiment.name] = _class(
+            params=experiment.params,
+        )

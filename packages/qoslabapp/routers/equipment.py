@@ -1,4 +1,7 @@
 import importlib
+import inspect
+import pkgutil
+import warnings
 from fastapi import APIRouter
 from pydantic import BaseModel
 
@@ -8,6 +11,47 @@ from qoslablib import labtype as l
 
 
 router = APIRouter()
+
+
+class AvailableEquipmentsPayload(BaseModel):
+    names: list[str]
+
+
+@router.post("/equipment/available_equipments")
+async def available_equipments(payload: AvailableEquipmentsPayload):
+    class EquipmentModule(BaseModel):
+        module: str
+        cls: str
+
+    equipments: list[EquipmentModule] = []
+
+    warnings.filterwarnings("ignore")
+
+    def get_equipments(module: str):
+        # First check the module is importable
+        if importlib.util.find_spec(module) and not module.endswith("__main__"):
+            try:
+                for [cls, clsT] in inspect.getmembers(importlib.import_module(module)):
+                    if (
+                        hasattr(clsT, "qoslab_type")
+                        and getattr(clsT, "qoslab_type") == "equipment"
+                    ):
+                        equipments.append({"module": module, "cls": cls})
+            except Exception as e:
+                print(f"Path {module} produced an exception")
+                print(e)
+
+    # Check all possible paths
+    for package in pkgutil.walk_packages():
+        for n in payload.names:
+            if package.name.startswith(n):
+                get_equipments(package.name)
+                break
+
+    # TODO Check in local directory for project specific equipments
+
+    warnings.filterwarnings("default")
+    return equipments
 
 
 class GetParamPayload(BaseModel):
@@ -21,28 +65,3 @@ async def get_params(payload: GetParamPayload):
         getattr(importlib.import_module(payload.module), payload.cls),
         "equipment_params",
     )
-
-
-class LoadEquipmentPayload(BaseModel):
-    equipments: list[l.Equipment]
-
-
-# Equipment Endpoints
-@router.post("/equipment/load")
-async def loadEquipment(payload: LoadEquipmentPayload):
-    AppState.equipments.clear()
-    for equipment in payload.equipments:
-        with open(equipment.path, mode="r", encoding="utf-8") as raw:
-            # Read the definition code from the source file
-            [module, classname] = importFromStr(raw.read())
-            _class = getattr(module, classname)
-            # Initilize the equipment and assign to equipments dict
-            AppState.equipments[equipment.name] = _class(equipment.params)
-            # Loop and assign instances to each param
-            for equipment in AppState.equipments.values():
-                for p in equipment.params.values():
-                    if p.type == "instance":
-                        p.instance = AppState.equipments[p.instance_name]
-    import pprint
-
-    pprint.pp(AppState.equipments)

@@ -1,7 +1,8 @@
 from pydantic import BaseModel
-from qoslablib import params as p
+from qoslablib import params as p, decorators as d
 
 
+@d.Equipment
 class ExampleEquipment:
     class ParamsType(BaseModel):
         strparam: p.StrParam
@@ -12,7 +13,7 @@ class ExampleEquipment:
         selectintparam: p.SelectIntParam
         selectfloatparam: p.SelectFloatParam
 
-    equipment_params: ParamsType = {
+    params: ParamsType = {
         "strparam": p.str_param(),
         "floatparam": p.float_param(suffix="W"),
         "intparam": p.int_param(),

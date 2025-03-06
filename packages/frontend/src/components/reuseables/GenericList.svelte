@@ -10,11 +10,10 @@
 	import Disk from "$icons/Disk.svelte";
 	import FolderQuestion from "$icons/FolderQuestion.svelte";
 	import Sign from "$icons/Sign.svelte";
-	import Play from "$icons/Play.svelte";
+
 	import {
 		getAvailableEquipments,
 		getAvailableExperiments,
-		startExperiments,
 	} from "$services/qoslabapp.svelte";
 	import { editor } from "$components/modules/Editor/EditorController.svelte";
 	import { dependency_editor } from "$components/modules/Editor/DependencyEditorController.svelte";
