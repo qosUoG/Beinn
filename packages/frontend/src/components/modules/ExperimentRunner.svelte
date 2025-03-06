@@ -1,5 +1,6 @@
 <script lang="ts">
 	import Play from "$icons/Play.svelte";
+	import { startExperiments } from "$services/qoslabapp.svelte";
 	import { gstore } from "$states/global.svelte";
 
 	let runnable_experiments = $derived(
@@ -20,7 +21,11 @@
 		{#each runnable_experiments as experiment}
 			<div class="wrapped bg-white row-1 items-center">
 				<div class="wrapped bg-slat">{experiment.name}</div>
-				<button class="icon-btn-sm green"><Play /></button>
+				<button
+					class="icon-btn-sm green"
+					onclick={async () => {
+						await startExperiments();
+					}}><Play /></button>
 			</div>
 		{/each}
 	</div>
