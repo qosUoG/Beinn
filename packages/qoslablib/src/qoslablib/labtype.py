@@ -3,14 +3,14 @@ from pydantic import BaseModel
 from qoslablib.params import AllParamTypes
 
 
-class Experiment(BaseModel):
+class ExperimentModule(BaseModel):
     name: str
     module: str
     cls: str
     params: dict[str, AllParamTypes]
 
 
-class Equipment(BaseModel):
+class EquipmentModule(BaseModel):
     name: str
     module: str
     cls: str

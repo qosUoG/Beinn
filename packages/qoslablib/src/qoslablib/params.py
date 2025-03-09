@@ -95,4 +95,4 @@ type AllParamTypes = (
 
 class CompositeParam(BaseModel):
     type: Literal["composite"]
-    children: dict[str, "AllParamTypes"]
+    children: dict[str, AllParamTypes]

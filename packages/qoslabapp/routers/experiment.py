@@ -67,8 +67,8 @@ async def get_params(payload: GetParamPayload):
 
 
 class StartExperimentsPayload(BaseModel):
-    equipments: list[l.Equipment]
-    experiments: list[l.Experiment]
+    equipments: list[l.EquipmentModule]
+    experiments: list[l.ExperimentModule]
 
 
 @router.post("/workspace/start_experiments")
@@ -92,7 +92,7 @@ async def start_experiments(body: StartExperimentsPayload):
 
     # Instantiate experiments
     for experiment in body.experiments:
-        # Read the definition code from the source file
+        # get the class of the experiment
         _class = getattr(importlib.import_module(experiment.module), experiment.cls)
 
     # Replace instances with actual equipments
@@ -107,3 +107,7 @@ async def start_experiments(body: StartExperimentsPayload):
         AppState.experiments[experiment.name] = _class(
             params=experiment.params,
         )
+
+    # Run the experiments
+    for experiment in body.experiments:
+        AppState.run_experiment(experiment.name)
