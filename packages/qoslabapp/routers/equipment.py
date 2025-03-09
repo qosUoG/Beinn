@@ -49,7 +49,7 @@ async def available_equipments(payload: AvailableEquipmentsPayload):
                         if clsT not in equipments:
                             equipments[clsT] = {"modules": [module], "cls": cls}
                         else:
-                            equipments[clsT].modules.append(module)
+                            equipments[clsT]["modules"].append(module)
             except Exception as e:
                 print(f"Path {module} produced an exception")
                 print(e)

@@ -47,7 +47,7 @@ async def available_experiments(payload: AvailableExperimentsPayload):
                         if clsT not in experiments:
                             experiments[clsT] = {"modules": [module], "cls": cls}
                         else:
-                            experiments[clsT].modules.append(module)
+                            experiments[clsT]["modules"].append(module)
             except Exception as e:
                 print(f"Path {module} produced an exception")
                 print(e)
