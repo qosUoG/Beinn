@@ -32,7 +32,9 @@ async def available_equipments(payload: AvailableEquipmentsPayload):
         # First check the module is importable
         if importlib.util.find_spec(module) and not module.endswith("__main__"):
             try:
-                for [cls, clsT] in inspect.getmembers(importlib.import_module(module)):
+                for [cls, clsT] in inspect.getmembers(
+                    importlib.import_module(module), inspect.isclass
+                ):
                     if issubclass(clsT, qoslablib.runtime.EquipmentABC):
                         equipments.append({"module": module, "cls": cls})
             except Exception as e:
