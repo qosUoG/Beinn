@@ -63,5 +63,5 @@ class GetParamPayload(BaseModel):
 async def get_params(payload: GetParamPayload):
     return getattr(
         getattr(importlib.import_module(payload.module), payload.cls),
-        "equipment_params",
+        "params",
     )
