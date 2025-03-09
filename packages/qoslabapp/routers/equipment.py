@@ -6,6 +6,8 @@ from fastapi import APIRouter
 from pydantic import BaseModel
 import qoslablib
 
+from packages.qoslablib.src.qoslablib.runtime import EquipmentABC, ExperimentABC
+
 from ..lib.state import AppState
 from ..lib.utils import importFromStr
 from qoslablib import labtype as l
@@ -35,7 +37,12 @@ async def available_equipments(payload: AvailableEquipmentsPayload):
                 for [cls, clsT] in inspect.getmembers(
                     importlib.import_module(module), inspect.isclass
                 ):
-                    if issubclass(clsT, qoslablib.runtime.EquipmentABC):
+                    if issubclass(
+                        clsT,
+                        EquipmentABC
+                        and clsT is not ExperimentABC
+                        and clsT is not EquipmentABC,
+                    ):
                         equipments.append({"module": module, "cls": cls})
             except Exception as e:
                 print(f"Path {module} produced an exception")
