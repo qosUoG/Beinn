@@ -4,7 +4,7 @@ import time
 from examplelib.ExampleDriver import ExampleEquipment
 
 
-class Examplexperiment(r.Experiment):
+class Examplexperiment(r.ExperimentABC):
     class ParamsType(BaseModel):
         strparam: p.StrParam
         floatparam: p.FloatParam

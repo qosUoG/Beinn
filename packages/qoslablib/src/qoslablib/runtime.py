@@ -15,8 +15,7 @@ class AggregateHolderABC(SqlSaverHolderABC, ChartHolderABC):
 
 
 @dataclass
-class Experiment(ABC):
-    _qoslab_type: ClassVar[Literal["experiment"]] = "experiment"
+class ExperimentABC(ABC):
     params: ClassVar[dict[str, AllParamTypes]]
 
     # Instance shall have this implemented
@@ -58,9 +57,7 @@ class Experiment(ABC):
 
 
 @dataclass
-class Equipment(ABC):
-    _qoslab_type: ClassVar[Literal["equipment"]] = "equipment"
-
+class EquipmentABC(ABC):
     _qoslab_equipment_thread_lock: Lock
 
     def __init__(self):
@@ -68,7 +65,7 @@ class Equipment(ABC):
 
     def EquipmentTLock(func):
         @functools.wraps(func)
-        def wrapper(self: Equipment, *args, **kwargs):
+        def wrapper(self: EquipmentABC, *args, **kwargs):
             with self._qoslab_equipment_thread_lock:
                 return func(self, *args, **kwargs)
 

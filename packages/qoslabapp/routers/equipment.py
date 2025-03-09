@@ -4,6 +4,7 @@ import pkgutil
 import warnings
 from fastapi import APIRouter
 from pydantic import BaseModel
+import qoslablib
 
 from ..lib.state import AppState
 from ..lib.utils import importFromStr
@@ -32,10 +33,7 @@ async def available_equipments(payload: AvailableEquipmentsPayload):
         if importlib.util.find_spec(module) and not module.endswith("__main__"):
             try:
                 for [cls, clsT] in inspect.getmembers(importlib.import_module(module)):
-                    if (
-                        hasattr(clsT, "_qoslab_type")
-                        and getattr(clsT, "_qoslab_type") == "equipment"
-                    ):
+                    if issubclass(clsT, qoslablib.runtime.EquipmentABC):
                         equipments.append({"module": module, "cls": cls})
             except Exception as e:
                 print(f"Path {module} produced an exception")
