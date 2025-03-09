@@ -35,7 +35,7 @@
 		{#each options as option}
 			<button
 				class={cn(
-					" wrapped  text-nowrap",
+					" wrapped  text-nowrap text-left",
 					value === option
 						? "bg-slate-400 text-slate-50"
 						: "hover:bg-slate-200"

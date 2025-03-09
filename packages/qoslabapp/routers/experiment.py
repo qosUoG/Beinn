@@ -23,10 +23,10 @@ class AvailableExperimentsPayload(BaseModel):
 @router.post("/experiment/available_experiments")
 async def available_experiments(payload: AvailableExperimentsPayload):
     class ExperimentModule(BaseModel):
-        module: str
+        modules: list[str]
         cls: str
 
-    experiments: list[ExperimentModule] = []
+    experiments: dict[type, ExperimentModule] = {}
 
     warnings.filterwarnings("ignore")
 
@@ -44,7 +44,10 @@ async def available_experiments(payload: AvailableExperimentsPayload):
                         and clsT is not ExperimentABC
                         and clsT is not EquipmentABC
                     ):
-                        experiments.append({"module": module, "cls": cls})
+                        if clsT not in experiments:
+                            experiments[clsT] = {"modules": [module], "cls": cls}
+                        else:
+                            experiments[clsT].modules.append(module)
             except Exception as e:
                 print(f"Path {module} produced an exception")
                 print(e)
@@ -59,7 +62,7 @@ async def available_experiments(payload: AvailableExperimentsPayload):
     # TODO Check in local directory for project specific experiments
 
     warnings.filterwarnings("default")
-    return experiments
+    return experiments.values()
 
 
 class GetParamPayload(BaseModel):
