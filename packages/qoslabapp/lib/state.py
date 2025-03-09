@@ -69,8 +69,8 @@ COMMIT;
 
 class AppState(c.ChartHolderABC, s.SqlSaverHolderABC):
     project = {"path": ""}
-    equipments: dict[str, r.Equipment] = {}
-    experiments: dict[str, r.Experiment] = {}
+    equipments: dict[str, r.EquipmentABC] = {}
+    experiments: dict[str, r.ExperimentABC] = {}
     experiment_tasks: dict[str, Task] = {}
     experiment_stop_events: dict[str, Event] = {}
     experiment_pause_events: dict[str, Event] = {}
@@ -162,7 +162,9 @@ class AppState(c.ChartHolderABC, s.SqlSaverHolderABC):
         cls.experiment_stop_events[name].set()
 
 
-def _experiment_runner(experiment: r.Experiment, stop_event: Event, pause_event: Event):
+def _experiment_runner(
+    experiment: r.ExperimentABC, stop_event: Event, pause_event: Event
+):
     # First run the inialize method
     experiment.initialize()
 

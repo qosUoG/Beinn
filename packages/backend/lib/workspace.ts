@@ -40,6 +40,8 @@ export async function copyApp(path: string) {
     // install all dependency
     await $`uv add fastapi fastapi[standard]`
     await $`uv add git+https://github.com/qosUoG/QosLab#subdirectory=packages/qoslablib --branch main`
+    // In case qoslablib is already installed and stale
+    await $`uv lock --upgrade-package qoslablib`
     await $`uvx copier copy git+https://github.com/qosUoG/QosLab.git ./app`
 }
 
