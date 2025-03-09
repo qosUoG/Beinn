@@ -39,7 +39,8 @@ async def available_equipments(payload: AvailableEquipmentsPayload):
                 ):
                     if cls == "ExampleEquipment":
                         print(issubclass(clsT, EquipmentABC))
-                        print("ExampleEquipment")
+                        print(module, cls)
+                        print()
                     if (
                         issubclass(clsT, EquipmentABC)
                         and clsT is not ExperimentABC

@@ -7,15 +7,14 @@ def main():
 
 
 if __name__ == "__main__":
+    import qoslablib
     import examplelib.ExampleDriver
-    import inspect
-    import warnings
 
-    importlib.util.find_spec("fastapi_cli.utils.cli")
-
-    for package in pkgutil.iter_modules():
-        if "abcde" in package.name:
-            print(package.name)
+    print(
+        issubclass(
+            examplelib.ExampleDriver.ExampleEquipment, qoslablib.runtime.EquipmentABC
+        )
+    )
 
     # def inside():
     #     warnings.filterwarnings("error")
