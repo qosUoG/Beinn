@@ -61,9 +61,7 @@ async def available_equipments(payload: AvailableEquipmentsPayload):
 
     warnings.filterwarnings("default")
 
-    print(equipments.values())
-
-    return equipments.values()
+    return list(equipments.values())
 
 
 class GetParamPayload(BaseModel):

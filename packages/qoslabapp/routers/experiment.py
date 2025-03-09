@@ -60,7 +60,7 @@ async def available_experiments(payload: AvailableExperimentsPayload):
     # TODO Check in local directory for project specific experiments
 
     warnings.filterwarnings("default")
-    return experiments.values()
+    return list(experiments.values())
 
 
 class GetParamPayload(BaseModel):
