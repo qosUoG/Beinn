@@ -37,10 +37,6 @@ async def available_equipments(payload: AvailableEquipmentsPayload):
                 for [cls, clsT] in inspect.getmembers(
                     importlib.import_module(module), inspect.isclass
                 ):
-                    if cls == "ExampleEquipment":
-                        print(issubclass(clsT, EquipmentABC))
-                        print(module, cls)
-                        print()
                     if (
                         issubclass(clsT, EquipmentABC)
                         and clsT is not ExperimentABC
@@ -64,6 +60,9 @@ async def available_equipments(payload: AvailableEquipmentsPayload):
     # TODO Check in local directory for project specific equipments
 
     warnings.filterwarnings("default")
+
+    print(equipments)
+
     return equipments.values()
 
 

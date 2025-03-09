@@ -37,8 +37,6 @@ async def available_experiments(payload: AvailableExperimentsPayload):
                 for [cls, clsT] in inspect.getmembers(
                     importlib.import_module(module), inspect.isclass
                 ):
-                    if cls == "ExampleExperiment":
-                        print("ExampleExperiment")
                     if (
                         issubclass(clsT, ExperimentABC)
                         and clsT is not ExperimentABC
