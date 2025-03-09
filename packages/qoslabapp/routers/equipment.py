@@ -38,6 +38,7 @@ async def available_equipments(payload: AvailableEquipmentsPayload):
                     importlib.import_module(module), inspect.isclass
                 ):
                     if cls == "ExampleEquipment":
+                        print(issubclass(clsT, EquipmentABC))
                         print("ExampleEquipment")
                     if (
                         issubclass(clsT, EquipmentABC)
