@@ -1,10 +1,10 @@
 from pydantic import BaseModel
-from qoslablib import params as p, exceptions as e
+from qoslablib import params as p, exceptions as e, runtime as r
 import time
 from examplelib.ExampleDriver import ExampleEquipment
 
 
-class Examplexperiment:
+class Examplexperiment(r.Expeirment):
     class ParamsType(BaseModel):
         strparam: p.StrParam
         floatparam: p.FloatParam
@@ -15,7 +15,7 @@ class Examplexperiment:
         selectfloatparam: p.SelectFloatParam
         instanceparam: p.InstanceParam
 
-    experiment_params: ParamsType = {
+    params: ParamsType = {
         "strparam": p.str_param(),
         "floatparam": p.float_param(suffix="W"),
         "intparam": p.int_param(),

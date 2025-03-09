@@ -103,7 +103,7 @@ requires-dist = [
     { name = "examplelib", directory = "../examplelib" },
     { name = "fastapi", extras = ["standard"], specifier = ">=0.115.11" },
     { name = "lib", specifier = ">=4.0.0" },
-    { name = "qoslablib", git = "https://github.com/qosUoG/QosLab?subdirectory=packages%2Fqoslablib" },
+    { name = "qoslablib", git = "https://github.com/qosUoG/QosLab?subdirectory=packages%2Fqoslablib&branch=main" },
 ]
 
 [[package]]
@@ -366,7 +366,7 @@ wheels = [
 [[package]]
 name = "qoslablib"
 version = "0.1.0"
-source = { git = "https://github.com/qosUoG/QosLab?subdirectory=packages%2Fqoslablib#78736e93edd781e464fb28667ceb8a5c4b9d17ef" }
+source = { git = "https://github.com/qosUoG/QosLab?subdirectory=packages%2Fqoslablib#6d350191951ae50eb67caacf35be6dc518c18ce2" }
 dependencies = [
     { name = "pydantic" },
     { name = "websockets" },

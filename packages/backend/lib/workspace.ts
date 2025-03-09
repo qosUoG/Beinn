@@ -38,7 +38,8 @@ export async function copyApp(path: string) {
     }
 
     // install all dependency
-    await $`uv add fastapi fastapi[standard] git+https://github.com/qosUoG/QosLab#subdirectory=packages/qoslablib`
+    await $`uv add fastapi fastapi[standard]`
+    await $`uv add git+https://github.com/qosUoG/QosLab#subdirectory=packages/qoslablib --branch main`
     await $`uvx copier copy git+https://github.com/qosUoG/QosLab.git ./app`
 }
 
@@ -105,7 +106,7 @@ export async function readDependencies(path: string) {
 }
 
 export async function readModules(path: string,) {
-    await syncUvScyn(path)
+    await syncUv(path)
     $.cwd(path)
 
     // Get list of modules in the venv
@@ -115,7 +116,7 @@ export async function readModules(path: string,) {
 
 }
 
-export async function syncUvScyn(path: string) {
+export async function syncUv(path: string) {
     $.cwd(path)
     await $`uv sync`
 }

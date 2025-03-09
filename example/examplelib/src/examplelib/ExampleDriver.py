@@ -1,9 +1,8 @@
 from pydantic import BaseModel
-from qoslablib import params as p, decorators as d
+from qoslablib import runtime as r, params as p
 
 
-@d.Equipment
-class ExampleEquipment:
+class ExampleEquipment(r.Equipment):
     class ParamsType(BaseModel):
         strparam: p.StrParam
         floatparam: p.FloatParam

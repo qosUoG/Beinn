@@ -33,8 +33,8 @@ async def available_equipments(payload: AvailableEquipmentsPayload):
             try:
                 for [cls, clsT] in inspect.getmembers(importlib.import_module(module)):
                     if (
-                        hasattr(clsT, "qoslab_type")
-                        and getattr(clsT, "qoslab_type") == "equipment"
+                        hasattr(clsT, "_qoslab_type")
+                        and getattr(clsT, "_qoslab_type") == "equipment"
                     ):
                         equipments.append({"module": module, "cls": cls})
             except Exception as e:
