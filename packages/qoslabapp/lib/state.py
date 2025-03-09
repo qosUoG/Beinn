@@ -11,7 +11,7 @@ from qoslablib import (
     labtype as l,
     exceptions as e,
     chart as c,
-    sql_saver as s,
+    saver as s,
     runtime as r,
 )
 
