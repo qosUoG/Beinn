@@ -37,11 +37,10 @@ async def available_equipments(payload: AvailableEquipmentsPayload):
                 for [cls, clsT] in inspect.getmembers(
                     importlib.import_module(module), inspect.isclass
                 ):
-                    if issubclass(
-                        clsT,
-                        EquipmentABC
+                    if (
+                        issubclass(clsT, EquipmentABC)
                         and clsT is not ExperimentABC
-                        and clsT is not EquipmentABC,
+                        and clsT is not EquipmentABC
                     ):
                         equipments.append({"module": module, "cls": cls})
             except Exception as e:
