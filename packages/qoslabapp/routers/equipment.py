@@ -61,7 +61,7 @@ async def available_equipments(payload: AvailableEquipmentsPayload):
 
     warnings.filterwarnings("default")
 
-    print(equipments)
+    print(equipments.values())
 
     return equipments.values()
 
