@@ -6,7 +6,7 @@ from fastapi import APIRouter
 from pydantic import BaseModel
 import qoslablib
 
-from packages.qoslablib.src.qoslablib.runtime import EquipmentABC, ExperimentABC
+from qoslablib.runtime import EquipmentABC, ExperimentABC
 
 from ..lib.state import AppState
 from ..lib.utils import importFromStr
