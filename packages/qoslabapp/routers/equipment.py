@@ -37,6 +37,8 @@ async def available_equipments(payload: AvailableEquipmentsPayload):
                 for [cls, clsT] in inspect.getmembers(
                     importlib.import_module(module), inspect.isclass
                 ):
+                    if cls == "ExampleEquipment":
+                        print("ExampleEquipment")
                     if (
                         issubclass(clsT, EquipmentABC)
                         and clsT is not ExperimentABC
