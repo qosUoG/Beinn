@@ -2,13 +2,12 @@ from asyncio import Task
 import asyncio
 from sqlite3 import Connection, Cursor
 import sqlite3
-from threading import Condition, Event, Lock, Thread
+from threading import Event, Lock
 import time
-import types
-from typing import Any, TypedDict, override
+
+from typing import override
 from fastapi import WebSocket
 from qoslablib import (
-    labtype as l,
     exceptions as e,
     chart as c,
     saver as s,
