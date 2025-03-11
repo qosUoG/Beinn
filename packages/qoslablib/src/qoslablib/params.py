@@ -72,23 +72,23 @@ def boolParam(default: bool) -> BoolParam:
     return {"type": "bool", "value": default}
 
 
-class InstanceEquipmentParam[T: EquipmentABC](BaseModel):
+class InstanceEquipmentParam[T: "EquipmentABC"](BaseModel):
     type: Literal["instance.equipment"]
     instance_name: str
     instance: T | None
 
 
-def instance_equipmentParam[T: EquipmentABC]() -> InstanceEquipmentParam[T]:
+def instance_equipmentParam[T: "EquipmentABC"]() -> InstanceEquipmentParam[T]:
     return {"type": "instance.equipment", "instance_name": "", "instance": None}
 
 
-class InstanceExperimentParam[T: ExperimentABC](BaseModel):
+class InstanceExperimentParam[T: "ExperimentABC"](BaseModel):
     type: Literal["instance.experiment"]
     instance_name: str
     instance: T | None
 
 
-def instance_experimentParam[T: ExperimentABC]() -> InstanceExperimentParam[T]:
+def instance_experimentParam[T: "ExperimentABC"]() -> InstanceExperimentParam[T]:
     return {"type": "instance.experiment", "instance_name": "", "instance": None}
 
 
