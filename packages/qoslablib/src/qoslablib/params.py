@@ -1,7 +1,7 @@
-from typing import Any, Literal
+from typing import Literal
 from pydantic import BaseModel
 
-from packages.qoslablib.src.qoslablib.runtime import EquipmentABC, ExperimentABC
+from .runtime import EquipmentABC, ExperimentABC
 
 
 class SelectStrParam(BaseModel):
