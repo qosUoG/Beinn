@@ -63,6 +63,8 @@ def getAvailableEEs(eeABC: EEABC, names: list[str]):
 
     warnings.filterwarnings("default")
 
+    print(ees)
+
     return list(ees.values())
 
 
