@@ -8,7 +8,7 @@ from pydantic import BaseModel
 from qoslablib.params import AllParamTypes
 from qoslablib.runtime import EquipmentABC, ExperimentABC
 
-from packages.qoslabapp.lib.state import AppState
+from ..lib.state import AppState
 
 type EELiteral = Literal["equipment"] | Literal["experiment"]
 type EEABC = type[ExperimentABC] | type[EquipmentABC]
