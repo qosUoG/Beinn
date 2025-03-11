@@ -1,78 +1,29 @@
 import { getRandomId } from "$lib/utils";
 import { gstore } from "$states/global.svelte";
-import type { Dependency, Directory } from "qoslab-shared";
+import type { Dependency } from "qoslab-shared";
+import { backendUrl, postRequestJsonInOut } from "./utils";
 
-export async function setWorkspaceDirectory(path: string): Promise<Directory> {
-
-    return await (
-        await fetch(
-            "http://localhost:4000/workspace/set_directory",
-            {
-                method: "POST",
-                body: JSON.stringify({ path }),
-                headers: {
-                    "Content-type": "application/json"
-                },
-            }
-        )
-    ).json();
+export async function setWorkspaceDirectory(path: string): Promise<void> {
+    await postRequestJsonInOut(backendUrl("workspace/set"), { path: gstore.workspace.path })
 }
 
 export async function addDependency(source: string): Promise<void> {
-    await fetch(
-        "http://localhost:4000/workspace/add_dependency",
-        {
-            method: "POST",
-            body: JSON.stringify({ source, path: gstore.workspace.path }),
-            headers: {
-                "Content-type": "application/json"
-            },
-        }
-    )
+    await postRequestJsonInOut(backendUrl("workspace/dependency/add"), { source, path: gstore.workspace.path })
+
 }
 
 export async function removeDependency(name: string): Promise<void> {
-    await fetch(
-        "http://localhost:4000/workspace/remove_dependency",
-        {
-            method: "POST",
-            body: JSON.stringify({ name, path: gstore.workspace.path }),
-            headers: {
-                "Content-type": "application/json"
-            },
-        }
-    )
+    return await postRequestJsonInOut(backendUrl("workspace/dependency/remove"), { name, path: gstore.workspace.path })
 }
 
-export async function readDependency(): Promise<Record<string, Dependency>> {
-    const res = await (await fetch("http://localhost:4000/workspace/read_dependency", { method: "POST", body: JSON.stringify({ path: gstore.workspace.path }) })).json() as { dependencies: Dependency[] }
-
-    let dependencies: Record<string, Dependency> = {}
-
-    for (const dependency of res.dependencies) {
-
-        const id = getRandomId(Object.keys(dependencies))
-        dependencies[id] = {
-            ...dependency,
-            id,
-        }
-    }
-
-    return dependencies
-
-
+export async function readAllUvDependencies(): Promise<Dependency[]> {
+    return (await postRequestJsonInOut(backendUrl("workspace/dependency/read_all"), { path: gstore.workspace.path }) as { dependencies: Dependency[] }).dependencies
 }
 
+export async function readUvDependency(name: string): Promise<Dependency> {
+    return (await postRequestJsonInOut(backendUrl("workspace/dependency/read"), { name, path: gstore.workspace.path }) as { dependency: Dependency }).dependency
+}
 
-export async function checkDependency(source: string): Promise<boolean> {
-    return (await (await fetch(
-        "http://localhost:4000/workspace/check_dependency",
-        {
-            method: "POST",
-            body: JSON.stringify({ source, path: gstore.workspace.path }),
-            headers: {
-                "Content-type": "application/json"
-            },
-        }
-    )).json()).success
+export async function checkDependencyInit(source: string): Promise<{ success: boolean }> {
+    return await postRequestJsonInOut(backendUrl("workspace/dependency/check_init"), { source, path: gstore.workspace.path })
 }

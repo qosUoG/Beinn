@@ -1,16 +1,15 @@
 import importlib
-import inspect
-import pkgutil
-import warnings
 from fastapi import APIRouter
 from pydantic import BaseModel
-import qoslablib
 
-from qoslablib.runtime import EquipmentABC, ExperimentABC
+
+from qoslablib.params import AllParamTypes
+from qoslablib.runtime import ExperimentABC, Params
+
+from .eeshared import getAvailableEEs, populateParam
 
 
 from ..lib.state import AppState
-from qoslablib import labtype as l
 
 
 router = APIRouter()
@@ -22,102 +21,42 @@ class AvailableExperimentsPayload(BaseModel):
 
 @router.post("/experiment/available_experiments")
 async def available_experiments(payload: AvailableExperimentsPayload):
-    class ExperimentModule(BaseModel):
-        modules: list[str]
-        cls: str
-
-    experiments: dict[type, ExperimentModule] = {}
-
-    warnings.filterwarnings("ignore")
-
-    def get_experiments(module: str):
-        # First check the module is importable
-        if importlib.util.find_spec(module) and not module.endswith("__main__"):
-            try:
-                for [cls, clsT] in inspect.getmembers(
-                    importlib.import_module(module), inspect.isclass
-                ):
-                    if (
-                        issubclass(clsT, ExperimentABC)
-                        and clsT is not ExperimentABC
-                        and clsT is not EquipmentABC
-                    ):
-                        if clsT not in experiments:
-                            experiments[clsT] = {"modules": [module], "cls": cls}
-                        else:
-                            experiments[clsT]["modules"].append(module)
-            except Exception as e:
-                print(f"Path {module} produced an exception")
-                print(e)
-
-    # Check all possible paths
-    for package in pkgutil.walk_packages():
-        for n in payload.names:
-            if package.name.startswith(n):
-                get_experiments(package.name)
-                break
-
-    # TODO Check in local directory for project specific experiments
-
-    warnings.filterwarnings("default")
-    return list(experiments.values())
+    return getAvailableEEs(ExperimentABC, payload.names)
 
 
-class GetParamPayload(BaseModel):
+class GetParamsPayload(BaseModel):
     module: str
     cls: str
 
 
 @router.post("/experiment/get_params")
-async def get_params(payload: GetParamPayload):
+async def get_params(payload: GetParamsPayload):
     return getattr(
         getattr(importlib.import_module(payload.module), payload.cls),
         "params",
     )
 
 
-class StartExperimentsPayload(BaseModel):
-    equipments: list[l.EquipmentModule]
-    experiments: list[l.ExperimentModule]
+class SetParamPayload(BaseModel):
+    params: Params
+    # Experiment name
+    experiment_name: str
+    # param name
 
 
-@router.post("/workspace/start_experiments")
-async def start_experiments(body: StartExperimentsPayload):
-    # Instantiate equipments
-    for equipment in body.equipments:
-        # Skip already created equipments
-        if equipment.name in AppState.equipments:
-            continue
-
-        # Read the definition code from the source file
-        _class = getattr(importlib.import_module(equipment.module), equipment.cls)
-        # Initilize the equipment and assign to equipments dict
-        AppState.equipments[equipment.name] = _class(equipment.params)
-
-    # Replace instances with actual equipments
-    for equipment in AppState.equipments.values():
-        for p in equipment.params.values():
-            if p.type == "instance":
-                p.instance = AppState.equipments[p.instance_name]
-
-    # Instantiate experiments
-    for experiment in body.experiments:
-        # get the class of the experiment
-        _class = getattr(importlib.import_module(experiment.module), experiment.cls)
-
-    # Replace instances with actual equipments
-    # TODO accept experiment instance for playlist
-    for experiment in AppState.experiments.values():
-        for p in experiment.params.values():
-            if p.type == "instance":
-                p.instance = AppState.equipments[p.instance_name]
-
-    # Initilize the equipment and assign to equipments dict
-    for experiment in body.experiments:
-        AppState.experiments[experiment.name] = _class(
-            params=experiment.params,
+@router.post("/experiment/set_params")
+async def set_params(payload: SetParamPayload):
+    for [param_name, param] in payload.params.items():
+        AppState.experiments[payload.experiment_name].params[param_name] = (
+            populateParam(param)
         )
 
+
+class StartExperimentPayload(BaseModel):
+    experiment_name: str
+
+
+@router.post("/experiment/start_experiment")
+async def start_experiment(payload: StartExperimentPayload):
     # Run the experiments
-    for experiment in body.experiments:
-        AppState.run_experiment(experiment.name)
+    AppState.run_experiment(payload.experiment_name)

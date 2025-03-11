@@ -172,6 +172,7 @@ def _experiment_runner(
     while True:
         if stop_event.is_set():
             print("experiment stopped")
+            experiment.stop()
             return
 
         if not pause_event.is_set():

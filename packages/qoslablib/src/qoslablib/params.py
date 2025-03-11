@@ -1,6 +1,8 @@
 from typing import Any, Literal
 from pydantic import BaseModel
 
+from packages.qoslablib.src.qoslablib.runtime import EquipmentABC, ExperimentABC
+
 
 class SelectStrParam(BaseModel):
     type: Literal["select.str"]
@@ -8,7 +10,7 @@ class SelectStrParam(BaseModel):
     value: str
 
 
-def select_str_param(options: list[str], default: int = 0) -> SelectStrParam:
+def select_strParam(options: list[str], default: int = 0) -> SelectStrParam:
     return {"type": "select.str", "options": options, "value": options[default]}
 
 
@@ -18,7 +20,7 @@ class SelectIntParam(BaseModel):
     value: int
 
 
-def select_int_param(options: list[int], default: int = 0) -> SelectIntParam:
+def select_intParam(options: list[int], default: int = 0) -> SelectIntParam:
     return {"type": "select.int", "options": options, "value": options[default]}
 
 
@@ -28,7 +30,7 @@ class SelectFloatParam(BaseModel):
     value: int
 
 
-def select_float_param(options: list[float], default: int = 0) -> SelectFloatParam:
+def select_floatParam(options: list[float], default: int = 0) -> SelectFloatParam:
     return {"type": "select.float", "options": options, "value": options[default]}
 
 
@@ -38,7 +40,7 @@ class IntParam(BaseModel):
     value: int
 
 
-def int_param(default: int = 0, suffix: str = "") -> IntParam:
+def intParam(default: int = 0, suffix: str = "") -> IntParam:
     return {"type": "int", "suffix": suffix, "value": default}
 
 
@@ -48,7 +50,7 @@ class FloatParam(BaseModel):
     value: float
 
 
-def float_param(default: float = 0.0, suffix: str = "") -> FloatParam:
+def floatParam(default: float = 0.0, suffix: str = "") -> FloatParam:
     return {"type": "float", "suffix": suffix, "value": default}
 
 
@@ -57,7 +59,7 @@ class StrParam(BaseModel):
     value: str
 
 
-def str_param(default: str = "") -> StrParam:
+def strParam(default: str = "") -> StrParam:
     return {"type": "str", "value": default}
 
 
@@ -66,18 +68,28 @@ class BoolParam(BaseModel):
     value: bool
 
 
-def bool_param(default: bool) -> BoolParam:
+def boolParam(default: bool) -> BoolParam:
     return {"type": "bool", "value": default}
 
 
-class InstanceParam(BaseModel):
-    type: Literal["instance"]
+class InstanceEquipmentParam[T: EquipmentABC](BaseModel):
+    type: Literal["instance.equipment"]
     instance_name: str
-    instance: Any
+    instance: T | None
 
 
-def instance_param() -> InstanceParam:
-    return {"type": "instance", "instance_name": "", "instance": ""}
+def instance_equipmentParam[T: EquipmentABC]() -> InstanceEquipmentParam[T]:
+    return {"type": "instance.equipment", "instance_name": "", "instance": None}
+
+
+class InstanceExperimentParam[T: ExperimentABC](BaseModel):
+    type: Literal["instance.experiment"]
+    instance_name: str
+    instance: T | None
+
+
+def instance_experimentParam[T: ExperimentABC]() -> InstanceExperimentParam[T]:
+    return {"type": "instance.experiment", "instance_name": "", "instance": None}
 
 
 type AllParamTypes = (
@@ -89,7 +101,8 @@ type AllParamTypes = (
     | StrParam
     | BoolParam
     | CompositeParam
-    | InstanceParam
+    | InstanceEquipmentParam
+    | InstanceExperimentParam
 )
 
 

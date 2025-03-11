@@ -1,14 +1,19 @@
 from abc import ABC, abstractmethod
 import time
-from typing import Callable, override
+from typing import Callable, TypedDict, Unpack, override
 
 from pydantic import BaseModel
 
 
 class SqlSaverABC(ABC):
-    class AbstractConfig(BaseModel):
+    class AbstractConfig(TypedDict):
         # ms
         timestamp: int
+
+    @abstractmethod
+    def kwargs[KW](self, **kwargs: KW) -> KW:
+        # This method creates the kwargs object for instantiating the chart
+        raise NotImplementedError
 
     @abstractmethod
     def save(self, frame) -> None:
@@ -36,7 +41,7 @@ class SqlSaverHolderABC(ABC):
 
     @classmethod
     @abstractmethod
-    def createSqlSaver(cls, sql_saverT: type[SqlSaverABC], *, kwargs={}) -> SqlSaverABC:
+    def createSqlSaver[T: SqlSaverABC](cls, sql_saverT: T, kwargs: T.KW) -> T:
         # This method returns a plot object
         raise NotImplementedError
 
@@ -48,18 +53,19 @@ class XYSqlSaver(SqlSaverABC):
         y_names: list[str]
         timestamp: int
 
+    class KW(TypedDict):
+        title: str
+        x_name: str
+        y_names: list[str]
+
     def __init__(
         self,
-        *,
-        title: str,
-        x_name: str,
-        y_names: list[str],
         save_fn: Callable[[dict[str, float]], None],
+        **kwargs: Unpack[KW],
     ):
-        self.title = (title,)
-        self.x_name = x_name
-        self.y_names = y_names
-        self._save_fn = save_fn
+        self.title = kwargs.title
+        self.x_name = kwargs.x_name
+        self.y_names = kwargs.y_names
 
         self.config: XYSqlSaver.Config = {
             "title": self.title,
@@ -69,6 +75,10 @@ class XYSqlSaver(SqlSaverABC):
         }
 
         self._save_fn = save_fn
+
+    @override
+    def kwargs(self, **kwargs: Unpack[KW]):
+        return kwargs
 
     @override
     def getConfig(self) -> Config:

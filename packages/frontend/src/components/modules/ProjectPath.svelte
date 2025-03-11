@@ -1,14 +1,15 @@
 <script lang="ts">
 	import Input from "$components/reuseables/Input.svelte";
-	import { retryTillSuccess } from "$components/utils.svelte";
+	import { retryOnError } from "$components/utils.svelte";
 	import { getRandomId } from "$lib/utils";
+
 	import {
-		readDependency,
+		readAllUvDependencies,
 		setWorkspaceDirectory,
 	} from "$services/backend.svelte";
 	import { getAvailableEquipments } from "$services/qoslabapp.svelte";
 	import { gstore } from "$states/global.svelte";
-	import type { Equipment } from "qoslab-shared";
+	import { type Dependency } from "qoslab-shared";
 </script>
 
 <label class=" row-1 flex-grow">
@@ -24,16 +25,21 @@
 		class="wrapped slate"
 		onclick={async () => {
 			// set the project directory
-			gstore.workspace.directory = await setWorkspaceDirectory(
-				gstore.workspace.path
-			);
+			await setWorkspaceDirectory(gstore.workspace.path);
 
 			// fetch the dependency from pyproject.toml
-			gstore.workspace.dependencies = await readDependency();
+			const new_dependencies: Record<string, Dependency> = {};
 
-			let res: { module: string; cls: string }[] = [];
+			(await readAllUvDependencies()).forEach((d) => {
+				const id = getRandomId(Object.keys(new_dependencies));
 
-			await retryTillSuccess(5000, async () => {
+				new_dependencies[id] = { ...d, id };
+			});
+
+			gstore.workspace.dependencies = new_dependencies;
+			let res: { modules: string[]; cls: string }[] = [];
+
+			await retryOnError(5000, async () => {
 				res = await getAvailableEquipments();
 			});
 

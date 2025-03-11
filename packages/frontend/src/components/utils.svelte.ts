@@ -10,18 +10,24 @@ export function autofocus(e: FocusEvent) {
     (e.target as HTMLInputElement).select()
 }
 
-export async function retryTillSuccess(timeout_ms: number, fn: () => Promise<void> | void) {
+export async function timeoutLoop(timeout_ms: number, fn: () => Promise<boolean> | void) {
     const timenow = Date.now();
-    while (Date.now() - timenow <= 1000 * 5) {
-        try {
-            // Fetch experiment and equipment
-            await fn();
+    while (Date.now() - timenow <= timeout_ms && await fn()) { }
+}
 
-        } catch (error) {
-            continue;
+export async function retryOnError(timeout_ms: number, fn: () => Promise<void> | void) {
+    timeoutLoop(
+        timeout_ms,
+        async () => {
+            try {
+                // Fetch experiment and equipment
+                await fn();
+            } catch (error) {
+                return true
+            }
+            return false
         }
-        return
-    }
+    )
 }
 
 

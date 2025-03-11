@@ -4,7 +4,7 @@ import { parse, stringify } from "smol-toml"
 import type { Dependency } from "qoslab-shared";
 
 
-export async function createProject(path: string) {
+export async function initiateWorkspace(path: string) {
     $.cwd(path);
     // TODO Check if uv exists
 
@@ -45,22 +45,8 @@ export async function copyApp(path: string) {
     await $`uvx copier copy git+https://github.com/qosUoG/QosLab.git ./app`
 }
 
-export async function addDependency(path: string, identifier: string) {
-    $.cwd(path)
-    // Could be from pip, git path or local path
-    await $`uv add ${identifier}`
-}
-
-export async function removeDependency(path: string, name: string) {
-    // Remove with the identifier
-    $.cwd(path)
-    await $`uv remove ${name}`
-}
-
-export async function readDependencies(path: string) {
+export async function readAllUvDependencies(path: string) {
     // Get the list of dependencies from pyproject.toml
-
-
     const pyproject = file(path + "/pyproject.toml")
     if (! await pyproject.exists()) throw Error()
 
@@ -107,37 +93,13 @@ export async function readDependencies(path: string) {
     return { dependencies: res }
 }
 
-export async function readModules(path: string,) {
-    await syncUv(path)
-    $.cwd(path)
-
-    // Get list of modules in the venv
-    const modules = JSON.parse(await $`uv pip list --format json`.text()) as { name: string, version: string }[]
-
-    return { modules }
-
-}
-
-export async function syncUv(path: string) {
-    $.cwd(path)
-    await $`uv sync`
-}
-
 export function runProject(path: string) {
+    if (app_state.pyproc !== undefined && !app_state.pyproc.killed)
+        return
 
-    if (app_state.pyproc === undefined || app_state.pyproc.killed) {
-
-        app_state.pyproc = spawn(
-            ["uv", "run", "uvicorn", "app.main:app", "--host", "localhost", "--port", "8000"],
-            { stdout: "inherit", cwd: path }
-        )
-
-    }
-
-
+    app_state.pyproc = spawn(
+        ["uv", "run", "uvicorn", "app.main:app", "--host", "localhost", "--port", "8000"],
+        { stdout: "inherit", cwd: path }
+    )
 }
 
-export async function checkDependency(path: string, source: string) {
-
-    return await file(path + "/" + source + "/__init__.py").exists()
-}

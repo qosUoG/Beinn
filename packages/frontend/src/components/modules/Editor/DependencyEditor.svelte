@@ -6,12 +6,12 @@
 	import { dependency_editor } from "./DependencyEditorController.svelte";
 
 	import Separator from "./Separator.svelte";
-	import { autofocus } from "$components/utils.svelte";
+	import { autofocus, timeoutLoop } from "$components/utils.svelte";
 	import Download from "$icons/Download.svelte";
 	import {
 		addDependency,
-		checkDependency,
-		readDependency,
+		checkDependencyInit,
+		readAllUvDependencies,
 		removeDependency,
 	} from "$services/backend.svelte";
 	import { getRandomId } from "$lib/utils";
@@ -23,6 +23,77 @@
 	});
 
 	let temp_source = $state("");
+
+	async function handleRemoveDependency() {
+		if (dependency?.confirmed && dependency.source?.type !== "local")
+			// TODO remove dependency in python project
+			await removeDependency(dependency.name!);
+
+		delete gstore.workspace.dependencies[dependency_editor.id!];
+
+		dependency_editor.id = undefined;
+	}
+
+	async function handleAddDependency() {
+		// Do nothing if the temp_source is invalid
+		if (temp_source === undefined || temp_source === "") return;
+
+		// Special headling for the python modules within project directory
+		if (temp_source.startsWith("local:")) {
+			const res = temp_source.split(":");
+			if (res.length > 2) return;
+
+			const name = res[1];
+
+			// Check init is available
+			const { success } = await checkDependencyInit(name);
+			if (!success) return;
+
+			// Write local to dependency
+			gstore.workspace.dependencies[dependency_editor.id!] = {
+				...gstore.workspace.dependencies[dependency_editor.id!],
+				source: { type: "local" },
+				confirmed: true,
+				name,
+				fullname: `local:${name}`,
+			};
+
+			return;
+		}
+
+		// Add as git / path / pip package
+		// TODO: Error Handling
+		await addDependency(temp_source);
+
+		temp_source = "";
+
+		const current_dependency_names = Object.values(
+			$state.snapshot(gstore.workspace.dependencies)
+		).map((d) => d.name);
+
+		// Keep Retrying in case there is a time gap between running add dependency
+		// and actual pyproject.toml update
+		timeoutLoop(5 * 1000, async () => {
+			let _continue = true;
+
+			// Read All dependencies and figure out which is the new one
+			let allDependencies = await readAllUvDependencies();
+
+			Object.values(allDependencies).forEach((d) => {
+				if (!current_dependency_names.includes(d.name)) {
+					const id = getRandomId(
+						Object.keys(gstore.workspace.dependencies)
+					);
+					gstore.workspace.dependencies[id] = { ...d, id };
+					dependency_editor.id = id;
+
+					_continue = false;
+				}
+			});
+
+			return _continue;
+		});
+	}
 </script>
 
 {#key dependency_editor.id}
@@ -35,20 +106,7 @@
 					</div>
 					<button
 						class="icon-btn-sm red"
-						onclick={async () => {
-							if (
-								dependency?.confirmed &&
-								dependency.source?.type !== "local"
-							)
-								// TODO remove dependency in python project
-								await removeDependency(dependency.name!);
-
-							delete gstore.workspace.dependencies[
-								dependency_editor.id!
-							];
-
-							dependency_editor.id = undefined;
-						}}><Trash /></button>
+						onclick={handleRemoveDependency}><Trash /></button>
 				</div>
 
 				{#if !dependency.confirmed}
@@ -65,71 +123,10 @@
 
 						<button
 							class="icon-btn-sm green"
-							onclick={async () => {
-								if (
-									temp_source === undefined ||
-									temp_source === ""
-								)
-									return;
-
-								if (temp_source.startsWith("local:")) {
-									const res = temp_source.split(":");
-									if (res.length > 2) return;
-
-									const path = res[1];
-									const valid = await checkDependency(path);
-									if (!valid) return;
-
-									gstore.workspace.dependencies[
-										dependency_editor.id!
-									].source = { type: "local" };
-									gstore.workspace.dependencies[
-										dependency_editor.id!
-									].confirmed = true;
-									gstore.workspace.dependencies[
-										dependency_editor.id!
-									].name = path;
-									gstore.workspace.dependencies[
-										dependency_editor.id!
-									].fullname = `local:${path}`;
-
-									return;
-								}
-
-								await addDependency(temp_source);
-
-								const current_dependencies = $state.snapshot(
-									gstore.workspace.dependencies
-								);
-								temp_source = "";
-
-								let res = await readDependency();
-
-								// Add all local: dependencies
-								Object.values(current_dependencies).forEach(
-									(d) => {
-										if (d.source?.type === "local") {
-											const id = getRandomId(
-												Object.keys(res)
-											);
-
-											res[id] = { ...d, id };
-										}
-									}
-								);
-
-								gstore.workspace.dependencies = res;
-
-								dependency_editor.id = Object.values(res).find(
-									(d) =>
-										Object.values(
-											current_dependencies
-										).find((dd) => d.name === dd.name) ===
-										undefined
-								)!.id;
-							}}><Download /></button>
+							onclick={handleAddDependency}><Download /></button>
 					</div>
 				{:else if dependency.source!.type === "pip"}
+					<!-- All Following has as confirmed dependency -->
 					<div class="row-2 bg-white wrapped w-full">
 						<div class="editor-label">Package</div>
 						<Separator />

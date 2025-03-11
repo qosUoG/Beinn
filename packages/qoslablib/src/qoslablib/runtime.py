@@ -10,29 +10,35 @@ from .chart import ChartHolderABC
 from .params import AllParamTypes
 
 
-class AggregateHolderABC(SqlSaverHolderABC, ChartHolderABC):
+class HoldersABC(SqlSaverHolderABC, ChartHolderABC):
     pass
+
+
+type Params = dict[str, AllParamTypes]
 
 
 @dataclass
 class ExperimentABC(ABC):
-    params: ClassVar[dict[str, AllParamTypes]]
+    # Instance shall initiate params in __init__() function
+    params: Params
 
-    # Instance shall have this implemented
-    params: dict[str, AllParamTypes]
+    def __init__(self):
+        pass
 
     # The __init__ of the exact experiment should look sth like this
 
-    # def __init__(self, params: dict[str, AllParamTypes], holder: AggregateHolderABC):
+    # def __init__(self, holder: HoldersABC):
+    #     # Call super for forward compatability
+    #     super()__init__(self)
 
-    #     # Save the params
-    #     # Do all the checking here to make sure the params are within range
-    #     # DO NOT interact with equipments here, any interaction with the equipments shall be done in the initialization stage
-    #     self.params = params
-
-    #     # instantiate variables that needes to be used during the experiment
-    #     self.mv =  Array(params.mv_range_min,params.mv_range_max) # Or sth with np
-    #     self.lockin = params.lockin
+    #     # List of params with default values
+    #     # This list will NOT be the final list of parameter used in the experiment
+    #     # Instead, this list is passed to the webapp to start with. The complete list
+    #     # with updated values will be passed during "initialization" phase (initialization function)
+    #     self.params = {
+    #         "power": qoslablib.params.int_param(-3)
+    #         "other param": ...
+    #     }
 
     #     # Create chart objects
     #     self.chart = holder.createChart(XYPlot, kwargs={"title": "title of the plot"})
@@ -43,6 +49,14 @@ class ExperimentABC(ABC):
 
     @abstractmethod
     def initialize(self):
+        # # params list would already be the most update
+        # # You may use the params directly as follows
+        # self.params
+
+        # # instantiate variables that needes to be used during the experiment
+        # self.mv =  Array(params.mv_range_min,params.mv_range_max) # Or sth with np
+        # self.lockin = self.params.lockin
+
         # This function should interact with equipment and do stuff that shall only run once each experiment
         # Only use this function to perform initialization of equipment
         raise NotImplementedError
@@ -55,18 +69,54 @@ class ExperimentABC(ABC):
         # self.sigen.frequency = mv
         raise NotImplementedError
 
+    @abstractmethod
+    def stop(self):
+        # This function should do any clean up if needed
+        # However, this function is not a must to be implemented
+        pass
+
+
+# This is a decorator to ensure thread safe access of equipment
+# All equipment functions shall use this decorator
+# Example refer to the EquipmentABC below
+def EquipmentTLock(func):
+    @functools.wraps(func)
+    def wrapper(self: EquipmentABC, *args, **kwargs):
+        with self._qoslab_equipment_thread_lock:
+            return func(self, *args, **kwargs)
+
+    return wrapper
+
 
 @dataclass
 class EquipmentABC(ABC):
+    # Instance shall initiate params in __init__() function
+    params: Params
+
+    # # All equipment subclass shall call __init__ function FIRST in their __init__ functions
+
+    # # e.g.
+
+    # def __init__(self):
+    #     super.__init__(self)
+    #     self.params = {
+    #         # Same as experiment, refer to experiment for example,
+    #         # refer to params page for documentation of specifying params
+    #     }
+
+    # Threading.Lock for thread safety access of Equipment
+    # usage refer to the EquipmentTLock Decorator, and the example below
     _qoslab_equipment_thread_lock: Lock
 
     def __init__(self):
         self._qoslab_equipment_thread_lock = Lock()
 
-    def EquipmentTLock(func):
-        @functools.wraps(func)
-        def wrapper(self: EquipmentABC, *args, **kwargs):
-            with self._qoslab_equipment_thread_lock:
-                return func(self, *args, **kwargs)
+    # # Example for using the equipment lock decorator
+    # # e.g.
+    # @EquipmentTLock
+    # @property
+    # def someEquipmentProperty(self): ...
 
-        return wrapper
+    # @EquipmentTLock
+    # @someEquipmentProperty.setter
+    # def someEquipmentPropertySetter(self): ...

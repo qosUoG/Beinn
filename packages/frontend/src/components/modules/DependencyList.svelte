@@ -8,8 +8,9 @@
 	import { editor } from "./Editor/EditorController.svelte";
 	import ExclamationMark from "$icons/ExclamationMark.svelte";
 	import Reload from "$icons/Reload.svelte";
-	import { readDependency } from "$services/backend.svelte";
+	import { readAllUvDependencies } from "$services/backend.svelte";
 	import { eeeditor } from "./Editor/EEEditorController.svelte";
+	import { type Dependency } from "qoslab-shared";
 </script>
 
 <div class="container col-2 bg-slate-200">
@@ -20,7 +21,13 @@
 				<button
 					class="icon-btn-sm slate"
 					onclick={async (e) => {
-						gstore.workspace.dependencies = await readDependency();
+						let res: Record<string, Dependency> = {};
+						(await readAllUvDependencies()).forEach((d) => {
+							const id = getRandomId(Object.keys(res));
+							res[id] = { ...d, id };
+						});
+
+						gstore.workspace.dependencies = res;
 					}}><Reload /></button>
 				<button
 					class="icon-btn-sm slate"

@@ -1,7 +1,5 @@
 <script lang="ts">
 	import Select from "$components/reuseables/Select.svelte";
-	import { clickoutside, cn } from "$components/utils.svelte";
-	import { getRandomId } from "$lib/utils";
 	import { gstore } from "$states/global.svelte";
 	import { eeeditor } from "./EEEditorController.svelte";
 	import Separator from "./Separator.svelte";

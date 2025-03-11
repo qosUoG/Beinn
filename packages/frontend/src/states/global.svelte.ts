@@ -7,8 +7,8 @@ export let gstore:
             path: string,
             directory: Directory,
             dependencies: Record<string, Dependency>
-            available_equipments: { module: string, cls: string }[]
-            available_experiments: { module: string, cls: string }[]
+            available_equipments: { modules: string[], cls: string }[]
+            available_experiments: { modules: string[], cls: string }[]
         }
         equipments: Record<string, Equipment>
         experiments: Record<string, Experiment>

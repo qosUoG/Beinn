@@ -3,6 +3,8 @@
 	import {
 		getEquipmentParams,
 		getExperimentParams,
+		setEquipmentParams,
+		setExperimentParams,
 	} from "$services/qoslabapp.svelte";
 	import { gstore } from "$states/global.svelte";
 	import type { Equipment, Experiment } from "qoslab-shared";
@@ -54,7 +56,7 @@
 					bind:cls={target!.cls}
 					options={gstore.workspace[
 						`available_${eeeditor.mode!}`
-					].map(({ module, cls }) => `${module} ${cls}`)}
+					].map(({ modules, cls }) => `${modules[0]} ${cls}`)}
 					onconfirm={async (path) => {
 						if (eeeditor.mode === "equipments")
 							target!.params = await getEquipmentParams(path);
@@ -69,7 +71,7 @@
 				{#if target!.module && target!.cls}
 					<Name bind:name={target!.name} />
 				{/if}
-				{#if target!.temp_params}
+				{#if target!.temp_params && target!.name}
 					<div class="row justify-between mt-4 items-end">
 						<div class="title">Parameters</div>
 						<div class="row-1">
@@ -83,10 +85,23 @@
 									}}><Cancel /></button>
 								<button
 									class="icon-btn-sm green"
-									onclick={() => {
+									onclick={async () => {
 										target!.params = JSON.parse(
 											JSON.stringify(target!.temp_params)
 										);
+										await tick();
+										if (eeeditor.mode === "equipments")
+											await setEquipmentParams(
+												target!.name!,
+												target!.params!
+											);
+										else if (
+											eeeditor.mode === "experiments"
+										)
+											await setExperimentParams(
+												target!.name!,
+												target!.params!
+											);
 									}}><Disk /></button>
 							{:else}
 								<div class="h-6"></div>
