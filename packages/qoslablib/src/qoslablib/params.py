@@ -80,7 +80,7 @@ class InstanceEquipmentParam[T: "runtime.EquipmentABC"](BaseModel):
     instance: T | None = Field(exclude=True)
 
 
-def instance_equipmentParam[T: "runtime.EquipmentABC"]() -> InstanceEquipmentParam[T]:
+def instance_equipmentParam() -> InstanceEquipmentParam:
     return {"type": "instance.equipment", "instance_name": "", "instance": None}
 
 
@@ -90,9 +90,7 @@ class InstanceExperimentParam[T: "runtime.ExperimentABC"](BaseModel):
     instance: T | None = Field(exclude=True)
 
 
-def instance_experimentParam[T: "runtime.ExperimentABC"]() -> InstanceExperimentParam[
-    T
-]:
+def instance_experimentParam() -> InstanceExperimentParam:
     return {"type": "instance.experiment", "instance_name": "", "instance": None}
 
 
