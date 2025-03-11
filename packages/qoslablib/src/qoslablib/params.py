@@ -3,9 +3,6 @@ from typing import Literal
 from pydantic import BaseModel, Field
 
 
-from . import runtime
-
-
 class SelectStrParam(BaseModel):
     type: Literal["select.str"]
     options: list[str]
@@ -74,7 +71,7 @@ def boolParam(default: bool) -> BoolParam:
     return {"type": "bool", "value": default}
 
 
-class InstanceEquipmentParam[T: "runtime.EquipmentABC"](BaseModel):
+class InstanceEquipmentParam[T](BaseModel):
     type: Literal["instance.equipment"]
     instance_name: str
     instance: T | None = Field(exclude=True)
@@ -84,7 +81,7 @@ def instance_equipmentParam() -> InstanceEquipmentParam:
     return {"type": "instance.equipment", "instance_name": "", "instance": None}
 
 
-class InstanceExperimentParam[T: "runtime.ExperimentABC"](BaseModel):
+class InstanceExperimentParam[T](BaseModel):
     type: Literal["instance.experiment"]
     instance_name: str
     instance: T | None = Field(exclude=True)
