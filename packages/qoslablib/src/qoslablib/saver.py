@@ -47,7 +47,7 @@ class SqlSaverHolderABC(ABC):
 
 
 class XYSqlSaver(SqlSaverABC):
-    class Config(BaseModel):
+    class Config(TypedDict):
         title: str
         x_name: str
         y_names: list[str]

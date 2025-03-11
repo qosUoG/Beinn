@@ -4,10 +4,7 @@ This module initiates a websocket to send data at each frame
 
 from abc import ABC, abstractmethod
 from collections.abc import Callable
-from typing import TypedDict, Unpack, override
-
-
-from pydantic import BaseModel
+from typing import Any, TypedDict, Unpack, override
 
 
 class ChartABC(ABC):
@@ -22,7 +19,7 @@ class ChartABC(ABC):
         raise NotImplementedError
 
     @abstractmethod
-    def getConfig(self) -> BaseModel:
+    def getConfig(self) -> dict[str, Any]:
         # This function returns the config of the plot
         raise NotImplementedError
 
@@ -36,7 +33,7 @@ class ChartHolderABC(ABC):
 
 
 class XYPlot(ChartABC):
-    class Config(BaseModel):
+    class Config(TypedDict):
         title: str
         x_name: str
         y_names: list[str]
