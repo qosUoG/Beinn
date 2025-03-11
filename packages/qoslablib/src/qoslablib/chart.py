@@ -12,7 +12,7 @@ from pydantic import BaseModel
 
 class ChartABC(ABC):
     @abstractmethod
-    def kwargs[KW](self, **kwargs: KW) -> KW:
+    def kwargs[KW](self, **kwargs: Unpack[KW]) -> KW:
         # This method creates the kwargs object for instantiating the chart
         raise NotImplementedError
 
@@ -30,7 +30,7 @@ class ChartABC(ABC):
 class ChartHolderABC(ABC):
     @classmethod
     @abstractmethod
-    def createChart[T: ChartABC](cls, chartT: type[T], kwargs: T.KW) -> T:
+    def createChart[T: ChartABC, KW](cls, chartT: type[T], kwargs: KW) -> T:
         # This method returns a plot object
         raise NotImplementedError
 

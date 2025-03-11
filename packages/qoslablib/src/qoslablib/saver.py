@@ -11,7 +11,7 @@ class SqlSaverABC(ABC):
         timestamp: int
 
     @abstractmethod
-    def kwargs[KW](self, **kwargs: KW) -> KW:
+    def kwargs[KW](self, **kwargs: Unpack[KW]) -> KW:
         # This method creates the kwargs object for instantiating the chart
         raise NotImplementedError
 
@@ -41,7 +41,7 @@ class SqlSaverHolderABC(ABC):
 
     @classmethod
     @abstractmethod
-    def createSqlSaver[T: SqlSaverABC](cls, sql_saverT: T, kwargs: T.KW) -> T:
+    def createSqlSaver[T: SqlSaverABC, KW](cls, sql_saverT: T, kwargs: KW) -> T:
         # This method returns a plot object
         raise NotImplementedError
 
