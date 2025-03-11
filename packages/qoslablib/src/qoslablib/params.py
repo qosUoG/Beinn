@@ -1,7 +1,7 @@
 from typing import Literal
 from pydantic import BaseModel
 
-from .runtime import EquipmentABC, ExperimentABC
+from . import runtime
 
 
 class SelectStrParam(BaseModel):
@@ -72,23 +72,25 @@ def boolParam(default: bool) -> BoolParam:
     return {"type": "bool", "value": default}
 
 
-class InstanceEquipmentParam[T: "EquipmentABC"](BaseModel):
+class InstanceEquipmentParam[T: "runtime.EquipmentABC"](BaseModel):
     type: Literal["instance.equipment"]
     instance_name: str
     instance: T | None
 
 
-def instance_equipmentParam[T: "EquipmentABC"]() -> InstanceEquipmentParam[T]:
+def instance_equipmentParam[T: "runtime.EquipmentABC"]() -> InstanceEquipmentParam[T]:
     return {"type": "instance.equipment", "instance_name": "", "instance": None}
 
 
-class InstanceExperimentParam[T: "ExperimentABC"](BaseModel):
+class InstanceExperimentParam[T: "runtime.ExperimentABC"](BaseModel):
     type: Literal["instance.experiment"]
     instance_name: str
     instance: T | None
 
 
-def instance_experimentParam[T: "ExperimentABC"]() -> InstanceExperimentParam[T]:
+def instance_experimentParam[T: "runtime.ExperimentABC"]() -> InstanceExperimentParam[
+    T
+]:
     return {"type": "instance.experiment", "instance_name": "", "instance": None}
 
 
