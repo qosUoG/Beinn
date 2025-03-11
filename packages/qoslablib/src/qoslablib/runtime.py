@@ -6,14 +6,14 @@ from threading import Lock
 from .saver import SqlSaverHolderABC
 from .chart import ChartHolderABC
 
-from .params import AllParamTypes
+from . import params
 
 
 class HoldersABC(SqlSaverHolderABC, ChartHolderABC):
     pass
 
 
-type Params = dict[str, "AllParamTypes"]
+type Params = dict[str, "params.AllParamTypes"]
 
 
 @dataclass
