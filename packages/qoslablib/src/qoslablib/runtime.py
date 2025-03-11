@@ -2,7 +2,6 @@ from abc import ABC, abstractmethod
 from dataclasses import dataclass
 import functools
 from threading import Lock
-from typing import ClassVar
 
 from .saver import SqlSaverHolderABC
 from .chart import ChartHolderABC
@@ -14,7 +13,7 @@ class HoldersABC(SqlSaverHolderABC, ChartHolderABC):
     pass
 
 
-type Params = dict[str, AllParamTypes]
+type Params = dict[str, "AllParamTypes"]
 
 
 @dataclass
