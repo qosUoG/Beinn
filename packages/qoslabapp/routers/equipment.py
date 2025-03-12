@@ -44,7 +44,12 @@ class GetParamsPayload(BaseModel):
 
 @router.post("/equipment/get_params")
 async def get_params(payload: GetParamsPayload):
-    return Params2ParamModels(AppState.equipments[payload.id].params)
+    res = Params2ParamModels(AppState.equipments[payload.id].params)
+
+    import pprint
+
+    pprint(res)
+    return res
 
 
 class SetParamsPayload(BaseModel):

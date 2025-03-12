@@ -38,19 +38,19 @@ export async function createExperiment(id: string, module_cls: { module: string,
 }
 
 export async function getEquipmentParams(id: string): Promise<Record<string, AllParamTypes>> {
-    return await postRequestJsonInOut("equipment/get_params", { id })
+    return await postRequestJsonInOut(qoslabappUrl("equipment/get_params"), { id })
 }
 
 export async function getExperimentParams(id: string): Promise<Record<string, AllParamTypes>> {
-    return await postRequestJsonInOut("experiment/get_params", { id })
+    return await postRequestJsonInOut(qoslabappUrl("experiment/get_params"), { id })
 }
 
 export async function setEquipmentParams(equipment_name: string, params: Record<string, AllParamTypes>) {
-    await postRequestJsonInOut("equipment/set_params", { equipment_name, params })
+    await postRequestJsonInOut(qoslabappUrl("equipment/set_params"), { equipment_name, params })
 }
 
 export async function setExperimentParams(experiment_name: string, params: Record<string, AllParamTypes>) {
-    await postRequestJsonInOut("experiment/set_params", { experiment_name, params })
+    await postRequestJsonInOut(qoslabappUrl("experiment/set_params"), { experiment_name, params })
 }
 
 export async function startExperiment(experiments: Experiment[]): Promise<void> {

@@ -1,4 +1,5 @@
 from abc import ABC, abstractmethod
+from dataclasses import dataclass
 from typing import Literal, override
 from pydantic import BaseModel
 
@@ -10,6 +11,7 @@ class QosParam[T: BaseModel](ABC):
         raise NotImplementedError
 
 
+@dataclass
 class SelectStrParam(QosParam):
     type: Literal["select.str"]
     options: list[str]
@@ -38,6 +40,7 @@ class SelectStrParam(QosParam):
         )
 
 
+@dataclass
 class SelectIntParam(QosParam):
     type: Literal["select.int"]
     options: list[int]
@@ -66,6 +69,7 @@ class SelectIntParam(QosParam):
         )
 
 
+@dataclass
 class SelectFloatParam:
     type: Literal["select.float"]
     options: list[float]
@@ -94,6 +98,7 @@ class SelectFloatParam:
         )
 
 
+@dataclass
 class IntParam:
     type: Literal["int"]
     suffix: str
@@ -119,6 +124,7 @@ class IntParam:
         )
 
 
+@dataclass
 class FloatParam:
     type: Literal["float"]
     suffix: str
@@ -144,6 +150,7 @@ class FloatParam:
         )
 
 
+@dataclass
 class StrParam:
     type: Literal["str"]
     value: str
@@ -155,7 +162,7 @@ class StrParam:
         def toParam(self):
             return StrParam(default=self.value)
 
-    def __init__(self, default: str = 0):
+    def __init__(self, default: str = ""):
         self.type = "str"
         self.default = default
 
@@ -164,6 +171,7 @@ class StrParam:
         return self.PydanticBaseModel(type=self.type, value=self.value)
 
 
+@dataclass
 class BoolParam:
     type: Literal["bool"]
     value: bool
@@ -184,6 +192,7 @@ class BoolParam:
         return self.PydanticBaseModel(type=self.type, value=self.value)
 
 
+@dataclass
 class InstanceEquipmentParam[T]:
     type: Literal["instance.equipment"]
     instance_name: str | None
@@ -208,6 +217,7 @@ class InstanceEquipmentParam[T]:
         return self.PydanticBaseModel(type=self.type, instance_name=self.instance_name)
 
 
+@dataclass
 class InstanceExperimentParam[T]:
     type: Literal["instance.experiment"]
     instance_name: str | None
