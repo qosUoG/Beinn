@@ -5,7 +5,7 @@ from pydantic import BaseModel
 
 from qoslablib.runtime import EquipmentABC
 
-from packages.qoslablib.src.qoslablib.params import AllParamModelTypes
+from qoslablib.params import AllParamModelTypes
 
 from .eeshared import getAvailableEEs, populateParam
 
