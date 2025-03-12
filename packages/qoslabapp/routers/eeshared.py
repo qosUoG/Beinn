@@ -44,12 +44,9 @@ def getAvailableEEs(eeABC: EEABC, names: list[str]):
             if module.endswith("__main__"):
                 continue
 
-            if module == "examplelib":
-                print(package.name)
-
             try:
                 for [cls, clsT] in inspect.getmembers(
-                    importlib.import_module(module), inspect.isclass
+                    importlib.import_module(package.name), inspect.isclass
                 ):
                     if (
                         not issubclass(clsT, eeABC)
@@ -59,12 +56,12 @@ def getAvailableEEs(eeABC: EEABC, names: list[str]):
                         continue
 
                     if clsT not in ees:
-                        ees[clsT] = {"modules": [module], "cls": cls}
+                        ees[clsT] = {"modules": [package.name], "cls": cls}
                     else:
-                        ees[clsT]["modules"].append(module)
+                        ees[clsT]["modules"].append(package.name)
 
             except Exception as e:
-                print(f"Path {module} produced an exception")
+                print(f"Path {package.name} produced an exception")
                 print(e)
                 break
 
