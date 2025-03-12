@@ -2,7 +2,6 @@ from ast import TypeVar
 from typing import Generic, Literal
 
 from pydantic import BaseModel, Field
-from pydantic.generics import BaseModel, Generic
 
 
 class SelectStrParam(BaseModel):
