@@ -26,7 +26,7 @@ class SelectStrParam(QosParam):
     def __init__(self, options: list[str], value: str | None = None):
         self.type = "select.str"
         self.options = options
-        if self.value is None:
+        if value is None:
             self.value = options[0]
         else:
             self.value = value
@@ -54,7 +54,7 @@ class SelectIntParam(QosParam):
     def __init__(self, options: list[int], value: int | None = None):
         self.type = "select.int"
         self.options = options
-        if self.value is None:
+        if value is None:
             self.value = options[0]
         else:
             self.value = value
@@ -82,7 +82,7 @@ class SelectFloatParam:
     def __init__(self, options: list[float], value: float | None = None):
         self.type = "select.float"
         self.options = options
-        if self.value is None:
+        if value is None:
             self.value = options[0]
         else:
             self.value = value
