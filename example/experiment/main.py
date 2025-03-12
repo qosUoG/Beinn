@@ -12,7 +12,7 @@ if __name__ == "__main__":
     import examplelib
 
     for [cls, clsT] in inspect.getmembers(
-        importlib.import_module("examplelib.ExampleDriver"), inspect.isclass
+        importlib.import_module("examplelib"), inspect.isclass
     ):
         print(cls)
 
