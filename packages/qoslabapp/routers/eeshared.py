@@ -44,13 +44,12 @@ def getAvailableEEs(eeABC: EEABC, names: list[str]):
             if module.endswith("__main__"):
                 continue
 
-            if module == "examplelib":
-                print(inspect.getmembers(importlib.import_module(module)))
-
             try:
-                for [cls, clsT] in inspect.getmembers(
-                    importlib.import_module(module), inspect.isclass
-                ):
+                for [cls, clsT] in inspect.getmembers(importlib.import_module(module)):
+                    if module == "examplelib":
+                        if issubclass(clsT, eeABC):
+                            print(cls)
+
                     if (
                         not issubclass(clsT, eeABC)
                         or clsT is ExperimentABC
