@@ -8,6 +8,8 @@ from pydantic import BaseModel
 from qoslablib.params import AllParamTypes
 from qoslablib.runtime import EquipmentABC, ExperimentABC
 
+from example.examplelib.src.examplelib.ExampleDriver import ExampleEquipment
+
 from ..lib.state import AppState
 
 type EELiteral = Literal["equipment"] | Literal["experiment"]
@@ -44,6 +46,8 @@ def getAvailableEEs(eeABC: EEABC, names: list[str]):
                 for [cls, clsT] in inspect.getmembers(
                     importlib.import_module(module), inspect.isclass
                 ):
+                    if cls == ExampleEquipment:
+                        print(cls)
                     if (
                         not issubclass(clsT, eeABC)
                         or clsT is ExperimentABC
