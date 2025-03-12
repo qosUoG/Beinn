@@ -38,7 +38,7 @@ class ExampleEquipment(r.EquipmentABC):
 
     def __init__(self):
         # Step 1. Call Super
-        super.__init__(self)
+        super().__init__(self)
 
         # Default params list
         self.params: ExampleEquipment.ParamsType = {

@@ -94,7 +94,7 @@ class EquipmentABC(ABC):
     # # e.g.
 
     # def __init__(self):
-    #     super.__init__(self)
+    #     super().__init__(self)
     #     self.params = {
     #         # Same as experiment, refer to experiment for example,
     #         # refer to params page for documentation of specifying params

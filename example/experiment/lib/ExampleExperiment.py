@@ -31,7 +31,7 @@ class ExampleExperiment(r.ExperimentABC):
 
         # Step 1. Call Super
         # Currently it does nothing, this is just to ensure foward compatability
-        super.__init__(self)
+        super().__init__(self)
 
         self.params: ExampleExperiment.ParamsType = {
             "strparam": p.StrParam(),
