@@ -1,10 +1,11 @@
-from abc import ABC
+from abc import ABC, abstractmethod
 from dataclasses import dataclass
 from typing import Literal, override
 from pydantic import BaseModel
 
 
 class QosParam[T: BaseModel](ABC):
+    @abstractmethod
     def toBaseModel(self) -> T:
         # This function should return a BaseModel
         raise NotImplementedError
@@ -16,7 +17,7 @@ class SelectStrParam(QosParam):
     options: list[str]
     value: str
 
-    class Model(BaseModel):
+    class PydanticBaseModel(BaseModel):
         type: Literal["select.str"]
         options: list[str]
         value: str
@@ -27,8 +28,10 @@ class SelectStrParam(QosParam):
         self.value = options[default]
 
     @override
-    def toBaseModel(self) -> Model:
-        return self.Model(type=self.type, options=self.options, value=self.value)
+    def toBaseModel(self) -> PydanticBaseModel:
+        return self.PydanticBaseModel(
+            type=self.type, options=self.options, value=self.value
+        )
 
 
 class SelectIntParam(QosParam):
@@ -36,7 +39,7 @@ class SelectIntParam(QosParam):
     options: list[int]
     value: int
 
-    class Model(BaseModel):
+    class PydanticBaseModel(BaseModel):
         type: Literal["select.int"]
         options: list[int]
         value: int
@@ -47,8 +50,10 @@ class SelectIntParam(QosParam):
         self.value = options[default]
 
     @override
-    def toBaseModel(self) -> Model:
-        return self.Model(type=self.type, options=self.options, value=self.value)
+    def toBaseModel(self) -> PydanticBaseModel:
+        return self.PydanticBaseModel(
+            type=self.type, options=self.options, value=self.value
+        )
 
 
 class SelectFloatParam:
@@ -56,7 +61,7 @@ class SelectFloatParam:
     options: list[float]
     value: int
 
-    class Model(BaseModel):
+    class PydanticBaseModel(BaseModel):
         type: Literal["select.float"]
         options: list[float]
         value: float
@@ -67,8 +72,10 @@ class SelectFloatParam:
         self.value = options[default]
 
     @override
-    def toBaseModel(self) -> Model:
-        return self.Model(type=self.type, options=self.options, value=self.value)
+    def toBaseModel(self) -> PydanticBaseModel:
+        return self.PydanticBaseModel(
+            type=self.type, options=self.options, value=self.value
+        )
 
 
 class IntParam:
@@ -76,7 +83,7 @@ class IntParam:
     suffix: str
     value: int
 
-    class Model(BaseModel):
+    class PydanticBaseModel(BaseModel):
         type: Literal["int"]
         suffix: str
         value: int
@@ -87,8 +94,10 @@ class IntParam:
         self.default = default
 
     @override
-    def toBaseModel(self) -> Model:
-        return self.Model(type=self.type, suffix=self.suffix, value=self.value)
+    def toBaseModel(self) -> PydanticBaseModel:
+        return self.PydanticBaseModel(
+            type=self.type, suffix=self.suffix, value=self.value
+        )
 
 
 class FloatParam:
@@ -96,7 +105,7 @@ class FloatParam:
     suffix: str
     value: float
 
-    class Model(BaseModel):
+    class PydanticBaseModel(BaseModel):
         type: Literal["float"]
         suffix: str
         value: float
@@ -107,32 +116,34 @@ class FloatParam:
         self.default = default
 
     @override
-    def toBaseModel(self) -> Model:
-        return self.Model(type=self.type, suffix=self.suffix, value=self.value)
+    def toBaseModel(self) -> PydanticBaseModel:
+        return self.PydanticBaseModel(
+            type=self.type, suffix=self.suffix, value=self.value
+        )
 
 
 class StrParam:
     type: Literal["str"]
     value: str
 
-    class Model(BaseModel):
+    class PydanticBaseModel(BaseModel):
         type: Literal["str"]
         value: str
 
-    def __init__(self, default: str = ""):
+    def __init__(self, default: str = 0):
         self.type = "str"
         self.default = default
 
     @override
-    def toBaseModel(self) -> Model:
-        return self.Model(type=self.type, value=self.value)
+    def toBaseModel(self) -> PydanticBaseModel:
+        return self.PydanticBaseModel(type=self.type, value=self.value)
 
 
 class BoolParam:
     type: Literal["bool"]
     value: bool
 
-    class Model(BaseModel):
+    class PydanticBaseModel(BaseModel):
         type: Literal["bool"]
         value: bool
 
@@ -141,8 +152,8 @@ class BoolParam:
         self.default = default
 
     @override
-    def toBaseModel(self) -> Model:
-        return self.Model(type=self.type, value=self.value)
+    def toBaseModel(self) -> PydanticBaseModel:
+        return self.PydanticBaseModel(type=self.type, value=self.value)
 
 
 class InstanceEquipmentParam[T]:
@@ -150,7 +161,7 @@ class InstanceEquipmentParam[T]:
     instance_name: str | None
     instance: T | None
 
-    class Model(BaseModel):
+    class PydanticBaseModel(BaseModel):
         type: Literal["instance.equipment"]
         instance_name: str
 
@@ -160,8 +171,8 @@ class InstanceEquipmentParam[T]:
         self.instance = None
 
     @override
-    def toBaseModel(self) -> Model:
-        return self.Model(type=self.type, instance_name=self.instance_name)
+    def toBaseModel(self) -> PydanticBaseModel:
+        return self.PydanticBaseModel(type=self.type, instance_name=self.instance_name)
 
 
 class InstanceExperimentParam[T]:
@@ -169,7 +180,7 @@ class InstanceExperimentParam[T]:
     instance_name: str | None
     instance: T | None
 
-    class Model(BaseModel):
+    class PydanticBaseModel(BaseModel):
         type: Literal["instance.experiment"]
         instance_name: str
 
@@ -179,8 +190,8 @@ class InstanceExperimentParam[T]:
         self.instance = None
 
     @override
-    def toBaseModel(self) -> Model:
-        return self.Model(type=self.type, instance_name=self.instance_name)
+    def toBaseModel(self) -> PydanticBaseModel:
+        return self.PydanticBaseModel(type=self.type, instance_name=self.instance_name)
 
 
 type AllParamTypes = (
@@ -191,14 +202,29 @@ type AllParamTypes = (
     | FloatParam
     | StrParam
     | BoolParam
-    | CompositeParam
+    # | CompositeParam
     | InstanceEquipmentParam
     | InstanceExperimentParam
 )
 
+type AllParamModelTypes = (
+    SelectStrParam.PydanticBaseModel
+    | SelectFloatParam.PydanticBaseModel
+    | SelectIntParam.PydanticBaseModel
+    | IntParam.PydanticBaseModel
+    | FloatParam.PydanticBaseModel
+    | StrParam.PydanticBaseModel
+    | BoolParam.PydanticBaseModel
+    # | CompositeParam.PydanticBaseModel
+    | InstanceEquipmentParam.PydanticBaseModel
+    | InstanceExperimentParam.PydanticBaseModel
+)
+
 type Params = dict[str, AllParamTypes]
 
+type ParamsModel = dict[str,]
 
-class CompositeParam:
-    type: Literal["composite"]
-    children: Params
+
+# class CompositeParam:
+#     type: Literal["composite"]
+#     children: Params
