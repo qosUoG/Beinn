@@ -34,14 +34,14 @@ class ExampleExperiment(r.ExperimentABC):
         super.__init__(self)
 
         self.params: ExampleExperiment.ParamsType = {
-            "strparam": p.strParam(),
-            "floatparam": p.floatParam(suffix="W"),
-            "intparam": p.intParam(),
-            "boolparam": p.boolParam(False),
-            "select_strparam": p.select_strParam(["option1", "option2", "option3"]),
-            "select_intparam": p.select_intParam([1, 2, 3]),
-            "select_floatparam": p.select_floatParam([1.1, 2.2, 3.3]),
-            "instance_equipmentparam": p.instance_equipmentParam[ExampleEquipment](),
+            "strparam": p.StrParam(),
+            "floatparam": p.FloatParam(suffix="W"),
+            "intparam": p.IntParam(),
+            "boolparam": p.BoolParam(False),
+            "select_strparam": p.SelectStrParam(["option1", "option2", "option3"]),
+            "select_intparam": p.SelectIntParam([1, 2, 3]),
+            "select_floatparam": p.SelectFloatParam([1.1, 2.2, 3.3]),
+            "instance_equipmentparam": p.InstanceEquipmentParam[ExampleEquipment](),
         }
 
         # # After the params list, instantiate charts and sql savers as needed

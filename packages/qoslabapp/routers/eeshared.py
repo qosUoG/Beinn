@@ -2,7 +2,7 @@ import importlib
 import importlib.util
 import inspect
 import pkgutil
-from typing import Literal
+from typing import Literal, TypedDict
 import warnings
 
 from pydantic import BaseModel
@@ -17,7 +17,7 @@ type EEABC = type[ExperimentABC] | type[EquipmentABC]
 
 
 def getAvailableEEs(eeABC: EEABC, names: list[str]):
-    class ReturnType(BaseModel):
+    class ReturnType(TypedDict):
         modules: list[str]
         cls: str
 

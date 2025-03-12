@@ -119,7 +119,7 @@ class StrParam:
         type: Literal["str"]
         value: str
 
-    def __init__(self, default: str = 0):
+    def __init__(self, default: str = ""):
         self.type = "str"
         self.default = default
 
