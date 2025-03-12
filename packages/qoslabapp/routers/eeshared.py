@@ -36,6 +36,9 @@ def getAvailableEEs(eeABC: EEABC, names: list[str]):
             if not package.name.startswith(module):
                 continue
 
+            if module == "examplelib":
+                print(package.name)
+
             # Check that the module is importable
             if not importlib.util.find_spec(module):
                 continue
@@ -48,9 +51,6 @@ def getAvailableEEs(eeABC: EEABC, names: list[str]):
                 for [cls, clsT] in inspect.getmembers(
                     importlib.import_module(module), inspect.isclass
                 ):
-                    if module == "examplelib":
-                        print(cls)
-
                     if (
                         not issubclass(clsT, eeABC)
                         or clsT is ExperimentABC
