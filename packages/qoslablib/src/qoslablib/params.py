@@ -115,7 +115,7 @@ class IntParam:
     def __init__(self, default: int = 0, suffix: str = ""):
         self.type = "int"
         self.suffix = suffix
-        self.default = default
+        self.value = default
 
     @override
     def toBaseModel(self) -> PydanticBaseModel:
@@ -141,7 +141,7 @@ class FloatParam:
     def __init__(self, default: float = 0, suffix: str = ""):
         self.type = "float"
         self.suffix = suffix
-        self.default = default
+        self.value = default
 
     @override
     def toBaseModel(self) -> PydanticBaseModel:
@@ -164,7 +164,7 @@ class StrParam:
 
     def __init__(self, default: str = ""):
         self.type = "str"
-        self.default = default
+        self.value = default
 
     @override
     def toBaseModel(self) -> PydanticBaseModel:
@@ -185,7 +185,7 @@ class BoolParam:
 
     def __init__(self, default: bool = 0):
         self.type = "bool"
-        self.default = default
+        self.value = default
 
     @override
     def toBaseModel(self) -> PydanticBaseModel:
