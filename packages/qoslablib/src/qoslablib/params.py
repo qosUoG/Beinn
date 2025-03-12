@@ -106,7 +106,9 @@ type AllParamTypes = (
     | InstanceExperimentParam
 )
 
+type Params = dict[str, AllParamTypes]
+
 
 class CompositeParam(BaseModel):
     type: Literal["composite"]
-    children: dict[str, AllParamTypes]
+    children: Params

@@ -13,13 +13,10 @@ class HoldersABC(SqlSaverHolderABC, ChartHolderABC):
     pass
 
 
-type Params = dict[str, "params.AllParamTypes"]
-
-
 @dataclass
 class ExperimentABC(ABC):
     # Instance shall initiate params in __init__() function
-    params: Params
+    params: params.Params
 
     def __init__(self):
         pass
@@ -90,7 +87,7 @@ def EquipmentTLock(func):
 @dataclass
 class EquipmentABC(ABC):
     # Instance shall initiate params in __init__() function
-    params: Params
+    params: params.Params
 
     # # All equipment subclass shall call __init__ function FIRST in their __init__ functions
 

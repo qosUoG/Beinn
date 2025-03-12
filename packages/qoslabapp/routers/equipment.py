@@ -2,8 +2,8 @@ import importlib
 from fastapi import APIRouter
 from pydantic import BaseModel
 
-from qoslablib.params import AllParamTypes
-from qoslablib.runtime import EquipmentABC, Params
+from qoslablib.params import Params
+from qoslablib.runtime import EquipmentABC
 
 from .eeshared import getAvailableEEs, populateParam
 
