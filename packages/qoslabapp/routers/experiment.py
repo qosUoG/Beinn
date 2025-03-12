@@ -5,12 +5,8 @@ from pydantic import BaseModel
 
 from qoslablib.runtime import ExperimentABC
 
-from qoslablib.params import ParamModels
+from qoslablib.params import ParamModels, ParamModels2Params, Params2ParamModels
 
-from packages.qoslablib.src.qoslablib.params import (
-    ParamModels2Params,
-    Params2ParamModels,
-)
 
 from .eeshared import getAvailableEEs, populateParam
 

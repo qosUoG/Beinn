@@ -5,9 +5,8 @@ from pydantic import BaseModel
 
 from qoslablib.runtime import EquipmentABC
 
-from qoslablib.params import ParamModels
+from qoslablib.params import ParamModels, Params2ParamModels, ParamModels2Params
 
-from packages.qoslablib.src.qoslablib.params import Params2ParamModels
 
 from .eeshared import getAvailableEEs, populateParam
 
@@ -56,6 +55,6 @@ class SetParamsPayload(BaseModel):
 
 @router.post("/equipment/set_params")
 async def set_params(payload: SetParamsPayload):
-    params = Params2ParamModels(payload.params)
+    params = ParamModels2Params(payload.params)
     for [param_name, param] in params.items():
         AppState.equipments[payload.id].params[param_name] = populateParam(param)
