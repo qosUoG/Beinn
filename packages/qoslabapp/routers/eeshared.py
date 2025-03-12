@@ -45,9 +45,7 @@ def getAvailableEEs(eeABC: EEABC, names: list[str]):
                 continue
 
             if module == "examplelib":
-                print(
-                    inspect.getmembers(importlib.import_module(module), inspect.isclass)
-                )
+                print(inspect.getmembers(importlib.import_module(module)))
 
             try:
                 for [cls, clsT] in inspect.getmembers(
