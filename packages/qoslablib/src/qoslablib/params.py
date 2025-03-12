@@ -1,5 +1,4 @@
 from abc import ABC, abstractmethod
-from dataclasses import dataclass
 from typing import Literal, override
 from pydantic import BaseModel
 
@@ -11,7 +10,6 @@ class QosParam[T: BaseModel](ABC):
         raise NotImplementedError
 
 
-@dataclass
 class SelectStrParam(QosParam):
     type: Literal["select.str"]
     options: list[str]
@@ -22,10 +20,16 @@ class SelectStrParam(QosParam):
         options: list[str]
         value: str
 
-    def __init__(self, options: list[str], default: int = 0):
+        def toParam(self):
+            return SelectStrParam(options=self.options, value=self.value)
+
+    def __init__(self, options: list[str], value: str | None = None):
         self.type = "select.str"
         self.options = options
-        self.value = options[default]
+        if self.value is None:
+            self.value = options[0]
+        else:
+            self.value = value
 
     @override
     def toBaseModel(self) -> PydanticBaseModel:
@@ -44,10 +48,16 @@ class SelectIntParam(QosParam):
         options: list[int]
         value: int
 
-    def __init__(self, options: list[int], default: int = 0):
+        def toParam(self):
+            return SelectIntParam(options=self.options, value=self.value)
+
+    def __init__(self, options: list[int], value: int | None = None):
         self.type = "select.int"
         self.options = options
-        self.value = options[default]
+        if self.value is None:
+            self.value = options[0]
+        else:
+            self.value = value
 
     @override
     def toBaseModel(self) -> PydanticBaseModel:
@@ -66,10 +76,16 @@ class SelectFloatParam:
         options: list[float]
         value: float
 
-    def __init__(self, options: list[float], default: int = 0):
+        def toParam(self):
+            return SelectFloatParam(options=self.options, value=self.value)
+
+    def __init__(self, options: list[float], value: float | None = None):
         self.type = "select.float"
         self.options = options
-        self.value = options[default]
+        if self.value is None:
+            self.value = options[0]
+        else:
+            self.value = value
 
     @override
     def toBaseModel(self) -> PydanticBaseModel:
@@ -87,6 +103,9 @@ class IntParam:
         type: Literal["int"]
         suffix: str
         value: int
+
+        def toParam(self):
+            return IntParam(default=self.value, suffix=self.suffix)
 
     def __init__(self, default: int = 0, suffix: str = ""):
         self.type = "int"
@@ -110,6 +129,9 @@ class FloatParam:
         suffix: str
         value: float
 
+        def toParam(self):
+            return FloatParam(default=self.value, suffix=self.suffix)
+
     def __init__(self, default: float = 0, suffix: str = ""):
         self.type = "float"
         self.suffix = suffix
@@ -130,6 +152,9 @@ class StrParam:
         type: Literal["str"]
         value: str
 
+        def toParam(self):
+            return StrParam(default=self.value)
+
     def __init__(self, default: str = 0):
         self.type = "str"
         self.default = default
@@ -146,6 +171,9 @@ class BoolParam:
     class PydanticBaseModel(BaseModel):
         type: Literal["bool"]
         value: bool
+
+        def toParam(self):
+            return BoolParam(default=self.value)
 
     def __init__(self, default: bool = 0):
         self.type = "bool"
@@ -165,9 +193,14 @@ class InstanceEquipmentParam[T]:
         type: Literal["instance.equipment"]
         instance_name: str
 
-    def __init__(self):
+        def toParam(self):
+            return InstanceEquipmentParam(
+                type=self.type, instance_name=self.instance_name
+            )
+
+    def __init__(self, instance_name=None):
         self.type = "instance.equipment"
-        self.instance_name = None
+        self.instance_name = instance_name
         self.instance = None
 
     @override
@@ -184,9 +217,9 @@ class InstanceExperimentParam[T]:
         type: Literal["instance.experiment"]
         instance_name: str
 
-    def __init__(self):
+    def __init__(self, instance_name=None):
         self.type = "instance.experiment"
-        self.instance_name = None
+        self.instance_name = instance_name
         self.instance = None
 
     @override
@@ -222,7 +255,24 @@ type AllParamModelTypes = (
 
 type Params = dict[str, AllParamTypes]
 
+
+def Params2ParamModels(params: Params):
+    res: ParamModels = {}
+    for [name, param] in params.items():
+        res[name] = param.toBaseModel()
+
+    return res
+
+
 type ParamModels = dict[str, AllParamModelTypes]
+
+
+def ParamModels2Params(param_models: ParamModels):
+    res: Params = {}
+    for [name, param_model] in param_models.items():
+        res[name] = param_model.toParam()
+
+    return res
 
 
 # class CompositeParam:

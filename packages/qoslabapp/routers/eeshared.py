@@ -78,9 +78,9 @@ def populateParam(*, param: AllParamTypes):
         case "instance.experiment":
             param.instance = AppState.experiments[param.instance_name]
 
-        case "composite":
-            # Recursively instantiate params
-            for [child_name, child_param] in param.children.items():
-                param.children[child_name] = populateParam(child_param)
+        # case "composite":
+        #     # Recursively instantiate params
+        #     for [child_name, child_param] in param.children.items():
+        #         param.children[child_name] = populateParam(child_param)
 
     return param

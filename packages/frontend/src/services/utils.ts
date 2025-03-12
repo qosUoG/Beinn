@@ -1,7 +1,8 @@
 export const postRequestJsonInOut = async (url: string, payload: Record<any, any>, headers: HeadersInit = {
     "Content-type": "application/json"
 }) => {
-    return (await fetch(url, {
+
+    return await (await fetch(url, {
         method: "POST",
         body: JSON.stringify(payload),
         headers

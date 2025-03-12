@@ -7,6 +7,11 @@ from qoslablib.runtime import ExperimentABC
 
 from qoslablib.params import ParamModels
 
+from packages.qoslablib.src.qoslablib.params import (
+    ParamModels2Params,
+    Params2ParamModels,
+)
+
 from .eeshared import getAvailableEEs, populateParam
 
 
@@ -43,18 +48,19 @@ class GetParamsPayload(BaseModel):
 
 @router.post("/experiment/get_params")
 async def get_params(payload: GetParamsPayload):
-    return AppState.experiments[payload.id].params
+    return Params2ParamModels(AppState.experiments[payload.id].params)
 
 
-class SetParamPayload(BaseModel):
+class SetParamsPayload(BaseModel):
     params: ParamModels
     # Experiment id
     id: str
 
 
 @router.post("/experiment/set_params")
-async def set_params(payload: SetParamPayload):
-    for [param_name, param] in payload.params.items():
+async def set_params(payload: SetParamsPayload):
+    params = ParamModels2Params(payload.params)
+    for [param_name, param] in params.items():
         AppState.experiments[payload.id].params[param_name] = populateParam(param)
 
 
