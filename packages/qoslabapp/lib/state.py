@@ -16,10 +16,11 @@ from qoslablib import (
 
 
 class ChartHandler[FrameT]:
-    def __init__(self, title: str, chart: c.ChartABC):
+    def __init__(self, experiment: str, title: str, chart: c.ChartABC):
         self.title = title
         self.frames: list[FrameT] = []
         self.chart = chart
+        self.experiment = experiment
 
         self._lock = Lock()
 
@@ -37,33 +38,38 @@ class ChartHandler[FrameT]:
 
 
 class SqlSaverHandler[FrameT]:
-    def __init__(self, title: str, sql_saver: s.SqlSaverABC):
+    def __init__(self, experiment: str, title: str, sql_saver: s.SqlSaverABC):
         self.title = title
         self.frames: list[FrameT] = []
         self.sql_saver = sql_saver
         self._lock = Lock()
+        self.experiment = experiment
 
-        # Create table with name and timestamp (ms)
-        table_name = f'"{self.title} timestamp:{self.sql_saver.getConfig().timestamp}"'
-        print(f"""
-BEGIN;
-CREATE TABLE {table_name}({self.sql_saver.getColumns()});
-COMMIT;
-""")
-
-        AppState.sqlite3_cursor.executescript(
-            f"""
-BEGIN;
-CREATE TABLE {table_name}({self.sql_saver.getColumns()});
-COMMIT;
-"""
-        )
+        self.table_name = ""
 
         def _save_fn(frame: FrameT):
             with AppState.sql_savers[title]._lock():
                 AppState.sql_savers[title].frames.append(frame)
 
+        def _initialize_fn():
+            # Create table with name and timestamp (ms)
+            self.table_name = f'"{self.title} timestamp:{int(time.time() * 1000)}"'
+            print(f"""
+    BEGIN;
+    CREATE TABLE {self.table_name}({self.sql_saver.getColumnsDefinition()});
+    COMMIT;
+    """)
+
+            AppState.SqlWorker.sqlite3_cursor.executescript(
+                f"""
+    BEGIN;
+    CREATE TABLE {self.table_name}({self.sql_saver.getColumnsDefinition()});
+    COMMIT;
+    """
+            )
+
         self.sql_saver._save_fn = _save_fn
+        self.sql_saver._initialize_fn = _initialize_fn
 
 
 class AppState(c.ChartHolderABC, s.SqlSaverHolderABC):
@@ -74,8 +80,11 @@ class AppState(c.ChartHolderABC, s.SqlSaverHolderABC):
     experiment_stop_events: dict[str, Event] = {}
     experiment_pause_events: dict[str, Event] = {}
 
-    charts: dict[str, ChartHandler]
-    sql_savers: dict[str, SqlSaverHandler]
+    charts: dict[str, ChartHandler] = {}
+    experiments_to_charts_map: dict[str, list[str]] = {}
+
+    sql_savers: dict[str, SqlSaverHandler] = {}
+    experiments_to_sql_savers_map: dict[str, list[str]] = {}
 
     sql_worker_task: Task
     sql_worker_task_created = False
@@ -97,7 +106,7 @@ class AppState(c.ChartHolderABC, s.SqlSaverHolderABC):
                 with sql_saver_handler._lock():
                     for frame in sql_saver_handler.frames:
                         cls.sqlite3_cursor.execute(
-                            sql_saver_handler.sql_saver.getInsertSqlTemplate(),
+                            sql_saver_handler.getInsertSqlTemplate(),
                             frame,
                         )
 
@@ -119,24 +128,41 @@ class AppState(c.ChartHolderABC, s.SqlSaverHolderABC):
 
     @classmethod
     @override
-    def createSqlSaver(cls, sql_saverT: type[s.SqlSaverABC], *, kwargs={}):
+    def createSqlSaver(cls, sql_saverT: type[s.SqlSaverABC], name: str, kwargs={}):
         # Create database connection if not yet created
-        cls._startSqlWorker
+        cls._startSqlWorker()
 
         title = kwargs["title"]
+
+        if name not in cls.experiments_to_sql_savers_map:
+            cls.experiments_to_sql_savers_map[name] = [title]
+        else:
+            cls.experiments_to_sql_savers_map[name].append(title)
+
         cls.sql_savers[title] = SqlSaverHandler(title, sql_saverT(**kwargs))
         return cls.sql_savers[title].sql_saver
 
     @classmethod
     @override
-    def createChart(cls, chartT: type[c.ChartABC], *, kwargs={}):
+    def createChart(cls, chartT: type[c.ChartABC], name: str, kwargs={}):
         # The title should be unique
         title = kwargs["title"]
+
+        if name not in cls.experiments_to_charts_map:
+            cls.experiments_to_charts_map[name] = [title]
+        else:
+            cls.experiments_to_charts_map[name].append(title)
+
         cls.charts[title] = ChartHandler(title, chartT(**kwargs))
         return cls.charts[title].chart
 
     @classmethod
-    def run_experiment(cls, name: str):
+    def runExperiment(cls, name: str):
+        # Run initialization of sql savers of the experiment if needed
+        if name in cls.experiments_to_sql_savers_map:
+            for sql_saver_name in cls.experiments_to_sql_savers_map[name]:
+                cls.sql_savers[sql_saver_name].sql_saver.initialize()
+
         cls.experiment_stop_events[name] = Event()
         cls.experiment_pause_events[name] = Event()
         cls.experiment_tasks[name] = asyncio.create_task(
@@ -149,16 +175,24 @@ class AppState(c.ChartHolderABC, s.SqlSaverHolderABC):
         )
 
     @classmethod
-    def pause_experiment(cls, name: str):
+    def pauseExperiment(cls, name: str):
         cls.experiment_pause_events[name].set()
 
     @classmethod
-    def continue_experiment(cls, name: str):
+    def continueExperiment(cls, name: str):
         cls.experiment_pause_events[name].clear()
 
     @classmethod
-    def stop_experiment(cls, name: str):
+    def stopExperiment(cls, name: str):
         cls.experiment_stop_events[name].set()
+
+    @classmethod
+    def createExperiment[T: r.ExperimentABC](cls, exp_cls: type[T], name: str):
+        AppState.experiments[name] = exp_cls(AppState, name)
+
+    @classmethod
+    def createEquipment[T: r.ExperimentABC](cls, exp_cls: type[T], name: str):
+        AppState.equipments[name] = exp_cls(AppState, name)
 
 
 def _experiment_runner(

@@ -2,6 +2,7 @@ from dataclasses import dataclass
 from typing import TypedDict
 
 from click import ParamType
+import numpy
 from qoslablib import params as p, exceptions as e, runtime as r
 import time
 
@@ -11,7 +12,7 @@ from examplelib.ExampleDriver import ExampleEquipment
 
 
 @dataclass
-class ExamplExperiment(r.ExperimentABC):
+class ExampleExperiment(r.ExperimentABC):
     class ParamsType(TypedDict):
         strparam: p.StrParam
         floatparam: p.FloatParam
@@ -20,40 +21,45 @@ class ExamplExperiment(r.ExperimentABC):
         selectstrparam: p.SelectStrParam
         selectintparam: p.SelectIntParam
         selectfloatparam: p.SelectFloatParam
-        instance_equipment_param: p.InstanceParam[ExampleEquipment]
+        instance_equipment_param: p.InstanceEquipmentParam[ExampleEquipment]
 
     params: ParamType
 
-    def __init__(self, holder: r.HoldersABC):
+    def __init__(self, holder: r.HoldersABC, name: str):
+        # The name of the experiment assigned during runtime would be made accessible.
+        # You would need it to pass to the createChart and createSqlSaver methods
+
         # Step 1. Call Super
         # Currently it does nothing, this is just to ensure foward compatability
         super.__init__(self)
 
-        self.params: ExamplExperiment.ParamsType = {
-            "strparam": p.str_param(),
-            "floatparam": p.float_param(suffix="W"),
-            "intparam": p.int_param(),
-            "boolparam": p.bool_param(False),
-            "selectstrparam": p.select_str_param(["option1", "option2", "option3"]),
-            "selectintparam": p.select_int_param([1, 2, 3]),
-            "selectfloatparam": p.select_float_param([1.1, 2.2, 3.3]),
-            "instance_equipment_param": p.instance_equipment_param[ExampleEquipment](),
+        self.params: ExampleExperiment.ParamsType = {
+            "strparam": p.strParam(),
+            "floatparam": p.floatParam(suffix="W"),
+            "intparam": p.intParam(),
+            "boolparam": p.boolParam(False),
+            "select_strparam": p.select_strParam(["option1", "option2", "option3"]),
+            "select_intparam": p.select_intParam([1, 2, 3]),
+            "select_floatparam": p.select_floatParam([1.1, 2.2, 3.3]),
+            "instance_equipmentparam": p.instance_equipmentParam[ExampleEquipment](),
         }
 
         # # After the params list, instantiate charts and sql savers as needed
-        self.xyplot = holder.createChart[XYPlot](
+        self.xyplot: XYPlot = holder.createChart[XYPlot](
             XYPlot,
+            name,
             XYPlot.kwargs(
                 title="Example XY Plot",
                 x_name="index",
-                y_names=["amplitude"],
+                y_names=["temperature"],
             ),
         )
 
-        self.saver = holder.createSqlSaver[XYSqlSaver](
+        self.saver: XYSqlSaver = holder.createSqlSaver[XYSqlSaver](
             XYSqlSaver,
+            name,
             XYSqlSaver.kwargs(
-                title="ExampleSqlSaver", x_name="index", y_names=["amplitude"]
+                title="ExampleSqlSaver", x_name="index", y_names=["temperature"]
             ),
         )
 
@@ -64,11 +70,33 @@ class ExamplExperiment(r.ExperimentABC):
 
         pprint.pprint(self.params)
 
+        # You may interact with the equipment here to do initialization
         self.params["instance_equipment_param"].instance.echo("hellow world")
-        self.params["instance_equipment_param"].instance.amplitude = 10
+        self.params["instance_equipment_param"].instance.power = 10
+
+        # You would instantiate ranges, or other derived values for use in loop from params here as well
+        self.inputs = numpy.arange(self.params["intparam"].value)
 
     def loop(self, index: int):
+        # Raise an exception such that qoslapapp knows experiment is ended
+        print(f"loop: {index}")
         if index >= 10:
             raise e.ExperimentEnded
-        print(self.params["instance_equipment_param"].instance.amplitude(index))
+        # In each loop, perform measurements
+
+        # set the power of the equipment
+        self.params["instance_equipment_param"].instance.power = self.inputs[index]
+        # Measure the "temp"
+        temp = self.params["instance_equipment_param"].instance.measureTemp()
+
+        # Then plot and save the data
+        # Since python's typing capability is limited, you would need to make sure you did write the correct keys yourself
+        self.xyplot.plot({"index": index, "temperature": temp})
+        self.saver.save({"index": index, "temperature": temp})
+
+        # This is here just to not make everything happening too quickly
         time.sleep(1)
+
+    def stop(self):
+        # define code here for clean up, for example switching off some equipment etc
+        print("stopped!")

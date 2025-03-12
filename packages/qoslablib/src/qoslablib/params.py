@@ -77,7 +77,7 @@ class InstanceEquipmentParam[T](BaseModel):
     instance: T | None = Field(exclude=True)
 
 
-def instance_equipmentParam() -> InstanceEquipmentParam:
+def instance_equipmentParam[T]() -> InstanceEquipmentParam[T]:
     return {"type": "instance.equipment", "instance_name": "", "instance": None}
 
 
@@ -87,7 +87,7 @@ class InstanceExperimentParam[T](BaseModel):
     instance: T | None = Field(exclude=True)
 
 
-def instance_experimentParam() -> InstanceExperimentParam:
+def instance_experimentParam[T]() -> InstanceExperimentParam[T]:
     return {"type": "instance.experiment", "instance_name": "", "instance": None}
 
 

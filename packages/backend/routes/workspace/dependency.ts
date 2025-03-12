@@ -12,11 +12,11 @@ export const routes: RouteType = {
     },
     "/workspace/dependency/add": {
         POST: async req => {
-            const { path, name } = await req.json() as { name: string, path: string }
+            const { path, source } = await req.json() as { source: string, path: string }
             $.cwd(path)
             // Could be from pip, git path or local path
-            await $`uv add ${name}`
-            return Response.json("", { headers })
+            await $`uv add ${source}`
+            return Response.json({}, { headers })
         }
     },
     "/workspace/dependency/remove": {

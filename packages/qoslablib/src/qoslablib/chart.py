@@ -27,7 +27,7 @@ class ChartABC(ABC):
 class ChartHolderABC(ABC):
     @classmethod
     @abstractmethod
-    def createChart[T: ChartABC, KW](cls, chartT: type[T], kwargs: KW) -> T:
+    def createChart[T: ChartABC, KW](cls, chartT: type[T], name: str, kwargs: KW) -> T:
         # This method returns a plot object
         raise NotImplementedError
 

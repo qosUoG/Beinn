@@ -1,5 +1,6 @@
 from dataclasses import dataclass
 import math
+from random import random
 from typing import ClassVar, TypedDict
 from qoslablib import runtime as r, params as p
 
@@ -35,19 +36,21 @@ class ExampleEquipment(r.EquipmentABC):
     equipment_pi: ClassVar[float] = math.pi
     equipment_model: ClassVar[str] = "QOS007"
 
-    def __init__(self):
+    def __init__(self, name):
+        # You would also get access the the name of the equipment you assigned to it during runtime. However, it is not really useful. Though for experiment, it would be useful to pass to chart and saver creators
+
         # Step 1. Call Super
         super.__init__(self)
 
         # Default params list
         self.params: ExampleEquipment.ParamsType = {
-            "strparam": p.str_param(),
-            "floatparam": p.float_param(suffix="W"),
-            "intparam": p.int_param(),
-            "boolparam": p.bool_param(False),
-            "selectstrparam": p.select_str_param(["option1", "option2", "option3"]),
-            "selectintparam": p.select_int_param([1, 2, 3]),
-            "selectfloatparam": p.select_float_param([1.1, 2.2, 3.3]),
+            "strparam": p.strParam(),
+            "floatparam": p.floatParam(suffix="W"),
+            "intparam": p.intParam(),
+            "boolparam": p.boolParam(False),
+            "select_strparam": p.select_strParam(["option1", "option2", "option3"]),
+            "select_intparam": p.select_intParam([1, 2, 3]),
+            "select_floatparam": p.select_floatParam([1.1, 2.2, 3.3]),
         }
 
         # # After the params list, one shall instantiate the equipment instance if needed
@@ -57,6 +60,8 @@ class ExampleEquipment(r.EquipmentABC):
         # rm = pyvisa.ResourceManager()
         # self.equipment = rm.open_resource('GPIB0::12::INSTR')
         # ...
+        # # Here, a private variable is ued for demonstration instead
+        self._power: int = 0
 
         """
         __init__() shall only contain the above code.
@@ -92,23 +97,29 @@ class ExampleEquipment(r.EquipmentABC):
     # In other words, it intercepts during instance attribute acquisition and assignment
     @r.EquipmentTLock
     @property
-    def amplitude(self):
-        # # In real life one should do something with the equipment
-        # return self.equipment.measure()
+    def power(self):
+        # # In real life one should do something with the equipment,
+        # # Which shall be acuired with pyvisa
+        # return self.equipment.query("POW?")
 
-        return self.amplitude
+        return self._power
 
-    # The setter is triggered when some value is assigned to the "amplitude" property
+    # The setter is triggered when some value is assigned to the "power" property
     # The value assigned is passed as the second argument in the parameter list,
     # "value" for the example below
 
     @r.EquipmentTLock
-    @amplitude.setter
-    def amplitude_setter(self, input: int):
-        self.amplitude = input
+    @power.setter
+    def power(self, input: int):
+        self._power = input
 
     # For actions that isn't a property, such as one off movement of a spectrometer turret, one
     # may write a normal function
     @r.EquipmentTLock
     def echo(self, input: str):
         return input
+
+    # While you may implement everything with @property, I like to define read only with methods and treat them as instead
+    @r.EquipmentTLock
+    def measureTemp(self):
+        return random() * 100 * self._power

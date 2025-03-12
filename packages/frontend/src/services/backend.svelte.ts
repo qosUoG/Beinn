@@ -9,7 +9,6 @@ export async function setWorkspaceDirectory(path: string): Promise<void> {
 
 export async function addDependency(source: string): Promise<void> {
     await postRequestJsonInOut(backendUrl("workspace/dependency/add"), { source, path: gstore.workspace.path })
-
 }
 
 export async function removeDependency(name: string): Promise<void> {

@@ -1,14 +1,15 @@
 from abc import ABC, abstractmethod
+from dataclasses import dataclass
 import time
 from typing import Callable, TypedDict, Unpack, override
 
 from pydantic import BaseModel
 
 
+@dataclass
 class SqlSaverABC(ABC):
-    class AbstractConfig(TypedDict):
-        # ms
-        timestamp: int
+    _initialize_fn: Callable[[], None]
+    _save_fn: Callable[[dict[str, float]], None]
 
     @abstractmethod
     def kwargs[KW](self, **kwargs: Unpack[KW]) -> KW:
@@ -21,19 +22,18 @@ class SqlSaverABC(ABC):
         raise NotImplementedError
 
     @abstractmethod
-    def getConfig(self) -> AbstractConfig:
+    def getConfig(self):
         # This function returns the config of the saver
         raise NotImplementedError
 
     @abstractmethod
-    def getInsertSqlTemplate(self) -> str:
-        # This function gets the insert sql query
+    def getColumnsDefinition(self) -> str:
+        # This function returns the string used for the sql creating table
         raise NotImplementedError
 
     @abstractmethod
-    def getColumns(self) -> str:
-        # This function returns the string used for the sql creating table
-        raise NotImplementedError
+    def initialize(self) -> None:
+        self._initialize_fn()
 
 
 class SqlSaverHolderABC(ABC):
@@ -41,7 +41,9 @@ class SqlSaverHolderABC(ABC):
 
     @classmethod
     @abstractmethod
-    def createSqlSaver[T: SqlSaverABC, KW](cls, sql_saverT: T, kwargs: KW) -> T:
+    def createSqlSaver[T: SqlSaverABC, KW](
+        cls, sql_saverT: T, name: str, kwargs: KW
+    ) -> T:
         # This method returns a plot object
         raise NotImplementedError
 
@@ -51,7 +53,6 @@ class XYSqlSaver(SqlSaverABC):
         title: str
         x_name: str
         y_names: list[str]
-        timestamp: int
 
     class KW(TypedDict):
         title: str
@@ -61,6 +62,7 @@ class XYSqlSaver(SqlSaverABC):
     def __init__(
         self,
         save_fn: Callable[[dict[str, float]], None],
+        initialize_fn: Callable[[dict[str, float]], None],
         **kwargs: Unpack[KW],
     ):
         self.title = kwargs.title
@@ -71,10 +73,10 @@ class XYSqlSaver(SqlSaverABC):
             "title": self.title,
             "x_name": self.x_name,
             "y_names": self.y_names,
-            "timestamp": int(time.time() * 1000),
         }
 
         self._save_fn = save_fn
+        self._initialize_fn = initialize_fn
 
     @override
     def kwargs(self, **kwargs: Unpack[KW]):
@@ -85,7 +87,7 @@ class XYSqlSaver(SqlSaverABC):
         return self.config
 
     @override
-    def getColumns(self) -> str:
+    def getColumnsDefinition(self) -> str:
         res = "timestamp INTEGER PRIMARY KEY"
         res += f",\n{self.x_name} REAL"
         for y_name in self.y_names:
@@ -94,5 +96,5 @@ class XYSqlSaver(SqlSaverABC):
         return res
 
     @override
-    def save(self, frame):
+    def save(self, frame: dict[str, float]):
         self._save_fn(frame)
