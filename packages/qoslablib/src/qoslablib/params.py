@@ -1,10 +1,7 @@
-from ast import TypeVar
-from typing import Any, Generic, Literal
-
-from pydantic import BaseModel, Field
+from typing import Literal, TypedDict
 
 
-class SelectStrParam(BaseModel):
+class SelectStrParam(TypedDict):
     type: Literal["select.str"]
     options: list[str]
     value: str
@@ -14,7 +11,7 @@ def select_strParam(options: list[str], default: int = 0) -> SelectStrParam:
     return {"type": "select.str", "options": options, "value": options[default]}
 
 
-class SelectIntParam(BaseModel):
+class SelectIntParam(TypedDict):
     type: Literal["select.int"]
     options: list[int]
     value: int
@@ -24,7 +21,7 @@ def select_intParam(options: list[int], default: int = 0) -> SelectIntParam:
     return {"type": "select.int", "options": options, "value": options[default]}
 
 
-class SelectFloatParam(BaseModel):
+class SelectFloatParam(TypedDict):
     type: Literal["select.float"]
     options: list[float]
     value: int
@@ -34,7 +31,7 @@ def select_floatParam(options: list[float], default: int = 0) -> SelectFloatPara
     return {"type": "select.float", "options": options, "value": options[default]}
 
 
-class IntParam(BaseModel):
+class IntParam(TypedDict):
     type: Literal["int"]
     suffix: str
     value: int
@@ -44,7 +41,7 @@ def intParam(default: int = 0, suffix: str = "") -> IntParam:
     return {"type": "int", "suffix": suffix, "value": default}
 
 
-class FloatParam(BaseModel):
+class FloatParam(TypedDict):
     type: Literal["float"]
     suffix: str
     value: float
@@ -54,7 +51,7 @@ def floatParam(default: float = 0.0, suffix: str = "") -> FloatParam:
     return {"type": "float", "suffix": suffix, "value": default}
 
 
-class StrParam(BaseModel):
+class StrParam(TypedDict):
     type: Literal["str"]
     value: str
 
@@ -63,7 +60,7 @@ def strParam(default: str = "") -> StrParam:
     return {"type": "str", "value": default}
 
 
-class BoolParam(BaseModel):
+class BoolParam(TypedDict):
     type: Literal["bool"]
     value: bool
 
@@ -72,23 +69,23 @@ def boolParam(default: bool) -> BoolParam:
     return {"type": "bool", "value": default}
 
 
-class InstanceEquipmentParam(BaseModel):
+class InstanceEquipmentParam[T](TypedDict):
     type: Literal["instance.equipment"]
     instance_name: str
-    instance: Any | None = Field(exclude=True)
+    instance: T | None
 
 
-def instance_equipmentParam() -> InstanceEquipmentParam:
+def instance_equipmentParam[T]() -> InstanceEquipmentParam[T]:
     return {"type": "instance.equipment", "instance_name": "", "instance": None}
 
 
-class InstanceExperimentParam(BaseModel):
+class InstanceExperimentParam[T](TypedDict):
     type: Literal["instance.experiment"]
     instance_name: str
-    instance: Any | None = Field(exclude=True)
+    instance: T | None
 
 
-def instance_experimentParam() -> InstanceExperimentParam:
+def instance_experimentParam[T]() -> InstanceExperimentParam[T]:
     return {"type": "instance.experiment", "instance_name": "", "instance": None}
 
 
@@ -108,6 +105,6 @@ type AllParamTypes = (
 type Params = dict[str, AllParamTypes]
 
 
-class CompositeParam(BaseModel):
+class CompositeParam(TypedDict):
     type: Literal["composite"]
     children: Params
