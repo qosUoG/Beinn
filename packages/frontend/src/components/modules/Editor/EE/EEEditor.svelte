@@ -57,7 +57,7 @@
 				<EEPath
 					bind:value={target.module_cls}
 					options={gstore.workspace[`available_${eeeditor.mode!}`]}
-					bind:created={target.created}
+					created={target.created}
 					onconfirm={async () => {
 						// Pleasing the type checker
 						if (target === undefined || eeeditor.id === undefined)

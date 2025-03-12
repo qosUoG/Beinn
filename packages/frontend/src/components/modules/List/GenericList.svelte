@@ -33,7 +33,11 @@
 			class="icon-btn-sm slate"
 			onclick={async () => {
 				const id = getRandomId(Object.keys(gstore[listtype]));
-				gstore[listtype][id] = { id };
+				gstore[listtype][id] = {
+					id,
+					created: false,
+					module_cls: { module: "", cls: "" },
+				};
 
 				if (listtype === "equipments")
 					gstore.workspace.available_equipments =
@@ -50,9 +54,10 @@
 			}}><Plus /></button>
 	</div>
 	{#each Object.values(gstore[listtype]) as target}
-		{@const params_edited =
-			JSON.stringify(target.temp_params) !==
-			JSON.stringify(target.params)}
+		{@const params_edited = target.created
+			? JSON.stringify(target.temp_params) !==
+				JSON.stringify(target.params)
+			: false}
 		<button
 			class={cn(
 				"container text-start bg-white row justify-between items-center ",
@@ -67,7 +72,7 @@
 				eeeditor.mode = listtype;
 			}}
 			id={`equipment-${target.id}`}>
-			{#if target.name !== undefined && target.name !== ""}
+			{#if "name" in target}
 				<div>
 					{target.name}
 				</div>
@@ -75,7 +80,7 @@
 				<div class="italic text-slate-500/75">Setup {capitalised}</div>
 			{/if}
 			<div class="row-1 flex-row-reverse">
-				{#if target.module === undefined}
+				{#if !target.created}
 					<div class="icon-btn-sm border border-red-500 text-red-500">
 						<FolderQuestion />
 					</div>

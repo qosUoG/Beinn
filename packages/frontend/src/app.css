@@ -54,7 +54,13 @@
 		/* IE and Edge */
 		scrollbar-width: none;
 		/* Firefox */
-		@apply cursor-auto;
+
+		/* Default cursor */
+		@apply cursor-default;
+	}
+
+	button * {
+		@apply cursor-pointer;
 	}
 
 	@layer base {

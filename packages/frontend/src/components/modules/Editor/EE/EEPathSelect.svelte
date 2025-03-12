@@ -1,4 +1,5 @@
 <script lang="ts">
+	import Separator from "$components/reuseables/Separator.svelte";
 	import { clickoutside, cn } from "$components/utils.svelte";
 	import { getRandomId } from "$lib/utils";
 	import type { ModuleCls } from "qoslab-shared";
@@ -17,40 +18,65 @@
 	const id = getRandomId([]);
 </script>
 
-<button
-	class="min-w-0 overflow-x-scroll text-nowrap w-full h-full"
-	onclick={async (e) => {
-		open = !open;
-	}}
-	{id}>
-	{value}
-</button>
+<div class="row-2 bg-white wrapped flex-grow min-w-0 h-full">
+	<div class="editor-label">Class</div>
+	<Separator />
+	<div class="relative flex-grow -mx-2 px-2 flex items-center min-w-0">
+		<button
+			class="min-w-0 overflow-x-scroll text-nowrap w-full h-full text-left"
+			onclick={async (e) => {
+				open = !open;
+			}}
+			{id}>
+			{#if value.module !== "" && value.cls !== ""}
+				from {value.module} import
+				{value.cls}
+			{/if}
+		</button>
 
-{#if open}
-	<div
-		use:clickoutside={id}
-		onoutsideclick={() => {
-			open = false;
-		}}
-		class="absolute left-0 top-6 bg-white col z-10 shadow-xl rounded min-w-full">
-		{#each options as { cls, modules }}
-			<div class="hover:bg-slate-300">
-				<div>{cls}</div>
-				{#each modules as module}
-					<button
+		{#if open}
+			<div
+				use:clickoutside={id}
+				onoutsideclick={() => {
+					open = false;
+				}}
+				class=" absolute left-0 top-6 bg-white col z-10 shadow-xl rounded min-w-full">
+				{#each options as { cls, modules }}
+					<div
 						class={cn(
-							" wrapped  text-nowrap text-left",
-							value.module === module
+							" wrapped col",
+							value.cls === cls
 								? "bg-slate-500 text-slate-50"
 								: "hover:bg-slate-300"
-						)}
-						onclick={() => {
-							value.module = module;
-							value.cls = cls;
-							open = false;
-						}}>{module}</button>
+						)}>
+						<div
+							class={cn(
+								" wrapped ",
+								value.cls === cls
+									? "bg-slate-500 text-slate-50"
+									: "hover:bg-slate-300"
+							)}>
+							{cls}
+						</div>
+						{#each modules as module}
+							<button
+								class={cn(
+									"   text-nowrap text-left ml-6 wrapped flex-grow",
+									value.module === module
+										? "bg-slate-500 text-slate-50"
+										: "hover:bg-slate-300"
+								)}
+								onclick={() => {
+									value.module = module;
+									value.cls = cls;
+									open = false;
+								}}>
+								{module}
+							</button>
+						{/each}
+					</div>
 				{/each}
 			</div>
-		{/each}
+		{/if}
 	</div>
-{/if}
+</div>

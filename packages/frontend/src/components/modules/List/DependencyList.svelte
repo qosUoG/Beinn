@@ -63,7 +63,7 @@
 					eeeditor.id = undefined;
 				}}
 				id={`equipment-${dependency.id}`}>
-				{#if dependency.name !== undefined && dependency.name !== ""}
+				{#if dependency.confirmed}
 					<div>
 						{dependency.name}
 					</div>

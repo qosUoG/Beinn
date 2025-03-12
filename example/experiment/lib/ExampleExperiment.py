@@ -25,7 +25,7 @@ class ExampleExperiment(r.ExperimentABC):
 
     params: ParamType
 
-    def __init__(self, holder: r.HoldersABC, name: str):
+    def __init__(self, holder: r.HoldersABC):
         # The name of the experiment assigned during runtime would be made accessible.
         # You would need it to pass to the createChart and createSqlSaver methods
 
@@ -47,7 +47,6 @@ class ExampleExperiment(r.ExperimentABC):
         # # After the params list, instantiate charts and sql savers as needed
         self.xyplot: XYPlot = holder.createChart[XYPlot](
             XYPlot,
-            name,
             XYPlot.kwargs(
                 title="Example XY Plot",
                 x_name="index",
@@ -57,7 +56,6 @@ class ExampleExperiment(r.ExperimentABC):
 
         self.saver: XYSqlSaver = holder.createSqlSaver[XYSqlSaver](
             XYSqlSaver,
-            name,
             XYSqlSaver.kwargs(
                 title="ExampleSqlSaver", x_name="index", y_names=["temperature"]
             ),

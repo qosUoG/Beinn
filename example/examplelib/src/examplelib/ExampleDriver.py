@@ -36,21 +36,19 @@ class ExampleEquipment(r.EquipmentABC):
     equipment_pi: ClassVar[float] = math.pi
     equipment_model: ClassVar[str] = "QOS007"
 
-    def __init__(self, name):
-        # You would also get access the the name of the equipment you assigned to it during runtime. However, it is not really useful. Though for experiment, it would be useful to pass to chart and saver creators
-
+    def __init__(self):
         # Step 1. Call Super
         super.__init__(self)
 
         # Default params list
         self.params: ExampleEquipment.ParamsType = {
-            "strparam": p.strParam(),
-            "floatparam": p.floatParam(suffix="W"),
-            "intparam": p.intParam(),
-            "boolparam": p.boolParam(False),
-            "select_strparam": p.select_strParam(["option1", "option2", "option3"]),
-            "select_intparam": p.select_intParam([1, 2, 3]),
-            "select_floatparam": p.select_floatParam([1.1, 2.2, 3.3]),
+            "strparam": p.StrParam(),
+            "floatparam": p.FloatParam(suffix="W"),
+            "intparam": p.IntParam(),
+            "boolparam": p.BoolParam(False),
+            "select_strparam": p.SelectStrParam(["option1", "option2", "option3"]),
+            "select_intparam": p.SelectIntParam([1, 2, 3]),
+            "select_floatparam": p.SelectFloatParam([1.1, 2.2, 3.3]),
         }
 
         # # After the params list, one shall instantiate the equipment instance if needed

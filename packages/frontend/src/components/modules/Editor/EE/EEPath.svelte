@@ -1,8 +1,7 @@
 <script lang="ts">
-	import Reload from "$icons/Reload.svelte";
 	import Tick from "$icons/Tick.svelte";
 
-	import EePathSelect from "./EEPathSelect.svelte";
+	import EEPathSelect from "./EEPathSelect.svelte";
 	import type { ModuleCls } from "qoslab-shared";
 	import FixedField from "$components/reuseables/Fields/FixedField.svelte";
 	import { tick } from "svelte";
@@ -10,7 +9,7 @@
 	let {
 		value = $bindable(),
 		options,
-		created = $bindable(),
+		created,
 		onconfirm,
 	}: {
 		value: ModuleCls;
@@ -24,7 +23,7 @@
 
 <div class="row-2 min-w-0">
 	{#if !created}
-		<EePathSelect bind:value {options} />
+		<EEPathSelect bind:value={temp_module_cls} {options} />
 
 		<button
 			class="icon-btn-sm green"
@@ -32,11 +31,11 @@
 				if (temp_module_cls.cls === "" || temp_module_cls.module === "")
 					return;
 
-				if (
-					temp_module_cls.cls === value.cls &&
-					temp_module_cls.module === value.module
-				)
-					return;
+				// if (
+				// 	temp_module_cls.cls === value.cls &&
+				// 	temp_module_cls.module === value.module
+				// )
+				// 	return;
 
 				value = { ...temp_module_cls };
 

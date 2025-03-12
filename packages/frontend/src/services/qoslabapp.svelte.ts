@@ -30,11 +30,11 @@ export async function getAvailableExperiments(): Promise<typeof gstore.workspace
 }
 
 export async function createEquipment(id: string, module_cls: { module: string, cls: string }) {
-    await postRequestJsonInOut(qoslabappUrl("equipment/create_equipment"), { id, ...module_cls })
+    await postRequestJsonInOut(qoslabappUrl("equipment/create"), { id, ...module_cls })
 }
 
 export async function createExperiment(id: string, module_cls: { module: string, cls: string }) {
-    await postRequestJsonInOut(qoslabappUrl("equipment/create_experiment"), { id, ...module_cls })
+    await postRequestJsonInOut(qoslabappUrl("equipment/create"), { id, ...module_cls })
 }
 
 export async function getEquipmentParams(id: string): Promise<Record<string, AllParamTypes>> {

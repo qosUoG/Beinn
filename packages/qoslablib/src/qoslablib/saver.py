@@ -39,9 +39,7 @@ class SqlSaverHolderABC(ABC):
 
     @classmethod
     @abstractmethod
-    def createSqlSaver[T: SqlSaverABC, KW](
-        cls, sql_saverT: T, name: str, kwargs: KW
-    ) -> T:
+    def createSqlSaver[T: SqlSaverABC, KW](cls, sql_saverT: T, kwargs: KW) -> T:
         # This method returns a plot object
         raise NotImplementedError
 
