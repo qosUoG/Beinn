@@ -98,7 +98,7 @@ export function runProject(path: string) {
         return
 
     app_state.pyproc = spawn(
-        ["uv", "run", "uvicorn", "app.main:app", "--host", "localhost", "--port", "8000"],
+        "uv run uvicorn app.main:app --host localhost --port 8000".split(" "),
         { stdout: "inherit", cwd: path }
     )
 }
