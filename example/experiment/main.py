@@ -16,6 +16,8 @@ if __name__ == "__main__":
     ):
         print(cls)
 
+    print("fastapi.__main__".endswith("__main__"))
+
     # def inside():
     #     warnings.filterwarnings("error")
 

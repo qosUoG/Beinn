@@ -5,7 +5,7 @@ from pydantic import BaseModel
 
 from qoslablib.runtime import ExperimentABC
 
-from qoslablib.params import AllParamModelTypes
+from qoslablib.params import ParamModels
 
 from .eeshared import getAvailableEEs, populateParam
 
@@ -47,7 +47,7 @@ async def get_params(payload: GetParamsPayload):
 
 
 class SetParamPayload(BaseModel):
-    params: AllParamModelTypes
+    params: ParamModels
     # Experiment name
     name: str
     # param name

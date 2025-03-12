@@ -222,7 +222,7 @@ type AllParamModelTypes = (
 
 type Params = dict[str, AllParamTypes]
 
-type ParamsModel = dict[str,]
+type ParamModels = dict[str, AllParamModelTypes]
 
 
 # class CompositeParam:

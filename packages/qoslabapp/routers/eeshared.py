@@ -41,7 +41,7 @@ def getAvailableEEs(eeABC: EEABC, names: list[str]):
                 continue
 
             # Exclude these
-            if module.endswith("__main__"):
+            if package.name.endswith("__main__"):
                 continue
 
             try:
