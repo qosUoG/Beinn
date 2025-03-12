@@ -6,8 +6,9 @@ export const routes: RouteType = {
 
     "/workspace/dependency/check_init": {
         POST: async req => {
-            const { path, dir } = await req.json() as { dir: string, path: string }
-            return Response.json({ success: await file(path + "/" + dir + "/__init__.py").exists() }, { headers })
+            const { path, directory } = await req.json() as { directory: string, path: string }
+            console.log(path + "/" + directory + "/__init__.py")
+            return Response.json({ success: await file(path + "/" + directory + "/__init__.py").exists() }, { headers })
         }
     },
     "/workspace/dependency/add": {
@@ -15,7 +16,7 @@ export const routes: RouteType = {
             const { path, source } = await req.json() as { source: string, path: string }
             $.cwd(path)
             // Could be from pip, git path or local path
-            await $`uv add ${source}`
+            await $`uv add ${{ raw: source }}`
             return Response.json({}, { headers })
         }
     },

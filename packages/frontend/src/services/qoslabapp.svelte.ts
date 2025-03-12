@@ -12,7 +12,7 @@ const headers = {
 export async function getAvailableEquipments(): Promise<typeof gstore.workspace.available_equipments> {
     return await postRequestJsonInOut(
         qoslabappUrl("equipment/available_equipments"), {
-        names: $state.snapshot(
+        prefixes: $state.snapshot(
             Object.values(gstore.workspace.dependencies)
                 .filter(d => d.confirmed)
                 .map(d => d.name))
@@ -22,19 +22,27 @@ export async function getAvailableEquipments(): Promise<typeof gstore.workspace.
 export async function getAvailableExperiments(): Promise<typeof gstore.workspace.available_equipments> {
     return await postRequestJsonInOut(
         qoslabappUrl("equipment/available_experiments"), {
-        names: $state.snapshot(
+        prefixes: $state.snapshot(
             Object.values(gstore.workspace.dependencies)
                 .filter(d => d.confirmed)
                 .map(d => d.name))
     })
 }
 
-export async function getEquipmentParams(path: { module: string, cls: string }): Promise<Record<string, AllParamTypes>> {
-    return await postRequestJsonInOut("equipment/get_params", path)
+export async function createEquipment(id: string, module_cls: { module: string, cls: string }) {
+    await postRequestJsonInOut(qoslabappUrl("equipment/create_equipment"), { id, ...module_cls })
 }
 
-export async function getExperimentParams(path: { module: string, cls: string }): Promise<Record<string, AllParamTypes>> {
-    return await postRequestJsonInOut("experiment/get_params", path)
+export async function createExperiment(id: string, module_cls: { module: string, cls: string }) {
+    await postRequestJsonInOut(qoslabappUrl("equipment/create_experiment"), { id, ...module_cls })
+}
+
+export async function getEquipmentParams(id: string): Promise<Record<string, AllParamTypes>> {
+    return await postRequestJsonInOut("equipment/get_params", { id })
+}
+
+export async function getExperimentParams(id: string): Promise<Record<string, AllParamTypes>> {
+    return await postRequestJsonInOut("experiment/get_params", { id })
 }
 
 export async function setEquipmentParams(equipment_name: string, params: Record<string, AllParamTypes>) {

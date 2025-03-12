@@ -73,7 +73,7 @@
 		@apply text-xl font-bold;
 	}
 	.editor-label {
-		@apply min-w-16;
+		@apply min-w-fit w-16 text-nowrap;
 	}
 	.slate {
 		@apply bg-slate-500 text-slate-50;

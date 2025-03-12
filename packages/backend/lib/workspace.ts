@@ -64,7 +64,7 @@ export async function readAllUvDependencies(path: string) {
         if (!(parsed_dependency in sources)) {
             res.push({
                 id: randomUUIDv7(),
-                source: { type: "pip" },
+                source: { type: "pip", name: parsed_dependency },
                 name: parsed_dependency,
                 fullname: dependency,
                 confirmed: true

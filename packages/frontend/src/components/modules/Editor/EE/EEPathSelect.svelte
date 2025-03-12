@@ -1,14 +1,15 @@
-<script lang="ts" generics="T extends string | number">
+<script lang="ts">
 	import { clickoutside, cn } from "$components/utils.svelte";
 	import { getRandomId } from "$lib/utils";
+	import type { ModuleCls } from "qoslab-shared";
 	import { tick } from "svelte";
 
 	let {
 		options,
 		value = $bindable(),
 	}: {
-		value: T;
-		options: T[];
+		value: ModuleCls;
+		options: { cls: string; modules: string[] }[];
 	} = $props();
 
 	let open = $state(false);
@@ -32,18 +33,24 @@
 			open = false;
 		}}
 		class="absolute left-0 top-6 bg-white col z-10 shadow-xl rounded min-w-full">
-		{#each options as option}
-			<button
-				class={cn(
-					" wrapped  text-nowrap text-left",
-					value === option
-						? "bg-slate-500 text-slate-50"
-						: "hover:bg-slate-300"
-				)}
-				onclick={() => {
-					value = option;
-					open = false;
-				}}>{option}</button>
+		{#each options as { cls, modules }}
+			<div class="hover:bg-slate-300">
+				<div>{cls}</div>
+				{#each modules as module}
+					<button
+						class={cn(
+							" wrapped  text-nowrap text-left",
+							value.module === module
+								? "bg-slate-500 text-slate-50"
+								: "hover:bg-slate-300"
+						)}
+						onclick={() => {
+							value.module = module;
+							value.cls = cls;
+							open = false;
+						}}>{module}</button>
+				{/each}
+			</div>
 		{/each}
 	</div>
 {/if}

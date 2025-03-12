@@ -23,6 +23,6 @@ export async function readUvDependency(name: string): Promise<Dependency> {
     return (await postRequestJsonInOut(backendUrl("workspace/dependency/read"), { name, path: gstore.workspace.path }) as { dependency: Dependency }).dependency
 }
 
-export async function checkDependencyInit(source: string): Promise<{ success: boolean }> {
-    return await postRequestJsonInOut(backendUrl("workspace/dependency/check_init"), { source, path: gstore.workspace.path })
+export async function checkDependencyInit(directory: string): Promise<{ success: boolean }> {
+    return await postRequestJsonInOut(backendUrl("workspace/dependency/check_init"), { directory, path: gstore.workspace.path })
 }

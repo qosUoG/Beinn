@@ -1,23 +1,24 @@
 <script lang="ts">
 	import Trash from "$icons/Trash.svelte";
 	import {
+		createEquipment,
+		createExperiment,
 		getEquipmentParams,
-		getExperimentParams,
 		setEquipmentParams,
 		setExperimentParams,
 	} from "$services/qoslabapp.svelte";
 	import { gstore } from "$states/global.svelte";
-	import type { Equipment, Experiment } from "qoslab-shared";
+
 	import { tick } from "svelte";
 	import { eeeditor } from "./EEEditorController.svelte";
 	import Name from "./Name.svelte";
 	import Params from "./Params.svelte";
-	import Path from "./EEPath.svelte";
+	import EEPath from "./EEPath.svelte";
 	import Cancel from "$icons/Cancel.svelte";
 
 	import Disk from "$icons/Disk.svelte";
 
-	const target: Experiment | Equipment | undefined = $derived.by(() => {
+	let target = $derived.by(() => {
 		if (eeeditor.id === undefined) return undefined;
 
 		if (eeeditor.mode === "equipments")
@@ -28,6 +29,8 @@
 	});
 
 	let params_edited = $derived.by(() => {
+		if (!target?.created) return false;
+
 		return (
 			JSON.stringify(target!.temp_params) !==
 			JSON.stringify(target!.params)
@@ -37,7 +40,7 @@
 
 {#key eeeditor.id}
 	<div class="container bg-slate-200 col-span-2 min-w-0 w-full">
-		{#if eeeditor.id !== undefined}
+		{#if eeeditor.id !== undefined && target !== undefined}
 			<div class="col-2 min-w-0 w-full">
 				<div class="row justify-between items-end">
 					<div class="title bg-white wrapped">
@@ -51,27 +54,39 @@
 					<Bin />
 				</div>
 
-				<Path
-					bind:module={target!.module}
-					bind:cls={target!.cls}
-					options={gstore.workspace[
-						`available_${eeeditor.mode!}`
-					].map(({ modules, cls }) => `${modules[0]} ${cls}`)}
-					onconfirm={async (path) => {
+				<EEPath
+					bind:value={target.module_cls}
+					options={gstore.workspace[`available_${eeeditor.mode!}`]}
+					bind:created={target.created}
+					onconfirm={async () => {
+						// Pleasing the type checker
+						if (target === undefined || eeeditor.id === undefined)
+							return;
+						// Create the equipment / experiment
 						if (eeeditor.mode === "equipments")
-							target!.params = await getEquipmentParams(path);
+							await createEquipment(target.id, target.module_cls);
 						else if (eeeditor.mode === "experiments")
-							target!.params = await getExperimentParams(path);
+							await createExperiment(
+								target.id,
+								target.module_cls
+							);
+
 						await tick();
-						target!.temp_params = JSON.parse(
-							JSON.stringify(target!.params)
-						);
+
+						// Fetch the params
+						const params = await getEquipmentParams(target.id);
+						gstore[eeeditor.mode][eeeditor.id] = {
+							...target,
+							created: true,
+							params: { ...params },
+							temp_params: { ...params },
+							name: "",
+						};
 					}} />
 
-				{#if target!.module && target!.cls}
-					<Name bind:name={target!.name} />
-				{/if}
-				{#if target!.temp_params && target!.name}
+				{#if target.created}
+					<Name bind:name={target.name} />
+
 					<div class="row justify-between mt-4 items-end">
 						<div class="title">Parameters</div>
 						<div class="row-1">
@@ -79,28 +94,28 @@
 								<button
 									class="icon-btn-sm red"
 									onclick={() => {
-										target!.temp_params = JSON.parse(
-											JSON.stringify(target!.params)
+										target.temp_params = JSON.parse(
+											JSON.stringify(target.params)
 										);
 									}}><Cancel /></button>
 								<button
 									class="icon-btn-sm green"
 									onclick={async () => {
-										target!.params = JSON.parse(
-											JSON.stringify(target!.temp_params)
+										target.params = JSON.parse(
+											JSON.stringify(target.temp_params)
 										);
 										await tick();
 										if (eeeditor.mode === "equipments")
 											await setEquipmentParams(
-												target!.name!,
-												target!.params!
+												target.name!,
+												target.params!
 											);
 										else if (
 											eeeditor.mode === "experiments"
 										)
 											await setExperimentParams(
-												target!.name!,
-												target!.params!
+												target.name!,
+												target.params!
 											);
 									}}><Disk /></button>
 							{:else}
@@ -109,7 +124,7 @@
 						</div>
 					</div>
 					<div class="grid grid-cols-2 gap-2 min-w-0 w-full">
-						<Params bind:params={target!.temp_params} />
+						<Params bind:params={target.temp_params} />
 					</div>
 				{/if}
 			</div>

@@ -3,17 +3,16 @@
 	import type { AllParamTypes } from "qoslab-shared";
 	import InstanceParam from "./InstanceParam.svelte";
 	import SelectParam from "./SelectParam.svelte";
-	import Separator from "./Separator.svelte";
+	import LabelField from "$components/reuseables/Fields/LabelField.svelte";
+	import DivField from "$components/reuseables/Fields/DivField.svelte";
 
 	let { params = $bindable() }: { params: Record<string, AllParamTypes> } =
 		$props();
 </script>
 
-{#each Object.entries(params) as [name, param]}
+{#each Object.entries(params) as [key, param]}
 	{#if param.type === "int" || param.type === "float"}
-		<label class="row-2 bg-white wrapped">
-			<div class="editor-label">{name}</div>
-			<Separator />
+		<LabelField {key}>
 			<input
 				type="number"
 				class=""
@@ -28,11 +27,9 @@
 			{#if param.suffix}
 				{param.suffix}
 			{/if}
-		</label>
+		</LabelField>
 	{:else if param.type === "bool"}
-		<div class="row-2 bg-white wrapped w-full">
-			<div class="editor-label">{name}</div>
-			<Separator />
+		<DivField {key}>
 			<div class="grid grid-cols-2 flex-grow">
 				<button
 					class={cn(
@@ -53,21 +50,19 @@
 						param.value = false;
 					}}>False</button>
 			</div>
-		</div>
+		</DivField>
 	{:else if param.type === "str"}
-		<label class="row-2 bg-white wrapped col-span-2">
-			<div class="editor-label">{name}</div>
-			<Separator />
+		<LabelField {key}>
 			<input
 				type="text"
 				class="flex-grow"
 				bind:value={param.value}
 				onfocus={autofocus} />
-		</label>
+		</LabelField>
 	{:else if param.type === "select.str" || param.type === "select.int" || param.type === "select.float"}
-		<SelectParam {name} bind:value={param.value} options={param.options} />
+		<SelectParam {key} bind:value={param.value} options={param.options} />
 	{:else if param.type === "instance"}
-		<InstanceParam {name} bind:instance_name={param.instance_name} />
+		<InstanceParam {key} bind:instance_name={param.instance_name} />
 	{:else}
 		{param.type} is not handled !!!
 	{/if}

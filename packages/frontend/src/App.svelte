@@ -3,9 +3,9 @@
 	import ProjectPath from "$components/modules/ProjectPath.svelte";
 
 	import Editor from "$components/modules/Editor/Editor.svelte";
-	import EquipmentList from "$components/modules/EquipmentList.svelte";
-	import ExperimentList from "$components/modules/ExperimentList.svelte";
-	import DependencyList from "$components/modules/DependencyList.svelte";
+	import EquipmentList from "$components/modules/List/EquipmentList.svelte";
+	import ExperimentList from "$components/modules/List/ExperimentList.svelte";
+	import DependencyList from "$components/modules/List/DependencyList.svelte";
 	import { gstore } from "$states/global.svelte";
 	import ExperimentRunner from "$components/modules/ExperimentRunner.svelte";
 </script>

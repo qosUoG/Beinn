@@ -1,5 +1,4 @@
 <script lang="ts">
-	import Input from "$components/reuseables/Input.svelte";
 	import { retryOnError } from "$components/utils.svelte";
 	import { getRandomId } from "$lib/utils";
 
@@ -16,7 +15,7 @@
 	<div class="w-fit wrapped text-nowrap bg-slate-200 flex items-center">
 		Project Directory
 	</div>
-	<Input
+	<input
 		spellcheck="false"
 		class="flex-grow wrapped bg-slate-200"
 		type="text"

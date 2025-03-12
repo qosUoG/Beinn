@@ -17,16 +17,16 @@ router = APIRouter()
 
 
 class AvailableExperimentsPayload(BaseModel):
-    names: list[str]
+    prefixes: list[str]
 
 
 @router.post("/experiment/available_experiments")
 async def available_experiments(payload: AvailableExperimentsPayload):
-    return getAvailableEEs(ExperimentABC, payload.names)
+    return getAvailableEEs(ExperimentABC, payload.prefixes)
 
 
 class CreateExperimentPayload(BaseModel):
-    name: str
+    id: str
     module: str
     cls: str
 
@@ -34,29 +34,28 @@ class CreateExperimentPayload(BaseModel):
 @router.post("/experiment/create")
 async def create_experiment(payload: CreateExperimentPayload):
     _class = getattr(importlib.import_module(payload.module), payload.cls)
-    AppState.experiments[payload.name] = _class()
+    AppState.experiments[payload.id] = _class()
 
 
 class GetParamsPayload(BaseModel):
-    name: str
+    id: str
 
 
 @router.post("/experiment/get_params")
 async def get_params(payload: GetParamsPayload):
-    return AppState.experiments[payload.name].params
+    return AppState.experiments[payload.id].params
 
 
 class SetParamPayload(BaseModel):
     params: ParamModels
-    # Experiment name
-    name: str
-    # param name
+    # Experiment id
+    id: str
 
 
 @router.post("/experiment/set_params")
 async def set_params(payload: SetParamPayload):
     for [param_name, param] in payload.params.items():
-        AppState.experiments[payload.name].params[param_name] = populateParam(param)
+        AppState.experiments[payload.id].params[param_name] = populateParam(param)
 
 
 class StartExperimentPayload(BaseModel):

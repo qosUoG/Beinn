@@ -17,16 +17,16 @@ router = APIRouter()
 
 
 class AvailableEquipmentsPayload(BaseModel):
-    names: list[str]
+    prefixes: list[str]
 
 
 @router.post("/equipment/available_equipments")
 async def available_equipments(payload: AvailableEquipmentsPayload):
-    return getAvailableEEs(EquipmentABC, payload.names)
+    return getAvailableEEs(EquipmentABC, payload.prefixes)
 
 
 class CreateEquipmentPayload(BaseModel):
-    name: str
+    id: str
     module: str
     cls: str
 
@@ -34,23 +34,22 @@ class CreateEquipmentPayload(BaseModel):
 @router.post("/equipment/create")
 async def create_equipment(payload: CreateEquipmentPayload):
     _class = getattr(importlib.import_module(payload.module), payload.cls)
-    AppState.equipments[payload.name] = _class()
+    AppState.equipments[payload.id] = _class()
 
 
 class GetParamsPayload(BaseModel):
-    name: str
+    id: str
 
 
 @router.post("/equipment/get_params")
 async def get_params(payload: GetParamsPayload):
-    return AppState.equipments[payload.name].params
+    return AppState.equipments[payload.id].params
 
 
 class SetParamPayload(BaseModel):
     params: ParamModels
-    # Equipment name
-    name: str
-    # param name
+    # Equipment id
+    id: str
 
 
 @router.post("/equipment/set_params")

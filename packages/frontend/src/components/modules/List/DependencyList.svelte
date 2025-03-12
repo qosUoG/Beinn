@@ -4,12 +4,12 @@
 	import { getRandomId } from "$lib/utils";
 	import { gstore } from "$states/global.svelte";
 	import { tick } from "svelte";
-	import { dependency_editor } from "./Editor/DependencyEditorController.svelte";
-	import { editor } from "./Editor/EditorController.svelte";
+	import { dependency_editor } from "../Editor/Dependency/DependencyEditorController.svelte";
+	import { editor } from "../Editor/EditorController.svelte";
 	import ExclamationMark from "$icons/ExclamationMark.svelte";
 	import Reload from "$icons/Reload.svelte";
 	import { readAllUvDependencies } from "$services/backend.svelte";
-	import { eeeditor } from "./Editor/EEEditorController.svelte";
+	import { eeeditor } from "../Editor/EE/EEEditorController.svelte";
 	import { type Dependency } from "qoslab-shared";
 </script>
 

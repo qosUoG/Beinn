@@ -1,45 +1,61 @@
 import type { AllParamTypes } from "./params"
 
-export interface Experiment {
-    id: string
-    name?: string
-    module?: string,
-    cls?: string,
-    params?: Record<string, AllParamTypes>
-    temp_params?: Record<string, AllParamTypes>
+export type ModuleCls = {
+    module: string,
+    cls: string
 }
 
-export interface Equipment {
+export type Experiment = {
+    created: false
     id: string
-    name?: string
-    module?: string,
-    cls?: string,
-    params?: Record<string, AllParamTypes>
-    temp_params?: Record<string, AllParamTypes>
+    // created in the python qoslabapp?
+    // If created, the module and cls would be defined
+    // the params would be collected as well
+    module_cls: ModuleCls
+} | {
+    created: true
+    id: string
+
+    module_cls: ModuleCls
+
+    name: string
+    params: Record<string, AllParamTypes>
+    temp_params: Record<string, AllParamTypes>
 }
+
+export type Equipment = Experiment
 
 export interface Directory {
     files: string[],
     dirs: Record<string, Directory>
 }
 
-export interface Dependency {
+export type Dependency = {
     id: string
-    source?: {
-        type: "git",
-        git: string,
-        subdirectory: string,
-    } | {
-        type: "path",
-        path: string
-    } | {
-        type: "pip"
-    } | {
-        type: "local",
-    }
+    confirmed: false
+} | {
+    id: string
+    source: DependencySource
 
-    name?: string,
-    fullname?: string,
+    name: string,
+    fullname: string,
 
-    confirmed: boolean
+    confirmed: true
+}
+
+export type DependencySource = {
+    type: "git",
+    git: string,
+    subdirectory: string,
+    branch: string
+} | {
+    type: "path",
+    path: string,
+    editable: boolean
+} | {
+    type: "pip",
+    package: string
+} | {
+    type: "local",
+    directory: string
 }
