@@ -48,7 +48,9 @@ def getAvailableEEs(eeABC: EEABC, names: list[str]):
                 print(package.name)
 
             try:
-                for [cls, clsT] in inspect.getmembers(importlib.import_module(module)):
+                for [cls, clsT] in inspect.getmembers(
+                    importlib.import_module(module), inspect.isclass
+                ):
                     if (
                         not issubclass(clsT, eeABC)
                         or clsT is ExperimentABC
