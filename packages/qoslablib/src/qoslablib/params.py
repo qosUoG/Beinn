@@ -1,8 +1,8 @@
 from ast import TypeVar
-from typing import Literal
+from typing import Generic, Literal
 
 from pydantic import BaseModel, Field
-from pydantic.generics import GenericModel
+from pydantic.generics import BaseModel, Generic
 
 
 class SelectStrParam(BaseModel):
@@ -73,23 +73,26 @@ def boolParam(default: bool) -> BoolParam:
     return {"type": "bool", "value": default}
 
 
-class InstanceEquipmentParam[T](GenericModel):
+T = TypeVar("T")
+
+
+class InstanceEquipmentParam(BaseModel, Generic[T]):
     type: Literal["instance.equipment"]
     instance_name: str
     instance: T | None = Field(exclude=True)
 
 
-def instance_equipmentParam[T]() -> InstanceEquipmentParam[T]:
+def instance_equipmentParam() -> InstanceEquipmentParam:
     return {"type": "instance.equipment", "instance_name": "", "instance": None}
 
 
-class InstanceExperimentParam[T](GenericModel):
+class InstanceExperimentParam(BaseModel, Generic[T]):
     type: Literal["instance.experiment"]
     instance_name: str
     instance: T | None = Field(exclude=True)
 
 
-def instance_experimentParam[T]() -> InstanceExperimentParam[T]:
+def instance_experimentParam() -> InstanceExperimentParam:
     return {"type": "instance.experiment", "instance_name": "", "instance": None}
 
 
