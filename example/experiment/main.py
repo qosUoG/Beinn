@@ -1,4 +1,5 @@
 import importlib
+import inspect
 import pkgutil
 
 
@@ -8,13 +9,12 @@ def main():
 
 if __name__ == "__main__":
     import qoslablib
-    import examplelib.ExampleDriver
+    import examplelib
 
-    print(
-        issubclass(
-            examplelib.ExampleDriver.ExampleEquipment, qoslablib.runtime.EquipmentABC
-        )
-    )
+    for [cls, clsT] in inspect.getmembers(
+        importlib.import_module("examplelib.ExampleDriver"), inspect.isclass
+    ):
+        print(cls)
 
     # def inside():
     #     warnings.filterwarnings("error")

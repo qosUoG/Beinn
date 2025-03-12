@@ -95,8 +95,8 @@ class ExampleEquipment(r.EquipmentABC):
     # Define equipment properties as follows:
     # @property decorator allows the instance method to be executed as if it is a instance attribute
     # In other words, it intercepts during instance attribute acquisition and assignment
-    @r.EquipmentTLock
     @property
+    @r.EquipmentTLock
     def power(self):
         # # In real life one should do something with the equipment,
         # # Which shall be acuired with pyvisa
@@ -108,8 +108,8 @@ class ExampleEquipment(r.EquipmentABC):
     # The value assigned is passed as the second argument in the parameter list,
     # "value" for the example below
 
-    @r.EquipmentTLock
     @power.setter
+    @r.EquipmentTLock
     def power(self, input: int):
         self._power = input
 
