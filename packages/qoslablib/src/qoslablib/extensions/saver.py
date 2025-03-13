@@ -103,7 +103,7 @@ class XYSqlSaver(SqlSaverABC):
         self._save_fn(frame)
 
     @override
-    def getInsertSqlTemplate(self, table_name: str):
+    def getInsertSql(self, table_name: str):
         return f"""
         INSERT INTO "{table_name}" VALUES(:{self.x_name},{"".join([f":{y_name}," for y_name in self.y_names])})
     """
