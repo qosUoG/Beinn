@@ -34,8 +34,9 @@ class CreateExperimentPayload(BaseModel):
 
 @router.post("/experiment/create")
 async def create_experiment(payload: CreateExperimentPayload):
-    _class = getattr(importlib.import_module(payload.module), payload.cls)
-    AppState.experiments[payload.id] = _class()
+    AppState.createExperiment(
+        payload.id, getattr(importlib.import_module(payload.module), payload.cls)
+    )
 
 
 class GetParamsPayload(BaseModel):

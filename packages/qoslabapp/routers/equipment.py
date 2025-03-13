@@ -34,8 +34,9 @@ class CreateEquipmentPayload(BaseModel):
 
 @router.post("/equipment/create")
 async def create_equipment(payload: CreateEquipmentPayload):
-    _class = getattr(importlib.import_module(payload.module), payload.cls)
-    AppState.equipments[payload.id] = _class()
+    AppState.createEquipment(
+        payload.id, getattr(importlib.import_module(payload.module), payload.cls)
+    )
 
 
 class GetParamsPayload(BaseModel):

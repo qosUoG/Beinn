@@ -1,13 +1,17 @@
 from abc import ABC, abstractmethod
 from dataclasses import dataclass
 
-from typing import Callable, TypedDict, Unpack, override
+from typing import Any, Callable, TypedDict, Unpack, override
 
 
 @dataclass
 class SqlSaverABC(ABC):
     _initialize_fn: Callable[[], None]
     _save_fn: Callable[[dict[str, float]], None]
+
+    @abstractmethod
+    def initialize(self) -> None:
+        self._initialize_fn()
 
     @abstractmethod
     def kwargs[KW](self, **kwargs: Unpack[KW]) -> KW:
@@ -20,18 +24,14 @@ class SqlSaverABC(ABC):
         raise NotImplementedError
 
     @abstractmethod
-    def getConfig(self):
-        # This function returns the config of the saver
-        raise NotImplementedError
-
-    @abstractmethod
-    def getColumnsDefinition(self) -> str:
+    def getCreateTableSql(self, table_name: str) -> str:
         # This function returns the string used for the sql creating table
         raise NotImplementedError
 
     @abstractmethod
-    def initialize(self) -> None:
-        self._initialize_fn()
+    def getInsertSql(self, table_name: str) -> str:
+        # This function returns the string used for the sql creating table
+        raise NotImplementedError
 
 
 class SqlSaverHolderABC(ABC):
@@ -39,7 +39,7 @@ class SqlSaverHolderABC(ABC):
 
     @classmethod
     @abstractmethod
-    def createSqlSaver[T: SqlSaverABC, KW](cls, sql_saverT: T, kwargs: KW) -> T:
+    def createSqlSaver[T: SqlSaverABC](cls, sql_saverT: type[T], **kwargs: Any) -> T:
         # This method returns a plot object
         raise NotImplementedError
 
@@ -55,6 +55,11 @@ class XYSqlSaver(SqlSaverABC):
         x_name: str
         y_names: list[str]
 
+    title: str
+    x_name: str
+    y_names: list[str]
+    config: Config
+
     def __init__(
         self,
         save_fn: Callable[[dict[str, float]], None],
@@ -65,7 +70,7 @@ class XYSqlSaver(SqlSaverABC):
         self.x_name = kwargs.x_name
         self.y_names = kwargs.y_names
 
-        self.config: XYSqlSaver.Config = {
+        self.config = {
             "title": self.title,
             "x_name": self.x_name,
             "y_names": self.y_names,
@@ -79,18 +84,25 @@ class XYSqlSaver(SqlSaverABC):
         return kwargs
 
     @override
-    def getConfig(self) -> Config:
-        return self.config
-
-    @override
-    def getColumnsDefinition(self) -> str:
-        res = "timestamp INTEGER PRIMARY KEY"
-        res += f",\n{self.x_name} REAL"
-        for y_name in self.y_names:
-            res += f",\n{y_name} REAL"
-
-        return res
+    def getCreateTableSql(self, table_name: str) -> str:
+        return f"""CREATE TABLE "{table_name}" (
+            timestamp INTEGER PRIMARY KEY,
+            {self.x_name} REAL,
+            {"".join([f",\n{y_name} REAL" for y_name in self.y_names])}
+            ) """
 
     @override
     def save(self, frame: dict[str, float]):
+        # Fill in Nones for missing keys
+        for y_name in self.y_names:
+            if y_name not in frame.keys():
+                frame[y_name] = None
+
+        # Execute the functions
         self._save_fn(frame)
+
+    @override
+    def getInsertSqlTemplate(self, table_name: str):
+        return f"""
+        INSERT INTO "{table_name}" VALUES(:{self.x_name},{"".join([f":{y_name}," for y_name in self.y_names])})
+    """
