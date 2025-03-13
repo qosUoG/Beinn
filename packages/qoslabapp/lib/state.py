@@ -28,7 +28,7 @@ class AppState(c.ChartHolderABC, s.SqlSaverHolderABC):
 
     @classmethod
     def createExperiment(cls, id: str, experimentCls: type[r.ExperimentABC]):
-        with AppState.handler_experiment_id_lock():
+        with AppState.handler_experiment_id_lock:
             AppState.handler_experiment_id = id
             AppState.experiments[id] = experimentCls(AppState)
 
@@ -94,7 +94,7 @@ class AppState(c.ChartHolderABC, s.SqlSaverHolderABC):
                 if not AppState.chart_handlers[experiment_id][
                     title
                 ].has_listener.is_set():
-                    with AppState.chart_handlers[experiment_id][title]._lock():
+                    with AppState.chart_handlers[experiment_id][title]._lock:
                         AppState.chart_handlers[experiment_id][title].frames.append(
                             frame
                         )
@@ -130,7 +130,7 @@ class AppState(c.ChartHolderABC, s.SqlSaverHolderABC):
             self.table_name = ""
 
             def _save_fn(frame: FrameT):
-                with AppState.sql_saver_handlers[experiment_id][title]._lock():
+                with AppState.sql_saver_handlers[experiment_id][title]._lock:
                     AppState.sql_saver_handlers[experiment_id][title].frames.append(
                         frame
                     )
@@ -187,7 +187,7 @@ class AppState(c.ChartHolderABC, s.SqlSaverHolderABC):
             time.sleep(5)
             for sql_saver_handlers in AppState.sql_saver_handlers.values():
                 for sql_saver_handler in sql_saver_handlers.values():
-                    with sql_saver_handler._lock():
+                    with sql_saver_handler._lock:
                         cls.sqlite3_cursor.executemany(
                             sql_saver_handler.sql_saver.getInsertSql(
                                 sql_saver_handler.table_name

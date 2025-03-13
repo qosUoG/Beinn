@@ -1,15 +1,14 @@
 from dataclasses import dataclass
-from typing import TypedDict, cast
+from typing import TypedDict
 
 from click import ParamType
 import numpy
 from qoslablib import params as p, exceptions as e, runtime as r
 import time
 
-from qoslablib.extensions.chart import ChartHolderABC, XYPlot, XYPlotKW
+from qoslablib.extensions.chart import XYPlot
 from qoslablib.extensions.saver import XYSqlSaver
 from examplelib.ExampleDriver import ExampleEquipment
-from packages.qoslabapp.lib.state import ChartHandler
 
 
 @dataclass
@@ -59,6 +58,13 @@ class ExampleExperiment(r.ExperimentABC):
         self.saver: XYSqlSaver = holder[XYSqlSaver].createSqlSaver(
             XYSqlSaver,
             XYSqlSaver.kwargs(
+                title="ExampleSqlSaver", x_name="index", y_names=["temperature"]
+            ),
+        )
+
+        self.plot: XYPlot = holder[XYPlot].createSqlSaver(
+            XYPlot,
+            XYPlot.kwargs(
                 title="ExampleSqlSaver", x_name="index", y_names=["temperature"]
             ),
         )

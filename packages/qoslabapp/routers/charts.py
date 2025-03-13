@@ -22,7 +22,7 @@ async def getChartDataWs(title: str, ws: WebSocket):
     try:
         while True:
             await asyncio.sleep(1 / AppState.charts[title].rate)
-            with AppState.charts[title]._lock():
+            with AppState.charts[title]._lock:
                 await asyncio.gather(
                     *[
                         con.send_json({"frames": AppState.charts[title].frames})
