@@ -73,10 +73,10 @@ def getAvailableEEs(eeABC: EEABC, names: list[str]):
 def populateParam(*, param: AllParamTypes):
     match param.type:
         case "instance.equipment":
-            param.instance = AppState.equipments[param.instance_name]
+            param.instance = AppState.equipments[param.instance_id]
 
         case "instance.experiment":
-            param.instance = AppState.experiments[param.instance_name]
+            param.instance = AppState.experiments[param.instance_id]
 
         # case "composite":
         #     # Recursively instantiate params

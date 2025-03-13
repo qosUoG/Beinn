@@ -68,9 +68,7 @@
 		</LabelField>
 	{:else if param.type === "select.str" || param.type === "select.int" || param.type === "select.float"}
 		<SelectParam {key} bind:value={param.value} options={param.options} />
-	{:else if param.type === "instance"}
-		<InstanceParam {key} bind:instance_name={param.instance_name} />
-	{:else}
-		{param.type} is not handled !!!
+	{:else if param.type === "instance.equipment" || param.type === "instance.experiment"}
+		<InstanceParam {key} bind:instance_id={param.instance_id} />
 	{/if}
 {/each}

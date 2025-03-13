@@ -57,7 +57,9 @@ class SetParamsPayload(BaseModel):
 async def set_params(payload: SetParamsPayload):
     params = ParamModels2Params(payload.params)
     for [param_name, param] in params.items():
-        AppState.experiments[payload.id].params[param_name] = populateParam(param)
+        params[param_name] = populateParam(param)
+
+    AppState.experiments[payload.id].params = params
 
 
 class StartExperimentPayload(BaseModel):

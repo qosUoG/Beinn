@@ -9,18 +9,20 @@
 
 	let {
 		key,
-		instance_name = $bindable(),
+		instance_id = $bindable(),
 	}: {
 		key: string;
-		instance_name: string;
+		instance_id: string;
 	} = $props();
 
 	let options = $derived(
 		Object.values(gstore.equipments)
-			.filter((e) => e.created) // Split here for type check sake
+			// Split here for type check sake
+			.filter((e) => e.created)
+			// Name needs to be defiend
 			.filter((e) => e.id !== eeeditor.id && e.name && e.name.length > 0)
-			.map((e) => e.name!)
+			.map((e) => ({ key: e.name, value: e.id }))
 	);
 </script>
 
-<SelectField {key} bind:value={instance_name} {options} />
+<SelectField {key} bind:value={instance_id} {options} />

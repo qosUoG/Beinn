@@ -6,7 +6,11 @@
 		key,
 		value = $bindable(),
 		options,
-	}: { key: string; value: T; options: T[] } = $props();
+	}: {
+		key: string;
+		value: T;
+		options: T[] | { key: string; value: T }[];
+	} = $props();
 </script>
 
 <div class="row-2 bg-white wrapped flex-grow min-w-0 h-full">

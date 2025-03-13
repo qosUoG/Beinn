@@ -66,17 +66,14 @@
 							return;
 						// Create the equipment / experiment
 						if (eeeditor.mode === "equipments")
-							await createEquipment(target.id, target.module_cls);
+							await createEquipment(target);
 						else if (eeeditor.mode === "experiments")
-							await createExperiment(
-								target.id,
-								target.module_cls
-							);
+							await createExperiment(target);
 
 						await tick();
 
 						// Fetch the params
-						const params = await getEquipmentParams(target.id);
+						const params = await getEquipmentParams(target);
 						gstore[eeeditor.mode][eeeditor.id] = {
 							...target,
 							created: true,
@@ -125,17 +122,11 @@
 										);
 										await tick();
 										if (eeeditor.mode === "equipments")
-											await setEquipmentParams(
-												target.name!,
-												target.params!
-											);
+											await setEquipmentParams(target);
 										else if (
 											eeeditor.mode === "experiments"
 										)
-											await setExperimentParams(
-												target.name!,
-												target.params!
-											);
+											await setExperimentParams(target);
 									}}><Disk /></button>
 							{:else}
 								<div class="h-6"></div>

@@ -1,14 +1,14 @@
 <script lang="ts" generics="T extends string | number">
 	import { clickoutside, cn } from "$components/utils.svelte";
 	import { getRandomId } from "$lib/utils";
-	import { tick } from "svelte";
 
 	let {
 		options,
+
 		value = $bindable(),
 	}: {
 		value: T;
-		options: T[];
+		options: T[] | { key: string; value: T }[];
 	} = $props();
 
 	let open = $state(false);
@@ -43,9 +43,21 @@
 						: "hover:bg-slate-300"
 				)}
 				onclick={() => {
-					value = option;
+					if (
+						typeof option === "string" ||
+						typeof option === "number"
+					)
+						value = option;
+					else value = option.value;
+
 					open = false;
-				}}>{option}</button>
+				}}>
+				{#if typeof option === "string" || typeof option === "number"}
+					{option}
+				{:else}
+					{option.key}
+				{/if}
+			</button>
 		{/each}
 	</div>
 {/if}

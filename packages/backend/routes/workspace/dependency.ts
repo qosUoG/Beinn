@@ -35,13 +35,13 @@ export const routes: RouteType = {
         }
     },
 
-    "/workspace/dependency/read": {
-        POST: async req => {
-            const { path, name } = await req.json() as { path: string, name: string }
-            return Response.json({
-                dependency: (await readAllUvDependencies(path)).dependencies
-                    .filter((dependency) => dependency.name = name)[0]
-            }, { headers })
-        }
-    },
+    // "/workspace/dependency/read": {
+    //     POST: async req => {
+    //         const { path, name } = await req.json() as { path: string, name: string }
+    //         return Response.json({
+    //             dependency: (await readAllUvDependencies(path)).dependencies
+    //                 .filter((dependency) => dependency.name = name)[0]
+    //         }, { headers })
+    //     }
+    // },
 }

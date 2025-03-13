@@ -1,4 +1,4 @@
-import { getRandomId } from "$lib/utils";
+
 import { gstore } from "$states/global.svelte";
 import type { Dependency } from "qoslab-shared";
 import { backendUrl, postRequestJsonInOut } from "./utils";
@@ -19,9 +19,9 @@ export async function readAllUvDependencies(): Promise<Dependency[]> {
     return (await postRequestJsonInOut(backendUrl("workspace/dependency/read_all"), { path: gstore.workspace.path }) as { dependencies: Dependency[] }).dependencies
 }
 
-export async function readUvDependency(name: string): Promise<Dependency> {
-    return (await postRequestJsonInOut(backendUrl("workspace/dependency/read"), { name, path: gstore.workspace.path }) as { dependency: Dependency }).dependency
-}
+// export async function readUvDependency(name: string): Promise<Dependency> {
+//     return (await postRequestJsonInOut(backendUrl("workspace/dependency/read"), { name, path: gstore.workspace.path }) as { dependency: Dependency }).dependency
+// }
 
 export async function checkDependencyInit(directory: string): Promise<{ success: boolean }> {
     return await postRequestJsonInOut(backendUrl("workspace/dependency/check_init"), { directory, path: gstore.workspace.path })

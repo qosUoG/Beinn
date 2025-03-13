@@ -41,18 +41,26 @@ export interface BoolParam {
     value: boolean
 }
 
-export interface InstanceParam {
-    type: "instance"
-    instance_name: string
+export interface InstanceEquipmentParam {
+    type: "instance.equipment"
+    instance_id: string
+    instance: string
+}
+
+export interface InstanceExperimentParam {
+    type: "instance.experiment"
+    instance_id: string
     instance: string
 }
 
 export type AllParamTypes = (
-    SelectStrParam | SelectFloatParam | SelectIntParam | IntParam | FloatParam | StrParam | BoolParam | CompositeParam | InstanceParam
+    SelectStrParam | SelectFloatParam | SelectIntParam | IntParam | FloatParam | StrParam | BoolParam |
+    //  CompositeParam |
+    InstanceEquipmentParam | InstanceExperimentParam
 )
 
 
-export interface CompositeParam {
-    type: "composite"
-    children: Record<string, AllParamTypes>
-}
+// export interface CompositeParam {
+//     type: "composite"
+//     children: Record<string, AllParamTypes>
+// }
