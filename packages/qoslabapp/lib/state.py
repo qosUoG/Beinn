@@ -23,11 +23,11 @@ class AppState(c.ChartHolderABC, s.SqlSaverHolderABC):
     experiments: dict[str, r.ExperimentABC] = {}
 
     @classmethod
-    def createEquipment(id: str, equipmentCls: type[r.EquipmentABC]):
+    def createEquipment(cls, id: str, equipmentCls: type[r.EquipmentABC]):
         AppState.equipments[id] = equipmentCls()
 
     @classmethod
-    def createExperiment(id: str, experimentCls: type[r.ExperimentABC]):
+    def createExperiment(cls, id: str, experimentCls: type[r.ExperimentABC]):
         with AppState.handler_experiment_id_lock():
             AppState.handler_experiment_id = id
             AppState.experiments[id] = experimentCls(AppState)
