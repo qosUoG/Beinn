@@ -55,7 +55,7 @@
 				{#if typeof option === "string" || typeof option === "number"}
 					{option}
 				{:else}
-					{option.key}
+					{option.value}
 				{/if}
 			</button>
 		{/each}
