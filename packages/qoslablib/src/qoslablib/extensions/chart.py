@@ -11,6 +11,9 @@ class ChartABC(ABC):
     _initialize_fn: Callable[[], None]
     _plot_fn: Callable[[dict[str, float]], None]
 
+    def initialize(self) -> None:
+        self._initialize_fn()
+
     @classmethod
     @abstractmethod
     def kwargs[T](self, **kwargs: T) -> T:
@@ -50,6 +53,7 @@ class XYPlot(ChartABC):
 
     def __init__(
         self,
+        initialize_fn: Callable[[], None],
         plot_fn: Callable[[dict[str, float]], None],
         **kwargs: Unpack[KW],
     ):
@@ -61,6 +65,7 @@ class XYPlot(ChartABC):
             "x_name": self.x_name,
             "y_names": self.y_names,
         }
+        self._initialize_fn = initialize_fn
         self._plot_fn = plot_fn
 
     @classmethod

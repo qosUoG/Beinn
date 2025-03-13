@@ -44,6 +44,7 @@ class AppState(c.ChartHolderABC, s.SqlSaverHolderABC):
         cls.experiment_tasks[id] = asyncio.create_task(
             asyncio.to_thread(
                 _experiment_runner,
+                id,
                 cls.experiments[id],
                 cls.experiment_stop_events[id],
                 cls.experiment_pause_events[id],
@@ -77,10 +78,12 @@ class AppState(c.ChartHolderABC, s.SqlSaverHolderABC):
     """
 
     class _ChartHandler[FrameT]:
-        def __init__(self, experiment_id: str, title: str, chart: c.ChartABC):
+        def __init__(
+            self, experiment_id: str, title: str, chartT: type[c.ChartABC], kwargs: Any
+        ):
             self.title = title
             self.frames: list[FrameT] = []
-            self.chart = chart
+
             self.experiment_id = experiment_id
 
             self._lock = Lock()
@@ -89,6 +92,9 @@ class AppState(c.ChartHolderABC, s.SqlSaverHolderABC):
             self.connections: list[WebSocket] = []
 
             self.has_listener = Event()
+
+            def _initialize_fn():
+                pass
 
             def _plot_fn(frame: FrameT):
                 if not AppState.chart_handlers[experiment_id][
@@ -99,7 +105,9 @@ class AppState(c.ChartHolderABC, s.SqlSaverHolderABC):
                             frame
                         )
 
-            self.chart._plot_fn = _plot_fn
+            self.chart = chartT(
+                initialize_fn=_initialize_fn, plot_fn=_plot_fn, **kwargs
+            )
 
     # Manages charts by experiment id and chart name
     chart_handlers: dict[str, dict[str, _ChartHandler]] = {}
@@ -112,7 +120,7 @@ class AppState(c.ChartHolderABC, s.SqlSaverHolderABC):
         title = kwargs["title"]
 
         cls.chart_handlers[AppState.handler_experiment_id][title] = cls._ChartHandler(
-            AppState.handler_experiment_id, title, chartT(**kwargs)
+            AppState.handler_experiment_id, title, chartT, kwargs
         )
         return cls.chart_handlers[AppState.handler_experiment_id][title].chart
 
@@ -121,10 +129,16 @@ class AppState(c.ChartHolderABC, s.SqlSaverHolderABC):
     """
 
     class _SqlSaverHandler[FrameT]:
-        def __init__(self, experiment_id: str, title: str, sql_saver: s.SqlSaverABC):
+        def __init__(
+            self,
+            experiment_id: str,
+            title: str,
+            sql_saverT: type[s.SqlSaverABC],
+            kwargs: Any,
+        ):
             self.title = title
             self.frames: list[FrameT] = []
-            self.sql_saver = sql_saver
+
             self._lock = Lock()
             self.experiment_id = experiment_id
 
@@ -139,13 +153,16 @@ class AppState(c.ChartHolderABC, s.SqlSaverHolderABC):
             def _initialize_fn():
                 # Create table with name and timestamp (ms)
                 table_name = f"{title} timestamp:{int(time.time() * 1000)}"
-                sql = sql_saver.getCreateTableSql(table_name)
+                sql = AppState.sql_saver_handlers[experiment_id][
+                    title
+                ].sql_saver.getCreateTableSql(table_name)
                 print(sql)
 
                 AppState.SqlWorker.sqlite3_cursor.executescript(sql)
 
-            self.sql_saver._save_fn = _save_fn
-            self.sql_saver._initialize_fn = _initialize_fn
+            self.sql_saver = sql_saverT(
+                initialize_fn=_initialize_fn, save_fn=_save_fn, **kwargs
+            )
 
     # Manages sql savers by experiment id and sql saver name
     sql_saver_handlers: dict[str, dict[str, _SqlSaverHandler]] = {}
@@ -160,7 +177,7 @@ class AppState(c.ChartHolderABC, s.SqlSaverHolderABC):
 
         cls.sql_saver_handlers[AppState.handler_experiment_id][title] = (
             cls._SqlSaverHandler(
-                AppState.handler_experiment_id, title, sql_saverT(**kwargs)
+                AppState.handler_experiment_id, title, sql_saverT, kwargs
             )
         )
         return cls.sql_saver_handlers[AppState.handler_experiment_id][title].sql_saver
@@ -217,10 +234,20 @@ class AppState(c.ChartHolderABC, s.SqlSaverHolderABC):
 
 
 def _experiment_runner(
-    experiment: r.ExperimentABC, stop_event: Event, pause_event: Event
+    id: str, experiment: r.ExperimentABC, stop_event: Event, pause_event: Event
 ):
     # First run the inialize method
     experiment.initialize()
+
+    # Initialize the charts of the experiment
+    if id in AppState.chart_handlers:
+        for chart_handler in AppState.chart_handlers[id].values():
+            chart_handler.chart.initialize()
+
+    # Initialize the sql_savers of the experiment
+    if id in AppState.sql_saver_handlers:
+        for sql_saver_handler in AppState.sql_saver_handlers[id].values():
+            sql_saver_handler.sql_saver.initialize()
 
     index = 0
     while True:
