@@ -66,9 +66,9 @@ class XYSqlSaver(SqlSaverABC):
         initialize_fn: Callable[[dict[str, float]], None],
         **kwargs: Unpack[KW],
     ):
-        self.title = kwargs.title
-        self.x_name = kwargs.x_name
-        self.y_names = kwargs.y_names
+        self.title = kwargs["title"]
+        self.x_name = kwargs["x_name"]
+        self.y_names = kwargs["y_names"]
 
         self.config = {
             "title": self.title,
