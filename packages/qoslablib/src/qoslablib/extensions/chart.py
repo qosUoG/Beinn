@@ -11,6 +11,7 @@ class ChartABC(ABC):
     _initialize_fn: Callable[[], None]
     _plot_fn: Callable[[dict[str, float]], None]
 
+    @classmethod
     @abstractmethod
     def kwargs[T](self, **kwargs: T) -> T:
         # This method creates the kwargs object for instantiating the chart
@@ -19,11 +20,6 @@ class ChartABC(ABC):
     @abstractmethod
     def plot(self, frame: Any) -> None:
         # This method plots a frame
-        raise NotImplementedError
-
-    @abstractmethod
-    def getConfig(self) -> Any:
-        # This function returns the config of the plot
         raise NotImplementedError
 
 
@@ -67,13 +63,10 @@ class XYPlot(ChartABC):
         }
         self._plot_fn = plot_fn
 
+    @classmethod
     @override
     def kwargs(self, **kwargs: Unpack[KW]):
         return kwargs
-
-    @override
-    def getConfig(self) -> Config:
-        return self.config
 
     @override
     def plot(self, frame: dict[str, float]):

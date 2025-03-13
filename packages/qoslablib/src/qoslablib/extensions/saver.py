@@ -13,8 +13,9 @@ class SqlSaverABC(ABC):
     def initialize(self) -> None:
         self._initialize_fn()
 
+    @classmethod
     @abstractmethod
-    def kwargs[KW](self, **kwargs: Unpack[KW]) -> KW:
+    def kwargs[KW](cls, **kwargs: Unpack[KW]) -> KW:
         # This method creates the kwargs object for instantiating the chart
         raise NotImplementedError
 
@@ -79,8 +80,9 @@ class XYSqlSaver(SqlSaverABC):
         self._save_fn = save_fn
         self._initialize_fn = initialize_fn
 
+    @classmethod
     @override
-    def kwargs(self, **kwargs: Unpack[KW]):
+    def kwargs(cls, **kwargs: Unpack[KW]):
         return kwargs
 
     @override
