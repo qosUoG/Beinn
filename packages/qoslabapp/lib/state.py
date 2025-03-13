@@ -106,7 +106,8 @@ class AppState(c.ChartHolderABC, s.SqlSaverHolderABC):
 
     @classmethod
     @override
-    def createChart[T: c.ChartABC, KW](cls, chartT: T, name: str, kwargs: KW = {}):
+    def createChart[T: c.ChartABC, KW](cls, chartT: T, kwargs: KW = {}):
+        print(kwargs)
         # The title should be unique
         title = kwargs["title"]
 

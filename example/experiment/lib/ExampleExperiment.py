@@ -55,16 +55,9 @@ class ExampleExperiment(r.ExperimentABC):
             ),
         )
 
-        self.saver: XYSqlSaver = holder[XYSqlSaver].createSqlSaver(
+        self.saver: XYSqlSaver = holder.createSqlSaver(
             XYSqlSaver,
             XYSqlSaver.kwargs(
-                title="ExampleSqlSaver", x_name="index", y_names=["temperature"]
-            ),
-        )
-
-        self.plot: XYPlot = holder[XYPlot].createSqlSaver(
-            XYPlot,
-            XYPlot.kwargs(
                 title="ExampleSqlSaver", x_name="index", y_names=["temperature"]
             ),
         )
