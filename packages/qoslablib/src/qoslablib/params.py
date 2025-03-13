@@ -200,7 +200,7 @@ class InstanceEquipmentParam[T]:
 
     class PydanticBaseModel(BaseModel):
         type: Literal["instance.equipment"]
-        instance_name: str
+        instance_name: str | None
 
         def toParam(self):
             return InstanceEquipmentParam(
@@ -225,7 +225,7 @@ class InstanceExperimentParam[T]:
 
     class PydanticBaseModel(BaseModel):
         type: Literal["instance.experiment"]
-        instance_name: str
+        instance_name: str | None
 
     def __init__(self, instance_name=None):
         self.type = "instance.experiment"

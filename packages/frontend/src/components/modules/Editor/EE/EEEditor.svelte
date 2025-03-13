@@ -4,6 +4,7 @@
 		createEquipment,
 		createExperiment,
 		getEquipmentParams,
+		getExperimentParams,
 		setEquipmentParams,
 		setExperimentParams,
 	} from "$services/qoslabapp.svelte";
@@ -73,7 +74,11 @@
 						await tick();
 
 						// Fetch the params
-						const params = await getEquipmentParams(target);
+						let params;
+						if (eeeditor.mode === "equipments")
+							params = await getEquipmentParams(target);
+						else params = await getExperimentParams(target);
+
 						gstore[eeeditor.mode][eeeditor.id] = {
 							...target,
 							created: true,
