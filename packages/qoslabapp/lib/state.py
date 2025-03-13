@@ -119,6 +119,9 @@ class AppState(c.ChartHolderABC, s.SqlSaverHolderABC):
         # The title should be unique
         title = kwargs["title"]
 
+        if AppState.handler_experiment_id not in AppState.chart_handlers:
+            AppState.chart_handlers[AppState.handler_experiment_id] = {}
+
         cls.chart_handlers[AppState.handler_experiment_id][title] = cls._ChartHandler(
             AppState.handler_experiment_id, title, chartT, kwargs
         )
@@ -174,6 +177,9 @@ class AppState(c.ChartHolderABC, s.SqlSaverHolderABC):
         cls._startSqlWorker()
 
         title = kwargs["title"]
+
+        if AppState.handler_experiment_id not in AppState.sql_saver_handlers:
+            AppState.sql_saver_handlers[AppState.handler_experiment_id] = {}
 
         cls.sql_saver_handlers[AppState.handler_experiment_id][title] = (
             cls._SqlSaverHandler(
