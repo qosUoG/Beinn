@@ -1,5 +1,5 @@
 <script lang="ts">
-	import GenericList from "$components/modules/List/GenericList.svelte";
+	import EEList from "$components/modules/List/EEList.svelte";
 </script>
 
-<GenericList listtype="equipments" />
+<EEList listtype="equipments" />

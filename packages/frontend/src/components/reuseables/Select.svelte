@@ -32,10 +32,12 @@
 			open = false;
 		}}
 		class="absolute left-0 top-6 bg-white col z-10 shadow-xl rounded min-w-full">
-		{#each options as option}
+		{#each options as option, i}
 			<button
 				class={cn(
-					" wrapped  text-nowrap text-left",
+					" wrapped  text-nowrap text-left rounded-none",
+					i === 0 ? "rounded-t" : "",
+					i === options.length - 1 ? "rounded-b" : "",
 					value === option
 						? "bg-slate-500 text-slate-50"
 						: "hover:bg-slate-300"

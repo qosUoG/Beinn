@@ -11,12 +11,14 @@
 
 	import { tick } from "svelte";
 	import { eeeditor } from "./EEEditorController.svelte";
-	import Name from "./Name.svelte";
 	import Params from "./Params.svelte";
 	import EEPath from "./EEPath.svelte";
 	import Cancel from "$icons/Cancel.svelte";
 
 	import Disk from "$icons/Disk.svelte";
+	import FixedField from "$components/reuseables/Fields/FixedField.svelte";
+	import LabelField from "$components/reuseables/Fields/LabelField.svelte";
+	import { autofocus } from "$components/utils.svelte";
 
 	let target = $derived.by(() => {
 		if (eeeditor.id === undefined) return undefined;
@@ -85,10 +87,27 @@
 					}} />
 
 				{#if target.created}
-					<Name bind:name={target.name} />
+					<div class="row justify-between mt-4 items-end">
+						<div class="title bg-white wrapped">Instance</div>
+					</div>
+					<FixedField key="id" value={target.id} />
+					<LabelField key="Name">
+						<input
+							type="text"
+							class="w-full"
+							onkeydown={(e: KeyboardEvent) => {
+								if (e.key === "Backspace" || e.key === "Delete")
+									return;
+								if (/[A-Za-z0-9_\- ]/.test(e.key)) return;
+
+								e.preventDefault();
+							}}
+							bind:value={target.name}
+							onfocus={autofocus} />
+					</LabelField>
 
 					<div class="row justify-between mt-4 items-end">
-						<div class="title">Parameters</div>
+						<div class="title bg-white wrapped">Parameters</div>
 						<div class="row-1">
 							{#if params_edited}
 								<button

@@ -44,10 +44,10 @@
 				onconfirm();
 			}}><Tick /></button>
 	{:else}
-		<div class="row-2">
-			<FixedField key="Module" value={value.module} />
-			<FixedField key="Class" value={value.cls} />
-		</div>
+		<FixedField
+			key="Class"
+			value={`from ${value.module} import ${value.cls}`} />
+
 		<!-- <div class="row-1">
 			<button
 				class="icon-btn-sm slate"

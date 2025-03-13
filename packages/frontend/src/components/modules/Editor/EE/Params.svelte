@@ -18,8 +18,15 @@
 				class=""
 				bind:value={param.value}
 				onkeydown={(e: KeyboardEvent) => {
-					if (e.key === "Backspace" || e.key === "Delete") return;
+					if (
+						e.key === "Backspace" ||
+						e.key === "Delete" ||
+						e.key === "ArrowLeft" ||
+						e.key === "ArrowRight"
+					)
+						return;
 					if (/[0-9]/.test(e.key)) return;
+					if (e.key === "." && param.type === "float") return;
 
 					e.preventDefault();
 				}}

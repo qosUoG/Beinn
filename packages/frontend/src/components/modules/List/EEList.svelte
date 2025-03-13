@@ -72,7 +72,7 @@
 				eeeditor.mode = listtype;
 			}}
 			id={`equipment-${target.id}`}>
-			{#if "name" in target}
+			{#if "name" in target && target.name !== ""}
 				<div>
 					{target.name}
 				</div>

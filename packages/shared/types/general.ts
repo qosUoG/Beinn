@@ -19,6 +19,7 @@ export type Experiment = {
     module_cls: ModuleCls
 
     name: string
+
     params: Record<string, AllParamTypes>
     temp_params: Record<string, AllParamTypes>
 }
