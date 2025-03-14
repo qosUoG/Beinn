@@ -42,19 +42,13 @@
 				}}
 				class=" absolute left-0 top-6 bg-white col z-10 shadow-xl rounded min-w-full">
 				{#each options as { cls, modules }}
-					<div
-						class={cn(
-							" wrapped col",
-							value.cls === cls
-								? "bg-slate-500 text-slate-50"
-								: "hover:bg-slate-300"
-						)}>
+					<div class={cn(" wrapped col group")}>
 						<div
 							class={cn(
 								" wrapped ",
 								value.cls === cls
 									? "bg-slate-500 text-slate-50"
-									: "hover:bg-slate-300"
+									: "group-hover:bg-slate-300"
 							)}>
 							{cls}
 						</div>

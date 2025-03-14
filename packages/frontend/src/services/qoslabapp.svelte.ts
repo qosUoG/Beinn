@@ -1,10 +1,10 @@
 import { gstore } from "$states/global.svelte";
-import type { AllParamTypes, Experiment } from "qoslab-shared";
+import type { AllParamTypes, ChartConfigs, EEType } from "qoslab-shared";
 import { postRequestJsonInOut, qoslabappUrl } from "./utils";
 
-type EEType = "equipment" | "experiment"
 
-async function getAvailableEEs(eetype: EEType): Promise<typeof gstore.workspace.available_equipments> {
+
+export async function getAvailableEEs(eetype: EEType): Promise<typeof gstore.workspace.available_equipments> {
     return await postRequestJsonInOut(
         qoslabappUrl(`${eetype}/available_${eetype}s`), {
         prefixes: $state.snapshot(
@@ -14,40 +14,25 @@ async function getAvailableEEs(eetype: EEType): Promise<typeof gstore.workspace.
     })
 }
 
-export const getAvailableEquipments = async () => await getAvailableEEs("equipment")
-export const getAvailableExperiments = async () => await getAvailableEEs("experiment")
-
-
-type OmitFirstParamType<T extends (...args: any) => any> = T extends (
-    ignored: infer _,
-    ...args: infer P
-) => any ? P : never
-
-async function createEE(eetype: EEType, payload: { id: string, module_cls: { module: string, cls: string } }) {
+export async function createEE(eetype: EEType, payload: { id: string, module_cls: { module: string, cls: string } }) {
     await postRequestJsonInOut(qoslabappUrl(`${eetype}/create`), { id: payload.id, ...payload.module_cls })
 }
 
-export const createEquipment = async (...args: OmitFirstParamType<typeof createEE>) => await createEE("equipment", ...args)
-
-export const createExperiment = async (...args: OmitFirstParamType<typeof createEE>) => await createEE("experiment", ...args)
-
-
-async function getEEParams(eetype: EEType, payload: { id: string }): Promise<Record<string, AllParamTypes>> {
+export async function getEEParams(eetype: EEType, payload: { id: string }): Promise<Record<string, AllParamTypes>> {
     return await postRequestJsonInOut(qoslabappUrl(`${eetype}/get_params`), payload)
 }
 
-export const getEquipmentParams = async (...args: OmitFirstParamType<typeof getEEParams>) => await getEEParams("equipment", ...args)
-
-export const getExperimentParams = async (...args: OmitFirstParamType<typeof getEEParams>) => await getEEParams("experiment", ...args)
-
-
-async function setEEParams(eetype: EEType, payload: { id: string, params: Record<string, AllParamTypes> }) {
+export async function setEEParams(eetype: EEType, payload: { id: string, params: Record<string, AllParamTypes> }) {
     await postRequestJsonInOut(qoslabappUrl(`${eetype}/set_params`), payload)
 }
 
-export const setEquipmentParams = async (...args: OmitFirstParamType<typeof setEEParams>) => await setEEParams("equipment", ...args)
+export async function removeEE(eetype: EEType, payload: { id: string }) {
+    await postRequestJsonInOut(qoslabappUrl(`${eetype}/remove`), payload)
+}
 
-export const setExperimentParams = async (...args: OmitFirstParamType<typeof setEEParams>) => await setEEParams("experiment", ...args)
+export async function getChartConfigsByExperimentId(payload: { id: string }): Promise<{ charts: Record<string, ChartConfigs> }> {
+    return await (await fetch(qoslabappUrl(`chart/${payload.id}/configs`))).json()
+}
 
 
 // export async function startExperiment(experiments: Experiment[]): Promise<void> {

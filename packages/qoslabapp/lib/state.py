@@ -33,6 +33,20 @@ class AppState(c.ChartHolderABC, s.SqlSaverHolderABC):
             AppState.experiments[id] = experimentCls(AppState)
 
     @classmethod
+    def removeEquipment(cls, id: str):
+        del AppState.equipments[id]
+
+    @classmethod
+    def removeExperiment(cls, id: str):
+        del AppState.experiments[id]
+
+        if id in AppState.chart_handlers:
+            del AppState.chart_handlers[id]
+
+        if id in AppState.sql_saver_handlers:
+            del AppState.sql_saver_handlers[id]
+
+    @classmethod
     def startExperiment(cls, id: str):
         # Run initialization of sql savers of the experiment if needed
         if id in cls.sql_saver_handlers:

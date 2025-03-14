@@ -2,4 +2,4 @@
 	import EEList from "$components/modules/List/EEList.svelte";
 </script>
 
-<EEList listtype="experiments" />
+<EEList eetype="experiment" />

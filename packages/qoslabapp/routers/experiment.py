@@ -39,6 +39,15 @@ async def create_experiment(payload: CreateExperimentPayload):
     )
 
 
+class RemoveExperimentPayload(BaseModel):
+    id: str
+
+
+@router.post("/experiment/remove")
+async def remove_experiment(payload: RemoveExperimentPayload):
+    AppState.removeExperiment(payload.id)
+
+
 class GetParamsPayload(BaseModel):
     id: str
 

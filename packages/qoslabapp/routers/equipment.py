@@ -39,6 +39,15 @@ async def create_equipment(payload: CreateEquipmentPayload):
     )
 
 
+class RemoveEquipmentPayload(BaseModel):
+    id: str
+
+
+@router.post("/equipment/remove")
+async def remove_equipment(payload: RemoveEquipmentPayload):
+    AppState.removeEquipment(payload.id)
+
+
 class GetParamsPayload(BaseModel):
     id: str
 

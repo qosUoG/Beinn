@@ -11,16 +11,14 @@
 	import FolderQuestion from "$icons/FolderQuestion.svelte";
 	import Sign from "$icons/Sign.svelte";
 
-	import {
-		getAvailableEquipments,
-		getAvailableExperiments,
-	} from "$services/qoslabapp.svelte";
+	import { getAvailableEEs } from "$services/qoslabapp.svelte";
 	import { editor } from "$components/modules/Editor/EditorController.svelte";
 	import { dependency_editor } from "$components/modules/Editor/Dependency/DependencyEditorController.svelte";
+	import { capitalise } from "qoslab-shared";
 
-	let { listtype }: { listtype: "equipments" | "experiments" } = $props();
+	let { eetype }: { eetype: "equipment" | "experiment" } = $props();
 
-	const capitalised = listtype[0].toUpperCase() + String(listtype).slice(1);
+	const capitalised = capitalise(eetype);
 </script>
 
 <div class="container col-2 bg-slate-200">
@@ -32,28 +30,24 @@
 		<button
 			class="icon-btn-sm slate"
 			onclick={async () => {
-				const id = getRandomId(Object.keys(gstore[listtype]));
-				gstore[listtype][id] = {
+				const id = getRandomId(Object.keys(gstore[`${eetype}s`]));
+				gstore[`${eetype}s`][id] = {
 					id,
 					created: false,
 					module_cls: { module: "", cls: "" },
 				};
 
-				if (listtype === "equipments")
-					gstore.workspace.available_equipments =
-						await getAvailableEquipments();
-				else if (listtype === "experiments")
-					gstore.workspace.available_experiments =
-						await getAvailableExperiments();
+				gstore.workspace[`available_${eetype}s`] =
+					await getAvailableEEs(eetype);
 
 				await tick();
 				editor.mode = "ee";
 				eeeditor.id = id;
-				eeeditor.mode = listtype;
+				eeeditor.mode = eetype;
 				dependency_editor.id = undefined;
 			}}><Plus /></button>
 	</div>
-	{#each Object.values(gstore[listtype]) as target}
+	{#each Object.values(gstore[`${eetype}s`]) as target}
 		{@const params_edited = target.created
 			? JSON.stringify(target.temp_params) !==
 				JSON.stringify(target.params)
@@ -69,7 +63,7 @@
 				editor.mode = "ee";
 				dependency_editor.id = undefined;
 				eeeditor.id = target.id;
-				eeeditor.mode = listtype;
+				eeeditor.mode = eetype;
 			}}
 			id={`equipment-${target.id}`}>
 			{#if "name" in target && target.name !== ""}

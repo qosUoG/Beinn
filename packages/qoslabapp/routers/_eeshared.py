@@ -26,8 +26,6 @@ def getAvailableEEs(eeABC: EEABC, names: list[str]):
 
     warnings.filterwarnings("ignore")
 
-    print(names)
-
     # Check all possible paths
     for package in pkgutil.walk_packages():
         for module in names:

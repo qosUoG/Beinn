@@ -7,7 +7,6 @@ export const routes: RouteType = {
     "/workspace/dependency/check_init": {
         POST: async req => {
             const { path, directory } = await req.json() as { directory: string, path: string }
-            console.log(path + "/" + directory + "/__init__.py")
             return Response.json({ success: await file(path + "/" + directory + "/__init__.py").exists() }, { headers })
         }
     },

@@ -1,5 +1,7 @@
 import type { AllParamTypes } from "./params"
 
+export type EEType = "equipment" | "experiment"
+
 export type ModuleCls = {
     module: string,
     cls: string
@@ -22,9 +24,19 @@ export type Experiment = {
 
     params: Record<string, AllParamTypes>
     temp_params: Record<string, AllParamTypes>
+
+    charts: Record<string, ChartConfigs>
 }
 
 export type Equipment = Experiment
+
+export type ChartConfigs = {
+    type: "XYPlot",
+    title: string,
+    x_name: string,
+    y_names: string
+
+}
 
 export interface Directory {
     files: string[],

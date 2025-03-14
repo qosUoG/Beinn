@@ -5,7 +5,8 @@
 		readAllUvDependencies,
 		setWorkspaceDirectory,
 	} from "$services/backend.svelte";
-	import { getAvailableEquipments } from "$services/qoslabapp.svelte";
+	import { getAvailableEEs } from "$services/qoslabapp.svelte";
+
 	import { gstore } from "$states/global.svelte";
 	import { retryOnError, type Dependency } from "qoslab-shared";
 </script>
@@ -35,13 +36,11 @@
 			});
 
 			gstore.workspace.dependencies = new_dependencies;
-			let res: { modules: string[]; cls: string }[] =
-				await getAvailableEquipments();
 
-			// await retryOnError(5000, async () => {
-			// 	res = await getAvailableEquipments();
-			// });
+			gstore.workspace.available_equipments =
+				await getAvailableEEs("equipment");
 
-			gstore.workspace.available_equipments = res;
+			gstore.workspace.available_experiments =
+				await getAvailableEEs("experiment");
 		}}>Set</button>
 </label>

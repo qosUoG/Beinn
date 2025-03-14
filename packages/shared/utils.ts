@@ -17,3 +17,5 @@ export async function retryOnError(timeout_ms: number, fn: () => Promise<void> |
         }
     )
 }
+
+export function capitalise(input: string) { return input[0].toUpperCase() + String(input).slice(1); }

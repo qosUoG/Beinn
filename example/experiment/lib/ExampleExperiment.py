@@ -55,6 +55,15 @@ class ExampleExperiment(r.ExperimentABC):
             ),
         )
 
+        self.xyplot2: XYPlot = holder.createChart(
+            XYPlot,
+            XYPlot.kwargs(
+                title="Another XY Plot",
+                x_name="indexxxx",
+                y_names=["temperature"],
+            ),
+        )
+
         self.saver: XYSqlSaver = holder.createSqlSaver(
             XYSqlSaver,
             XYSqlSaver.kwargs(

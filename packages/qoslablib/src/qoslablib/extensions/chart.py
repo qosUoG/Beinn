@@ -3,13 +3,26 @@
 from abc import ABC, abstractmethod
 from collections.abc import Callable
 from dataclasses import dataclass
-from typing import Any, TypedDict, Unpack, override
+import dataclasses
+import json
+from typing import Any, Literal, TypedDict, Unpack, override
 
 
 @dataclass
-class ChartABC(ABC):
+class ChartConfigABC[T: str](ABC):
+    title: str
+    type: T
+
+    @abstractmethod
+    def toJson(self) -> str:
+        raise NotImplementedError
+
+
+@dataclass
+class ChartABC[T: ChartConfigABC](ABC):
     _initialize_fn: Callable[[], None]
     _plot_fn: Callable[[dict[str, float]], None]
+    config: T
 
     def initialize(self) -> None:
         self._initialize_fn()
@@ -35,12 +48,18 @@ class ChartHolderABC(ABC):
 
 
 @dataclass
-class XYPlot(ChartABC):
-    class Config(TypedDict):
-        title: str
-        x_name: str
-        y_names: list[str]
+class XYPlotConfig(ChartConfigABC[Literal["XYPlot"]]):
+    title: str
+    type: Literal["XYPlot"]
+    x_name: str
+    y_names: list[str]
 
+    def toJson(self) -> str:
+        return json.dumps(dataclasses.asdict(self))
+
+
+@dataclass
+class XYPlot(ChartABC[XYPlotConfig]):
     class KW(TypedDict):
         title: str
         x_name: str
@@ -49,7 +68,7 @@ class XYPlot(ChartABC):
     title: str
     x_name: str
     y_names: list[str]
-    config: Config
+    config: XYPlotConfig
 
     def __init__(
         self,
@@ -60,11 +79,12 @@ class XYPlot(ChartABC):
         self.title = kwargs["title"]
         self.x_name = kwargs["x_name"]
         self.y_names = kwargs["y_names"]
-        self.config: XYPlot.Config = {
-            "title": self.title,
-            "x_name": self.x_name,
-            "y_names": self.y_names,
-        }
+        self.config = XYPlotConfig(
+            title=self.title,
+            type="XYPlot",
+            x_name=self.x_name,
+            y_names=self.y_names,
+        )
         self._initialize_fn = initialize_fn
         self._plot_fn = plot_fn
 

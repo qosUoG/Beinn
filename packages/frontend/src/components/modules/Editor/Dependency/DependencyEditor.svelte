@@ -5,7 +5,7 @@
 
 	import { dependency_editor } from "./DependencyEditorController.svelte";
 
-	import { autofocus, cn, timeoutLoop } from "$components/utils.svelte";
+	import { autofocus } from "$components/utils.svelte";
 	import Download from "$icons/Download.svelte";
 	import {
 		addDependency,
@@ -18,6 +18,7 @@
 	import FixedField from "$components/reuseables/Fields/FixedField.svelte";
 	import SelectField from "$components/reuseables/Fields/SelectField.svelte";
 	import SelfToggle from "$components/reuseables/SelfToggle.svelte";
+	import { getAvailableEEs } from "$services/qoslabapp.svelte";
 
 	const dependency: Dependency | undefined = $derived.by(() => {
 		if (dependency_editor.id === undefined) return undefined;
@@ -41,13 +42,15 @@
 
 	async function handleAddDependency() {
 		let source = "";
+
+		// Resolve the source
 		switch (temp_source.type) {
 			case "local":
 				// Check init is available
 				const { success } = await checkDependencyInit(
 					temp_source.directory
 				);
-				console.log({ success });
+
 				if (!success) return;
 
 				// Write local to dependency
@@ -58,8 +61,7 @@
 					name: temp_source.directory,
 					fullname: temp_source.directory,
 				};
-
-				return;
+				break;
 
 			case "git":
 				if (temp_source.git === "") return;
@@ -80,29 +82,38 @@
 				break;
 		}
 
-		await addDependency(source);
+		// Add dependency with uv id not local
+		if (temp_source.type !== "local") {
+			await addDependency(source);
 
-		temp_source = { type: "pip", package: "" };
+			temp_source = { type: "pip", package: "" };
 
-		const current_dependency_names = Object.values(
-			$state.snapshot(gstore.workspace.dependencies)
-		)
-			.filter((d) => d.confirmed)
-			.map((d) => d.name);
+			const current_dependency_names = Object.values(
+				$state.snapshot(gstore.workspace.dependencies)
+			)
+				.filter((d) => d.confirmed)
+				.map((d) => d.name);
 
-		// Read All dependencies and figure out which is the new one
-		const allDependencies = await readAllUvDependencies();
+			// Read All dependencies and figure out which is the new one
+			const allDependencies = await readAllUvDependencies();
 
-		Object.values(allDependencies.filter((d) => d.confirmed)).forEach(
-			(d) => {
-				if (!current_dependency_names.includes(d.name)) {
-					gstore.workspace.dependencies[dependency_editor.id!] = {
-						...d,
-						id: dependency_editor.id!,
-					};
+			Object.values(allDependencies.filter((d) => d.confirmed)).forEach(
+				(d) => {
+					if (!current_dependency_names.includes(d.name)) {
+						gstore.workspace.dependencies[dependency_editor.id!] = {
+							...d,
+							id: dependency_editor.id!,
+						};
+					}
 				}
-			}
-		);
+			);
+		}
+
+		// Refresh available equipments and experiments
+		gstore.workspace.available_equipments =
+			await getAvailableEEs("equipment");
+		gstore.workspace.available_experiments =
+			await getAvailableEEs("experiment");
 	}
 </script>
 
