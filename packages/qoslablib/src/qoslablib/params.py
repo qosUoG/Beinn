@@ -203,9 +203,7 @@ class InstanceEquipmentParam[T]:
         instance_name: str | None
 
         def toParam(self):
-            return InstanceEquipmentParam(
-                type=self.type, instance_name=self.instance_name
-            )
+            return InstanceEquipmentParam(instance_name=self.instance_name)
 
     def __init__(self, instance_name=None):
         self.type = "instance.equipment"
@@ -226,6 +224,9 @@ class InstanceExperimentParam[T]:
     class PydanticBaseModel(BaseModel):
         type: Literal["instance.experiment"]
         instance_name: str | None
+
+        def toParam(self):
+            return InstanceExperimentParam(instance_name=self.instance_name)
 
     def __init__(self, instance_name=None):
         self.type = "instance.experiment"

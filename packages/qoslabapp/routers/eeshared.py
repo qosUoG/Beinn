@@ -70,7 +70,7 @@ def getAvailableEEs(eeABC: EEABC, names: list[str]):
     return list(ees.values())
 
 
-def populateParam(*, param: AllParamTypes):
+def populateParam(param: AllParamTypes):
     match param.type:
         case "instance.equipment":
             param.instance = AppState.equipments[param.instance_id]

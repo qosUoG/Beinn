@@ -21,7 +21,7 @@
 			.filter((e) => e.created)
 			// Name needs to be defiend
 			.filter((e) => e.id !== eeeditor.id && e.name && e.name.length > 0)
-			.map((e) => ({ key: e.name, value: e.id }))
+			.map((e) => ({ key: e.id, value: e.name }))
 	);
 </script>
 
