@@ -89,6 +89,7 @@ export async function readAllUvDependencies(path: string) {
 
 
     }
+    console.log("end read all uv")
     // return the list of dependencies
     return { dependencies: res }
 }
@@ -102,12 +103,16 @@ export async function runProject(path: string) {
         { stdout: "inherit", cwd: path }
     )
 
+    console.log("Before retryonerror")
+
     // Wait until the app is online
     await retryOnError(5000, async () => {
         const res = await (await fetch("http://localhost:8000/workspace/status")).json();
         if (res.status !== "online")
             throw Error()
     });
+
+    console.log("After retryonerror")
 
 
 }

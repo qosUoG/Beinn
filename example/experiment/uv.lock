@@ -385,7 +385,7 @@ wheels = [
 [[package]]
 name = "qoslablib"
 version = "0.1.0"
-source = { git = "https://github.com/qosUoG/QosLab?subdirectory=packages%2Fqoslablib&branch=main#f6781ff3eca3d56e8f24b56f650a8d12fc2a4a87" }
+source = { git = "https://github.com/qosUoG/QosLab?subdirectory=packages%2Fqoslablib&branch=main#3048b8d3a88d69a06d11e6fe4602ce38ed7bbd39" }
 dependencies = [
     { name = "pydantic" },
     { name = "websockets" },

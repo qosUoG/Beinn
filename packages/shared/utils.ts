@@ -4,7 +4,7 @@ export async function timeoutLoop(timeout_ms: number, fn: () => Promise<boolean>
 }
 
 export async function retryOnError(timeout_ms: number, fn: () => Promise<void> | void) {
-    timeoutLoop(
+    await timeoutLoop(
         timeout_ms,
         async () => {
             try {

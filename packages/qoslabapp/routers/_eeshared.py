@@ -59,6 +59,8 @@ def getAvailableEEs(eeABC: EEABC, names: list[str]):
                     else:
                         ees[clsT]["modules"].append(package.name)
 
+            except ModuleNotFoundError:
+                pass
             except Exception as e:
                 print(f"Path {package.name} produced an exception")
                 print(e)
