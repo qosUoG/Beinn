@@ -1,9 +1,8 @@
 from fastapi import FastAPI
 from fastapi.middleware.cors import CORSMiddleware
 
-from packages.qoslabapp.routers import workspace
 
-from .routers import equipment, experiment
+from .routers import equipment, experiment, workspace
 
 
 app = FastAPI()
