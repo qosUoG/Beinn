@@ -4,7 +4,6 @@ from typing import Any, TypedDict
 from fastapi import APIRouter, WebSocket, WebSocketDisconnect
 from pydantic import BaseModel
 
-from packages.qoslabapp.routers import experiment
 
 from ..lib.state import AppState
 
