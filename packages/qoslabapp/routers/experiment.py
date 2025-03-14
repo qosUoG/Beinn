@@ -72,6 +72,9 @@ async def set_params(payload: SetParamsPayload):
     AppState.experiments[payload.id].params = params
 
 
+# @router.websocket("/experiment/status")
+
+
 class StartExperimentPayload(BaseModel):
     experiment_name: str
 
@@ -80,6 +83,3 @@ class StartExperimentPayload(BaseModel):
 async def start_experiment(payload: StartExperimentPayload):
     # Run the experiments
     AppState.run_experiment(payload.experiment_name)
-
-
-# @router.websocket("/experiment/")
