@@ -38,7 +38,7 @@
 </script>
 
 {#key eeeditor.id}
-	<div class="container bg-slate-200 col-span-2 min-w-0 w-full">
+	<div class="section bg-slate-200 col-span-2 min-w-0 w-full">
 		{#if eeeditor.id !== undefined && target !== undefined}
 			<div class="col-2 min-w-0 w-full">
 				<div class="row justify-between items-end">
@@ -75,29 +75,39 @@
 						// Fetch the params
 						const params = await getEEParams(eeeditor.mode, target);
 
-						gstore[`${eeeditor.mode}s`][eeeditor.id] = {
-							...target,
-							created: true,
-							params: { ...params },
-							temp_params: { ...params },
-							name: "",
-							charts: {},
-						};
-
+						if (eeeditor.mode === "equipment")
+							gstore.equipments[eeeditor.id] = {
+								...target,
+								created: true,
+								params: { ...params },
+								temp_params: { ...params },
+								name: "",
+							};
 						// If experiment, fetch the charts also
-						if (eeeditor.mode === "experiment") {
-							(
-								gstore.experiments[eeeditor.id] as Extract<
-									Experiment,
-									{ created: true }
-								>
-							).charts = (
-								await getChartConfigsByExperimentId({
-									id: eeeditor.id,
-								})
-							).charts;
-
-							console.log(gstore.experiments[eeeditor.id].charts);
+						else if (eeeditor.mode === "experiment") {
+							{
+								gstore.experiments[eeeditor.id] = {
+									...target,
+									created: true,
+									params: { ...params },
+									temp_params: { ...params },
+									name: "",
+									charts: {},
+									running: false,
+									paused: false,
+									completed: false,
+								};
+								(
+									gstore.experiments[eeeditor.id] as Extract<
+										Experiment,
+										{ created: true }
+									>
+								).charts = (
+									await getChartConfigsByExperimentId({
+										id: eeeditor.id,
+									})
+								).charts;
+							}
 						}
 					}} />
 

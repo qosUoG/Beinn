@@ -1,5 +1,6 @@
 from abc import ABC, abstractmethod
 from dataclasses import dataclass
+from enum import Enum
 import functools
 from threading import Lock
 
@@ -17,6 +18,13 @@ class HoldersABC(SqlSaverHolderABC, ChartHolderABC):
 class ExperimentABC(ABC):
     # Instance shall initiate params in __init__() function
     params: params.Params
+
+    class LoopCount:
+        INFINITE = -1
+
+        @classmethod
+        def FINITE(loop: int):
+            return loop
 
     def __init__(self):
         pass
@@ -44,7 +52,7 @@ class ExperimentABC(ABC):
     #     self.data = holder.createSqlSaver(XYSqlSaver, kwargs={"title": "some title"})
 
     @abstractmethod
-    def initialize(self):
+    def initialize(self) -> int:
         # # params list would already be the most update
         # # You may use the params directly as follows
         # self.params
@@ -55,6 +63,13 @@ class ExperimentABC(ABC):
 
         # This function should interact with equipment and do stuff that shall only run once each experiment
         # Only use this function to perform initialization of equipment
+
+        # # This function shall return the number of loops, it needs to be integer / -1 for infinity
+
+        # # e.g.
+        # <cls>.Loop.FOR(30)
+        # <cls>.Loop.FOREVER
+
         raise NotImplementedError
 
     @abstractmethod

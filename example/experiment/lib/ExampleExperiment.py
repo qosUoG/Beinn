@@ -1,5 +1,5 @@
 from dataclasses import dataclass
-from typing import TypedDict
+from typing import TypedDict, override
 
 from click import ParamType
 import numpy
@@ -73,7 +73,8 @@ class ExampleExperiment(r.ExperimentABC):
 
         # This should be all of the __init__ code. For instantiation of params from the final params list, or turning on equipment, initializing equipment etc, define in the initialization method
 
-    def initialize(self):
+    @override
+    def initialize(self) -> int:
         import pprint
 
         pprint.pprint(self.params)
@@ -85,6 +86,9 @@ class ExampleExperiment(r.ExperimentABC):
         # You would instantiate ranges, or other derived values for use in loop from params here as well
         self.inputs = numpy.arange(self.params["intparam"].value)
 
+        return ExampleExperiment.LoopCount.FINITE(self.params["intparam"].value)
+
+    @override
     def loop(self, index: int):
         # Raise an exception such that qoslapapp knows experiment is ended
         print(f"loop: {index}")

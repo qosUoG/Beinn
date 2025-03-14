@@ -57,8 +57,12 @@ class ChartConfigsByExperimentIdPayload(BaseModel):
     id: str
 
 
-@router.post("/chart/configs")
-async def getChartConfigByExperimentId(payload: ChartConfigsByExperimentIdPayload):
+@router.post("/chart/{id}/configs")
+async def getChartConfigByExperimentId(
+    id: str, payload: ChartConfigsByExperimentIdPayload
+):
+    print(id)
+
     class ReturnType(TypedDict):
         charts: dict[str, Any]
 

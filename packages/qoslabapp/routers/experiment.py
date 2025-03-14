@@ -80,3 +80,6 @@ class StartExperimentPayload(BaseModel):
 async def start_experiment(payload: StartExperimentPayload):
     # Run the experiments
     AppState.run_experiment(payload.experiment_name)
+
+
+# @router.websocket("/experiment/")

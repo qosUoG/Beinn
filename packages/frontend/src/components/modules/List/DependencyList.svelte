@@ -13,7 +13,7 @@
 	import { type Dependency } from "qoslab-shared";
 </script>
 
-<div class="container col-2 bg-slate-200">
+<div class="section col-2 bg-slate-200">
 	<div class="col-2">
 		<div class="row justify-between items-center">
 			<div class="title bg-white wrapped self-start">Dependencies</div>
@@ -52,7 +52,7 @@
 		{#each Object.values(gstore.workspace.dependencies) as dependency}
 			<button
 				class={cn(
-					"container text-start bg-white row justify-between items-center ",
+					"section text-start bg-white row justify-between items-center ",
 					dependency.id === dependency_editor.id
 						? "outline outline-offset-2 outline-slate-600"
 						: ""

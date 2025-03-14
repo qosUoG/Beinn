@@ -118,7 +118,7 @@
 </script>
 
 {#key dependency_editor.id}
-	<div class="container bg-slate-200 col-span-2">
+	<div class="section bg-slate-200 col-span-2">
 		{#if dependency !== undefined}
 			<div class="col-2">
 				<div class="row justify-between items-end">

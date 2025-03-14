@@ -11,5 +11,5 @@
 {:else if editor.mode !== undefined}
 	editor.mode unexpected value!!!
 {:else}
-	<div class="container bg-slate-200 col-span-2"></div>
+	<div class="section bg-slate-200 col-span-2"></div>
 {/if}

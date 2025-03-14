@@ -7,14 +7,18 @@ export type ModuleCls = {
     cls: string
 }
 
-export type Experiment = {
+type Params = Record<string, AllParamTypes>
+
+type EENotCreated = {
     created: false
     id: string
     // created in the python qoslabapp?
     // If created, the module and cls would be defined
     // the params would be collected as well
     module_cls: ModuleCls
-} | {
+}
+
+type EECreated = {
     created: true
     id: string
 
@@ -22,13 +26,30 @@ export type Experiment = {
 
     name: string
 
-    params: Record<string, AllParamTypes>
-    temp_params: Record<string, AllParamTypes>
-
-    charts: Record<string, ChartConfigs>
+    params: Params
+    temp_params: Params
 }
 
-export type Equipment = Experiment
+export type Equipment = EENotCreated | EECreated
+
+
+
+export type Experiment = EENotCreated | EECreated & {
+    charts: Record<string, ChartConfigs>
+
+    running: boolean
+    paused: boolean
+    completed: boolean
+
+    // Initial(Stopped):running: false, paused: false, completed: false
+    // Start:           running: true,  paused: false, completed: false
+    // Pause:           running: true,  paused: true,  completed: false
+    // Continue:        running: true,  paused: false, completed: false
+    // Complete:        running: false, paused: false, completed: true
+    // Stopped(Initial):running: false, paused: false, completed: false
+}
+
+
 
 export type ChartConfigs = {
     type: "XYPlot",

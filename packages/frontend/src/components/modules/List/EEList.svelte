@@ -21,7 +21,7 @@
 	const capitalised = capitalise(eetype);
 </script>
 
-<div class="container col-2 bg-slate-200">
+<div class="section col-2 bg-slate-200">
 	<div class="row justify-between items-center">
 		<div class="title bg-white wrapped">
 			{capitalised}
@@ -54,7 +54,7 @@
 			: false}
 		<button
 			class={cn(
-				"container text-start bg-white row justify-between items-center ",
+				"section text-start bg-white row justify-between items-center ",
 				target.id === eeeditor.id
 					? "outline outline-offset-2 outline-slate-600"
 					: ""
