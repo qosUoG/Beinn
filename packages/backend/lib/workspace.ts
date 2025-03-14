@@ -1,7 +1,7 @@
-import { $, file, randomUUIDv7, spawn, write } from "bun"
+import { $, fetch, file, randomUUIDv7, spawn, write } from "bun"
 import { app_state } from "./app_state"
 import { parse, stringify } from "smol-toml"
-import type { Dependency } from "qoslab-shared";
+import { retryOnError, type Dependency } from "qoslab-shared";
 
 
 export async function initiateWorkspace(path: string) {
@@ -93,7 +93,7 @@ export async function readAllUvDependencies(path: string) {
     return { dependencies: res }
 }
 
-export function runProject(path: string) {
+export async function runProject(path: string) {
     if (app_state.pyproc !== undefined && !app_state.pyproc.killed)
         return
 
@@ -101,5 +101,14 @@ export function runProject(path: string) {
         "uv run uvicorn app.main:app --host localhost --port 8000".split(" "),
         { stdout: "inherit", cwd: path }
     )
+
+    // Wait until the app is online
+    await retryOnError(5000, async () => {
+        const res = await (await fetch("http://localhost:8000/workspace/status")).json();
+        if (res.status !== "online")
+            throw Error()
+    });
+
+
 }
 

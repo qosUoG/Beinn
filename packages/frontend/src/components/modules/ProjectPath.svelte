@@ -1,5 +1,4 @@
 <script lang="ts">
-	import { retryOnError } from "$components/utils.svelte";
 	import { getRandomId } from "$lib/utils";
 
 	import {
@@ -8,7 +7,7 @@
 	} from "$services/backend.svelte";
 	import { getAvailableEquipments } from "$services/qoslabapp.svelte";
 	import { gstore } from "$states/global.svelte";
-	import { type Dependency } from "qoslab-shared";
+	import { retryOnError, type Dependency } from "qoslab-shared";
 </script>
 
 <label class=" row-1 flex-grow">
@@ -36,12 +35,13 @@
 			});
 
 			gstore.workspace.dependencies = new_dependencies;
-			let res: { modules: string[]; cls: string }[] = [];
+			let res: { modules: string[]; cls: string }[] =
+				await getAvailableEquipments();
 
-			await retryOnError(5000, async () => {
-				res = await getAvailableEquipments();
-			});
+			// await retryOnError(5000, async () => {
+			// 	res = await getAvailableEquipments();
+			// });
 
 			gstore.workspace.available_equipments = res;
-		}}>Update</button>
+		}}>Set</button>
 </label>

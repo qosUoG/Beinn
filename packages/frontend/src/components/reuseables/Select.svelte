@@ -14,6 +14,17 @@
 	let open = $state(false);
 
 	const id = getRandomId([]);
+
+	let selected_key = $derived.by(() => {
+		if (typeof options[0] === "string" || typeof options[0] === "number")
+			return value;
+
+		if (!value) return "";
+
+		return (options as { key: string; value: T }[]).find(
+			(option) => option.value === value
+		)!.key;
+	});
 </script>
 
 <button
@@ -22,7 +33,7 @@
 		open = !open;
 	}}
 	{id}>
-	{value}
+	{selected_key}
 </button>
 
 {#if open}
@@ -55,7 +66,7 @@
 				{#if typeof option === "string" || typeof option === "number"}
 					{option}
 				{:else}
-					{option.value}
+					{option.key}
 				{/if}
 			</button>
 		{/each}

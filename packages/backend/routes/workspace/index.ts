@@ -25,7 +25,7 @@ export const routes: RouteType = {
             if (!await pathExist(path + "/app"))
                 await copyApp(path)
 
-            runProject(path)
+            await runProject(path)
 
 
             return Response.json({}, { headers })
