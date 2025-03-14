@@ -1,11 +1,12 @@
 from asyncio import Task
 import asyncio
+from dataclasses import dataclass
 from sqlite3 import Connection, Cursor
 import sqlite3
 from threading import Event, Lock
 import time
 
-from typing import Any, override
+from typing import Any, TypedDict, override
 from fastapi import WebSocket
 from qoslablib import (
     exceptions as e,
@@ -20,6 +21,86 @@ class AppState(c.ChartHolderABC, s.SqlSaverHolderABC):
     """
 
     equipments: dict[str, r.EquipmentABC] = {}
+
+    @dataclass
+    class ExperimentHandler:
+        id: str
+        experiment: r.ExperimentABC
+        
+        stop_event = Event()
+        pause_event = Event()
+        
+        total_loop: int = 0
+        index: int = 0
+        
+        
+        running = False
+        paused = False
+        completed = False
+
+        class Message(TypedDict):
+            key: str
+            value: str
+
+        _message_queue = list[Message]
+
+        def appendMessage(self, message):
+            self._message_queue.append(message)
+
+        def startExperiment(self):
+               # Run initialization of sql savers of the experiment if needed
+            if self.id in AppState.sql_saver_handlers:
+                for sql_saver_handler in AppState.sql_saver_handlers[self.id].values():
+                    sql_saver_handler.sql_saver.initialize()
+
+            AppState.experiment_stop_events[self.id] = Event()
+            AppState.experiment_pause_events[self.id] = Event()
+            AppState.experiment_tasks[self.id] = asyncio.create_task(
+                asyncio.to_thread(
+                    self._experiment_runner,
+                    args=( 
+                        self.id,
+                        self.experiment,
+                        self.stop_event,
+                        self.pause_event
+                    )
+                )
+            )
+            pass
+
+        @classmethod
+        def _experiment_runner(
+            id: str, experiment: r.ExperimentABC, stop_event: Event, pause_event: Event
+        ):
+            # First run the inialize method
+            experiment.initialize()
+
+            # Initialize the charts of the experiment
+            if id in AppState.chart_handlers:
+                for chart_handler in AppState.chart_handlers[id].values():
+                    chart_handler.chart.initialize()
+
+            # Initialize the sql_savers of the experiment
+            if id in AppState.sql_saver_handlers:
+                for sql_saver_handler in AppState.sql_saver_handlers[id].values():
+                    sql_saver_handler.sql_saver.initialize()
+
+            index = 0
+            while True:
+                if stop_event.is_set():
+                    print("experiment stopped")
+                    experiment.stop()
+                    return
+
+                if not pause_event.is_set():
+                    try:
+                        experiment.loop(index)
+                        index += 1
+
+                    except e.ExperimentEnded:
+                        print("experiment ended")
+                        return
+
     experiments: dict[str, r.ExperimentABC] = {}
 
     @classmethod
@@ -48,22 +129,7 @@ class AppState(c.ChartHolderABC, s.SqlSaverHolderABC):
 
     @classmethod
     def startExperiment(cls, id: str):
-        # Run initialization of sql savers of the experiment if needed
-        if id in cls.sql_saver_handlers:
-            for sql_saver_handler in cls.sql_saver_handlers[id].values():
-                sql_saver_handler.sql_saver.initialize()
-
-        cls.experiment_stop_events[id] = Event()
-        cls.experiment_pause_events[id] = Event()
-        cls.experiment_tasks[id] = asyncio.create_task(
-            asyncio.to_thread(
-                _experiment_runner,
-                id,
-                cls.experiments[id],
-                cls.experiment_stop_events[id],
-                cls.experiment_pause_events[id],
-            )
-        )
+     
 
     @classmethod
     def pauseExperiment(cls, id: str):
@@ -251,36 +317,3 @@ class AppState(c.ChartHolderABC, s.SqlSaverHolderABC):
         cls.sql_worker_task = asyncio.create_task(asyncio.to_thread(sqlWorker))
 
         cls.sql_worker_task_created = True
-
-
-def _experiment_runner(
-    id: str, experiment: r.ExperimentABC, stop_event: Event, pause_event: Event
-):
-    # First run the inialize method
-    experiment.initialize()
-
-    # Initialize the charts of the experiment
-    if id in AppState.chart_handlers:
-        for chart_handler in AppState.chart_handlers[id].values():
-            chart_handler.chart.initialize()
-
-    # Initialize the sql_savers of the experiment
-    if id in AppState.sql_saver_handlers:
-        for sql_saver_handler in AppState.sql_saver_handlers[id].values():
-            sql_saver_handler.sql_saver.initialize()
-
-    index = 0
-    while True:
-        if stop_event.is_set():
-            print("experiment stopped")
-            experiment.stop()
-            return
-
-        if not pause_event.is_set():
-            try:
-                experiment.loop(index)
-                index += 1
-
-            except e.ExperimentEnded:
-                print("experiment ended")
-                return
