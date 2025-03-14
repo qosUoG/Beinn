@@ -133,13 +133,13 @@ class AppState(c.ChartHolderABC, s.SqlSaverHolderABC):
         # The title should be unique
         title = kwargs["title"]
 
-        if AppState.handler_experiment_id not in AppState.chart_handlers:
-            AppState.chart_handlers[AppState.handler_experiment_id] = {}
+        if cls.handler_experiment_id not in cls.chart_handlers:
+            cls.chart_handlers[cls.handler_experiment_id] = {}
 
-        cls.chart_handlers[AppState.handler_experiment_id][title] = cls._ChartHandler(
-            AppState.handler_experiment_id, title, chartT, kwargs
+        cls.chart_handlers[cls.handler_experiment_id][title] = cls._ChartHandler(
+            cls.handler_experiment_id, title, chartT, kwargs
         )
-        return cls.chart_handlers[AppState.handler_experiment_id][title].chart
+        return cls.chart_handlers[cls.handler_experiment_id][title].chart
 
     """
     Sqlsaver management
