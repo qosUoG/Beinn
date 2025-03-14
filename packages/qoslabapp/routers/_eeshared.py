@@ -5,7 +5,6 @@ import pkgutil
 from typing import Literal, TypedDict
 import warnings
 
-from pydantic import BaseModel
 from qoslablib.params import AllParamTypes
 from qoslablib.runtime import EquipmentABC, ExperimentABC
 

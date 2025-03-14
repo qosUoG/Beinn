@@ -2,7 +2,7 @@ import asyncio
 import json
 from fastapi import APIRouter, WebSocket, WebSocketDisconnect
 
-from packages.qoslabapp.lib.state import AppState
+from ..lib.state import AppState
 
 
 router = APIRouter()

@@ -8,7 +8,7 @@ from qoslablib.runtime import EquipmentABC
 from qoslablib.params import ParamModels, Params2ParamModels, ParamModels2Params
 
 
-from .eeshared import getAvailableEEs, populateParam
+from ._eeshared import getAvailableEEs, populateParam
 
 
 from ..lib.state import AppState
