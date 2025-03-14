@@ -2,7 +2,7 @@ from fastapi import FastAPI
 from fastapi.middleware.cors import CORSMiddleware
 
 
-from .routers import equipment, experiment, workspace
+from .routers import equipment, experiment, workspace, chart
 
 
 app = FastAPI()
@@ -22,3 +22,4 @@ app.add_middleware(
 app.include_router(equipment.router)
 app.include_router(experiment.router)
 app.include_router(workspace.router)
+app.include_router(chart.router)

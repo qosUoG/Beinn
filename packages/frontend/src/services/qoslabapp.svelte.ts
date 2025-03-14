@@ -31,7 +31,7 @@ export async function removeEE(eetype: EEType, payload: { id: string }) {
 }
 
 export async function getChartConfigsByExperimentId(payload: { id: string }): Promise<{ charts: Record<string, ChartConfigs> }> {
-    return await (await fetch(qoslabappUrl(`chart/${payload.id}/configs`))).json()
+    return await postRequestJsonInOut(qoslabappUrl(`chart/configs`), payload)
 }
 
 

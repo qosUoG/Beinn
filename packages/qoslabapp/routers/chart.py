@@ -4,6 +4,8 @@ from typing import Any, TypedDict
 from fastapi import APIRouter, WebSocket, WebSocketDisconnect
 from pydantic import BaseModel
 
+from packages.qoslabapp.routers import experiment
+
 from ..lib.state import AppState
 
 
@@ -52,17 +54,21 @@ async def getChartDataWs(experiment_id: str, title: str, ws: WebSocket):
             AppState.chart_handlers[experiment_id][title].has_listener.clear()
 
 
-@router.get("/chart/{experiment_id}/configs")
-async def getChartConfigByExperimentId(experiment_id: str):
+class ChartConfigsByExperimentIdPayload(BaseModel):
+    id: str
+
+
+@router.post("/chart/configs")
+async def getChartConfigByExperimentId(payload: ChartConfigsByExperimentIdPayload):
     class ReturnType(TypedDict):
         charts: dict[str, Any]
 
     res: ReturnType = {"charts": []}
 
-    if experiment_id not in AppState.chart_handlers:
+    if payload.id not in AppState.chart_handlers:
         return json.dumps({"charts": []})
 
-    for chart_handler in AppState.chart_handlers[experiment_id].values():
+    for chart_handler in AppState.chart_handlers[payload.id].values():
         res["charts"][chart_handler.chart.config.title](chart_handler.chart.config)
 
     return res
