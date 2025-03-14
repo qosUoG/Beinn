@@ -62,10 +62,10 @@ async def getChartConfigByExperimentId(payload: ChartConfigsByExperimentIdPayloa
     class ReturnType(TypedDict):
         charts: dict[str, Any]
 
-    res: ReturnType = {"charts": []}
+    res: ReturnType = {"charts": {}}
 
     if payload.id not in AppState.chart_handlers:
-        return json.dumps({"charts": []})
+        return json.dumps({"charts": {}})
 
     for chart_handler in AppState.chart_handlers[payload.id].values():
         res["charts"][chart_handler.chart.config.title](chart_handler.chart.config)
