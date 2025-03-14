@@ -195,47 +195,47 @@ class BoolParam:
 @dataclass
 class InstanceEquipmentParam[T]:
     type: Literal["instance.equipment"]
-    instance_name: str | None
+    instance_id: str | None
     instance: T | None
 
     class PydanticBaseModel(BaseModel):
         type: Literal["instance.equipment"]
-        instance_name: str | None
+        instance_id: str | None
 
         def toParam(self):
-            return InstanceEquipmentParam(instance_name=self.instance_name)
+            return InstanceEquipmentParam(instance_id=self.instance_id)
 
-    def __init__(self, instance_name=None):
+    def __init__(self, instance_id=None):
         self.type = "instance.equipment"
-        self.instance_name = instance_name
+        self.instance_id = instance_id
         self.instance = None
 
     @override
     def toBaseModel(self) -> PydanticBaseModel:
-        return self.PydanticBaseModel(type=self.type, instance_name=self.instance_name)
+        return self.PydanticBaseModel(type=self.type, instance_id=self.instance_id)
 
 
 @dataclass
 class InstanceExperimentParam[T]:
     type: Literal["instance.experiment"]
-    instance_name: str | None
+    instance_id: str | None
     instance: T | None
 
     class PydanticBaseModel(BaseModel):
         type: Literal["instance.experiment"]
-        instance_name: str | None
+        instance_id: str | None
 
         def toParam(self):
-            return InstanceExperimentParam(instance_name=self.instance_name)
+            return InstanceExperimentParam(instance_id=self.instance_id)
 
-    def __init__(self, instance_name=None):
+    def __init__(self, instance_id=None):
         self.type = "instance.experiment"
-        self.instance_name = instance_name
+        self.instance_id = instance_id
         self.instance = None
 
     @override
     def toBaseModel(self) -> PydanticBaseModel:
-        return self.PydanticBaseModel(type=self.type, instance_name=self.instance_name)
+        return self.PydanticBaseModel(type=self.type, instance_id=self.instance_id)
 
 
 type AllParamTypes = (
