@@ -34,6 +34,7 @@ class CreateEquipmentPayload(BaseModel):
 
 @router.post("/equipment/create")
 async def create_equipment(payload: CreateEquipmentPayload):
+    importlib.invalidate_caches()
     AppState.createEquipment(
         payload.id, getattr(importlib.import_module(payload.module), payload.cls)
     )

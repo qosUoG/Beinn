@@ -33,6 +33,7 @@ class CreateExperimentPayload(BaseModel):
 
 @router.post("/experiment/create")
 async def create_experiment(payload: CreateExperimentPayload):
+    importlib.invalidate_caches()
     AppState.createExperiment(
         payload.id, getattr(importlib.import_module(payload.module), payload.cls)
     )

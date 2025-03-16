@@ -29,10 +29,6 @@ class ExampleExperiment(r.ExperimentABC):
         # The name of the experiment assigned during runtime would be made accessible.
         # You would need it to pass to the createChart and createSqlSaver methods
 
-        # Step 1. Call Super
-        # Currently it does nothing, this is just to ensure foward compatability
-        super().__init__()
-
         self.params: ExampleExperiment.ParamsType = {
             "strparam": p.StrParam(),
             "floatparam": p.FloatParam(suffix="W"),
