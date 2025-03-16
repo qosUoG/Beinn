@@ -8,11 +8,7 @@ from qoslablib.runtime import ExperimentABC
 
 from qoslablib.params import ParamModels, ParamModels2Params, Params2ParamModels
 
-from example.experiment.app.routers import experiment
-
-
 from ._eeshared import getAvailableEEs, populateParam
-
 
 from ..lib.state import AppState
 
@@ -87,10 +83,10 @@ async def getStreamingLoopCount(experiment_id: str):
 
 
 class StartExperimentPayload(BaseModel):
-    experiment_name: str
+    id: str
 
 
 @router.post("/experiment/start_experiment")
 async def start_experiment(payload: StartExperimentPayload):
     # Run the experiments
-    AppState.run_experiment(payload.experiment_name)
+    AppState.startExperiment(payload.id)
