@@ -17,10 +17,17 @@ class Message(TypedDict):
 
 class ExperimentProxy:
     def __init__(
-        self, *, id: str, experimentCls: type[ExperimentABC], holder: type[ManagerABC]
+        self,
+        *,
+        id: str,
+        experimentCls: type[ExperimentABC],
+        manager: type[ManagerABC],
+        loop: asyncio.EventLoop,
     ):
         self.experiment_id = id
-        self._experiment = experimentCls(holder)
+        self._experiment = experimentCls(manager)
+
+        self.manager = manager
 
         # Loop Count
         # Setting to -1 makes it start looping at 0
@@ -41,6 +48,8 @@ class ExperimentProxy:
         self._proposed_total_loop: int = 0
 
         self.loop_index_subscribers: list[Event] = []
+
+        self.loop = loop
 
     @property
     def params(self):
@@ -141,30 +150,35 @@ class ExperimentProxy:
             self._proposed_total_loop = value
 
 
-def _experiment_runner(handler: ExperimentProxy):
+def _experiment_runner(proxy: ExperimentProxy):
     # Wait the running event set_ before initializing
-    handler.waitUntilShouldRun()
-    # First run the inialize _method and get the number of loops
-    handler._experiment.initialize()
+    proxy.waitUntilShouldRun()
+    # First run the inialize method and get the number of loops
+    proxy.proposed_total_loop = proxy._experiment.initialize()
+
+    # Then run the initializer of extensions from appstate
+    proxy.loop.call_soon_threadsafe(
+        proxy.manager.initializeExtensions(proxy.experiment_id)
+    )
 
     while True:
         # Wait until the running event is set in each loop
-        handler.waitUntilShouldRun()
+        proxy.waitUntilShouldRun()
 
         # Stop the _experiment is the stop event is set
-        if handler.should_stop():
-            handler._experiment.stop()
-            handler.to_stopped()
+        if proxy.should_stop():
+            proxy._experiment.stop()
+            proxy.to_stopped()
             return
 
-        handler.start_loop()
+        proxy.start_loop()
 
         # Loop the _experiment once with the newest index
         try:
-            handler.loop_count += 1
-            handler._experiment.loop(handler.loop_count)
+            proxy.loop_count += 1
+            proxy._experiment.loop(proxy.loop_count)
 
-            handler.end_loop()
+            proxy.end_loop()
 
         except ExperimentEnded:
             print("experiment ended")

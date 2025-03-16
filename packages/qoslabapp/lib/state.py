@@ -1,3 +1,4 @@
+import asyncio
 from threading import Lock
 
 
@@ -8,6 +9,8 @@ from qoslablib.extensions.chart import ChartABC, ChartManagerABC
 from qoslablib.extensions.saver import SqlSaverABC, SqlSaverManagerABC
 from qoslablib.params import Params
 from qoslablib.runtime import EquipmentABC, ExperimentABC
+
+from .workers.sqlite3 import SqlWorker
 
 from .proxies.equipment import EquipmentProxy
 
@@ -50,7 +53,10 @@ class AppState(ChartManagerABC, SqlSaverManagerABC):
         with cls.handler_experiment_id_lock:
             cls.handler_experiment_id = id
             cls._experiment_proxies[id] = ExperimentProxy(
-                id=id, experimentCls=experimentCls, holder=cls
+                id=id,
+                experimentCls=experimentCls,
+                manager=cls,
+                loop=asyncio.get_event_loop(),
             )
 
     @classmethod
@@ -110,6 +116,18 @@ class AppState(ChartManagerABC, SqlSaverManagerABC):
     handler_experiment_id_lock: Lock = Lock()
     handler_experiment_id: str
 
+    @classmethod
+    def initializeExtensions(cls, experiment_id: str):
+        # Initialize the charts
+        if experiment_id in cls._chart_proxies:
+            for chart_proxy in cls._chart_proxies[experiment_id].values():
+                chart_proxy.initialize()
+
+        # Initialize sql savers
+        if experiment_id in cls._sql_saver_proxies:
+            for sql_saver_proxy in cls._sql_saver_proxies[experiment_id].values():
+                sql_saver_proxy.initialize()
+
     """
     Chart management
     """
@@ -154,6 +172,7 @@ class AppState(ChartManagerABC, SqlSaverManagerABC):
             experiment_id=cls.handler_experiment_id,
             title=title,
             sql_saverT=sql_saverT,
+            worker=SqlWorker,
             kwargs=kwargs,
         )
 

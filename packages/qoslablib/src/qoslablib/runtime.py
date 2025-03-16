@@ -1,8 +1,8 @@
 from abc import ABC, abstractmethod
 from dataclasses import dataclass
-from enum import Enum
+
 import functools
-from threading import Lock
+
 
 from .extensions.saver import SqlSaverManagerABC
 from .extensions.chart import ChartManagerABC
@@ -11,6 +11,7 @@ from . import params
 
 
 class ManagerABC(SqlSaverManagerABC, ChartManagerABC):
+    @classmethod
     @abstractmethod
     def initializeExtensions(self, experiment_id: str):
         raise NotImplementedError

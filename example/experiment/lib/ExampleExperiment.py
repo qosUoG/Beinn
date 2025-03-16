@@ -25,7 +25,7 @@ class ExampleExperiment(r.ExperimentABC):
 
     params: ParamType
 
-    def __init__(self, holder: r.HoldersABC):
+    def __init__(self):
         # The name of the experiment assigned during runtime would be made accessible.
         # You would need it to pass to the createChart and createSqlSaver methods
 
@@ -44,37 +44,10 @@ class ExampleExperiment(r.ExperimentABC):
             "instance_equipmentparam": p.InstanceEquipmentParam[ExampleEquipment](),
         }
 
-        # # After the params list, instantiate charts and sql savers as needed
-
-        self.xyplot: XYPlot = holder.createChart(
-            XYPlot,
-            XYPlot.kwargs(
-                title="Example XY Plot",
-                x_name="index",
-                y_names=["temperature"],
-            ),
-        )
-
-        self.xyplot2: XYPlot = holder.createChart(
-            XYPlot,
-            XYPlot.kwargs(
-                title="Another XY Plot",
-                x_name="indexxxx",
-                y_names=["temperature"],
-            ),
-        )
-
-        self.saver: XYSqlSaver = holder.createSqlSaver(
-            XYSqlSaver,
-            XYSqlSaver.kwargs(
-                title="ExampleSqlSaver", x_name="index", y_names=["temperature"]
-            ),
-        )
-
         # This should be all of the __init__ code. For instantiation of params from the final params list, or turning on equipment, initializing equipment etc, define in the initialization method
 
     @override
-    def initialize(self) -> int:
+    def initialize(self, manager: r.ManagerABC) -> int:
         import pprint
 
         pprint.pprint(self.params)
@@ -85,6 +58,32 @@ class ExampleExperiment(r.ExperimentABC):
 
         # You would instantiate ranges, or other derived values for use in loop from params here as well
         self.inputs = numpy.arange(self.params["intparam"].value)
+
+        # # After the params, instantiate charts and sql savers as needed
+        self.xyplot: XYPlot = manager.createChart(
+            XYPlot,
+            XYPlot.kwargs(
+                title="Example XY Plot",
+                x_name="index",
+                y_names=["temperature"],
+            ),
+        )
+
+        self.xyplot2: XYPlot = manager.createChart(
+            XYPlot,
+            XYPlot.kwargs(
+                title="Another XY Plot",
+                x_name="indexxxx",
+                y_names=["temperature"],
+            ),
+        )
+
+        self.saver: XYSqlSaver = manager.createSqlSaver(
+            XYSqlSaver,
+            XYSqlSaver.kwargs(
+                title="ExampleSqlSaver", x_name="index", y_names=["temperature"]
+            ),
+        )
 
         return ExampleExperiment.LoopCount.FINITE(self.params["intparam"].value)
 

@@ -20,12 +20,8 @@ class ChartConfigABC(ABC):
 
 @dataclass
 class ChartABC(ABC):
-    _initialize_fn: Callable[[], None]
     _plot_fn: Callable[[dict[str, float]], None]
     config: ChartConfigABC
-
-    def initialize(self) -> None:
-        self._initialize_fn()
 
     @classmethod
     @abstractmethod

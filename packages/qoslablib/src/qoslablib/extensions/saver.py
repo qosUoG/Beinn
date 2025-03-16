@@ -6,11 +6,7 @@ from typing import Any, Callable, TypedDict, Unpack, override
 
 @dataclass
 class SqlSaverABC(ABC):
-    _initialize_fn: Callable[[], None]
     _save_fn: Callable[[dict[str, float]], None]
-
-    def initialize(self) -> None:
-        self._initialize_fn()
 
     @classmethod
     @abstractmethod
