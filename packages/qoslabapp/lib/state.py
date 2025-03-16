@@ -29,7 +29,7 @@ class AppState(ChartManagerABC, SqlSaverManagerABC):
 
     _equipments_proxies: dict[str, EquipmentProxy] = {}
 
-    _equipment_imported_modules: list[ModuleType] = {}
+    _equipment_imported_modules: list[ModuleType] = []
 
     @classmethod
     def createEquipment(cls, id: str, module_str: str, eCls: str):
@@ -57,7 +57,7 @@ class AppState(ChartManagerABC, SqlSaverManagerABC):
     Runtime management of Experiments
     """
     _experiment_proxies: dict[str, ExperimentProxy] = {}
-    _experiment_imported_modules: list[ModuleType] = {}
+    _experiment_imported_modules: list[ModuleType] = []
 
     @classmethod
     def createExperiment(cls, id: str, module_str: str, eCls: str):
