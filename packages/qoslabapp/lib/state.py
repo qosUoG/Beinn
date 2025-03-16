@@ -1,14 +1,16 @@
 import asyncio
+import importlib
 from threading import Lock
 
 
+from types import ModuleType
 from typing import Any, override
 
 
 from qoslablib.extensions.chart import ChartABC, ChartManagerABC
 from qoslablib.extensions.saver import SqlSaverABC, SqlSaverManagerABC
 from qoslablib.params import Params
-from qoslablib.runtime import EquipmentABC, ExperimentABC
+
 
 from .workers.sqlite3 import SqlWorker
 
@@ -27,9 +29,16 @@ class AppState(ChartManagerABC, SqlSaverManagerABC):
 
     _equipments_proxies: dict[str, EquipmentProxy] = {}
 
+    _equipment_imported_modules: list[ModuleType] = {}
+
     @classmethod
-    def createEquipment(cls, id: str, eCls: type[EquipmentABC]):
-        cls._equipments_proxies[id] = EquipmentProxy(eCls)
+    def createEquipment(cls, id: str, module_str: str, eCls: str):
+        module = importlib.import_module(module_str)
+        if module in cls._equipment_imported_modules:
+            cls._equipment_imported_modules.remove(module)
+            module = importlib.reload(module)
+            cls._equipment_imported_modules.append(module)
+        cls._equipments_proxies[id] = EquipmentProxy(getattr(module, eCls))
 
     @classmethod
     def getEquipmentParams(cls, id: str):
@@ -41,20 +50,29 @@ class AppState(ChartManagerABC, SqlSaverManagerABC):
 
     @classmethod
     def removeEquipment(cls, id: str):
-        del cls._equipments_proxies[id]
+        if id in cls._equipments_proxies:
+            del cls._equipments_proxies[id]
 
     """
     Runtime management of Experiments
     """
     _experiment_proxies: dict[str, ExperimentProxy] = {}
+    _experiment_imported_modules: list[ModuleType] = {}
 
     @classmethod
-    def createExperiment(cls, id: str, experimentCls: type[ExperimentABC]):
+    def createExperiment(cls, id: str, module_str: str, eCls: str):
         with cls.handler_experiment_id_lock:
             cls.handler_experiment_id = id
+
+            module = importlib.import_module(module_str)
+            if module in cls._experiment_imported_modules:
+                cls._experiment_imported_modules.remove(module)
+                module = importlib.reload(module)
+                cls._experiment_imported_modules.append(module)
+
             cls._experiment_proxies[id] = ExperimentProxy(
                 id=id,
-                experimentCls=experimentCls,
+                experimentCls=getattr(module, eCls),
                 manager=cls,
                 loop=asyncio.get_event_loop(),
             )
