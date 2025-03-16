@@ -4,7 +4,7 @@ from typing import Any
 
 from qoslablib.extensions.saver import SqlSaverABC
 
-from ..workers.sqlite3 import SqlWorker
+from ..workers.sqlite3 import SqlWorker as Worker
 
 
 class SqlSaverProxy:
@@ -14,7 +14,7 @@ class SqlSaverProxy:
         experiment_id: str,
         title: str,
         sql_saverT: type[SqlSaverABC],
-        worker: type[SqlWorker],
+        worker: type[Worker],
         kwargs: Any,
     ):
         # Identifier for the sql saver handler

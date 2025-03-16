@@ -10,7 +10,7 @@ class SqlWorker:
     _sqlite3_connection: Connection
     _sqlite3_cursor: Cursor
 
-    _proxies: dict[str, dict[str, SqlSaverProxy]]
+    _proxies: dict[str, dict[str, SqlSaverProxy]] = []
 
     _sql_worker_task: asyncio.Task
     _sql_worker_task_created: bool = False
