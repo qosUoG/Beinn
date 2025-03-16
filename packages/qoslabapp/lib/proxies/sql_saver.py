@@ -27,6 +27,9 @@ class SqlSaverProxy:
             initialize_fn=self._initialize_fn, save_fn=self._save_fn, **kwargs
         )
 
+        self._frame_lock = Lock()
+        self._frames: list[Any] = []
+
     def getInsertSql(self):
         return self.sql_saver.getInsertSql(self.table_name)
 
@@ -43,8 +46,6 @@ class SqlSaverProxy:
         SqlWorker.runSql(self.sql_saver.getCreateTableSql(self._table_name))
 
     # Memory for saving
-    _frame_lock = Lock()
-    _frames: list[Any] = []
 
     def toOwnedFrames(self):
         with self._frame_lock:

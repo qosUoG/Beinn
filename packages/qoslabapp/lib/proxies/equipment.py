@@ -10,10 +10,10 @@ from qoslablib.runtime import EquipmentABC
 @dataclass
 class EquipmentProxy:
     # Threading.Lock for thread safety access of Equipment
-    _lock = Lock()
 
     def __init__(self, eCls: type[EquipmentABC]):
         self._equipment = eCls()
+        self._lock = Lock()
 
     # For Type safety
     @property

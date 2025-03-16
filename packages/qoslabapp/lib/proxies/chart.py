@@ -21,6 +21,7 @@ class ChartProxy:
         self.chart = chartT(
             initialize_fn=self._initialize_fn, plot_fn=self._plot_fn, **kwargs
         )
+        self.connections: list[ChartProxy.Subscriber] = []
 
     def _initialize_fn(self):
         pass
@@ -42,8 +43,6 @@ class ChartProxy:
         def appendFrame(self, frame: Any):
             with self._frame_lock:
                 self._frames.append(frame)
-
-    connections: list[Subscriber] = []
 
     def subscribe(self, ws: WebSocket):
         subscriber = ChartProxy.Subscriber(ws)

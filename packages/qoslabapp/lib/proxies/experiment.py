@@ -1,5 +1,5 @@
 import asyncio
-from dataclasses import dataclass
+from dataclasses import dataclass, field
 from threading import Event, Lock
 from typing import TypedDict
 
@@ -23,6 +23,24 @@ class ExperimentProxy:
         self.experiment_id = id
         self._experiment = experimentCls(holder)
 
+        # Loop Count
+        # Setting to -1 makes it start looping at 0
+
+        self._loop_count_lock = Lock()
+        self._loop_count: int = -1
+
+        self._message_queue: list[Message] = []
+
+        # These would be used with _expeirment_runner
+        self._running = Event()
+        self._should_run = Event()
+        self._should_stop = Event()
+        self._stopped = Event()
+        self._loop_ended = Event()
+
+        self._proposed_total_loop_lock = Lock()
+        self._proposed_total_loop: int = 0
+
     @property
     def params(self):
         return self._experiment.params
@@ -30,12 +48,6 @@ class ExperimentProxy:
     @params.setter
     def params(self, params: Params):
         self._experiment.params = params
-
-    # Loop Count
-    # Setting to -1 makes it start looping at 0
-
-    _loop_count_lock = Lock()
-    _loop_count: int = -1
 
     @property
     def loop_count(self):
@@ -64,17 +76,8 @@ class ExperimentProxy:
 
         return yieldLoopIndex
 
-    _message_queue = list[Message]
-
     def appendMessage(self, message):
         self._message_queue.append(message)
-
-    # These would be used with _expeirment_runner
-    _running = Event()
-    _should_run = Event()
-    _should_stop = Event()
-    _stopped = Event()
-    _loop_ended = Event()
 
     _experiment_task: asyncio.Task
 
@@ -127,9 +130,6 @@ class ExperimentProxy:
         self._loop_ended.set()
         for subscriber in self.loop_index_subscribers:
             subscriber.set()
-
-    _proposed_total_loop_lock = Lock()
-    _proposed_total_loop: int = 0
 
     @property
     def proposed_total_loop(self):
