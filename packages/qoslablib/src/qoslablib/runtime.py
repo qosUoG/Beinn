@@ -30,7 +30,7 @@ class ExperimentABC(ABC):
             return loop
 
     def __init__(self):
-        pass
+        raise Exception("__init__() of ExperimentABC shall not be called")
 
     # The __init__ of the exact experiment should look sth like this
 
@@ -106,6 +106,9 @@ def EquipmentTLock(func):
 class EquipmentABC(ABC):
     # Instance shall initiate params in __init__() function
     params: params.Params
+
+    def __init__(self):
+        raise Exception("__init__() of ExperimentABC shall not be called")
 
     # # All equipment subclass shall call __init__ function FIRST in their __init__ functions
 
