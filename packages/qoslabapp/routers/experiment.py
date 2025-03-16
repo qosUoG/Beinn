@@ -75,7 +75,7 @@ async def set_params(payload: SetParamsPayload):
 async def getStreamingLoopCount(experiment_id: str):
     def yieldLoopCountEventStream():
         for loop_count in AppState.getStreamingLoopCount(experiment_id)():
-            yield f"{{{{loop_count: {loop_count}}}}}\n\n"
+            yield "{" + f"loop_count: {loop_count}" + "}\n\n"
 
     return StreamingResponse(
         yieldLoopCountEventStream(), media_type="text/event-stream"
