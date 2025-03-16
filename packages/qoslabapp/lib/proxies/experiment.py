@@ -41,6 +41,8 @@ class ExperimentProxy:
         self._proposed_total_loop_lock = Lock()
         self._proposed_total_loop: int = 0
 
+        self.loop_index_subscribers: list[Event] = []
+
     @property
     def params(self):
         return self._experiment.params
@@ -122,8 +124,6 @@ class ExperimentProxy:
     def start_loop(self):
         self._running.set()
         self._loop_ended.clear()
-
-    loop_index_subscribers: list[Event] = []
 
     def end_loop(self):
         self._running.clear()
