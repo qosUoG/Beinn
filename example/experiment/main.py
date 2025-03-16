@@ -52,6 +52,8 @@ if __name__ == "__main__":
 
     e = EquipmentProxy()
 
+    print(e.params)
+
     # def inside():
     #     warnings.filterwarnings("error")
 
