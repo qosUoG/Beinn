@@ -1,4 +1,3 @@
-from dataclasses import dataclass
 from threading import Lock
 
 from typing import Any
@@ -7,7 +6,6 @@ from qoslablib.params import Params
 from qoslablib.runtime import EquipmentABC
 
 
-@dataclass
 class EquipmentProxy:
     # Threading.Lock for thread safety access of Equipment
 

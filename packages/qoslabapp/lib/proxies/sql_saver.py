@@ -1,4 +1,3 @@
-from dataclasses import dataclass
 from threading import Lock
 import time
 from typing import Any
@@ -8,7 +7,6 @@ from qoslablib.extensions.saver import SqlSaverABC
 from ..workers.sqlite3 import SqlWorker
 
 
-@dataclass
 class SqlSaverProxy:
     def __init__(
         self,
@@ -30,10 +28,10 @@ class SqlSaverProxy:
         self._frame_lock = Lock()
         self._frames: list[Any] = []
 
+        self.table_name: str
+
     def getInsertSql(self):
         return self.sql_saver.getInsertSql(self.table_name)
-
-    table_name: str
 
     # This should only be called within the same thread
     def _initialize_fn(self):

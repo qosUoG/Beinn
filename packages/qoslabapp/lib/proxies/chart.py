@@ -1,5 +1,5 @@
 import asyncio
-from dataclasses import dataclass
+
 from threading import Lock
 from typing import Any
 
@@ -8,7 +8,6 @@ from fastapi import WebSocket
 from qoslablib.extensions.chart import ChartABC
 
 
-@dataclass
 class ChartProxy:
     def __init__(
         self, *, experiment_id: str, title: str, chartT: type[ChartABC], kwargs: Any
@@ -27,12 +26,14 @@ class ChartProxy:
         pass
 
     # For posting to the frontend TODO Should not be here
-    @dataclass
+
     class Subscriber:
-        rate = 1
-        ws: WebSocket
-        _frame_lock = Lock()
-        _frames: list[Any] = []
+        def __init__(self, ws: WebSocket):
+            self.rate = 1
+            self.ws: WebSocket
+
+            self._frame_lock = Lock()
+            self._frames: list[Any] = []
 
         def toOwnedFrames(self):
             with self._frame_lock:

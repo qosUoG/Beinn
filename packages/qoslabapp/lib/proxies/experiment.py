@@ -1,5 +1,5 @@
 import asyncio
-from dataclasses import dataclass, field
+
 from threading import Event, Lock
 from typing import TypedDict
 
@@ -15,7 +15,6 @@ class Message(TypedDict):
     value: str
 
 
-@dataclass
 class ExperimentProxy:
     def __init__(
         self, *, id: str, experimentCls: type[ExperimentABC], holder: type[ManagerABC]
