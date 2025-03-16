@@ -4,8 +4,6 @@ from typing import Any
 
 from qoslablib.extensions.saver import SqlSaverABC
 
-from ..workers.sqlite3 import SqlWorker as Worker
-
 
 class SqlSaverProxy:
     def __init__(
@@ -14,7 +12,6 @@ class SqlSaverProxy:
         experiment_id: str,
         title: str,
         sql_saverT: type[SqlSaverABC],
-        worker: type[Worker],
         kwargs: Any,
     ):
         # Identifier for the sql saver handler
@@ -27,8 +24,6 @@ class SqlSaverProxy:
         self._frame_lock = Lock()
         self._frames: list[Any] = []
 
-        self._worker = worker
-
         self.table_name: str
 
     def getInsertSql(self):
@@ -36,13 +31,15 @@ class SqlSaverProxy:
 
     # This is in main thread
     def initialize(self):
+        from ..workers.sqlite3 import SqlWorker
+
         # Each sqlsaverhandler shall always call createconnection
-        self._worker.createSqlConnection()
+        SqlWorker.createSqlConnection()
 
         # Create table with name and timestamp (ms)
         self._table_name = f"{self.title} timestamp:{int(time.time() * 1000)}"
 
-        self._worker.runSql(self.sql_saver.getCreateTableSql(self._table_name))
+        SqlWorker.runSql(self.sql_saver.getCreateTableSql(self._table_name))
 
     # Memory for saving
 
