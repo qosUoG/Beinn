@@ -6,7 +6,7 @@ from qoslablib.params import Params
 from qoslablib.runtime import EquipmentABC
 
 
-class EquipmentProxy:
+class EquipmentProxy(object):
     # Threading.Lock for thread safety access of Equipment
 
     def __init__(self, eCls: type[EquipmentABC]):
