@@ -24,13 +24,13 @@ if __name__ == "__main__":
         # For Type safety
         @property
         def params(self):
-            with super()._lock:
-                return super()._equipment
+            with self._lock:
+                return self._equipment
 
         @params.setter
         def params(self, value: int):
-            with super()._lock:
-                super()._equipment = value
+            with self._lock:
+                self._equipment = value
 
         # Proxy to all underlying parameters
         def __getattr__(self, key: str):
