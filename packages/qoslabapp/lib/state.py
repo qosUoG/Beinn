@@ -37,7 +37,7 @@ class AppState(ChartManagerABC, SqlSaverManagerABC):
         if module in cls._equipment_imported_modules:
             cls._equipment_imported_modules.remove(module)
             module = importlib.reload(module)
-            cls._equipment_imported_modules.append(module)
+        cls._equipment_imported_modules.append(module)
         cls._equipments_proxies[id] = EquipmentProxy(getattr(module, eCls))
 
     @classmethod
@@ -68,7 +68,7 @@ class AppState(ChartManagerABC, SqlSaverManagerABC):
             if module in cls._experiment_imported_modules:
                 cls._experiment_imported_modules.remove(module)
                 module = importlib.reload(module)
-                cls._experiment_imported_modules.append(module)
+            cls._experiment_imported_modules.append(module)
 
             cls._experiment_proxies[id] = ExperimentProxy(
                 id=id,
