@@ -48,7 +48,7 @@ class ChartManagerABC(ABC):
 
 
 @dataclass
-class XYPlotConfig(ChartConfigABC[Literal["XYPlot"]]):
+class XYPlotConfig(ChartConfigABC):
     title: str
     type: Literal["XYPlot"]
     x_name: str
@@ -59,7 +59,7 @@ class XYPlotConfig(ChartConfigABC[Literal["XYPlot"]]):
 
 
 @dataclass
-class XYPlot(ChartABC[XYPlotConfig]):
+class XYPlot(ChartABC):
     class KW(TypedDict):
         title: str
         x_name: str
