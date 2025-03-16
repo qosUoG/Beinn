@@ -25,7 +25,7 @@ class ExperimentProxy:
         loop: asyncio.EventLoop,
     ):
         self.experiment_id = id
-        self._experiment = experimentCls(manager)
+        self._experiment = experimentCls()
 
         self.manager = manager
 
@@ -154,7 +154,7 @@ def _experiment_runner(proxy: ExperimentProxy):
     # Wait the running event set_ before initializing
     proxy.waitUntilShouldRun()
     # First run the inialize method and get the number of loops
-    proxy.proposed_total_loop = proxy._experiment.initialize()
+    proxy.proposed_total_loop = proxy._experiment.initialize(proxy.manager)
 
     # Then run the initializer of extensions from appstate
     proxy.loop.call_soon_threadsafe(

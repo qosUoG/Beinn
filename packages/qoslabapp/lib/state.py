@@ -135,7 +135,6 @@ class AppState(ChartManagerABC, SqlSaverManagerABC):
     # Manages charts by experiment id and chart name
     _chart_proxies: dict[str, dict[str, ChartProxy]] = {}
 
-    # These creation method shall only be called in __init__ of experiments
     @classmethod
     @override
     def createChart(cls, chartT: ChartABC, kwargs: Any = {}):
