@@ -76,7 +76,7 @@ async def getStreamingLoopCount(experiment_id: str):
     def yieldLoopCountEventStream():
         generator = AppState.getStreamingLoopCount(experiment_id)
         for loop_count in generator():
-            yield f"{{{{loop_count: {loop_count}}}}}\n\n"
+            yield f"{{loop_count: {loop_count}}}\n\n"
 
     return StreamingResponse(
         yieldLoopCountEventStream(), media_type="text/event-stream"

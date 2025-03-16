@@ -14,7 +14,7 @@ def main():
 
 if __name__ == "__main__":
     x = 1
-    print(f"{{loop_count: {x}}}\n\n")
+    print(f"{{x: {x}}}\n\n")
     # def inside():
     #     warnings.filterwarnings("error")
 
