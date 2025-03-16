@@ -1,6 +1,6 @@
 from dataclasses import dataclass
 from threading import Lock
-import types
+
 from typing import Any
 
 from qoslablib.params import Params

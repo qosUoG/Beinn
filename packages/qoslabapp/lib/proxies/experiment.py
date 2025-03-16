@@ -7,7 +7,7 @@ from qoslablib.exceptions import ExperimentEnded
 from qoslablib.params import Params
 from qoslablib.runtime import ExperimentABC
 
-from qoslablib.runtime import HoldersABC
+from qoslablib.runtime import ManagerABC
 
 
 class Message(TypedDict):
@@ -18,7 +18,7 @@ class Message(TypedDict):
 @dataclass
 class ExperimentProxy:
     def __init__(
-        self, *, id: str, experimentCls: type[ExperimentABC], holder: type[HoldersABC]
+        self, *, id: str, experimentCls: type[ExperimentABC], holder: type[ManagerABC]
     ):
         self.experiment_id = id
         self._experiment = experimentCls(holder)
