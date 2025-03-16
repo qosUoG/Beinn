@@ -96,6 +96,7 @@
 									running: false,
 									paused: false,
 									completed: false,
+									loop_count: -1,
 								};
 								(
 									gstore.experiments[eeeditor.id] as Extract<

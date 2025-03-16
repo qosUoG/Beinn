@@ -54,7 +54,7 @@ class GetParamsPayload(BaseModel):
 
 @router.post("/equipment/get_params")
 async def get_params(payload: GetParamsPayload):
-    return Params2ParamModels(AppState.equipments[payload.id].params)
+    return Params2ParamModels(AppState.getEquipmentParams(payload.id))
 
 
 class SetParamsPayload(BaseModel):
@@ -69,4 +69,4 @@ async def set_params(payload: SetParamsPayload):
     for [param_name, param] in params.items():
         params[param_name] = populateParam(param)
 
-    AppState.equipments[payload.id].params = params
+    AppState.setEquipmentParams(params)

@@ -41,12 +41,34 @@ export type Experiment = EENotCreated | EECreated & {
     paused: boolean
     completed: boolean
 
+    loop_count: number
+
     // Initial(Stopped):running: false, paused: false, completed: false
     // Start:           running: true,  paused: false, completed: false
     // Pause:           running: true,  paused: true,  completed: false
     // Continue:        running: true,  paused: false, completed: false
     // Complete:        running: false, paused: false, completed: true
     // Stopped(Initial):running: false, paused: false, completed: false
+}
+
+export enum ExperimentStatus {
+    NotCreated,
+    Stopped,
+    Started,
+    Paused,
+    Completed,
+}
+
+export function getExperimentStatus(experiment: Experiment) {
+    if (!experiment.created) return ExperimentStatus.NotCreated
+
+    if (experiment.paused) return ExperimentStatus.Paused
+
+    if (experiment.completed) return ExperimentStatus.Completed
+
+    if (experiment.running) return ExperimentStatus.Started
+
+    return ExperimentStatus.Stopped
 }
 
 

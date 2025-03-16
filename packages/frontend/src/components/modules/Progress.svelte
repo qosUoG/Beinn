@@ -1,11 +1,16 @@
 <script lang="ts">
-	let {
-		running,
-		paused,
-		completed,
-	}: { running: boolean; paused: boolean; completed: boolean } = $props();
+	import {
+		ExperimentStatus,
+		getExperimentStatus,
+		type Experiment,
+	} from "qoslab-shared";
 
-	let status;
+	let { experiment }: { experiment: Extract<Experiment, { created: true }> } =
+		$props();
 </script>
 
-<div></div>
+{#if getExperimentStatus(experiment) === ExperimentStatus.Started || getExperimentStatus(experiment) === ExperimentStatus.Paused || getExperimentStatus(experiment) === ExperimentStatus.Completed}
+	{experiment.loop_count}
+{:else}
+	<div class="flex-grow"></div>
+{/if}

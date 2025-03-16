@@ -1,11 +1,14 @@
 import importlib
 from fastapi import APIRouter
+from fastapi.responses import StreamingResponse
 from pydantic import BaseModel
 
 
 from qoslablib.runtime import ExperimentABC
 
 from qoslablib.params import ParamModels, ParamModels2Params, Params2ParamModels
+
+from example.experiment.app.routers import experiment
 
 
 from ._eeshared import getAvailableEEs, populateParam
@@ -54,7 +57,7 @@ class GetParamsPayload(BaseModel):
 
 @router.post("/experiment/get_params")
 async def get_params(payload: GetParamsPayload):
-    return Params2ParamModels(AppState.experiments[payload.id].params)
+    return Params2ParamModels(AppState.getExperimentParams(payload.id))
 
 
 class SetParamsPayload(BaseModel):
@@ -69,10 +72,18 @@ async def set_params(payload: SetParamsPayload):
     for [param_name, param] in params.items():
         params[param_name] = populateParam(param)
 
-    AppState.experiments[payload.id].params = params
+    AppState.setExperimentParams(payload.id, params)
 
 
-# @router.websocket("/experiment/status")
+@router.get("experiment/{experiment_id}/loop_count")
+async def getStreamingLoopCount(experiment_id: str):
+    def yieldLoopCountEventStream():
+        for loop_count in AppState.getStreamingLoopCount(experiment_id)():
+            yield f"{{loop_count: {loop_count}\}}\n\n"
+
+    return StreamingResponse(
+        yieldLoopCountEventStream(), media_type="text/event-stream"
+    )
 
 
 class StartExperimentPayload(BaseModel):

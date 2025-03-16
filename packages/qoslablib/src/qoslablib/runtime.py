@@ -4,14 +4,16 @@ from enum import Enum
 import functools
 from threading import Lock
 
-from .extensions.saver import SqlSaverHolderABC
-from .extensions.chart import ChartHolderABC
+from .extensions.saver import SqlSaverManagerABC
+from .extensions.chart import ChartManagerABC
 
 from . import params
 
 
-class HoldersABC(SqlSaverHolderABC, ChartHolderABC):
-    pass
+class ManagerABC(SqlSaverManagerABC, ChartManagerABC):
+    @abstractmethod
+    def initializeExtensions(self, experiment_id: str):
+        raise NotImplementedError
 
 
 @dataclass
@@ -31,7 +33,7 @@ class ExperimentABC(ABC):
 
     # The __init__ of the exact experiment should look sth like this
 
-    # def __init__(self, holder: HoldersABC):
+    # def __init__(self, holder: ManagerABC):
     #     # Call super for forward compatability
     #     super()__init__(self)
 
@@ -114,20 +116,3 @@ class EquipmentABC(ABC):
     #         # Same as experiment, refer to experiment for example,
     #         # refer to params page for documentation of specifying params
     #     }
-
-    # Threading.Lock for thread safety access of Equipment
-    # usage refer to the EquipmentTLock Decorator, and the example below
-    _qoslab_equipment_thread_lock: Lock
-
-    def __init__(self):
-        self._qoslab_equipment_thread_lock = Lock()
-
-    # # Example for using the equipment lock decorator
-    # # e.g.
-    # @EquipmentTLock
-    # @property
-    # def someEquipmentProperty(self): ...
-
-    # @EquipmentTLock
-    # @someEquipmentProperty.setter
-    # def someEquipmentPropertySetter(self): ...

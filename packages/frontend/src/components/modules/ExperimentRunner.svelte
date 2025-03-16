@@ -26,7 +26,7 @@
 					{experiment.name}
 				</div>
 			</div>
-			<!-- <Progress /> -->
+			<Progress {experiment} />
 			<button
 				class="icon-btn-sm green"
 				onclick={async () => {

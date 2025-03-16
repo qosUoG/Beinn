@@ -34,7 +34,7 @@ class SqlSaverABC(ABC):
         raise NotImplementedError
 
 
-class SqlSaverHolderABC(ABC):
+class SqlSaverManagerABC(ABC):
     # The holder shall manage the database connection, and provide a method that would be consumed bu the SaverABC method
 
     @classmethod

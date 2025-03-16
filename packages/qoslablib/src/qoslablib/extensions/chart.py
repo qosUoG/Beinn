@@ -9,9 +9,9 @@ from typing import Any, Literal, TypedDict, Unpack, override
 
 
 @dataclass
-class ChartConfigABC[T: str](ABC):
+class ChartConfigABC(ABC):
     title: str
-    type: T
+    type: str
 
     @abstractmethod
     def toJson(self) -> str:
@@ -19,17 +19,17 @@ class ChartConfigABC[T: str](ABC):
 
 
 @dataclass
-class ChartABC[T: ChartConfigABC](ABC):
+class ChartABC(ABC):
     _initialize_fn: Callable[[], None]
     _plot_fn: Callable[[dict[str, float]], None]
-    config: T
+    config: ChartConfigABC
 
     def initialize(self) -> None:
         self._initialize_fn()
 
     @classmethod
     @abstractmethod
-    def kwargs[T](self, **kwargs: T) -> T:
+    def kwargs(self, **kwargs: Any) -> Any:
         # This method creates the kwargs object for instantiating the chart
         raise NotImplementedError
 
@@ -39,10 +39,10 @@ class ChartABC[T: ChartConfigABC](ABC):
         raise NotImplementedError
 
 
-class ChartHolderABC(ABC):
+class ChartManagerABC(ABC):
     @classmethod
     @abstractmethod
-    def createChart[T: ChartABC](cls, chartT: type[T], kwargs: Any) -> T:
+    def createChart(cls, chartT: type[ChartABC], kwargs: Any) -> ChartABC:
         # This method returns a plot object
         raise NotImplementedError
 
