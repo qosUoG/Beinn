@@ -74,13 +74,13 @@ class ExperimentProxy:
         event = Event()
         self.loop_index_subscribers.append(event)
 
-        def yieldLoopIndex():
+        async def yieldLoopIndex():
             # yield the current index first
 
             yield self.loop_count
 
             while True:
-                event.wait()
+                await asyncio.to_thread(event.wait)
                 event.clear()
                 yield self.loop_count
 
