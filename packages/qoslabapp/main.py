@@ -2,7 +2,7 @@ from contextlib import asynccontextmanager
 from fastapi import FastAPI
 from fastapi.middleware.cors import CORSMiddleware
 
-from packages.qoslabapp.lib.state import AppState
+from .lib.state import AppState
 
 
 from .routers import equipment, experiment, workspace, chart
