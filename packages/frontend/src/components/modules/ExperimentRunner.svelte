@@ -2,7 +2,7 @@
 	import Play from "$icons/Play.svelte";
 
 	import { gstore } from "$states/global.svelte";
-	import type { Experiment } from "qoslab-shared";
+	import type { CreatedExperiment, Experiment } from "qoslab-shared";
 	import Progress from "./Progress.svelte";
 
 	let runnable_experiments = $derived(
@@ -14,7 +14,7 @@
 				JSON.stringify(experiment.params) ===
 					JSON.stringify(experiment.temp_params) &&
 				experiment.params !== undefined
-		) as Extract<Experiment, { created: true }>[]
+		) as CreatedExperiment[]
 	);
 </script>
 

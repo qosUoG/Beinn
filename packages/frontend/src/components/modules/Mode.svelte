@@ -19,11 +19,11 @@
 	<button
 		class={cn(
 			" bg-slate-200 rounded-l-none icon-btn",
-			gstore.mode === "EXPERIMENT"
+			gstore.mode === "EXPERIMENTS"
 				? "bg-slate-500 text-slate-50"
 				: "bg-slate-200"
 		)}
 		onclick={() => {
-			gstore.mode = "EXPERIMENT";
+			gstore.mode = "EXPERIMENTS";
 		}}><Flask /></button>
 </div>

@@ -6,6 +6,7 @@
 		getEEParams,
 		removeEE,
 		setEEParams,
+		subscribeExperimentLoopCountWs,
 	} from "$services/qoslabapp.svelte";
 	import { gstore } from "$states/global.svelte";
 
@@ -19,7 +20,12 @@
 	import FixedField from "$components/reuseables/Fields/FixedField.svelte";
 	import LabelField from "$components/reuseables/Fields/LabelField.svelte";
 	import { autofocus } from "$components/utils.svelte";
-	import { capitalise, type Experiment } from "qoslab-shared";
+	import {
+		capitalise,
+		getUpdateLoopCountFromWsMessageFn,
+		type CreatedExperiment,
+		type Experiment,
+	} from "qoslab-shared";
 
 	let target = $derived.by(() => {
 		if (eeeditor.id === undefined) return undefined;
@@ -85,30 +91,30 @@
 							};
 						// If experiment, fetch the charts also
 						else if (eeeditor.mode === "experiment") {
-							{
-								gstore.experiments[eeeditor.id] = {
-									...target,
-									created: true,
-									params: { ...params },
-									temp_params: { ...params },
-									name: "",
-									charts: {},
-									running: false,
-									paused: false,
-									completed: false,
-									loop_count: -1,
-								};
-								(
-									gstore.experiments[eeeditor.id] as Extract<
-										Experiment,
-										{ created: true }
-									>
-								).charts = (
-									await getChartConfigsByExperimentId({
-										id: eeeditor.id,
-									})
-								).charts;
-							}
+							gstore.experiments[eeeditor.id] = {
+								...target,
+								created: true,
+								params: { ...params },
+								temp_params: { ...params },
+								name: "",
+								charts: {},
+								running: false,
+								paused: false,
+								completed: false,
+								loop_count: -1,
+							};
+
+							await tick();
+
+							// Start listening to experiment status here
+							subscribeExperimentLoopCountWs({
+								id: target.id,
+								onmessage: getUpdateLoopCountFromWsMessageFn(
+									gstore.experiments[
+										eeeditor.id
+									] as CreatedExperiment
+								),
+							});
 						}
 					}} />
 

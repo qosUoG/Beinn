@@ -12,7 +12,7 @@ export let gstore:
         }
         equipments: Record<string, Equipment>
         experiments: Record<string, Experiment>
-        mode: "CONFIG" | "EXPERIMENT",
+        mode: "CONFIG" | "EXPERIMENTS",
 
 
     } = $state({

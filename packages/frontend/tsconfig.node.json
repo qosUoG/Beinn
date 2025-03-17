@@ -27,7 +27,8 @@
 			"$components/*": ["./components/*"],
 			"$states/*": ["./states/*"],
 			"$lib/*": ["./lib/*"],
-			"$services/*": ["./services/*"]
+			"$services/*": ["./services/*"],
+			"$pages/*": ["./pages/*"]
 		}
 	},
 	"include": ["vite.config.ts"]

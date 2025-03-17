@@ -23,7 +23,8 @@
 			"$components/*": ["./components/*"],
 			"$states/*": ["./states/*"],
 			"$lib/*": ["./lib/*"],
-			"$services/*": ["./services/*"]
+			"$services/*": ["./services/*"],
+			"$pages/*": ["./pages/*"]
 		}
 	},
 	"include": ["./src/**/*.ts", "./src/**/*.js", "./src/**/*.svelte"]

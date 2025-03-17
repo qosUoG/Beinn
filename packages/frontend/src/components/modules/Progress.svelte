@@ -2,11 +2,10 @@
 	import {
 		ExperimentStatus,
 		getExperimentStatus,
-		type Experiment,
+		type CreatedExperiment,
 	} from "qoslab-shared";
 
-	let { experiment }: { experiment: Extract<Experiment, { created: true }> } =
-		$props();
+	let { experiment }: { experiment: CreatedExperiment } = $props();
 </script>
 
 {#if getExperimentStatus(experiment) === ExperimentStatus.Started || getExperimentStatus(experiment) === ExperimentStatus.Paused || getExperimentStatus(experiment) === ExperimentStatus.Completed}

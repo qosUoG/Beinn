@@ -1,6 +1,6 @@
 import { gstore } from "$states/global.svelte";
 import type { AllParamTypes, ChartConfigs, EEType } from "qoslab-shared";
-import { postRequestJsonInOut, qoslabappUrl } from "./utils";
+import { postRequestJsonInOut, qoslabappUrl, qoslabappWs } from "./utils";
 
 
 
@@ -32,6 +32,11 @@ export async function removeEE(eetype: EEType, payload: { id: string }) {
 
 export async function getChartConfigsByExperimentId(payload: { id: string }): Promise<{ charts: Record<string, ChartConfigs> }> {
     return await (await fetch(qoslabappUrl(`chart/${payload.id}/configs`))).json()
+}
+
+export function subscribeExperimentLoopCountWs<T extends any>(payload: { id: string, onmessage: (this: WebSocket, event: MessageEvent<T>) => any, options?: AddEventListenerOptions }) {
+    const socket = new WebSocket(qoslabappWs(`experiment/${payload.id}/loop_count`))
+    socket.addEventListener("message", payload.onmessage, payload.options)
 }
 
 

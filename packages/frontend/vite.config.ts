@@ -19,6 +19,7 @@ export default defineConfig({
       $states: path.resolve("./src/states"),
       $lib: path.resolve("./src/lib"),
       $services: path.resolve("./src/services"),
+      $pages: path.resolve("./src/pages"),
     },
   },
 })

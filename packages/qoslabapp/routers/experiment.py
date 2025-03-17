@@ -1,5 +1,5 @@
 import importlib
-from fastapi import APIRouter
+from fastapi import APIRouter, WebSocket
 from fastapi.responses import StreamingResponse
 from pydantic import BaseModel
 
@@ -69,15 +69,12 @@ async def set_params(payload: SetParamsPayload):
     AppState.setExperimentParams(payload.id, params)
 
 
-@router.get("experiment/{experiment_id}/loop_count")
-async def getStreamingLoopCount(experiment_id: str):
-    def yieldLoopCountEventStream():
+@router.websocket("/experiment/{experiment_id}/loop_count")
+async def getStreamingLoopCount(ws: WebSocket, experiment_id: str):
+    await ws.accept()
+    while True:
         for loop_count in AppState.getStreamingLoopCount(experiment_id)():
-            yield "{" + f"loop_count: {loop_count}" + "}\n\n"
-
-    return StreamingResponse(
-        yieldLoopCountEventStream(), media_type="text/event-stream"
-    )
+            await ws.send_text("{" + f"loop_count: {loop_count}" + "}")
 
 
 class StartExperimentPayload(BaseModel):
