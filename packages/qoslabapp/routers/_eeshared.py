@@ -72,10 +72,11 @@ def getAvailableEEs(eeABC: EEABC, names: list[str]):
 def populateParam(param: AllParamTypes):
     match param.type:
         case "instance.equipment":
-            param.instance = AppState.equipments[param.instance_id]
+            param.instance = AppState._equipments_proxies[param.instance_id]
 
         case "instance.experiment":
-            param.instance = AppState.experiments[param.instance_id]
+            raise Exception("Playlist is not being implemented yet")
+            # param.instance = AppState._experiment_proxies[param.instance_id]
 
         # case "composite":
         #     # Recursively instantiate params
