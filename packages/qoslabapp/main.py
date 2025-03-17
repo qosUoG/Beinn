@@ -1,11 +1,21 @@
+from contextlib import asynccontextmanager
 from fastapi import FastAPI
 from fastapi.middleware.cors import CORSMiddleware
+
+from packages.qoslabapp.lib.state import AppState
 
 
 from .routers import equipment, experiment, workspace, chart
 
 
-app = FastAPI()
+@asynccontextmanager
+async def lifespan(app: FastAPI):
+    # No Startup Logic
+    yield
+    await AppState.disconnectAllWs()
+
+
+app = FastAPI(lifespan=lifespan)
 
 origins = [
     "http://localhost:5173",

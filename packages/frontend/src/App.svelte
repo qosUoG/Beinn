@@ -3,9 +3,9 @@
 	import ProjectPath from "$components/modules/ProjectPath.svelte";
 
 	import { gstore } from "$states/global.svelte";
-	import ExperimentRunner from "$components/modules/ExperimentRunner.svelte";
-	import Config from "pages/Config.svelte";
-	import Experiments from "pages/Experiments.svelte";
+
+	import Config from "$pages/Config.svelte";
+	import Experiments from "$pages/Experiments.svelte";
 </script>
 
 <div class="col-4 w-full h-full p-4">

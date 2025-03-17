@@ -7,6 +7,7 @@ from types import ModuleType
 from typing import Any, override
 
 
+from fastapi import WebSocket
 from qoslablib.extensions.chart import ChartABC, ChartManagerABC
 from qoslablib.extensions.saver import SqlSaverABC, SqlSaverManagerABC
 from qoslablib.params import Params
@@ -23,6 +24,17 @@ from .proxies.sql_saver import SqlSaverProxy
 
 
 class AppState(ChartManagerABC, SqlSaverManagerABC):
+    """
+    Management of websocket connections
+    """
+
+    _ws: list[WebSocket] = []
+
+    @classmethod
+    async def disconnectAllWs(cls):
+        for ws in cls._ws:
+            await ws.close(code=1001)
+
     """
     Runtime management of Equipments
     """

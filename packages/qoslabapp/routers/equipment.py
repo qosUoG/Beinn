@@ -67,4 +67,4 @@ async def set_params(payload: SetParamsPayload):
     for [param_name, param] in params.items():
         params[param_name] = populateParam(param)
 
-    AppState.setEquipmentParams(params)
+    AppState.setEquipmentParams(payload.id, params)
