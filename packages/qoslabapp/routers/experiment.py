@@ -68,12 +68,13 @@ async def set_params(payload: SetParamsPayload):
     AppState.setExperimentParams(payload.id, params)
 
 
+# Websockets implemented with non async as the underlying event used is Threading ones
 @router.websocket("/experiment/{experiment_id}/loop_count")
-async def getStreamingLoopCount(ws: WebSocket, experiment_id: str):
-    await ws.accept()
+def getStreamingLoopCount(ws: WebSocket, experiment_id: str):
+    ws.accept()
     while True:
         for loop_count in AppState.getStreamingLoopCount(experiment_id)():
-            await ws.send_text("{" + f"loop_count: {loop_count}" + "}")
+            ws.send_text("{" + f"loop_count: {loop_count}" + "}")
 
 
 class StartExperimentPayload(BaseModel):
