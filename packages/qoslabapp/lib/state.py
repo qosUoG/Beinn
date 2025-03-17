@@ -8,6 +8,7 @@ from typing import Any, override
 
 
 from fastapi import WebSocket
+
 from qoslablib.extensions.chart import ChartABC, ChartManagerABC
 from qoslablib.extensions.saver import SqlSaverABC, SqlSaverManagerABC
 from qoslablib.params import Params
@@ -29,6 +30,10 @@ class AppState(ChartManagerABC, SqlSaverManagerABC):
     """
 
     _ws: list[WebSocket] = []
+
+    @classmethod
+    def appendWs(cls, ws: WebSocket):
+        cls._ws.append(ws)
 
     @classmethod
     async def disconnectAllWs(cls):
