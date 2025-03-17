@@ -75,7 +75,7 @@ async def getStreamingLoopCount(ws: WebSocket, experiment_id: str):
     await ws.accept()
     while True:
         async for loop_count in AppState.getStreamingLoopCount(experiment_id)():
-            await ws.send_text("{" + f"loop_count: {loop_count}" + "}")
+            await ws.send_text("{" + f'"loop_count": {loop_count}' + "}")
 
 
 class StartExperimentPayload(BaseModel):

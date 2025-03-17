@@ -58,6 +58,7 @@ export type CreatedExperiment = Extract<Experiment, { created: true }>
 export function getUpdateLoopCountFromWsMessageFn(experiment: CreatedExperiment) {
 
     function updateLoopCountFromWsMessage(event: MessageEvent<string>) {
+        console.log(event.data)
         const res = JSON.parse(event.data) as { loop_count: number }
         experiment.loop_count = res.loop_count
     }
