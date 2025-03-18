@@ -1,5 +1,6 @@
 
-import type { Equipment, Experiment, Directory, Dependency } from "qoslab-shared";
+import type { Equipment, Directory, Dependency } from "qoslab-shared";
+import type { RuntimeExperiment } from "./experiment";
 
 export let gstore:
     {
@@ -11,7 +12,7 @@ export let gstore:
             available_experiments: { modules: string[], cls: string }[]
         }
         equipments: Record<string, Equipment>
-        experiments: Record<string, Experiment>
+        experiments: Record<string, RuntimeExperiment>
         mode: "CONFIG" | "EXPERIMENTS",
 
 

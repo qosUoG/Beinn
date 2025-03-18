@@ -2,6 +2,7 @@ import asyncio
 from sqlite3 import Connection, Cursor
 import sqlite3
 from threading import Event
+from time import sleep
 
 from ..proxies.sql_saver import SqlSaverProxy
 
@@ -38,10 +39,11 @@ class SqlWorker:
     def runSql(cls, sql: str):
         cls._sqlite3_cursor.executescript(sql)
 
+    @classmethod
     def sqlWorker(cls):
         cls.createSqlConnection()
         while True:
-            asyncio.sleep(5)
+            sleep(5)
             for sql_saver_proxies in cls._proxies.values():
                 for sql_saver_proxy in sql_saver_proxies.values():
                     cls._sqlite3_cursor.executemany(

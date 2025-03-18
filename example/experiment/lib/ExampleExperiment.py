@@ -44,65 +44,70 @@ class ExampleExperiment(r.ExperimentABC):
 
     @override
     def initialize(self, manager: r.ManagerABC) -> int:
-        import pprint
+        # import pprint
 
-        pprint.pprint(self.params)
+        # pprint.pprint(self.params)
 
-        # You may interact with the equipment here to do initialization
-        self.params["instance_equipment_param"].instance.echo("hellow world")
-        self.params["instance_equipment_param"].instance.power = 10
+        # # You may interact with the equipment here to do initialization
+        # self.params["instance_equipment_param"].instance.echo("hellow world")
+        # self.params["instance_equipment_param"].instance.power = 10
 
-        # You would instantiate ranges, or other derived values for use in loop from params here as well
-        self.inputs = numpy.arange(self.params["intparam"].value)
+        # # You would instantiate ranges, or other derived values for use in loop from params here as well
+        # self.inputs = numpy.arange(self.params["intparam"].value)
 
-        # # After the params, instantiate charts and sql savers as needed
-        self.xyplot: XYPlot = manager.createChart(
-            XYPlot,
-            XYPlot.kwargs(
-                title="Example XY Plot",
-                x_name="index",
-                y_names=["temperature"],
-            ),
-        )
+        # # # After the params, instantiate charts and sql savers as needed
+        # self.xyplot: XYPlot = manager.createChart(
+        #     XYPlot,
+        #     XYPlot.kwargs(
+        #         title="Example XY Plot",
+        #         x_name="index",
+        #         y_names=["temperature"],
+        #     ),
+        # )
 
-        self.xyplot2: XYPlot = manager.createChart(
-            XYPlot,
-            XYPlot.kwargs(
-                title="Another XY Plot",
-                x_name="indexxxx",
-                y_names=["temperature"],
-            ),
-        )
+        # self.xyplot2: XYPlot = manager.createChart(
+        #     XYPlot,
+        #     XYPlot.kwargs(
+        #         title="Another XY Plot",
+        #         x_name="indexxxx",
+        #         y_names=["temperature"],
+        #     ),
+        # )
 
-        self.saver: XYSqlSaver = manager.createSqlSaver(
-            XYSqlSaver,
-            XYSqlSaver.kwargs(
-                title="ExampleSqlSaver", x_name="index", y_names=["temperature"]
-            ),
-        )
+        # self.saver: XYSqlSaver = manager.createSqlSaver(
+        #     XYSqlSaver,
+        #     XYSqlSaver.kwargs(
+        #         title="ExampleSqlSaver", x_name="index", y_names=["temperature"]
+        #     ),
+        # )
 
-        return ExampleExperiment.LoopCount.FINITE(self.params["intparam"].value)
+        print("initialized experiment")
+
+        return ExampleExperiment.LoopCount.FINITE(10)
 
     @override
     def loop(self, index: int):
         # Raise an exception such that qoslapapp knows experiment is ended
-        print(f"loop: {index}")
-        if index >= 10:
-            raise e.ExperimentEnded
-        # In each loop, perform measurements
+        # print(f"loop: {index}")
+        # if index >= 10:
+        #     raise e.ExperimentEnded
+        # # In each loop, perform measurements
 
-        # set the power of the equipment
-        self.params["instance_equipment_param"].instance.power = self.inputs[index]
-        # Measure the "temp"
-        temp = self.params["instance_equipment_param"].instance.measureTemp()
+        # # set the power of the equipment
+        # self.params["instance_equipment_param"].instance.power = self.inputs[index]
+        # # Measure the "temp"
+        # temp = self.params["instance_equipment_param"].instance.measureTemp()
 
-        # Then plot and save the data
-        # Since python's typing capability is limited, you would need to make sure you did write the correct keys yourself
-        self.xyplot.plot({"index": index, "temperature": temp})
-        self.saver.save({"index": index, "temperature": temp})
+        # # Then plot and save the data
+        # # Since python's typing capability is limited, you would need to make sure you did write the correct keys yourself
+        # self.xyplot.plot({"index": index, "temperature": temp})
+        # self.saver.save({"index": index, "temperature": temp})
 
-        # This is here just to not make everything happening too quickly
+        # # This is here just to not make everything happening too quickly
+        # time.sleep(1)
+
         time.sleep(1)
+        print(index)
 
     def stop(self):
         # define code here for clean up, for example switching off some equipment etc

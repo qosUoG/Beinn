@@ -1,8 +1,7 @@
 <script lang="ts">
-	import Select from "$components/reuseables/Select.svelte";
 	import { gstore } from "$states/global.svelte";
 	import { eeeditor } from "./EEEditorController.svelte";
-	import Separator from "../../../reuseables/Separator.svelte";
+
 	import SelectField from "$components/reuseables/Fields/SelectField.svelte";
 
 	let open = $state(false);

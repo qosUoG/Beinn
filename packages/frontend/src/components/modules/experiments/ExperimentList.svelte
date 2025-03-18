@@ -1,0 +1,103 @@
+<script lang="ts">
+	import Play from "$icons/Play.svelte";
+
+	import { gstore } from "$states/global.svelte";
+
+	import Progress from "./Progress.svelte";
+	import StopWatch from "$icons/StopWatch.svelte";
+	import Rotate from "$icons/Rotate.svelte";
+
+	import { startExperiment } from "$services/qoslabapp.svelte";
+	import type { CreatedRuntimeExperiment } from "$states/experiment";
+
+	let runnable_experiments = $derived(
+		Object.values(gstore.experiments).filter(
+			(experiment) =>
+				experiment.created &&
+				experiment.name &&
+				experiment.name.length > 0 &&
+				JSON.stringify(experiment.params) ===
+					JSON.stringify(experiment.temp_params) &&
+				experiment.params !== undefined
+		) as CreatedRuntimeExperiment[]
+	);
+</script>
+
+<div class="col-2 w-96 section bg-slate-200">
+	{#each runnable_experiments as experiment}
+		{@const loop_time = experiment.loop_time_start - experiment.total_time}
+		<div class="section bg-white col-2 justify-between w-full">
+			<div class="grid grid-cols-2">
+				<div class="wrapped bg-slate-200 w-fit">
+					{experiment.name}
+				</div>
+				<Progress {experiment} />
+			</div>
+
+			<div class="row justify-between">
+				<div class="row-1">
+					<div class="bg-slate-200 row rounded items-center w-24">
+						<div class="icon-btn-sm">
+							<StopWatch />
+						</div>
+						<div class="p-1 rounded pr-2 flex-grow text-center">
+							{#if experiment.total_time > 0}
+								{@render timer(experiment.total_time)}
+							{:else}
+								-
+							{/if}
+						</div>
+					</div>
+					<div class="bg-slate-200 row rounded items-center w-24">
+						<div class="icon-btn-sm">
+							<Rotate />
+						</div>
+						<div class="p-1 rounded pr-2 flex-grow text-center">
+							{#if loop_time > 0 && experiment.status !== "initial"}
+								{@render timer(loop_time)}
+							{:else}
+								-
+							{/if}
+						</div>
+					</div>
+
+					<div class="wrapped bg-slate-200 min-w-12 text-center">
+						{#if experiment.loop_count + 1 < 0}
+							-
+						{:else}
+							{experiment.loop_count}
+						{/if}
+
+						/ {#if experiment.proposed_total_loop === undefined}
+							-
+						{:else if experiment.proposed_total_loop === -1}
+							∞
+						{:else}
+							{experiment.proposed_total_loop}
+						{/if}
+					</div>
+				</div>
+				<div class="row-1">
+					<button
+						class="icon-btn-sm green"
+						onclick={async () => {
+							await startExperiment(experiment);
+						}}><Play /></button>
+				</div>
+			</div>
+		</div>
+	{/each}
+</div>
+
+{#snippet timer(time: number)}
+	{@const day_object = new Date(time * 1000)}
+	{@const hour = day_object.getHours() - 1}
+	{@const minuet = day_object.getMinutes() - 1}
+	{@const second = day_object.getSeconds()}
+
+	{#if hour > 0}
+		{hour}h {minuet}m
+	{:else}
+		{minuet}m {second}s
+	{/if}
+{/snippet}

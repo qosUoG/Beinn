@@ -1,4 +1,4 @@
-from fastapi import APIRouter, WebSocket
+from fastapi import APIRouter, WebSocket, WebSocketDisconnect
 
 from pydantic import BaseModel
 
@@ -69,20 +69,24 @@ async def set_params(payload: SetParamsPayload):
 
 
 # Websockets implemented with non async as the underlying event used is Threading ones
-@router.websocket("/experiment/{experiment_id}/loop_count")
-async def getStreamingLoopCount(ws: WebSocket, experiment_id: str):
+@router.websocket("/experiment/{experiment_id}/events")
+async def getMessageQueueFn(ws: WebSocket, experiment_id: str):
     AppState.appendWs(ws)
     await ws.accept()
-    while True:
-        async for loop_count in AppState.getStreamingLoopCount(experiment_id)():
-            await ws.send_text("{" + f'"loop_count": {loop_count}' + "}")
+
+    getFn = AppState.getMessageQueueFn(experiment_id)
+    try:
+        while True:
+            await ws.send_text(await getFn())
+    except WebSocketDisconnect:
+        AppState.removeWs(ws)
 
 
 class StartExperimentPayload(BaseModel):
     id: str
 
 
-@router.post("/experiment/start_experiment")
+@router.post("/experiment/start")
 async def start_experiment(payload: StartExperimentPayload):
     # Run the experiments
     AppState.startExperiment(payload.id)

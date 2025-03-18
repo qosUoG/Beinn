@@ -26,6 +26,12 @@ from .proxies.sql_saver import SqlSaverProxy
 
 class AppState(ChartManagerABC, SqlSaverManagerABC):
     """
+    asyncio event loop
+    """
+
+    loop: asyncio.EventLoop
+
+    """
     Management of websocket connections
     """
 
@@ -39,6 +45,10 @@ class AppState(ChartManagerABC, SqlSaverManagerABC):
     async def disconnectAllWs(cls):
         for ws in cls._ws:
             await ws.close(code=1001)
+
+    @classmethod
+    def removeWs(cls, ws: WebSocket):
+        cls._ws.remove(ws)
 
     """
     Runtime management of Equipments
@@ -130,8 +140,8 @@ class AppState(ChartManagerABC, SqlSaverManagerABC):
         cls._experiment_proxies[id].start()
 
     @classmethod
-    def getStreamingLoopCount(cls, id: str):
-        return cls._experiment_proxies[id].getStreamingLoopCount()
+    def getMessageQueueFn(cls, id: str):
+        return cls._experiment_proxies[id].getMessageQueueFn()
 
     @classmethod
     def pauseExperiment(cls, id: str):

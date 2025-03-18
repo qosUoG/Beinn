@@ -1,4 +1,5 @@
 from abc import ABC, abstractmethod
+from asyncio import EventLoop
 from dataclasses import dataclass
 
 import functools
@@ -11,6 +12,8 @@ from . import params
 
 
 class ManagerABC(SqlSaverManagerABC, ChartManagerABC):
+    loop: EventLoop
+
     @classmethod
     @abstractmethod
     def initializeExtensions(self, experiment_id: str):

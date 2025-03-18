@@ -1,7 +1,7 @@
 import asyncio
 
 from threading import Event, Lock
-from typing import TypedDict
+
 
 from qoslablib.exceptions import ExperimentEnded
 from qoslablib.params import Params
@@ -9,10 +9,7 @@ from qoslablib.runtime import ExperimentABC
 
 from qoslablib.runtime import ManagerABC
 
-
-class Message(TypedDict):
-    key: str
-    value: str
+from ..utils import singleKVNumberMessage, singleKVStrMessage
 
 
 class ExperimentProxy:
@@ -22,7 +19,6 @@ class ExperimentProxy:
         id: str,
         experimentCls: type[ExperimentABC],
         manager: type[ManagerABC],
-        loop: asyncio.EventLoop,
     ):
         self.experiment_id = id
         self._experiment = experimentCls()
@@ -35,8 +31,6 @@ class ExperimentProxy:
         self._loop_count_lock = Lock()
         self._loop_count: int = -1
 
-        self._message_queue: list[Message] = []
-
         # These would be used with _expeirment_runner
         self._running = Event()
         self._should_run = Event()
@@ -47,9 +41,9 @@ class ExperimentProxy:
         self._proposed_total_loop_lock = Lock()
         self._proposed_total_loop: int = 0
 
-        self.loop_index_subscribers: list[Event] = []
+        self._message_queue = asyncio.Queue()
 
-        self.loop = loop
+        self._experiment_task: asyncio.Task
 
     @property
     def params(self):
@@ -69,27 +63,15 @@ class ExperimentProxy:
         with self._loop_count_lock:
             self._loop_count = value
 
-    def getStreamingLoopCount(self):
-        # return a function that yields new loop index when done
-        event = Event()
-        self.loop_index_subscribers.append(event)
+    def getMessageQueueFn(self):
+        # return a function that keeps yielding new event
+        return self._message_queue.get
 
-        async def yieldLoopIndex():
-            # yield the current index first
+    def appendMessage(self, message: str):
+        self._message_queue.put_nowait(message)
 
-            yield self.loop_count
-
-            while True:
-                await asyncio.to_thread(event.wait)
-                event.clear()
-                yield self.loop_count
-
-        return yieldLoopIndex
-
-    def appendMessage(self, message):
-        self._message_queue.append(message)
-
-    _experiment_task: asyncio.Task
+    def threadSafeAppendMessage(self, message: str):
+        self.manager.loop.call_soon_threadsafe(self.appendMessage(message))
 
     def start(self):
         self._experiment_task = asyncio.create_task(
@@ -109,35 +91,45 @@ class ExperimentProxy:
         # Wait till it actually stopped
         self._stopped.wait()
 
+        self.appendMessage(singleKVNumberMessage("status", "initial"))
+
     def pause(self):
         self._should_run.clear()
         self._loop_ended.wait()
-
-    def unpause(self):
-        self._should_run.set()
-
-    def should_stop(self):
-        return self._should_stop.is_set()
-
-    def to_stopped(self):
-        self._should_run.clear()
-        self._stopped.set()
+        self.appendMessage(singleKVNumberMessage("status", "paused"))
 
     def stopped(self):
         return self._stopped.is_set()
 
-    def waitUntilShouldRun(self):
+    def unpause(self):
+        self._should_run.set()
+        self.appendMessage(singleKVNumberMessage("status", "continued"))
+
+    # Following runner functions are only called in runner and must be thread safe
+
+    def runner_shouldStop(self):
+        return self._should_stop.is_set()
+
+    def runner_toStopped(self):
+        self._should_run.clear()
+        self._stopped.set()
+
+    def runner_waitUntilShouldRun(self):
         self._should_run.wait()
 
-    def start_loop(self):
+    def runner_startLoop(self):
         self._running.set()
         self._loop_ended.clear()
 
-    def end_loop(self):
+    def runner_endLoop(self):
         self._running.clear()
         self._loop_ended.set()
-        for subscriber in self.loop_index_subscribers:
-            subscriber.set()
+
+        # Post loop count event to message queue
+        with self._loop_count_lock:
+            self.threadSafeAppendMessage(
+                singleKVNumberMessage("loop_count", self._loop_count)
+            )
 
     @property
     def proposed_total_loop(self):
@@ -149,36 +141,45 @@ class ExperimentProxy:
         with self._proposed_total_loop_lock:
             self._proposed_total_loop = value
 
+            # Post to event message queue
+            self.threadSafeAppendMessage(
+                singleKVNumberMessage("proposed_total_loop", self._proposed_total_loop)
+            )
+
 
 def _experiment_runner(proxy: ExperimentProxy):
     # Wait the running event set_ before initializing
-    proxy.waitUntilShouldRun()
+    proxy.runner_waitUntilShouldRun()
     # First run the inialize method and get the number of loops
     proxy.proposed_total_loop = proxy._experiment.initialize(proxy.manager)
 
     # Then run the initializer of extensions from appstate
-    proxy.loop.call_soon_threadsafe(
+    proxy.manager.loop.call_soon_threadsafe(
         proxy.manager.initializeExtensions(proxy.experiment_id)
     )
 
+    # Post Start event to message queue
+    proxy.threadSafeAppendMessage(singleKVStrMessage("status", "started"))
+
     while True:
         # Wait until the running event is set in each loop
-        proxy.waitUntilShouldRun()
+        proxy.runner_waitUntilShouldRun()
 
         # Stop the _experiment is the stop event is set
-        if proxy.should_stop():
+        if proxy.runner_shouldStop():
             proxy._experiment.stop()
-            proxy.to_stopped()
+            proxy.runner_toStopped()
+
             return
 
-        proxy.start_loop()
+        proxy.runner_startLoop()
 
         # Loop the _experiment once with the newest index
         try:
             proxy.loop_count += 1
             proxy._experiment.loop(proxy.loop_count)
 
-            proxy.end_loop()
+            proxy.runner_endLoop()
 
         except ExperimentEnded:
             print("experiment ended")

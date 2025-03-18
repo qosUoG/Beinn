@@ -34,37 +34,11 @@ export type Equipment = EENotCreated | EECreated
 
 
 
-export type Experiment = EENotCreated | EECreated & {
-    charts: Record<string, ChartConfigs>
-
-    running: boolean
-    paused: boolean
-    completed: boolean
-
-    loop_count: number
-
-    ws?: WebSocket
-
-    // Initial(Stopped):running: false, paused: false, completed: false
-    // Start:           running: true,  paused: false, completed: false
-    // Pause:           running: true,  paused: true,  completed: false
-    // Continue:        running: true,  paused: false, completed: false
-    // Complete:        running: false, paused: false, completed: true
-    // Stopped(Initial):running: false, paused: false, completed: false
-}
+export type Experiment = EENotCreated | EECreated
 
 export type CreatedExperiment = Extract<Experiment, { created: true }>
 
-export function getUpdateLoopCountFromWsMessageFn(experiment: CreatedExperiment) {
 
-    function updateLoopCountFromWsMessage(event: MessageEvent<string>) {
-        console.log(event.data)
-        const res = JSON.parse(event.data) as { loop_count: number }
-        experiment.loop_count = res.loop_count
-    }
-
-    return updateLoopCountFromWsMessage
-}
 
 export enum ExperimentStatus {
     NotCreated,
@@ -74,19 +48,7 @@ export enum ExperimentStatus {
     Completed,
 }
 
-export function getExperimentStatus(experiment: Experiment) {
-    if (!experiment.created) return ExperimentStatus.NotCreated
 
-
-
-    if (experiment.paused) return ExperimentStatus.Paused
-
-    if (experiment.completed) return ExperimentStatus.Completed
-
-    if (experiment.running) return ExperimentStatus.Started
-
-    return ExperimentStatus.Stopped
-}
 
 
 

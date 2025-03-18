@@ -1,5 +1,5 @@
 import { gstore } from "$states/global.svelte";
-import type { AllParamTypes, ChartConfigs, EEType } from "qoslab-shared";
+import type { AllParamTypes, ChartConfigs, CreatedExperiment, EEType } from "qoslab-shared";
 import { postRequestJsonInOut, qoslabappUrl, qoslabappWs } from "./utils";
 
 
@@ -34,19 +34,12 @@ export async function getChartConfigsByExperimentId(payload: { id: string }): Pr
     return await (await fetch(qoslabappUrl(`chart/${payload.id}/configs`))).json()
 }
 
-export function subscribeExperimentLoopCountWs<T extends any>(payload: { id: string, onmessage: (this: WebSocket, event: MessageEvent<T>) => any, options?: AddEventListenerOptions }) {
-    const socket = new WebSocket(qoslabappWs(`experiment/${payload.id}/loop_count`))
+export function subscribeExperimentEventsWs<T extends any>(payload: { id: string, onmessage: (this: WebSocket, event: MessageEvent<T>) => any, options?: AddEventListenerOptions }) {
+    const socket = new WebSocket(qoslabappWs(`experiment/${payload.id}/events`))
     socket.addEventListener("message", payload.onmessage, payload.options)
 }
 
 
-// export async function startExperiment(experiments: Experiment[]): Promise<void> {
-//     await postRequestJsonInOut("experiment/start_experiment_params", {
-//         experiment: experiments.map(({ name, module, params, cls }) => ({ name, module, params, cls })),
-//         equipments: $state.snapshot(Object.values(gstore.equipments).map((equipment) => ({
-//             name: equipment.name,
-//             module: equipment.module,
-//             params: equipment.params
-//         })))
-//     })
-// }
+export async function startExperiment(payload: { id: string }): Promise<void> {
+    await postRequestJsonInOut(qoslabappUrl("experiment/start"), payload)
+}

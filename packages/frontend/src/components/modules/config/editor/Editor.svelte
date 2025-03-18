@@ -1,7 +1,7 @@
 <script lang="ts">
 	import DependencyEditor from "./Dependency/DependencyEditor.svelte";
 	import { editor } from "./EditorController.svelte";
-	import EeEditor from "./EE/EEEditor.svelte";
+	import EeEditor from "./ee/EEEditor.svelte";
 </script>
 
 {#if editor.mode === "dependency"}

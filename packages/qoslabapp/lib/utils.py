@@ -1,6 +1,7 @@
 import importlib.util
 import sys
 import ast
+from typing import Any
 
 
 def importFromStr(code):
@@ -18,3 +19,11 @@ def importFromStr(code):
     exec(code, module.__dict__)
     sys.modules[spec.name] = module
     return [module, classname]
+
+
+def singleKVNumberMessage(key: str, value: float | int):
+    return "{" + f'"{key}": {value}' + "}"
+
+
+def singleKVStrMessage(key: str, value: str):
+    return "{" + f'"{key}": "{value}"' + "}"

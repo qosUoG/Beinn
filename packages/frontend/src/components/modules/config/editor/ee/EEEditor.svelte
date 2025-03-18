@@ -6,7 +6,7 @@
 		getEEParams,
 		removeEE,
 		setEEParams,
-		subscribeExperimentLoopCountWs,
+		subscribeExperimentEventsWs,
 	} from "$services/qoslabapp.svelte";
 	import { gstore } from "$states/global.svelte";
 
@@ -20,12 +20,11 @@
 	import FixedField from "$components/reuseables/Fields/FixedField.svelte";
 	import LabelField from "$components/reuseables/Fields/LabelField.svelte";
 	import { autofocus } from "$components/utils.svelte";
+	import { capitalise } from "qoslab-shared";
 	import {
-		capitalise,
-		getUpdateLoopCountFromWsMessageFn,
-		type CreatedExperiment,
-		type Experiment,
-	} from "qoslab-shared";
+		getExperimentEventFn,
+		type CreatedRuntimeExperiment,
+	} from "$states/experiment";
 
 	let target = $derived.by(() => {
 		if (eeeditor.id === undefined) return undefined;
@@ -89,7 +88,6 @@
 								temp_params: { ...params },
 								name: "",
 							};
-						// If experiment, fetch the charts also
 						else if (eeeditor.mode === "experiment") {
 							gstore.experiments[eeeditor.id] = {
 								...target,
@@ -98,21 +96,21 @@
 								temp_params: { ...params },
 								name: "",
 								charts: {},
-								running: false,
-								paused: false,
-								completed: false,
+								status: "initial",
 								loop_count: -1,
+								loop_time_start: 0,
+								total_time: 0,
 							};
 
 							await tick();
 
-							// Start listening to experiment status here
-							subscribeExperimentLoopCountWs({
+							// Start listening to experiment events here
+							subscribeExperimentEventsWs({
 								id: target.id,
-								onmessage: getUpdateLoopCountFromWsMessageFn(
+								onmessage: getExperimentEventFn(
 									gstore.experiments[
 										eeeditor.id
-									] as CreatedExperiment
+									] as CreatedRuntimeExperiment
 								),
 							});
 						}

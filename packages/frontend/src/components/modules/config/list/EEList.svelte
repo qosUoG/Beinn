@@ -3,7 +3,7 @@
 
 	import { getRandomId } from "$lib/utils";
 	import { gstore } from "$states/global.svelte";
-	import { eeeditor } from "$components/modules/Editor/EE/EEEditorController.svelte";
+	import { eeeditor } from "$components/modules/config/editor/ee/EEEditorController.svelte";
 	import { tick } from "svelte";
 	import { cn } from "$components/utils.svelte";
 
@@ -12,8 +12,8 @@
 	import Sign from "$icons/Sign.svelte";
 
 	import { getAvailableEEs } from "$services/qoslabapp.svelte";
-	import { editor } from "$components/modules/Editor/EditorController.svelte";
-	import { dependency_editor } from "$components/modules/Editor/Dependency/DependencyEditorController.svelte";
+	import { editor } from "$components/modules/config/editor/EditorController.svelte";
+	import { dependency_editor } from "$components/modules/config/editor/Dependency/DependencyEditorController.svelte";
 	import { capitalise } from "qoslab-shared";
 
 	let { eetype }: { eetype: "equipment" | "experiment" } = $props();

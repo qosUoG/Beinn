@@ -1,3 +1,4 @@
+import asyncio
 from contextlib import asynccontextmanager
 from fastapi import FastAPI
 from fastapi.middleware.cors import CORSMiddleware
@@ -10,7 +11,7 @@ from .routers import equipment, experiment, workspace, chart
 
 @asynccontextmanager
 async def lifespan(app: FastAPI):
-    # No Startup Logic
+    AppState.loop = asyncio.get_event_loop()
     yield
     await AppState.disconnectAllWs()
 
