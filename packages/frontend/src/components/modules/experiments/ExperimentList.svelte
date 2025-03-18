@@ -59,7 +59,7 @@
 							<Rotate />
 						</div>
 						<div class="p-1 rounded pr-2 flex-grow text-center">
-							{#if loop_time > 0 && experiment.status !== "initial"}
+							{#if loop_time >= 0 && experiment.status !== "initial"}
 								{@render timer(loop_time)}
 							{:else}
 								-

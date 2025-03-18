@@ -74,6 +74,16 @@ class ExperimentProxy:
         self.manager.loop.call_soon_threadsafe(lambda: self.appendMessage(message))
 
     def start(self):
+        # Make sure experiment is at fresh state
+        self.loop_count = 0
+
+        # Reset All Events
+        self._running = Event()
+        self._should_run = Event()
+        self._should_stop = Event()
+        self._stopped = Event()
+        self._loop_ended = Event()
+
         self._experiment_task = asyncio.create_task(
             asyncio.to_thread(_experiment_runner, self)
         )
