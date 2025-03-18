@@ -101,7 +101,6 @@ class AppState(ChartManagerABC, SqlSaverManagerABC):
                 id=id,
                 experimentCls=getattr(module, eCls),
                 manager=cls,
-                loop=asyncio.get_event_loop(),
             )
 
     @classmethod
