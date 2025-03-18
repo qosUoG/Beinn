@@ -138,6 +138,8 @@ class ExperimentProxy:
         with self._proposed_total_loop_lock:
             self._proposed_total_loop = value
 
+            print(value)
+
             # Post to event message queue
             self.threadSafeAppendMessage(
                 singleKVNumberMessage("proposed_total_loop", self._proposed_total_loop)

@@ -26,10 +26,12 @@ class ExperimentABC(ABC):
     params: params.Params
 
     class LoopCount:
-        INFINITE = -1
+        @classmethod
+        def INFINITE(cls):
+            return -1
 
         @classmethod
-        def FINITE(loop: int):
+        def FINITE(cls, loop: int):
             return loop
 
     def __init__(self):
