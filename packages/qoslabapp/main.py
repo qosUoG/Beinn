@@ -14,6 +14,7 @@ async def lifespan(app: FastAPI):
     AppState.loop = asyncio.get_event_loop()
     yield
     await AppState.disconnectAllWs()
+    await AppState.cancelAllExperiment()
 
 
 app = FastAPI(lifespan=lifespan)

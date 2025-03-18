@@ -154,6 +154,10 @@ class AppState(ChartManagerABC, SqlSaverManagerABC):
     def stopExperiment(cls, id: str):
         cls._experiment_proxies[id].stop()
 
+    @classmethod
+    def cancelAllExperiment(cls, id: str):
+        cls._experiment_proxies[id].cancelExperimentTask()
+
     """
     Extension Management
     """

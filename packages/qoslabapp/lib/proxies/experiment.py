@@ -81,6 +81,9 @@ class ExperimentProxy:
         # run the experiment!
         self._should_run.set()
 
+    def cancelExperimentTask(self):
+        self._experiment_task.cancel()
+
     def stop(self):
         self._should_stop.set()
         # Set the running event as well just in case it is being paused

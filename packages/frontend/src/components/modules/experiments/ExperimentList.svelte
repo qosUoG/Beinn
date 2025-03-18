@@ -26,6 +26,7 @@
 <div class="col-2 w-96 section bg-slate-200">
 	{#each runnable_experiments as experiment}
 		{@const loop_time = experiment.loop_time_start - experiment.total_time}
+
 		<div class="section bg-white col-2 justify-between w-full">
 			<div class="grid grid-cols-2">
 				<div class="wrapped bg-slate-200 w-fit">
