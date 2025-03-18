@@ -87,10 +87,6 @@ class ExampleExperiment(r.ExperimentABC):
 
     @override
     def loop(self, index: int):
-        # Raise an exception such that qoslapapp knows experiment is ended
-        # print(f"loop: {index}")
-        if index >= 10:
-            raise e.ExperimentEnded
         # # In each loop, perform measurements
 
         # # set the power of the equipment
@@ -104,10 +100,12 @@ class ExampleExperiment(r.ExperimentABC):
         # self.saver.save({"index": index, "temperature": temp})
 
         # # This is here just to not make everything happening too quickly
-        # time.sleep(1)
-
         time.sleep(1)
-        print(index)
+
+        # Raise an exception such that qoslapapp knows experiment is ended
+        print(f"loop: {index}")
+        if index >= 9:
+            raise e.ExperimentEnded
 
     def stop(self):
         # define code here for clean up, for example switching off some equipment etc

@@ -11,7 +11,10 @@
 	</div>
 {:else if experiment.proposed_total_loop !== undefined}
 	{@const percentage =
-		((experiment.loop_count + 1) / experiment.proposed_total_loop!) * 100}
+		Math.round(
+			((experiment.loop_count + 1) / experiment.proposed_total_loop!) *
+				10000
+		) / 100}
 	{@render progress(percentage)}
 {:else}
 	<div class="wrapped text-center bg-slate-200 rounded-full w-full"></div>

@@ -21,11 +21,16 @@
 				experiment.params !== undefined
 		) as CreatedRuntimeExperiment[]
 	);
+
+	function zeropad(num: number) {
+		if (num < 10) return `0${num}`;
+		return `${num}`;
+	}
 </script>
 
 <div class="col-2 w-96 section bg-slate-200">
 	{#each runnable_experiments as experiment}
-		{@const loop_time = experiment.loop_time_start - experiment.total_time}
+		{@const loop_time = experiment.total_time - experiment.loop_time_start}
 		{console.log(experiment)}
 		<div class="section bg-white col-2 justify-between w-full">
 			<div class="grid grid-cols-2">
@@ -93,12 +98,14 @@
 {#snippet timer(time: number)}
 	{@const day_object = new Date(time * 1000)}
 	{@const hour = day_object.getHours() - 1}
-	{@const minuet = day_object.getMinutes() - 1}
+	{@const minuet = day_object.getMinutes()}
 	{@const second = day_object.getSeconds()}
 
 	{#if hour > 0}
-		{hour}h {minuet}m
+		{zeropad(hour)}h {zeropad(minuet)}m
+	{:else if minuet > 0}
+		{zeropad(minuet)}m {zeropad(second)}s
 	{:else}
-		{minuet}m {second}s
+		{zeropad(second)}s
 	{/if}
 {/snippet}

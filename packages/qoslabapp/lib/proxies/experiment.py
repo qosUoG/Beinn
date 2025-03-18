@@ -133,7 +133,7 @@ class ExperimentProxy:
             )
 
     def runner_completed(self):
-        self.threadSafeAppendMessage(singleKVNumberMessage("status", "completed"))
+        self.threadSafeAppendMessage(singleKVStrMessage("status", "completed"))
 
     @property
     def proposed_total_loop(self):
