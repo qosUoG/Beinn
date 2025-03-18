@@ -75,7 +75,7 @@ class ExperimentProxy:
 
     def start(self):
         # Make sure experiment is at fresh state
-        self.loop_count = 0
+        self.loop_count = -1
 
         # Reset All Events
         self._running = Event()
