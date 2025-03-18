@@ -71,7 +71,7 @@ class ExperimentProxy:
         self._message_queue.put_nowait(message)
 
     def threadSafeAppendMessage(self, message: str):
-        self.manager.loop.call_soon_threadsafe(self.appendMessage(message))
+        self.manager.loop.call_soon_threadsafe(lambda: self.appendMessage(message))
 
     def start(self):
         self._experiment_task = asyncio.create_task(
@@ -138,8 +138,6 @@ class ExperimentProxy:
         with self._proposed_total_loop_lock:
             self._proposed_total_loop = value
 
-            print(value)
-
             # Post to event message queue
             self.threadSafeAppendMessage(
                 singleKVNumberMessage("proposed_total_loop", self._proposed_total_loop)
@@ -168,7 +166,6 @@ def _experiment_runner(proxy: ExperimentProxy):
         if proxy.runner_shouldStop():
             proxy._experiment.stop()
             proxy.runner_toStopped()
-
             return
 
         proxy.runner_startLoop()
