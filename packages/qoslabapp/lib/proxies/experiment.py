@@ -132,6 +132,9 @@ class ExperimentProxy:
                 singleKVNumberMessage("loop_count", self._loop_count)
             )
 
+    def runner_completed(self):
+        self.threadSafeAppendMessage(singleKVNumberMessage("status", "completed"))
+
     @property
     def proposed_total_loop(self):
         with self._proposed_total_loop_lock:
@@ -183,4 +186,7 @@ def _experiment_runner(proxy: ExperimentProxy):
 
         except ExperimentEnded:
             print("experiment ended")
+            proxy.runner_endLoop()
+            proxy.runner_completed()
+
             return

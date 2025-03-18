@@ -66,7 +66,7 @@
 						{#if experiment.loop_count + 1 < 0}
 							-
 						{:else}
-							{experiment.loop_count}
+							{experiment.loop_count + 1}
 						{/if}
 
 						/ {#if experiment.proposed_total_loop === undefined}
