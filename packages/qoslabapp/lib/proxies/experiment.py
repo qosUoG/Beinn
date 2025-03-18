@@ -82,6 +82,7 @@ class ExperimentProxy:
         self._should_run.set()
 
     def cancelExperimentTask(self):
+        self.stop()
         self._experiment_task.cancel()
 
     def stop(self):
@@ -155,7 +156,7 @@ def _experiment_runner(proxy: ExperimentProxy):
 
     # Then run the initializer of extensions from appstate
     proxy.manager.loop.call_soon_threadsafe(
-        proxy.manager.initializeExtensions(proxy.experiment_id)
+        lambda: proxy.manager.initializeExtensions(proxy.experiment_id)
     )
 
     # Post Start event to message queue
