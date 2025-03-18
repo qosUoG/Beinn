@@ -89,8 +89,8 @@ class ExampleExperiment(r.ExperimentABC):
     def loop(self, index: int):
         # Raise an exception such that qoslapapp knows experiment is ended
         # print(f"loop: {index}")
-        # if index >= 10:
-        #     raise e.ExperimentEnded
+        if index >= 10:
+            raise e.ExperimentEnded
         # # In each loop, perform measurements
 
         # # set the power of the equipment

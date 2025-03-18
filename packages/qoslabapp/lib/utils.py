@@ -22,8 +22,8 @@ def importFromStr(code):
 
 
 def singleKVNumberMessage(key: str, value: float | int):
-    return "{" + f'"{key}": {value}' + "}"
+    return "{" + f'"key": "{key}", "value": {value}' + "}"
 
 
 def singleKVStrMessage(key: str, value: str):
-    return "{" + f'"{key}": "{value}"' + "}"
+    return "{" + f'"key": "{key}", "value": "{value}"' + "}"
