@@ -75,10 +75,7 @@ class ExperimentProxy:
 
     def start(self):
         self._experiment_task = asyncio.create_task(
-            asyncio.to_thread(
-                _experiment_runner,
-                args=(self),
-            )
+            asyncio.to_thread(_experiment_runner, self)
         )
 
         # run the experiment!

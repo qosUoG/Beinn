@@ -24,6 +24,8 @@ export function getExperimentEventFn(experiment: CreatedRuntimeExperiment) {
 
     function updateEventFromWsFn(event: MessageEvent<string>) {
 
+        console.log(event.data)
+
         const res = JSON.parse(event.data) as
             { key: "loop_count", value: number } |
             { key: "proposed_total_loop", value: number }
