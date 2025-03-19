@@ -55,7 +55,7 @@
 							<StopWatch />
 						</div>
 						<div class="p-1 rounded pr-2 flex-grow text-center">
-							{#if experiment.total_time > 0}
+							{#if experiment.total_time >= 0 && experiment.proposed_total_loop !== undefined}
 								{@render timer(experiment.total_time)}
 							{:else}
 								-
@@ -123,7 +123,7 @@
 								await continueExperiment(experiment);
 							}}><Play /></button>
 					{/if}
-					{#if experiment.status === "stopping"}
+					{#if experiment.status === "stopping" || experiment.status === "pausing"}
 						<div class="icon-btn-sm bg-slate-200">
 							<div class="animate-pulse">
 								<Loader />

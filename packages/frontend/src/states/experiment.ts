@@ -31,6 +31,11 @@ export function getExperimentEventFn(experiment: CreatedRuntimeExperiment) {
             { key: "proposed_total_loop", value: number }
             | { key: "status", value: "started" | "paused" | "continued" | "completed" | "initial" | "stopped" }
 
+        // Reset loop time only if loop count is different
+        if (res.key === "loop_count" && res.value !== experiment.loop_count && experiment.status !== "stopped" && experiment.status !== "completed" && experiment.status !== "paused")
+            experiment.loop_time_start = experiment.total_time
+
+
         // Pleasing the type checker
         if (typeof res.value === "number")
             experiment[res.key] = res.value
@@ -61,10 +66,7 @@ export function getExperimentEventFn(experiment: CreatedRuntimeExperiment) {
             }
         }
 
-        // Reset loop time
-        if (res.key === "loop_count")
 
-            experiment.loop_time_start = experiment.total_time
 
 
     }
