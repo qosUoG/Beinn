@@ -102,7 +102,7 @@ class ExperimentProxy:
         # Wait till it actually stopped
         self._stopped.wait()
 
-        self.appendMessage(singleKVStrMessage("status", "initial"))
+        self.appendMessage(singleKVStrMessage("status", "stopped"))
 
     def pause(self):
         self._should_run.clear()

@@ -16,6 +16,7 @@
 	import type { CreatedRuntimeExperiment } from "$states/experiment";
 	import Pause from "$icons/Pause.svelte";
 	import Stop from "$icons/Stop.svelte";
+	import Loader from "$icons/Loader.svelte";
 
 	let runnable_experiments = $derived(
 		Object.values(gstore.experiments).filter(
@@ -91,31 +92,43 @@
 					</div>
 				</div>
 				<div class="row-1">
-					{#if experiment.status === "initial" || experiment.status === "completed"}
+					{#if experiment.status === "initial" || experiment.status === "completed" || experiment.status === "stopped"}
 						<button
 							class="icon-btn-sm green"
 							onclick={async () => {
+								experiment.loop_count = -1;
+								experiment.status = "starting";
 								await startExperiment(experiment);
 							}}><Play /></button>
 					{:else if experiment.status === "continuing" || experiment.status === "started" || experiment.status === "starting" || experiment.status === "continued"}
 						<button
 							class="icon-btn-sm red"
 							onclick={async () => {
+								experiment.status = "pausing";
 								await pauseExperiment(experiment);
 							}}><Pause /></button>
 					{:else if experiment.status === "paused" || experiment.status === "pausing"}
 						<button
 							class="icon-btn-sm red"
 							onclick={async () => {
+								experiment.status = "stopping";
 								await stopExperiment(experiment);
 							}}><Stop /></button>
 					{/if}
 					{#if experiment.status === "paused"}
 						<button
-							class="icon-btn-sm red"
+							class="icon-btn-sm green"
 							onclick={async () => {
+								experiment.status = "continuing";
 								await continueExperiment(experiment);
 							}}><Play /></button>
+					{/if}
+					{#if experiment.status === "stopping"}
+						<div class="icon-btn-sm bg-slate-200">
+							<div class="animate-pulse">
+								<Loader />
+							</div>
+						</div>
 					{/if}
 				</div>
 			</div>

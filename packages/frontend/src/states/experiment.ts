@@ -3,7 +3,7 @@ import type { ChartConfigs, Experiment } from "qoslab-shared"
 export type RuntimeExperiment = Experiment & {
     charts: Record<string, ChartConfigs>
 
-    status: "initial" | "starting" | "started" | "pausing" | "paused" | "continuing" | "continued" | "completed"
+    status: "initial" | "starting" | "started" | "pausing" | "paused" | "continuing" | "continued" | "stopping" | "stopped" | "completed"
 
     loop_count: number
     proposed_total_loop?: number
@@ -29,7 +29,7 @@ export function getExperimentEventFn(experiment: CreatedRuntimeExperiment) {
         const res = JSON.parse(event.data) as
             { key: "loop_count", value: number } |
             { key: "proposed_total_loop", value: number }
-            | { key: "status", value: "started" | "paused" | "continued" | "completed" | "initial" }
+            | { key: "status", value: "started" | "paused" | "continued" | "completed" | "initial" | "stopped" }
 
         // Pleasing the type checker
         if (typeof res.value === "number")
@@ -39,24 +39,25 @@ export function getExperimentEventFn(experiment: CreatedRuntimeExperiment) {
 
         if (res.key === "status") {
             switch (res.value) {
-                case "continued":
-                    // reset loop time
-                    experiment.loop_time_start = experiment.total_time
                 case "started":
                     experiment.total_time = 0
                     experiment.loop_time_start = 0
+                    experiment.loop_count = 0
+                    experiment.timer = setInterval(() => {
+                        experiment.total_time += 1
+                    }, 1000)
+                    break
+                case "continued":
+                    // reset loop time
+                    experiment.loop_time_start = experiment.total_time
                     experiment.timer = setInterval(() => {
                         experiment.total_time += 1
                     }, 1000)
                     break
                 case "paused":
                 case "completed":
+                case "stopped":
                     clearInterval(experiment.timer)
-                    break
-                case "initial":
-                    clearInterval(experiment.timer)
-                    experiment.loop_time_start = 0
-                    experiment.total_time = 0
                     break
             }
         }
