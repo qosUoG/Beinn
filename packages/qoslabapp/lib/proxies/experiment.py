@@ -102,19 +102,19 @@ class ExperimentProxy:
         # Wait till it actually stopped
         self._stopped.wait()
 
-        self.appendMessage(singleKVNumberMessage("status", "initial"))
+        self.appendMessage(singleKVStrMessage("status", "initial"))
 
     def pause(self):
         self._should_run.clear()
         self._loop_ended.wait()
-        self.appendMessage(singleKVNumberMessage("status", "paused"))
+        self.appendMessage(singleKVStrMessage("status", "paused"))
 
     def stopped(self):
         return self._stopped.is_set()
 
     def unpause(self):
         self._should_run.set()
-        self.appendMessage(singleKVNumberMessage("status", "continued"))
+        self.appendMessage(singleKVStrMessage("status", "continued"))
 
     # Following runner functions are only called in runner and must be thread safe
 
