@@ -82,11 +82,29 @@ async def getMessageQueueFn(ws: WebSocket, experiment_id: str):
         AppState.removeWs(ws)
 
 
-class StartExperimentPayload(BaseModel):
+class controlExperimentPayload(BaseModel):
     id: str
 
 
 @router.post("/experiment/start")
-async def start_experiment(payload: StartExperimentPayload):
+async def start_experiment(payload: controlExperimentPayload):
     # Run the experiments
     AppState.startExperiment(payload.id)
+
+
+@router.post("/experiment/pause")
+async def pause_experiment(payload: controlExperimentPayload):
+    # Run the experiments
+    AppState.pauseExperiment(payload.id)
+
+
+@router.post("/experiment/continue")
+async def continue_experiment(payload: controlExperimentPayload):
+    # Run the experiments
+    AppState.continueExperiment(payload.id)
+
+
+@router.post("/experiment/stop")
+async def stop_experiment(payload: controlExperimentPayload):
+    # Run the experiments
+    AppState.stopExperiment(payload.id)

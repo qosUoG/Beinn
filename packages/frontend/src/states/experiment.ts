@@ -43,7 +43,8 @@ export function getExperimentEventFn(experiment: CreatedRuntimeExperiment) {
                     // reset loop time
                     experiment.loop_time_start = experiment.total_time
                 case "started":
-                    console.log("hi")
+                    experiment.total_time = 0
+                    experiment.loop_time_start = 0
                     experiment.timer = setInterval(() => {
                         experiment.total_time += 1
                     }, 1000)
@@ -62,6 +63,7 @@ export function getExperimentEventFn(experiment: CreatedRuntimeExperiment) {
 
         // Reset loop time
         if (res.key === "loop_count")
+
             experiment.loop_time_start = experiment.total_time
 
 

@@ -43,3 +43,15 @@ export function subscribeExperimentEventsWs<T extends any>(payload: { id: string
 export async function startExperiment(payload: { id: string }): Promise<void> {
     await postRequestJsonInOut(qoslabappUrl("experiment/start"), payload)
 }
+
+export async function pauseExperiment(payload: { id: string }): Promise<void> {
+    await postRequestJsonInOut(qoslabappUrl("experiment/pause"), payload)
+}
+
+export async function continueExperiment(payload: { id: string }): Promise<void> {
+    await postRequestJsonInOut(qoslabappUrl("experiment/continue"), payload)
+}
+
+export async function stopExperiment(payload: { id: string }): Promise<void> {
+    await postRequestJsonInOut(qoslabappUrl("experiment/stop"), payload)
+}

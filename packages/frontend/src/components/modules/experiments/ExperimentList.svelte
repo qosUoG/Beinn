@@ -7,8 +7,15 @@
 	import StopWatch from "$icons/StopWatch.svelte";
 	import Rotate from "$icons/Rotate.svelte";
 
-	import { startExperiment } from "$services/qoslabapp.svelte";
+	import {
+		continueExperiment,
+		pauseExperiment,
+		startExperiment,
+		stopExperiment,
+	} from "$services/qoslabapp.svelte";
 	import type { CreatedRuntimeExperiment } from "$states/experiment";
+	import Pause from "$icons/Pause.svelte";
+	import Stop from "$icons/Stop.svelte";
 
 	let runnable_experiments = $derived(
 		Object.values(gstore.experiments).filter(
@@ -84,11 +91,32 @@
 					</div>
 				</div>
 				<div class="row-1">
-					<button
-						class="icon-btn-sm green"
-						onclick={async () => {
-							await startExperiment(experiment);
-						}}><Play /></button>
+					{#if experiment.status === "initial" || experiment.status === "completed"}
+						<button
+							class="icon-btn-sm green"
+							onclick={async () => {
+								await startExperiment(experiment);
+							}}><Play /></button>
+					{:else if experiment.status === "continuing" || experiment.status === "started" || experiment.status === "starting" || experiment.status === "continued"}
+						<button
+							class="icon-btn-sm red"
+							onclick={async () => {
+								await pauseExperiment(experiment);
+							}}><Pause /></button>
+					{:else if experiment.status === "paused" || experiment.status === "pausing"}
+						<button
+							class="icon-btn-sm red"
+							onclick={async () => {
+								await stopExperiment(experiment);
+							}}><Stop /></button>
+					{/if}
+					{#if experiment.status === "paused"}
+						<button
+							class="icon-btn-sm red"
+							onclick={async () => {
+								await continueExperiment(experiment);
+							}}><Play /></button>
+					{/if}
 				</div>
 			</div>
 		</div>
