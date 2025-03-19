@@ -107,6 +107,7 @@ class ExperimentProxy:
     def pause(self):
         self._should_run.clear()
         self._loop_ended.wait()
+
         self.appendMessage(singleKVStrMessage("status", "paused"))
 
     def stopped(self):
@@ -117,6 +118,8 @@ class ExperimentProxy:
         self.appendMessage(singleKVStrMessage("status", "continued"))
 
     # Following runner functions are only called in runner and must be thread safe
+    def runner_shouldRun(self):
+        return self._should_run.is_set()
 
     def runner_shouldStop(self):
         return self._should_stop.is_set()
@@ -191,6 +194,10 @@ def _experiment_runner(proxy: ExperimentProxy):
         try:
             proxy.loop_count += 1
             proxy._experiment.loop(proxy.loop_count)
+
+            if not proxy.runner_shouldRun():
+                # Decrement to exclude the previous loop index
+                proxy.loop_count -= 1
 
             proxy.runner_endLoop()
 

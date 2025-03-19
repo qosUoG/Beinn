@@ -76,7 +76,7 @@
 					</div>
 
 					<div class="wrapped bg-slate-200 min-w-12 text-center">
-						{#if experiment.loop_count + 1 < 0}
+						{#if experiment.loop_count + 1 < 0 || experiment.proposed_total_loop === undefined}
 							-
 						{:else}
 							{experiment.loop_count + 1}

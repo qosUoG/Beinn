@@ -42,7 +42,6 @@ export function getExperimentEventFn(experiment: CreatedRuntimeExperiment) {
                 case "started":
                     experiment.total_time = 0
                     experiment.loop_time_start = 0
-                    experiment.loop_count = 0
                     experiment.timer = setInterval(() => {
                         experiment.total_time += 1
                     }, 1000)
