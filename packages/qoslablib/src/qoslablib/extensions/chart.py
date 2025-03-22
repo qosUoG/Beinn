@@ -55,7 +55,6 @@ class XYPlotConfig(ChartConfigABC):
         return dataclasses.asdict(self)
 
 
-@dataclass
 class XYPlot(ChartABC):
     class KW(TypedDict):
         title: str
@@ -63,20 +62,14 @@ class XYPlot(ChartABC):
         y_axis: str
         y_names: list[str]
 
-    title: str
-    x_axis: str
-    y_axis: str
-    y_names: list[str]
-    config: XYPlotConfig
-
     def __init__(
         self,
         plot_fn: Callable[[dict[str, float]], None],
         **kwargs: Unpack[KW],
     ):
-        print("hi")
         self.title = kwargs["title"]
         self.x_axis = kwargs["x_axis"]
+        self.y_axis = kwargs["y_axis"]
         self.y_names = kwargs["y_names"]
         self.config = XYPlotConfig(
             title=self.title,

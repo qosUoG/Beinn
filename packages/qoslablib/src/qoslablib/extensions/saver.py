@@ -22,7 +22,7 @@ class SqlSaverABC(ABC):
 
     @classmethod
     @abstractmethod
-    def kwargs[KW](cls, **kwargs: Unpack[KW]) -> KW:
+    def kwargs(cls, **kwargs: Any) -> Any:
         # This method creates the kwargs object for instantiating the chart
         raise NotImplementedError
 
@@ -68,11 +68,6 @@ class XYSqlSaver(SqlSaverABC):
         title: str
         x_name: str
         y_names: list[str]
-
-    title: str
-    x_name: str
-    y_names: list[str]
-    config: XYSqlSaverConfig
 
     def __init__(
         self,

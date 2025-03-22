@@ -10,16 +10,14 @@ from time import sleep
 import types
 from typing import Any
 
+from qoslablib.extensions.chart import XYPlotConfig
+
 
 if __name__ == "__main__":
-
-    @dataclass
-    class A:
-        S: str
-
-    aa = A("wow")
-
-    print(json.dumps({"a": dataclasses.asdict(aa)}))
+    config = XYPlotConfig(
+        title="wow", type="XYPlot", x_axis="xxx", y_axis="yyy", y_names=["temperature"]
+    )
+    print(dataclasses.asdict(config))
 
     # def inside():
     #     warnings.filterwarnings("error")

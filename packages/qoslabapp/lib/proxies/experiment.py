@@ -214,7 +214,7 @@ def _experiment_runner(proxy: ExperimentProxy):
     # Then run the initializer of extensions from appstate
     proxy.manager.loop.call_soon_threadsafe(
         lambda: proxy.manager.initializeExtensions(
-            proxy.experiment_id, proxy.runner_getMessengerAppendObjFn
+            proxy.experiment_id, proxy.runner_getMessengerAppendObjFn()
         )
     )
 
