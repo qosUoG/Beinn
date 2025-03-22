@@ -77,9 +77,8 @@ async def getMessageQueueFn(ws: WebSocket, experiment_id: str):
     getFn = AppState.getMessageQueueGetFn(experiment_id)
     try:
         while True:
-            print("before send")
             await ws.send_text(await getFn())
-            print("after send")
+
     except WebSocketDisconnect:
         AppState.removeWs(ws)
 
