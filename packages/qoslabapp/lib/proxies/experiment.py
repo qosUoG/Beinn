@@ -242,8 +242,9 @@ def _experiment_runner(proxy: ExperimentProxy):
             if not proxy.runner_shouldRun():
                 # Decrement to exclude the previous loop index
                 proxy.loop_count -= 1
-
+            print("hi")
             proxy.runner_endLoop()
+            print("hi end")
 
         except ExperimentEnded:
             print("experiment ended")
