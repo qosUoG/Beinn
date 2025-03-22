@@ -36,104 +36,108 @@
 	}
 </script>
 
-<div class="col-2 w-96 section bg-slate-200">
-	{#each runnable_experiments as experiment}
-		{@const loop_time = experiment.total_time - experiment.loop_time_start}
-		{console.log(experiment)}
-		<div class="section bg-white col-2 justify-between w-full">
-			<div class="grid grid-cols-2">
-				<div class="wrapped bg-slate-200 w-fit">
-					{experiment.name}
+<div class="col-2 w-96 section bg-slate-200 h-full min-h-0">
+	<div class="title wrapped bg-white w-fit">Experiments</div>
+	<div class="h-full overflow-y-scroll col-2 min-h-0">
+		{#each runnable_experiments as experiment}
+			{@const loop_time =
+				experiment.total_time - experiment.loop_time_start}
+
+			<div class="section bg-white col-2 justify-between w-full">
+				<div class="grid grid-cols-2">
+					<div class="wrapped bg-slate-200 w-fit">
+						{experiment.name}
+					</div>
+					<Progress {experiment} />
 				</div>
-				<Progress {experiment} />
-			</div>
 
-			<div class="row justify-between">
-				<div class="row-1">
-					<div class="bg-slate-200 row rounded items-center w-24">
-						<div class="icon-btn-sm">
-							<StopWatch />
-						</div>
-						<div class="p-1 rounded pr-2 flex-grow text-center">
-							{#if experiment.total_time >= 0 && experiment.proposed_total_loop !== undefined}
-								{@render timer(experiment.total_time)}
-							{:else}
-								-
-							{/if}
-						</div>
-					</div>
-					<div class="bg-slate-200 row rounded items-center w-24">
-						<div class="icon-btn-sm">
-							<Rotate />
-						</div>
-						<div class="p-1 rounded pr-2 flex-grow text-center">
-							{#if loop_time >= 0 && experiment.status !== "initial"}
-								{@render timer(loop_time)}
-							{:else}
-								-
-							{/if}
-						</div>
-					</div>
-
-					<div class="wrapped bg-slate-200 min-w-12 text-center">
-						{#if experiment.loop_count + 1 < 0 || experiment.proposed_total_loop === undefined}
-							-
-						{:else}
-							{experiment.loop_count + 1}
-						{/if}
-
-						/ {#if experiment.proposed_total_loop === undefined}
-							-
-						{:else if experiment.proposed_total_loop === -1}
-							∞
-						{:else}
-							{experiment.proposed_total_loop}
-						{/if}
-					</div>
-				</div>
-				<div class="row-1">
-					{#if experiment.status === "initial" || experiment.status === "completed" || experiment.status === "stopped"}
-						<button
-							class="icon-btn-sm green"
-							onclick={async () => {
-								experiment.loop_count = -1;
-								experiment.status = "starting";
-								await startExperiment(experiment);
-							}}><Play /></button>
-					{:else if experiment.status === "continuing" || experiment.status === "started" || experiment.status === "starting" || experiment.status === "continued"}
-						<button
-							class="icon-btn-sm red"
-							onclick={async () => {
-								experiment.status = "pausing";
-								await pauseExperiment(experiment);
-							}}><Pause /></button>
-					{:else if experiment.status === "paused" || experiment.status === "pausing"}
-						<button
-							class="icon-btn-sm red"
-							onclick={async () => {
-								experiment.status = "stopping";
-								await stopExperiment(experiment);
-							}}><Stop /></button>
-					{/if}
-					{#if experiment.status === "paused"}
-						<button
-							class="icon-btn-sm green"
-							onclick={async () => {
-								experiment.status = "continuing";
-								await continueExperiment(experiment);
-							}}><Play /></button>
-					{/if}
-					{#if experiment.status === "stopping" || experiment.status === "pausing"}
-						<div class="icon-btn-sm bg-slate-200">
-							<div class="animate-pulse">
-								<Loader />
+				<div class="row justify-between">
+					<div class="row-1">
+						<div class="bg-slate-200 row rounded items-center w-24">
+							<div class="icon-btn-sm">
+								<StopWatch />
+							</div>
+							<div class="p-1 rounded pr-2 flex-grow text-center">
+								{#if experiment.total_time >= 0 && experiment.proposed_total_loop !== undefined}
+									{@render timer(experiment.total_time)}
+								{:else}
+									-
+								{/if}
 							</div>
 						</div>
-					{/if}
+						<div class="bg-slate-200 row rounded items-center w-24">
+							<div class="icon-btn-sm">
+								<Rotate />
+							</div>
+							<div class="p-1 rounded pr-2 flex-grow text-center">
+								{#if loop_time >= 0 && experiment.status !== "initial"}
+									{@render timer(loop_time)}
+								{:else}
+									-
+								{/if}
+							</div>
+						</div>
+
+						<div class="wrapped bg-slate-200 min-w-12 text-center">
+							{#if experiment.loop_count + 1 < 0 || experiment.proposed_total_loop === undefined}
+								-
+							{:else}
+								{experiment.loop_count + 1}
+							{/if}
+
+							/ {#if experiment.proposed_total_loop === undefined}
+								-
+							{:else if experiment.proposed_total_loop === -1}
+								∞
+							{:else}
+								{experiment.proposed_total_loop}
+							{/if}
+						</div>
+					</div>
+					<div class="row-1">
+						{#if experiment.status === "initial" || experiment.status === "completed" || experiment.status === "stopped"}
+							<button
+								class="icon-btn-sm green"
+								onclick={async () => {
+									experiment.loop_count = -1;
+									experiment.status = "starting";
+									await startExperiment(experiment);
+								}}><Play /></button>
+						{:else if experiment.status === "continuing" || experiment.status === "started" || experiment.status === "starting" || experiment.status === "continued"}
+							<button
+								class="icon-btn-sm red"
+								onclick={async () => {
+									experiment.status = "pausing";
+									await pauseExperiment(experiment);
+								}}><Pause /></button>
+						{:else if experiment.status === "paused" || experiment.status === "pausing"}
+							<button
+								class="icon-btn-sm red"
+								onclick={async () => {
+									experiment.status = "stopping";
+									await stopExperiment(experiment);
+								}}><Stop /></button>
+						{/if}
+						{#if experiment.status === "paused"}
+							<button
+								class="icon-btn-sm green"
+								onclick={async () => {
+									experiment.status = "continuing";
+									await continueExperiment(experiment);
+								}}><Play /></button>
+						{/if}
+						{#if experiment.status === "stopping" || experiment.status === "pausing"}
+							<div class="icon-btn-sm bg-slate-200">
+								<div class="animate-pulse">
+									<Loader />
+								</div>
+							</div>
+						{/if}
+					</div>
 				</div>
 			</div>
-		</div>
-	{/each}
+		{/each}
+	</div>
 </div>
 
 {#snippet timer(time: number)}

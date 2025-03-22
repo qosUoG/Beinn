@@ -95,7 +95,7 @@
 								params: { ...params },
 								temp_params: { ...params },
 								name: "",
-								charts: {},
+								chart_configs: {},
 								status: "initial",
 								loop_count: -1,
 								loop_time_start: 0,

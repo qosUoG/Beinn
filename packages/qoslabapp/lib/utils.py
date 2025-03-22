@@ -1,4 +1,5 @@
 import importlib.util
+import json
 import sys
 import ast
 from typing import Any
@@ -27,3 +28,7 @@ def singleKVNumberMessage(key: str, value: float | int):
 
 def singleKVStrMessage(key: str, value: str):
     return "{" + f'"key": "{key}", "value": "{value}"' + "}"
+
+
+def singleKVDictMessage(key: str, value: dict[str, Any]):
+    return json.dumps({"key": key, "value": value})

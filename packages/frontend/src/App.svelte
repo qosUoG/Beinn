@@ -23,7 +23,7 @@
 			}}><Cli /></button>
 	</div>
 
-	<div class="h-full w-full row-4">
+	<div class="h-full w-full row-4 min-h-0">
 		{#if gstore.mode === "CONFIG"}
 			<Config />
 		{:else if gstore.mode === "EXPERIMENTS"}

@@ -19,7 +19,7 @@ class SqlSaverProxy:
         self.experiment_id = experiment_id
 
         # sql_saver instance for consumer of sql_saver
-        self.sql_saver = sql_saverT(save_fn=self._save_fn, **kwargs)
+        self._sql_saver = sql_saverT(save_fn=self._save_fn, **kwargs)
 
         self._frame_lock = Lock()
         self._frames: list[Any] = []
@@ -27,7 +27,10 @@ class SqlSaverProxy:
         self.table_name: str
 
     def getInsertSql(self):
-        return self.sql_saver.getInsertSql(self.table_name)
+        return self._sql_saver.getInsertSql(self.table_name)
+
+    def getConfig(self):
+        return self._sql_saver.config.toDict()
 
     # This is in main thread
     def initialize(self):
@@ -39,7 +42,7 @@ class SqlSaverProxy:
         # Create table with name and timestamp (ms)
         self._table_name = f"{self.title} timestamp:{int(time.time() * 1000)}"
 
-        SqlWorker.runSql(self.sql_saver.getCreateTableSql(self._table_name))
+        SqlWorker.runSql(self._sql_saver.getCreateTableSql(self._table_name))
 
     # Memory for saving
 

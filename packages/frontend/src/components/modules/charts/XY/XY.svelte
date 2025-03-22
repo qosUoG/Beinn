@@ -1,8 +1,16 @@
 <script lang="ts">
-	import { type ChartConfiguration } from "chart.js";
 	import { onMount } from "svelte";
+	import type { XYChartConfig, XYEvent } from "./XY_types";
 
-	let {}: {} = $props();
+	let {
+		mode,
+		url,
+		config,
+	}: {
+		mode: XYEvent["payload"]["mode"];
+		url: string;
+		config: XYChartConfig;
+	} = $props();
 
 	let canvas: HTMLCanvasElement;
 
@@ -11,6 +19,17 @@
 	});
 	onMount(() => {
 		const offscreenCanvas = canvas.transferControlToOffscreen();
+
+		const payload: XYEvent = {
+			type: "instantiate",
+			payload: {
+				canvas: offscreenCanvas,
+				mode,
+				url,
+				config,
+			},
+		};
+
 		worker.postMessage({ canvas: offscreenCanvas }, [offscreenCanvas]);
 	});
 </script>

@@ -17,11 +17,14 @@ class ChartProxy:
         self.experiment_id = experiment_id
 
         # underlying chart instance
-        self.chart = chartT(plot_fn=self._plot_fn, **kwargs)
-        self.connections: list[ChartProxy.Subscriber] = []
+        self._chart = chartT(plot_fn=self._plot_fn, **kwargs)
+        self._subscribers: list[ChartProxy.Subscriber] = []
 
     def initialize(self):
         pass
+
+    def getConfig(self):
+        return self._chart.config.toDict()
 
     # For posting to the frontend TODO Should not be here
 
@@ -45,7 +48,7 @@ class ChartProxy:
 
     def subscribe(self, ws: WebSocket):
         subscriber = ChartProxy.Subscriber(ws)
-        self.connections.append(subscriber)
+        self._subscribers.append(subscriber)
 
         # Function that yield frames according to the rate
         async def subscription():
@@ -55,5 +58,5 @@ class ChartProxy:
         return subscription
 
     def _plot_fn(self, frame: Any):
-        for subscriber in self.connections:
+        for subscriber in self._subscribers:
             subscriber.appendFrame(frame)

@@ -1,6 +1,8 @@
 import asyncio
 
+import json
 from threading import Event, Lock
+from typing import Any, Callable
 
 
 from qoslablib.exceptions import ExperimentEnded
@@ -9,7 +11,52 @@ from qoslablib.runtime import ExperimentABC
 
 from qoslablib.runtime import ManagerABC
 
-from ..utils import singleKVNumberMessage, singleKVStrMessage
+from ..utils import singleKVDictMessage, singleKVNumberMessage, singleKVStrMessage
+
+
+# Experiment Messenger shall be instantiated in the main thread
+class ExperimentMessenger:
+    def __init__(self):
+        self.loop = asyncio.get_event_loop()
+        self._message_queue = asyncio.Queue()
+
+    def getMessageQueueGetFn(self):
+        # return a function that keeps yielding new event
+        return self._message_queue.get
+
+    def appendObjMessage(self, key: str, obj: dict[str, Any]):
+        self._appendMessage(singleKVDictMessage(key, obj))
+
+    def _appendMessage(self, message: str):
+        self._message_queue.put_nowait(message)
+
+    # This is meant to be consumed by functions calling from other threads
+    def _threadSafeAppendMessage(self, message: str):
+        self.loop.call_soon_threadsafe(lambda: self._appendMessage(message))
+
+    # thread safe API
+    def threadSafeSendStarted(self):
+        self._threadSafeAppendMessage(singleKVStrMessage("status", "started"))
+
+    def threadSafeSendStopped(self):
+        self._threadSafeAppendMessage(singleKVStrMessage("status", "stopped"))
+
+    def threadSafeSendPaused(self):
+        self._threadSafeAppendMessage(singleKVStrMessage("status", "paused"))
+
+    def threadSafeSendContinued(self):
+        self._threadSafeAppendMessage(singleKVStrMessage("status", "continued"))
+
+    def threadSafeSendCompleted(self):
+        self._threadSafeAppendMessage(singleKVStrMessage("status", "completed"))
+
+    def threadSafeSendLoopCount(self, loop_count: int):
+        self._threadSafeAppendMessage(singleKVNumberMessage("loop_count", loop_count))
+
+    def threadSafeSendProposedTotalLoop(self, proposed_total_loop: int):
+        self._threadSafeAppendMessage(
+            singleKVNumberMessage("proposed_total_loop", proposed_total_loop)
+        )
 
 
 class ExperimentProxy:
@@ -41,9 +88,12 @@ class ExperimentProxy:
         self._proposed_total_loop_lock = Lock()
         self._proposed_total_loop: int = 0
 
-        self._message_queue = asyncio.Queue()
+        self._messenger = ExperimentMessenger()
 
         self._experiment_task: asyncio.Task
+
+    def getMessageQueueGetFn(self):
+        return self._messenger.getMessageQueueGetFn()
 
     @property
     def params(self):
@@ -62,16 +112,6 @@ class ExperimentProxy:
     def loop_count(self, value: int):
         with self._loop_count_lock:
             self._loop_count = value
-
-    def getMessageQueueFn(self):
-        # return a function that keeps yielding new event
-        return self._message_queue.get
-
-    def appendMessage(self, message: str):
-        self._message_queue.put_nowait(message)
-
-    def threadSafeAppendMessage(self, message: str):
-        self.manager.loop.call_soon_threadsafe(lambda: self.appendMessage(message))
 
     def start(self):
         # Make sure experiment is at fresh state
@@ -102,20 +142,20 @@ class ExperimentProxy:
         # Wait till it actually stopped
         self._stopped.wait()
 
-        self.appendMessage(singleKVStrMessage("status", "stopped"))
+        self._messenger.threadSafeSendStopped()
 
     def pause(self):
         self._should_run.clear()
         self._loop_ended.wait()
 
-        self.appendMessage(singleKVStrMessage("status", "paused"))
+        self._messenger.threadSafeSendPaused()
 
     def stopped(self):
         return self._stopped.is_set()
 
     def unpause(self):
         self._should_run.set()
-        self.appendMessage(singleKVStrMessage("status", "continued"))
+        self._messenger.threadSafeSendContinued()
 
     # Following runner functions are only called in runner and must be thread safe
     def runner_shouldRun(self):
@@ -141,12 +181,16 @@ class ExperimentProxy:
 
         # Post loop count event to message queue
         with self._loop_count_lock:
-            self.threadSafeAppendMessage(
-                singleKVNumberMessage("loop_count", self._loop_count)
-            )
+            self._messenger.threadSafeSendLoopCount(self.loop_count)
+
+    def runner_sendStartedMessage(self):
+        self._messenger.threadSafeSendStarted()
+
+    def runner_getMessengerAppendObjFn(self) -> Callable[[dict[str, Any]], None]:
+        self._messenger.appendObjMessage
 
     def runner_completed(self):
-        self.threadSafeAppendMessage(singleKVStrMessage("status", "completed"))
+        self._messenger.threadSafeSendCompleted()
 
     @property
     def proposed_total_loop(self):
@@ -159,9 +203,7 @@ class ExperimentProxy:
             self._proposed_total_loop = value
 
             # Post to event message queue
-            self.threadSafeAppendMessage(
-                singleKVNumberMessage("proposed_total_loop", self._proposed_total_loop)
-            )
+            self._messenger.threadSafeSendProposedTotalLoop(self._proposed_total_loop)
 
 
 def _experiment_runner(proxy: ExperimentProxy):
@@ -172,11 +214,13 @@ def _experiment_runner(proxy: ExperimentProxy):
 
     # Then run the initializer of extensions from appstate
     proxy.manager.loop.call_soon_threadsafe(
-        lambda: proxy.manager.initializeExtensions(proxy.experiment_id)
+        lambda: proxy.manager.initializeExtensions(
+            proxy.experiment_id, proxy.runner_getMessengerAppendObjFn
+        )
     )
 
     # Post Start event to message queue
-    proxy.threadSafeAppendMessage(singleKVStrMessage("status", "started"))
+    proxy.runner_sendStartedMessage()
 
     while True:
         # Wait until the running event is set in each loop

@@ -4,14 +4,21 @@ from threading import Lock
 
 
 from types import ModuleType
-from typing import Any, override
+from typing import Any, Callable, override
 
 
 from fastapi import WebSocket
 
-from qoslablib.extensions.chart import ChartABC, ChartManagerABC
-from qoslablib.extensions.saver import SqlSaverABC, SqlSaverManagerABC
+from qoslablib.extensions import chart
+from qoslablib.extensions.chart import ChartABC, ChartConfigABC, ChartManagerABC
+from qoslablib.extensions.saver import (
+    SqlSaverABC,
+    SqlSaverConfigABC,
+    SqlSaverManagerABC,
+)
 from qoslablib.params import Params
+
+from ..lib.utils import singleKVDictMessage
 
 
 from .workers.sqlite3 import SqlWorker
@@ -139,8 +146,8 @@ class AppState(ChartManagerABC, SqlSaverManagerABC):
         cls._experiment_proxies[id].start()
 
     @classmethod
-    def getMessageQueueFn(cls, id: str):
-        return cls._experiment_proxies[id].getMessageQueueFn()
+    def getMessageQueueGetFn(cls, id: str):
+        return cls._experiment_proxies[id].getMessageQueueGetFn()
 
     @classmethod
     def pauseExperiment(cls, id: str):
@@ -166,16 +173,30 @@ class AppState(ChartManagerABC, SqlSaverManagerABC):
     handler_experiment_id: str
 
     @classmethod
-    def initializeExtensions(cls, experiment_id: str):
-        # Initialize the charts
+    def initializeExtensions(
+        cls, experiment_id: str, sendObjMessage: Callable[[str, dict[str, Any]], None]
+    ):
+        # Initialize and send configs of the charts
+        chart_configs: dict[str, ChartConfigABC] = {}
         if experiment_id in cls._chart_proxies:
-            for chart_proxy in cls._chart_proxies[experiment_id].values():
+            for [chart_title, chart_proxy] in cls._chart_proxies[experiment_id].items():
                 chart_proxy.initialize()
+                chart_configs[chart_title] = chart_proxy.getConfig()
 
-        # Initialize sql savers
+        if chart_configs:
+            sendObjMessage("chart_configs", chart_configs)
+
+        # Initialize sql savers and send configs of the sql savers
+        sql_saver_configs: dict[str, SqlSaverConfigABC] = {}
         if experiment_id in cls._sql_saver_proxies:
-            for sql_saver_proxy in cls._sql_saver_proxies[experiment_id].values():
+            for [sql_saver_title, sql_saver_proxy] in cls._sql_saver_proxies[
+                experiment_id
+            ].items():
                 sql_saver_proxy.initialize()
+                sql_saver_configs[sql_saver_title] = SqlSaverProxy.getConfig()
+
+        if sql_saver_configs:
+            sendObjMessage("sql_saver_configs", sql_saver_configs)
 
     """
     Chart management
@@ -199,7 +220,7 @@ class AppState(ChartManagerABC, SqlSaverManagerABC):
             chartT=chartT,
             kwargs=kwargs,
         )
-        return cls._chart_proxies[cls.handler_experiment_id][title].chart
+        return cls._chart_proxies[cls.handler_experiment_id][title]._chart
 
     """
     Sqlsaver management
@@ -224,4 +245,4 @@ class AppState(ChartManagerABC, SqlSaverManagerABC):
             kwargs=kwargs,
         )
 
-        return cls._sql_saver_proxies[cls.handler_experiment_id][title].sql_saver
+        return cls._sql_saver_proxies[cls.handler_experiment_id][title]._sql_saver

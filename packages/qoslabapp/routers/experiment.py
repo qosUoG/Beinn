@@ -74,7 +74,7 @@ async def getMessageQueueFn(ws: WebSocket, experiment_id: str):
     AppState.appendWs(ws)
     await ws.accept()
 
-    getFn = AppState.getMessageQueueFn(experiment_id)
+    getFn = AppState.getMessageQueueGetFn(experiment_id)
     try:
         while True:
             await ws.send_text(await getFn())

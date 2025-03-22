@@ -52,13 +52,7 @@ export enum ExperimentStatus {
 
 
 
-export type ChartConfigs = {
-    type: "XYPlot",
-    title: string,
-    x_name: string,
-    y_names: string
 
-}
 
 export interface Directory {
     files: string[],

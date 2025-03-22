@@ -14,7 +14,7 @@ class ChartConfigABC(ABC):
     type: str
 
     @abstractmethod
-    def toJson(self) -> str:
+    def toDict(self) -> dict[str, Any]:
         raise NotImplementedError
 
 
@@ -50,8 +50,8 @@ class XYPlotConfig(ChartConfigABC):
     x_name: str
     y_names: list[str]
 
-    def toJson(self) -> str:
-        return json.dumps(dataclasses.asdict(self))
+    def toDict(self):
+        return dataclasses.asdict(self)
 
 
 @dataclass

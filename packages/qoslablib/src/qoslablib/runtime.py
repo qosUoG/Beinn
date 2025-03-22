@@ -3,6 +3,7 @@ from asyncio import EventLoop
 from dataclasses import dataclass
 
 import functools
+from typing import Any, Callable
 
 
 from .extensions.saver import SqlSaverManagerABC
@@ -16,7 +17,9 @@ class ManagerABC(SqlSaverManagerABC, ChartManagerABC):
 
     @classmethod
     @abstractmethod
-    def initializeExtensions(self, experiment_id: str):
+    def initializeExtensions(
+        self, experiment_id: str, appendObjMessage: Callable[[dict[str, Any], None]]
+    ):
         raise NotImplementedError
 
 

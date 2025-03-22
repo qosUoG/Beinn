@@ -1,12 +1,24 @@
 from abc import ABC, abstractmethod
 from dataclasses import dataclass
 
-from typing import Any, Callable, TypedDict, Unpack, override
+import dataclasses
+from typing import Any, Callable, Literal, TypedDict, Unpack, override
+
+
+@dataclass
+class SqlSaverConfigABC(ABC):
+    title: str
+    type: str
+
+    @abstractmethod
+    def toDict(self) -> dict[str, Any]:
+        raise NotImplementedError
 
 
 @dataclass
 class SqlSaverABC(ABC):
     _save_fn: Callable[[dict[str, float]], None]
+    config: SqlSaverConfigABC
 
     @classmethod
     @abstractmethod
@@ -40,12 +52,18 @@ class SqlSaverManagerABC(ABC):
         raise NotImplementedError
 
 
-class XYSqlSaver(SqlSaverABC):
-    class Config(TypedDict):
-        title: str
-        x_name: str
-        y_names: list[str]
+@dataclass
+class XYSqlSaverConfig(SqlSaverABC):
+    type: Literal["XYSqlSaver"]
+    title: str
+    x_name: str
+    y_names: list[str]
 
+    def toDict(self):
+        return dataclasses.asdict()
+
+
+class XYSqlSaver(SqlSaverABC):
     class KW(TypedDict):
         title: str
         x_name: str
@@ -54,7 +72,7 @@ class XYSqlSaver(SqlSaverABC):
     title: str
     x_name: str
     y_names: list[str]
-    config: Config
+    config: XYSqlSaverConfig
 
     def __init__(
         self,
@@ -66,11 +84,12 @@ class XYSqlSaver(SqlSaverABC):
         self.x_name = kwargs["x_name"]
         self.y_names = kwargs["y_names"]
 
-        self.config = {
-            "title": self.title,
-            "x_name": self.x_name,
-            "y_names": self.y_names,
-        }
+        self.config = XYSqlSaverConfig(
+            type="XYSqlSaver",
+            title=self.title,
+            x_name=self.x_name,
+            y_names=self.y_names,
+        )
 
         self._save_fn = save_fn
         self._initialize_fn = initialize_fn
