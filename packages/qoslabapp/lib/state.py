@@ -1,6 +1,6 @@
 import asyncio
 import importlib
-from threading import Lock
+from threading import Event, Lock
 
 
 from types import ModuleType
@@ -198,29 +198,31 @@ class AppState(ChartManagerABC, SqlSaverManagerABC):
         if sql_saver_configs:
             sendObjMessage("sql_saver_configs", sql_saver_configs)
 
+    # The following creation methods are run in experiment initialization phase,
+    # i.e. not in the main thread
     """
     Chart management
     """
 
     # Manages charts by experiment id and chart name
     _chart_proxies: dict[str, dict[str, ChartProxy]] = {}
+    _chart_proxies_lock = Lock()
 
     @classmethod
     @override
     def createChart(cls, chartT: ChartABC, kwargs: Any = {}):
-        # The title should be unique
         title = kwargs["title"]
+        with cls._chart_proxies_lock:
+            if cls.handler_experiment_id not in cls._chart_proxies:
+                cls._chart_proxies[cls.handler_experiment_id] = {}
 
-        if cls.handler_experiment_id not in cls._chart_proxies:
-            cls._chart_proxies[cls.handler_experiment_id] = {}
-
-        cls._chart_proxies[cls.handler_experiment_id][title] = ChartProxy(
-            experiment_id=cls.handler_experiment_id,
-            title=title,
-            chartT=chartT,
-            kwargs=kwargs,
-        )
-        return cls._chart_proxies[cls.handler_experiment_id][title]._chart
+            cls._chart_proxies[cls.handler_experiment_id][title] = ChartProxy(
+                experiment_id=cls.handler_experiment_id,
+                title=title,
+                chartT=chartT,
+                kwargs=kwargs,
+            )
+            return cls._chart_proxies[cls.handler_experiment_id][title]._chart
 
     """
     Sqlsaver management
@@ -228,21 +230,23 @@ class AppState(ChartManagerABC, SqlSaverManagerABC):
 
     # Manages sql savers by experiment id and sql_saver name
     _sql_saver_proxies: dict[str, dict[str, SqlSaverProxy]] = {}
+    _sql_saver_proxies_lock = Lock()
 
     @classmethod
     @override
     def createSqlSaver(cls, sql_saverT: type[SqlSaverABC], kwargs: Any = {}):
         title = kwargs["title"]
 
-        if cls.handler_experiment_id not in cls._sql_saver_proxies:
-            cls._sql_saver_proxies[cls.handler_experiment_id] = {}
+        with cls._sql_saver_proxies_lock:
+            if cls.handler_experiment_id not in cls._sql_saver_proxies:
+                cls._sql_saver_proxies[cls.handler_experiment_id] = {}
 
-        cls._sql_saver_proxies[cls.handler_experiment_id][title] = SqlSaverProxy(
-            experiment_id=cls.handler_experiment_id,
-            title=title,
-            sql_saverT=sql_saverT,
-            worker=SqlWorker,
-            kwargs=kwargs,
-        )
+            cls._sql_saver_proxies[cls.handler_experiment_id][title] = SqlSaverProxy(
+                experiment_id=cls.handler_experiment_id,
+                title=title,
+                sql_saverT=sql_saverT,
+                worker=SqlWorker,
+                kwargs=kwargs,
+            )
 
-        return cls._sql_saver_proxies[cls.handler_experiment_id][title]._sql_saver
+            return cls._sql_saver_proxies[cls.handler_experiment_id][title]._sql_saver
