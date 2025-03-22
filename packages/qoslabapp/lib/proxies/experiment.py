@@ -180,10 +180,13 @@ class ExperimentProxy:
         self._loop_ended.set()
 
         # Post loop count event to message queue
+        loop_count: int
         with self._loop_count_lock:
-            print("loop lock hi")
-            self._messenger.threadSafeSendLoopCount(self.loop_count)
-            print("loop lock hi end")
+            loop_count = self.loop_count
+
+        print("loop lock hi")
+        self._messenger.threadSafeSendLoopCount(loop_count)
+        print("loop lock hi end")
 
     def runner_sendStartedMessage(self):
         self._messenger.threadSafeSendStarted()
