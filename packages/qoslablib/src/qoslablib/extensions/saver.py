@@ -76,8 +76,8 @@ class XYSqlSaver(SqlSaverABC):
 
     def __init__(
         self,
+        *,
         save_fn: Callable[[dict[str, float]], None],
-        initialize_fn: Callable[[dict[str, float]], None],
         **kwargs: Unpack[KW],
     ):
         self.title = kwargs["title"]
@@ -92,7 +92,6 @@ class XYSqlSaver(SqlSaverABC):
         )
 
         self._save_fn = save_fn
-        self._initialize_fn = initialize_fn
 
     @classmethod
     @override

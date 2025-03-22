@@ -71,7 +71,6 @@ class XYPlot(ChartABC):
 
     def __init__(
         self,
-        initialize_fn: Callable[[], None],
         plot_fn: Callable[[dict[str, float]], None],
         **kwargs: Unpack[KW],
     ):
@@ -85,7 +84,7 @@ class XYPlot(ChartABC):
             y_axis=self.y_axis,
             y_names=self.y_names,
         )
-        self._initialize_fn = initialize_fn
+
         self._plot_fn = plot_fn
 
     @classmethod
