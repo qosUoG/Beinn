@@ -185,8 +185,8 @@ class ExperimentProxy:
     def runner_sendStartedMessage(self):
         self._messenger.threadSafeSendStarted()
 
-    def runner_getMessengerAppendObjFn(self) -> Callable[[dict[str, Any]], None]:
-        self._messenger.appendObjMessage
+    def runner_getMessengerAppendObjFn(self):
+        return self._messenger.appendObjMessage
 
     def runner_completed(self):
         self._messenger.threadSafeSendCompleted()
