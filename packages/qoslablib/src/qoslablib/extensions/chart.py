@@ -4,7 +4,7 @@ from abc import ABC, abstractmethod
 from collections.abc import Callable
 from dataclasses import dataclass
 import dataclasses
-import json
+
 from typing import Any, Literal, TypedDict, Unpack, override
 
 
@@ -47,7 +47,8 @@ class ChartManagerABC(ABC):
 class XYPlotConfig(ChartConfigABC):
     title: str
     type: Literal["XYPlot"]
-    x_name: str
+    x_axis: str
+    y_axis: str
     y_names: list[str]
 
     def toDict(self):
@@ -58,11 +59,13 @@ class XYPlotConfig(ChartConfigABC):
 class XYPlot(ChartABC):
     class KW(TypedDict):
         title: str
-        x_name: str
+        x_axis: str
+        y_axis: str
         y_names: list[str]
 
     title: str
-    x_name: str
+    x_axis: str
+    y_axis: str
     y_names: list[str]
     config: XYPlotConfig
 
@@ -73,12 +76,13 @@ class XYPlot(ChartABC):
         **kwargs: Unpack[KW],
     ):
         self.title = kwargs["title"]
-        self.x_name = kwargs["x_name"]
+        self.x_axis = kwargs["x_axis"]
         self.y_names = kwargs["y_names"]
         self.config = XYPlotConfig(
             title=self.title,
             type="XYPlot",
-            x_name=self.x_name,
+            x_axis=self.x_axis,
+            y_axis=self.y_axis,
             y_names=self.y_names,
         )
         self._initialize_fn = initialize_fn

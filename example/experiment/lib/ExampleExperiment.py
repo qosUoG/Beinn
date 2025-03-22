@@ -56,14 +56,15 @@ class ExampleExperiment(r.ExperimentABC):
         # self.inputs = numpy.arange(self.params["intparam"].value)
 
         # # # After the params, instantiate charts and sql savers as needed
-        # self.xyplot: XYPlot = manager.createChart(
-        #     XYPlot,
-        #     XYPlot.kwargs(
-        #         title="Example XY Plot",
-        #         x_name="index",
-        #         y_names=["temperature"],
-        #     ),
-        # )
+        self.xyplot: XYPlot = manager.createChart(
+            XYPlot,
+            XYPlot.kwargs(
+                title="Example XY Plot",
+                x_axis="index",
+                y_axis="C",
+                y_names=["temperature"],
+            ),
+        )
 
         # self.xyplot2: XYPlot = manager.createChart(
         #     XYPlot,
