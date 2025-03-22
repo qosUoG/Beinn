@@ -18,7 +18,9 @@ class ManagerABC(SqlSaverManagerABC, ChartManagerABC):
     @classmethod
     @abstractmethod
     def initializeExtensions(
-        self, experiment_id: str, appendObjMessage: Callable[[dict[str, Any], None]]
+        self,
+        experiment_id: str,
+        appendObjMessage: Callable[[str, dict[str, Any]], None],
     ):
         raise NotImplementedError
 
