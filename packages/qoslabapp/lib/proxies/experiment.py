@@ -16,8 +16,8 @@ from ..utils import singleKVDictMessage, singleKVNumberMessage, singleKVStrMessa
 
 # Experiment Messenger shall be instantiated in the main thread
 class ExperimentMessenger:
-    def __init__(self):
-        self.loop = asyncio.get_event_loop()
+    def __init__(self, loop: asyncio.EventLoop):
+        self._loop = loop
         self._message_queue = asyncio.Queue()
 
     def getMessageQueueGetFn(self):
@@ -32,7 +32,7 @@ class ExperimentMessenger:
 
     # This is meant to be consumed by functions calling from other threads
     def _threadSafeAppendMessage(self, message: str):
-        self.loop.call_soon_threadsafe(lambda: self._appendMessage(message))
+        self._loop.call_soon_threadsafe(lambda: self._appendMessage(message))
 
     # thread safe API
     def threadSafeSendStarted(self):
@@ -88,7 +88,7 @@ class ExperimentProxy:
         self._proposed_total_loop_lock = Lock()
         self._proposed_total_loop: int = 0
 
-        self._messenger = ExperimentMessenger()
+        self._messenger = ExperimentMessenger(self.manager.loop)
 
         self._experiment_task: asyncio.Task
 
