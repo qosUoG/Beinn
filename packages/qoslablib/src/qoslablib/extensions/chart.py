@@ -74,6 +74,7 @@ class XYPlot(ChartABC):
         plot_fn: Callable[[dict[str, float]], None],
         **kwargs: Unpack[KW],
     ):
+        print("hi")
         self.title = kwargs["title"]
         self.x_axis = kwargs["x_axis"]
         self.y_names = kwargs["y_names"]
