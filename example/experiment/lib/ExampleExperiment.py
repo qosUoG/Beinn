@@ -1,4 +1,6 @@
 from dataclasses import dataclass
+import math
+import random
 from typing import TypedDict, override
 
 from click import ParamType
@@ -106,6 +108,14 @@ class ExampleExperiment(r.ExperimentABC):
 
         # Raise an exception such that qoslapapp knows experiment is ended
         print(f"loop: {index}")
+
+        self.xyplot.plot(
+            {
+                "x": index,
+                "temperature": random.random(),
+            }
+        )
+
         if index >= 9:
             raise e.ExperimentEnded
 

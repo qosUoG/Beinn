@@ -1,6 +1,7 @@
 """Module initiates a websocket to send data at each frame."""
 
 from abc import ABC, abstractmethod
+import array
 from collections.abc import Callable
 from dataclasses import dataclass
 import dataclasses
@@ -21,7 +22,7 @@ class ChartConfigABC(ABC):
 
 @dataclass
 class ChartABC(ABC):
-    _plot_fn: Callable[[dict[str, float]], None]
+    _plot_fn: Callable[[bytes], None]
     config: ChartConfigABC
 
     @classmethod
@@ -70,7 +71,7 @@ class XYPlot(ChartABC):
 
     def __init__(
         self,
-        plot_fn: Callable[[dict[str, float]], None],
+        plot_fn: Callable[[bytes], None],
         **kwargs: Unpack[KW],
     ):
         self.title = kwargs["title"]
@@ -96,4 +97,22 @@ class XYPlot(ChartABC):
 
     @override
     def plot(self, frame: dict[str, float]):
-        self._plot_fn(frame)
+        # there should always be an x value
+        try:
+            real_frame = array.array("d")
+            # 0: value of x
+            real_frame.append(frame["x"])
+            for y_name in self.y_names:
+                if y_name in frame:
+                    # If have value, takes two 8 byte floats.
+                    # First 8 byte has 1 for indicating have value,
+                    # Second 8 byte is the value itself
+                    real_frame.append(1)
+                    real_frame.append(frame[y_name])
+                else:
+                    # If without value, a 0 is put there
+                    real_frame.append(0)
+
+            self._plot_fn(real_frame.tobytes())
+        except KeyError as e:
+            raise Exception(f"key {e.args[0]} for xyplot frame is wrong")

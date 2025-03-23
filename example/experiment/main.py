@@ -1,3 +1,4 @@
+import array
 import asyncio
 from dataclasses import dataclass
 import dataclasses
@@ -14,10 +15,22 @@ from qoslablib.extensions.chart import XYPlotConfig
 
 
 if __name__ == "__main__":
-    config = XYPlotConfig(
-        title="wow", type="XYPlot", x_axis="xxx", y_axis="yyy", y_names=["temperature"]
-    )
-    print(dataclasses.asdict(config))
+    a = array.array("d")
+
+    a.append(1)
+    a.append(0.1)
+
+    b = array.array("d")
+
+    b.append(2)
+    b.append(0.2)
+    # a.append(None)
+
+    c: bytes = bytes()
+
+    c += a.tobytes() + b.tobytes()
+
+    print(c.hex())
 
     # def inside():
     #     warnings.filterwarnings("error")

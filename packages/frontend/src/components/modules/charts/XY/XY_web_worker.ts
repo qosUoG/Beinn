@@ -1,5 +1,6 @@
 import { Chart, type ChartConfiguration, type Point } from "chart.js/auto";
-import type { XYWebWorkerMessage, XYFrame, XYChartMode } from "./XY_types";
+import type { XYWebWorkerMessage, XYChartMode } from "./XY_types";
+import { qoslabappWs } from "$services/utils";
 
 
 let chart: Chart
@@ -14,10 +15,8 @@ onmessage = function (event: MessageEvent<XYWebWorkerMessage>) {
 
             canvas = from_canvas
 
-            console.log({ w: width, h: height })
-
-            // canvas.width = width
-            // canvas.height = height
+            canvas.width = width
+            canvas.height = height
 
             const config: ChartConfiguration = {
                 type: "line",
@@ -31,11 +30,6 @@ onmessage = function (event: MessageEvent<XYWebWorkerMessage>) {
                     resizeDelay: 500,
                     animation: false,
                     parsing: false,
-                    plugins: {
-                        title: {
-                            text: title
-                        }
-                    },
                     scales: {
                         x: {
                             type: "linear",
@@ -56,13 +50,13 @@ onmessage = function (event: MessageEvent<XYWebWorkerMessage>) {
 
             chart = new Chart(canvas, config)
 
-            console.log("chart creation complete")
-
 
             // Establish websocket to get data
-            ws = new WebSocket("")
+            ws = new WebSocket(qoslabappWs(`chart/${id}/${title}`))
 
             if (ws === null) throw Error("Websocket connection failed!")
+
+            ws.binaryType = "arraybuffer"
 
             ws.onmessage = getWsOnmessageHandler(y_names.length, mode)
             break
@@ -75,7 +69,7 @@ onmessage = function (event: MessageEvent<XYWebWorkerMessage>) {
 
             canvas.width = width
             canvas.height = height
-            console.log("upate chart")
+
             chart.resize(width, height - 1)
         }
 
@@ -83,23 +77,54 @@ onmessage = function (event: MessageEvent<XYWebWorkerMessage>) {
     }
 }
 
+
+
 // WebSocket onmessage
 const getWsOnmessageHandler = (y_length: number, mode: XYChartMode) => {
 
-    function onmessage(event: MessageEvent<{ frames: XYFrame[] }>) {
-        const frames = event.data.frames
+    function onmessage(event: MessageEvent<ArrayBuffer>) {
 
-        // Frame size is assumed to be right, as such only size of the first frame is checked
-        if (frames[0].length !== y_length + 1) throw Error("Frame size does not match with the config of the chart")
+        const frames_bytes = new DataView(event.data)
+        // Frame size is assumed to be right, thus not checked
+        console.log({ frames_bytes })
+
+        function* parseFrames(frames_bytes: DataView<ArrayBuffer>) {
+            let offset = 0
+
+            while (offset < frames_bytes.byteLength) {
+                // yield frame by frame
+                const res: (number | null)[] = [frames_bytes.getFloat64(offset)]
+                offset += 8
+                for (let i = 0; i < y_length; i++) {
+                    const has_y = frames_bytes.getFloat64(offset)
+                    offset += 8
+
+                    if (has_y !== 0) {
+                        res.push(has_y ? frames_bytes.getFloat64(offset) : null)
+                        offset += 8
+                    } else
+                        res.push(null)
+                }
+                yield res
+            }
+        }
 
         const chart_data = chart.data
+
 
         switch (mode) {
             case "overwrite": {
                 // In overwrite mode
 
+                // Get all of the frames
+                const frames = [...parseFrames(frames_bytes)]
+
+                // Frame size is assumed to be right, as such only size of the first frame is checked
+                if (frames[0].length !== y_length + 1) throw Error("Frame size does not match with the config of the chart")
+
+
                 // frames are first sorted by it's x value
-                frames.sort((a, b) => a[0] - b[0])
+                frames.sort((a, b) => (a[0] as number) - (b[0] as number))
 
                 // append frame in reversed order, skip if repeated
                 const x_set = new Set<number>()
@@ -108,7 +133,7 @@ const getWsOnmessageHandler = (y_length: number, mode: XYChartMode) => {
                 for (let frame_index = frames.length; frame_index > 0; frame_index--) {
                     const frame = frames[frame_index]
 
-                    const x = frame[0]
+                    const x = frame[0] as number
 
                     // put x into set to avoid repeat
                     if (x_set.has(x)) continue
@@ -143,32 +168,33 @@ const getWsOnmessageHandler = (y_length: number, mode: XYChartMode) => {
             }
             case "append": {
                 // In append mode, x is assumed to be in ascending order without repeat
+                let checked = false
+                for (const frame of parseFrames(frames_bytes)) {
+                    if (!checked) {
+                        // Frame size is assumed to be right, as such only size of the first frame is checked
+                        if (frame.length !== y_length + 1) throw Error("Frame size does not match with the config of the chart")
 
-                // Frame size is assumed to be right, as such only size of the first frame is checked
-                if (frames[0].length !== y_length + 1) throw Error("Frame size does not match with the config of the chart")
+                        checked = true
+                    }
 
-                // append y value to each dataset
-                frames.forEach(frame => {
-                    const x = frame[0]
+                    const x = frame[0] as number
 
+                    // append y value to each dataset
                     for (let y_index = 1; y_index < frame.length; y_index++) {
                         const y = frame[y_index]
                         if (y === null) continue
 
                         chart_data.datasets[y_index].data.push({ x, y })
                     }
-                })
-
-
+                }
                 break
             }
-        }
 
+        }
         // update the chart!
         chart.update()
-
-
     }
 
     return onmessage
 }
+

@@ -43,21 +43,9 @@
 		@apply h-full w-full box-border;
 	}
 
-	/* Hide scrollbar for Chrome, Safari and Opera */
-	* ::-webkit-scrollbar {
-		display: none;
-	}
-
-	/* Hide scrollbar for IE, Edge and Firefox */
-	* {
-		-ms-overflow-style: none;
-		/* IE and Edge */
+	/* * {
 		scrollbar-width: none;
-		/* Firefox */
-
-		/* Default cursor */
-		@apply cursor-default;
-	}
+	} */
 
 	button * {
 		@apply cursor-pointer;
@@ -151,5 +139,9 @@
 
 	.title {
 		@apply font-semibold;
+	}
+
+	.scrollbar {
+		@apply [scrollbar-color:var(--color-slate-600)] [scrollbar-width:auto];
 	}
 }

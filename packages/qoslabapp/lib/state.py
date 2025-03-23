@@ -4,7 +4,7 @@ from threading import Event, Lock
 
 
 from types import ModuleType
-from typing import Any, Callable, override
+from typing import Any, AsyncGenerator, Callable, override
 
 
 from fastapi import WebSocket
@@ -224,9 +224,29 @@ class AppState(ChartManagerABC, SqlSaverManagerABC):
             )
             return cls._chart_proxies[cls.handler_experiment_id][title]._chart
 
+    @classmethod
+    def getChartSubscription(cls, experiment_id: str, title: str):
+        if (
+            experiment_id not in cls._chart_proxies
+            or title not in cls._chart_proxies[experiment_id]
+        ):
+            return (None, None)
+
+        return cls._chart_proxies[experiment_id][title].subscribe()
+
     """
     Sqlsaver management
     """
+
+    @classmethod
+    def setChartUpdateRate(cls, experiment_id: str, title: str, rate: int):
+        if (
+            experiment_id not in cls._chart_proxies
+            or title not in cls._chart_proxies[experiment_id]
+        ):
+            return
+
+        cls._chart_proxies[experiment_id][title].setUpdateRate(rate)
 
     # Manages sql savers by experiment id and sql_saver name
     _sql_saver_proxies: dict[str, dict[str, SqlSaverProxy]] = {}

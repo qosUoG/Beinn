@@ -29,25 +29,23 @@ class ChartProxy:
     # For posting to the frontend TODO Should not be here
 
     class Subscriber:
-        def __init__(self, ws: WebSocket):
+        def __init__(self):
             self.rate = 1
-            self.ws: WebSocket
-
             self._frame_lock = Lock()
-            self._frames: list[Any] = []
+            self._frames: bytes = bytes()
 
         def toOwnedFrames(self):
             with self._frame_lock:
                 frames = self._frames
-                self._frames = []
+                self._frames = bytes()
                 return frames
 
-        def appendFrame(self, frame: Any):
+        def appendFrame(self, frame: bytes):
             with self._frame_lock:
-                self._frames.append(frame)
+                self._frames += frame
 
-    def subscribe(self, ws: WebSocket):
-        subscriber = ChartProxy.Subscriber(ws)
+    def subscribe(self):
+        subscriber = ChartProxy.Subscriber()
         self._subscribers.append(subscriber)
 
         # Function that yield frames according to the rate
@@ -55,8 +53,14 @@ class ChartProxy:
             await asyncio.sleep(1 / subscriber.rate)
             yield subscriber.toOwnedFrames()
 
-        return subscription
+        def unsubscribe():
+            self._subscribers.remove(subscriber)
 
-    def _plot_fn(self, frame: Any):
+        def setRate(rate: int):
+            subscriber.rate = rate
+
+        return (subscription, unsubscribe, setRate)
+
+    def _plot_fn(self, frame: bytes):
         for subscriber in self._subscribers:
             subscriber.appendFrame(frame)
