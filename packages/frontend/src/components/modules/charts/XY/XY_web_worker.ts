@@ -93,14 +93,14 @@ const getWsOnmessageHandler = (y_length: number, mode: XYChartMode) => {
 
             while (offset < frames_bytes.byteLength) {
                 // yield frame by frame
-                const res: (number | null)[] = [frames_bytes.getFloat64(offset)]
+                const res: (number | null)[] = [frames_bytes.getFloat64(offset, true)]
                 offset += 8
                 for (let i = 0; i < y_length; i++) {
-                    const has_y = frames_bytes.getFloat64(offset)
+                    const has_y = frames_bytes.getFloat64(offset, true)
                     offset += 8
 
                     if (has_y !== 0) {
-                        res.push(has_y ? frames_bytes.getFloat64(offset) : null)
+                        res.push(has_y ? frames_bytes.getFloat64(offset, true) : null)
                         offset += 8
                     } else
                         res.push(null)
@@ -140,27 +140,29 @@ const getWsOnmessageHandler = (y_length: number, mode: XYChartMode) => {
                     else x_set.add(x)
 
                     // Put each non null y value into dataset
-                    for (let y_index = 1; y_index < frame.length; y_index++) {
-                        const y = frame[y_index]
+                    for (let frame_y_index = 1; frame_y_index < frame.length; frame_y_index++) {
+                        const y = frame[frame_y_index]
                         if (y === null) continue
 
                         // add y to dataset that needs sorted
-                        y_set.add(y_index);
+                        y_set.add(frame_y_index);
+
+                        const chart_y_index = frame_y_index - 1
 
                         // Check if a point with same x already exist
-                        const point_index = chart_data.datasets[y_index].data.findIndex(point => (point as Point).x === x);
+                        const point_index = chart_data.datasets[chart_y_index].data.findIndex(point => (point as Point).x === x);
 
                         // -1 if not found
                         if (point_index === -1)
-                            chart_data.datasets[y_index].data.push({ x, y })
+                            chart_data.datasets[chart_y_index].data.push({ x, y })
                         else
-                            (chart_data.datasets[y_index].data[point_index] as Point).y = y
+                            (chart_data.datasets[chart_y_index].data[point_index] as Point).y = y
                     }
                 }
 
                 // sort the datasets required
-                y_set.forEach(y_index => {
-                    (chart_data.datasets[y_index].data as Point[]).sort((a, b) => a.x - b.x)
+                y_set.forEach(chart_y_index => {
+                    (chart_data.datasets[chart_y_index].data as Point[]).sort((a, b) => a.x - b.x)
                 })
 
 
@@ -180,11 +182,11 @@ const getWsOnmessageHandler = (y_length: number, mode: XYChartMode) => {
                     const x = frame[0] as number
 
                     // append y value to each dataset
-                    for (let y_index = 1; y_index < frame.length; y_index++) {
-                        const y = frame[y_index]
+                    for (let frame_y_index = 1; frame_y_index < frame.length; frame_y_index++) {
+                        const y = frame[frame_y_index]
                         if (y === null) continue
 
-                        chart_data.datasets[y_index].data.push({ x, y })
+                        chart_data.datasets[frame_y_index - 1].data.push({ x, y })
                     }
                 }
                 break

@@ -2,6 +2,7 @@ import asyncio
 
 import json
 from threading import Event, Lock
+import time
 from typing import Any, Callable
 
 
@@ -217,6 +218,9 @@ def _experiment_runner(proxy: ExperimentProxy):
             proxy.experiment_id, proxy.runner_getMessengerAppendObjFn()
         )
     )
+
+    # Allow connceted system to give response
+    time.sleep(1)
 
     # Post Start event to message queue
     proxy.runner_sendStartedMessage()
