@@ -15,22 +15,7 @@ from qoslablib.extensions.chart import XYPlotConfig
 
 
 if __name__ == "__main__":
-    a = array.array("d")
-
-    a.append(1)
-    a.append(0.1)
-
-    b = array.array("d")
-
-    b.append(2)
-    b.append(0.2)
-    # a.append(None)
-
-    c: bytes = bytes()
-
-    c += a.tobytes() + b.tobytes()
-
-    print(c.hex())
+    print(bool(bytes()))
 
     # def inside():
     #     warnings.filterwarnings("error")
