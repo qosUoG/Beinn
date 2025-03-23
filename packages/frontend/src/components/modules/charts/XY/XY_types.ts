@@ -26,5 +26,4 @@ export type XYWebWorkerMessage = {
     payload: { width: number, height: number }
 }
 
-// Numbers are in 
-export type XYFrame = number[]
+
