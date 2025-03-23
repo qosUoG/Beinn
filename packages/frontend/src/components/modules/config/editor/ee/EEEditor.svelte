@@ -2,7 +2,6 @@
 	import Trash from "$icons/Trash.svelte";
 	import {
 		createEE,
-		getChartConfigsByExperimentId,
 		getEEParams,
 		removeEE,
 		setEEParams,

@@ -40,6 +40,7 @@
 	<div class="title wrapped bg-white w-fit">Experiments</div>
 	<div class="h-full overflow-y-scroll col-2 min-h-0">
 		{#each runnable_experiments as experiment}
+			{console.log(experiment.chart_configs)}
 			{@const loop_time =
 				experiment.total_time - experiment.loop_time_start}
 

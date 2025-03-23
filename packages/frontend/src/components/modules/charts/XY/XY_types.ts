@@ -1,20 +1,29 @@
 import type { ChartConfiguration } from "chart.js"
 
+export type XYChartMode = "overwrite" | "append"
+
 export type XYChartConfig = {
-    type: "xy"
+    type: "XYPlot"
+    title: string
     x_axis: string,
     y_axis: string,
     y_names: string[]
+    mode: XYChartMode
 }
 
-export type XYEvent = {
+
+export type XYWebWorkerMessage = {
     type: "instantiate",
     payload: {
         canvas: OffscreenCanvas,
-        mode: "overwrite" | "append"
-        url: string,
+        id: string,
         config: XYChartConfig
+        width: number,
+        height: number
     }
+} | {
+    type: "resize",
+    payload: { width: number, height: number }
 }
 
 // Numbers are in 

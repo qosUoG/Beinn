@@ -1,36 +1,50 @@
 <script lang="ts">
 	import { onMount } from "svelte";
-	import type { XYChartConfig, XYEvent } from "./XY_types";
+	import type { XYChartConfig, XYWebWorkerMessage } from "./XY_types";
 
 	let {
-		mode,
-		url,
+		id,
 		config,
+		width = $bindable(),
+		height = $bindable(),
 	}: {
-		mode: XYEvent["payload"]["mode"];
-		url: string;
+		id: string;
 		config: XYChartConfig;
+		width: number;
+		height: number;
 	} = $props();
-
 	let canvas: HTMLCanvasElement;
-
 	const worker = new Worker(new URL("./XY_web_worker.js", import.meta.url), {
 		type: "module",
 	});
+
+	$effect(() => {
+		console.log({ width, height });
+		const message: XYWebWorkerMessage = {
+			type: "resize",
+			payload: {
+				width,
+				height,
+			},
+		};
+		worker.postMessage(message);
+	});
+
 	onMount(() => {
 		const offscreenCanvas = canvas.transferControlToOffscreen();
 
-		const payload: XYEvent = {
+		const message: XYWebWorkerMessage = {
 			type: "instantiate",
 			payload: {
 				canvas: offscreenCanvas,
-				mode,
-				url,
-				config,
+				id,
+				config: JSON.parse(JSON.stringify(config)),
+				width,
+				height,
 			},
 		};
 
-		worker.postMessage({ canvas: offscreenCanvas }, [offscreenCanvas]);
+		worker.postMessage(message, [offscreenCanvas]);
 	});
 </script>
 

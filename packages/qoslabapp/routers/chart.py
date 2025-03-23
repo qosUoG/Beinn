@@ -53,20 +53,20 @@ async def getChartDataWs(experiment_id: str, title: str, ws: WebSocket):
             AppState.chart_handlers[experiment_id][title].has_listener.clear()
 
 
-@router.get("/chart/{id}/configs")
-async def getChartConfigByExperimentId(id: str):
-    class ReturnType(TypedDict):
-        charts: dict[str, Any]
+# @router.get("/chart/{id}/configs")
+# async def getChartConfigByExperimentId(id: str):
+#     class ReturnType(TypedDict):
+#         charts: dict[str, Any]
 
-    res: ReturnType = {"charts": {}}
+#     res: ReturnType = {"charts": {}}
 
-    if id not in AppState.chart_handlers:
-        return json.dumps({"charts": {}})
+#     if id not in AppState.chart_handlers:
+#         return json.dumps({"charts": {}})
 
-    for chart_handler in AppState.chart_handlers[id].values():
-        res["charts"][chart_handler.chart.config.title] = chart_handler.chart.config
+#     for chart_handler in AppState.chart_handlers[id].values():
+#         res["charts"][chart_handler.chart.config.title] = chart_handler.chart.config
 
-    return res
+#     return res
 
 
 class SetChartUpdateRatePayload(BaseModel):

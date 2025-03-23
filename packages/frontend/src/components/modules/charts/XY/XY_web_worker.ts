@@ -1,16 +1,23 @@
 import { Chart, type ChartConfiguration, type Point } from "chart.js/auto";
-import type { XYChartConfig, XYEvent, XYFrame } from "./XY_types";
+import type { XYWebWorkerMessage, XYFrame, XYChartMode } from "./XY_types";
 
 
 let chart: Chart
+let canvas: OffscreenCanvas
 let ws: WebSocket
 
 // Webworker onmessage
-onmessage = function (event: MessageEvent<XYEvent>) {
+onmessage = function (event: MessageEvent<XYWebWorkerMessage>) {
     switch (event.data.type) {
-        case "instantiate":
+        case "instantiate": {
+            const { canvas: from_canvas, id, config: { mode, x_axis, y_axis, y_names, title }, width, height } = event.data.payload
 
-            const { canvas, url, mode, config: { x_axis, y_axis, y_names } } = event.data.payload
+            canvas = from_canvas
+
+            console.log({ w: width, h: height })
+
+            // canvas.width = width
+            // canvas.height = height
 
             const config: ChartConfiguration = {
                 type: "line",
@@ -19,9 +26,16 @@ onmessage = function (event: MessageEvent<XYEvent>) {
                     datasets: []
                 },
                 options: {
+                    responsive: true,
+                    maintainAspectRatio: false,
+                    resizeDelay: 500,
                     animation: false,
                     parsing: false,
-
+                    plugins: {
+                        title: {
+                            text: title
+                        }
+                    },
                     scales: {
                         x: {
                             type: "linear",
@@ -42,21 +56,35 @@ onmessage = function (event: MessageEvent<XYEvent>) {
 
             chart = new Chart(canvas, config)
 
+            console.log("chart creation complete")
 
 
             // Establish websocket to get data
-            ws = new WebSocket(url)
+            ws = new WebSocket("")
 
             if (ws === null) throw Error("Websocket connection failed!")
 
             ws.onmessage = getWsOnmessageHandler(y_names.length, mode)
+            break
+        }
+
+        case "resize": {
+            if (!canvas) return
+
+            const { width, height } = event.data.payload
+
+            canvas.width = width
+            canvas.height = height
+            console.log("upate chart")
+            chart.resize(width, height - 1)
+        }
 
 
     }
 }
 
 // WebSocket onmessage
-const getWsOnmessageHandler = (y_length: number, mode: XYEvent["payload"]["mode"]) => {
+const getWsOnmessageHandler = (y_length: number, mode: XYChartMode) => {
 
     function onmessage(event: MessageEvent<{ frames: XYFrame[] }>) {
         const frames = event.data.frames

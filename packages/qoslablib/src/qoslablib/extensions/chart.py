@@ -12,6 +12,7 @@ from typing import Any, Literal, TypedDict, Unpack, override
 class ChartConfigABC(ABC):
     title: str
     type: str
+    mode: str
 
     @abstractmethod
     def toDict(self) -> dict[str, Any]:
@@ -43,10 +44,14 @@ class ChartManagerABC(ABC):
         raise NotImplementedError
 
 
+type XYPlotMode = Literal["append"] | Literal["overwrite"]
+
+
 @dataclass
 class XYPlotConfig(ChartConfigABC):
     title: str
     type: Literal["XYPlot"]
+    mode: XYPlotMode
     x_axis: str
     y_axis: str
     y_names: list[str]
@@ -58,6 +63,7 @@ class XYPlotConfig(ChartConfigABC):
 class XYPlot(ChartABC):
     class KW(TypedDict):
         title: str
+        mode: XYPlotMode
         x_axis: str
         y_axis: str
         y_names: list[str]
@@ -71,12 +77,14 @@ class XYPlot(ChartABC):
         self.x_axis = kwargs["x_axis"]
         self.y_axis = kwargs["y_axis"]
         self.y_names = kwargs["y_names"]
+        self.mode = kwargs["mode"]
         self.config = XYPlotConfig(
             title=self.title,
             type="XYPlot",
             x_axis=self.x_axis,
             y_axis=self.y_axis,
             y_names=self.y_names,
+            mode=self.mode,
         )
 
         self._plot_fn = plot_fn

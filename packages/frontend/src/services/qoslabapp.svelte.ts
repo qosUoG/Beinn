@@ -1,5 +1,5 @@
 import { gstore } from "$states/global.svelte";
-import type { AllParamTypes, ChartConfigs, CreatedExperiment, EEType } from "qoslab-shared";
+import type { AllParamTypes, CreatedExperiment, EEType } from "qoslab-shared";
 import { postRequestJsonInOut, qoslabappUrl, qoslabappWs } from "./utils";
 
 
@@ -30,16 +30,6 @@ export async function removeEE(eetype: EEType, payload: { id: string }) {
     await postRequestJsonInOut(qoslabappUrl(`${eetype}/remove`), payload)
 }
 
-export async function getChartConfigsByExperimentId(payload: { id: string }): Promise<{ charts: Record<string, ChartConfigs> }> {
-    return await (await fetch(qoslabappUrl(`chart/${payload.id}/configs`))).json()
-}
-
-export function subscribeExperimentEventsWs<T extends any>(payload: { id: string, onmessage: (this: WebSocket, event: MessageEvent<T>) => any, options?: AddEventListenerOptions }) {
-    const socket = new WebSocket(qoslabappWs(`experiment/${payload.id}/events`))
-    socket.addEventListener("message", payload.onmessage, payload.options)
-}
-
-
 export async function startExperiment(payload: { id: string }): Promise<void> {
     await postRequestJsonInOut(qoslabappUrl("experiment/start"), payload)
 }
@@ -54,4 +44,15 @@ export async function continueExperiment(payload: { id: string }): Promise<void>
 
 export async function stopExperiment(payload: { id: string }): Promise<void> {
     await postRequestJsonInOut(qoslabappUrl("experiment/stop"), payload)
+}
+
+export function subscribeExperimentEventsWs<T extends any>(payload: { id: string, onmessage: (this: WebSocket, event: MessageEvent<T>) => any }) {
+    const socket = new WebSocket(qoslabappWs(`experiment/${payload.id}/events`))
+    socket.onmessage = payload.onmessage
+
+}
+
+export function subscribeChartDataWs<T extends any>(payload: { id: string, title: string, onmessage: (this: WebSocket, event: MessageEvent<T>) => any }) {
+    const socket = new WebSocket(qoslabappWs(`chart/${payload.id}/events`))
+    socket.onmessage = payload.onmessage
 }

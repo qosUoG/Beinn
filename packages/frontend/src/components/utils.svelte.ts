@@ -10,9 +10,6 @@ export function autofocus(e: FocusEvent) {
     (e.target as HTMLInputElement).select()
 }
 
-
-
-
 export const clickoutside: Action<
     Element,
     string,
@@ -33,3 +30,23 @@ export const clickoutside: Action<
         };
     });
 };
+
+export const watchresize: Action<HTMLDivElement, undefined, {
+    ondivresize: (e: CustomEvent<{ width: number, height: number }>) => void
+}> = (node) => {
+    const observer = new ResizeObserver(entries => {
+        const entry = entries.at(0)
+
+        node.dispatchEvent(
+            new CustomEvent<{ width: number, height: number }>(
+                "divresize", { detail: { width: entry?.target.clientWidth ?? 0, height: entry?.target.clientHeight ?? 0 } }))
+    })
+
+    $effect(() => {
+        observer.observe(node)
+
+        return () => {
+            observer.unobserve(node)
+        }
+    })
+}

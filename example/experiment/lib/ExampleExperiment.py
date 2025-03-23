@@ -63,6 +63,7 @@ class ExampleExperiment(r.ExperimentABC):
                 x_axis="index",
                 y_axis="C",
                 y_names=["temperature"],
+                mode="append",
             ),
         )
 

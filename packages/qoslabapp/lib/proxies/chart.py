@@ -17,7 +17,7 @@ class ChartProxy:
         self.experiment_id = experiment_id
 
         # underlying chart instance
-        self._chart = chartT(plot_fn=self._plot_fn, **kwargs)
+        self._chart = chartT(self._plot_fn, **kwargs)
         self._subscribers: list[ChartProxy.Subscriber] = []
 
     def initialize(self):
