@@ -36,6 +36,9 @@ class ChartProxy:
 
         def toOwnedFrames(self):
             with self._frame_lock:
+                if self._frames == bytes():
+                    return None
+
                 frames = self._frames
                 self._frames = bytes()
                 return frames
@@ -50,8 +53,11 @@ class ChartProxy:
 
         # Function that yield frames according to the rate
         async def subscription():
-            await asyncio.sleep(1 / subscriber.rate)
-            yield subscriber.toOwnedFrames()
+            while True:
+                await asyncio.sleep(1 / subscriber.rate)
+                frames = subscriber.toOwnedFrames()
+                if frames is not None:
+                    yield frames
 
         def unsubscribe():
             self._subscribers.remove(subscriber)
