@@ -38,7 +38,7 @@ class SqlSaverProxy:
 
         from ..workers.sqlite3 import SqlWorker
 
-        loop.call_soon_threadsafe(SqlWorker.start())
+        loop.call_soon_threadsafe(SqlWorker.start)
 
         self._queueScript = SqlWorker.queueScript
         self._queueMany = SqlWorker.queueMany
