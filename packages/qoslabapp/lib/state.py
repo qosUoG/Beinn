@@ -239,14 +239,14 @@ class AppState(ChartManagerABC, SqlSaverManagerABC):
         title = kwargs["title"]
 
         with cls._sql_saver_proxies_lock:
-            if cls.handler_experiment_id not in cls._sql_saver_proxies:
-                cls._sql_saver_proxies[cls.handler_experiment_id] = {}
+            if cls.current_initializer_id not in cls._sql_saver_proxies:
+                cls._sql_saver_proxies[cls.current_initializer_id] = {}
 
-            cls._sql_saver_proxies[cls.handler_experiment_id][title] = SqlSaverProxy(
-                experiment_id=cls.handler_experiment_id,
+            cls._sql_saver_proxies[cls.current_initializer_id][title] = SqlSaverProxy(
+                experiment_id=cls.current_initializer_id,
                 title=title,
                 sql_saverT=sql_saverT,
                 kwargs=kwargs,
             )
 
-            return cls._sql_saver_proxies[cls.handler_experiment_id][title]._sql_saver
+            return cls._sql_saver_proxies[cls.current_initializer_id][title]._sql_saver
