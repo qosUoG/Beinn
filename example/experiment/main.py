@@ -12,10 +12,13 @@ import types
 from typing import Any
 
 from qoslablib.extensions.chart import XYPlotConfig
+from qoslablib.extensions.saver import KVSqlSaverConfig
 
 
 if __name__ == "__main__":
-    print(bool(bytes()))
+    kv = KVSqlSaverConfig(type="KVFloatSqlSaver", title="title", keys=["keys"])
+
+    print(kv)
 
     # def inside():
     #     warnings.filterwarnings("error")

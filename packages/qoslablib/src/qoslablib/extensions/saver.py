@@ -53,7 +53,7 @@ class SqlSaverManagerABC(ABC):
 
 
 @dataclass
-class KVSqlSaverConfig(SqlSaverABC):
+class KVSqlSaverConfig(SqlSaverConfigABC):
     type: Literal["KVFloatSqlSaver"]
     title: str
     keys: list[str]

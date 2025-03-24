@@ -255,7 +255,6 @@ class AppState(ChartManagerABC, SqlSaverManagerABC):
                 experiment_id=cls.handler_experiment_id,
                 title=title,
                 sql_saverT=sql_saverT,
-                worker=SqlWorker,
                 kwargs=kwargs,
             )
 

@@ -37,6 +37,7 @@ class SqlWorker:
 
     @classmethod
     def runSql(cls, sql: str):
+        print(sql)
         cls._sqlite3_cursor.executescript(sql)
 
     @classmethod
