@@ -2,6 +2,8 @@ from abc import ABC, abstractmethod
 from dataclasses import dataclass
 
 import dataclasses
+import math
+import time
 from typing import Any, Callable, Literal, TypedDict, Unpack, override
 
 
@@ -99,6 +101,8 @@ class KVFloatSqlSaver(SqlSaverABC):
         for key in self.keys:
             if key not in frame.keys():
                 frame[key] = None
+        # Fill in timestamp
+        frame["timestamp"] = int(time.time() * 1000)
 
         # Execute the functions
         self._save_fn(frame)
@@ -106,5 +110,5 @@ class KVFloatSqlSaver(SqlSaverABC):
     @override
     def getInsertSql(self, table_name: str):
         return f"""
-        INSERT INTO "{table_name}"({"".join([f"{key}," for key in self.keys])}) VALUES({"".join([f":{key}," for key in self.keys])})
+        INSERT INTO "{table_name}"({"timestamp,".join([f"{key}," for key in self.keys])}) VALUES({":timestamp,".join([f":{key}," for key in self.keys])})
     """
