@@ -3,7 +3,7 @@ from contextlib import asynccontextmanager
 from fastapi import FastAPI
 from fastapi.middleware.cors import CORSMiddleware
 
-from packages.qoslabapp.lib.workers.sqlite3 import SqlWorker
+from .lib.workers.sqlite3 import SqlWorker
 
 from .lib.state import AppState
 
@@ -16,7 +16,7 @@ async def lifespan(app: FastAPI):
     AppState.loop = asyncio.get_running_loop()
     yield
     await AppState.disconnectAllWs()
-    SqlWorker.stop()
+    await SqlWorker.stop()
     AppState.cancelAllExperiments()
 
 
