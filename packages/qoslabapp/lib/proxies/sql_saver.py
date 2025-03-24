@@ -60,7 +60,7 @@ class SqlSaverProxy:
 
     async def continuousSubmitFrames(self):
         while True:
-            asyncio.sleep(5)
+            await asyncio.sleep(5)
             frames = self.toOwnedFrames()
             if frames:
                 await self._queueMany(self._insert_sql, frames)

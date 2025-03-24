@@ -36,7 +36,7 @@ class SqlWorker:
         if not cls._sqlite3_connection:
             cls._sqlite3_connection = await aiosqlite.connect("data.db")
             cls._sqlite3_cursor = await cls._sqlite3_connection.cursor()
-            cls._task = asyncio.create_task(cls.sqlWorker)
+            cls._task = asyncio.create_task(cls.sqlWorker())
 
         # Return the functions they can interact with
         return (cls.queueScript, cls.queueMany)
