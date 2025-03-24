@@ -22,30 +22,85 @@ from qoslablib.extensions.saver import KVSqlSaverConfig
 if __name__ == "__main__":
 
     async def main():
-        _sqlite3_connection = await aiosqlite.connect("data.db")
-        _sqlite3_cursor = await _sqlite3_connection.cursor()
-        time_stamp = math.floor(time.time() * 1000)
+        try:
+            _sqlite3_connection = await aiosqlite.connect("data.db")
+            _sqlite3_cursor = await _sqlite3_connection.cursor()
+            time_stamp = math.floor(time.time() * 1000)
 
-        print("hi")
-        await _sqlite3_cursor.executemany(
-            """INSERT INTO "ExampleSqlSaver timestamp:1742837678014"(x,temperature) VALUES(:x,:temperature)""",
-            [
-                {"timestamp": time_stamp, "x": 0, "temperature": 0.6519844731250238},
-                # {"timestamp": time_stamp, "x": 1, "temperature": 0.8307955603827071},
-                # {"timestamp": time_stamp, "x": 2, "temperature": 0.9121215107754074},
-                # {"timestamp": time_stamp, "x": 3, "temperature": 0.7356677089848823},
-                # {"timestamp": time_stamp, "x": 4, "temperature": 0.6031502326540543},
-                # {"timestamp": time_stamp, "x": 5, "temperature": 0.44179161623614216},
-                # {"timestamp": time_stamp, "x": 6, "temperature": 0.5916372847789413},
-                # {"timestamp": time_stamp, "x": 7, "temperature": 0.850536904323041},
-                # {"timestamp": time_stamp, "x": 8, "temperature": 0.5886951158571079},
-                # {"timestamp": time_stamp, "x": 9, "temperature": 0.024571036476593644},
-            ],
-        )
+            print("hi")
+            await _sqlite3_cursor.executescript("""
+                                                CREATE TABLE "ExampleSqlSaver timestamp:8" (
+                id INTEGER PRIMARY KEY,
+                timestamp INTEGER,
+    x REAL,
+    temperature REAL
+                ) """)
+            await _sqlite3_cursor.executemany(
+                """INSERT INTO "ExampleSqlSaver timestamp:8"(x,timestamp,temperature) VALUES(:x,:timestamp,:temperature)""",
+                [
+                    {
+                        "x": 0,
+                        "temperature": 0.8842598734536562,
+                        "timestamp": 1742840284542,
+                    },
+                    {
+                        "x": 1,
+                        "temperature": 0.5620609419026966,
+                        "timestamp": 1742840284542,
+                    },
+                    {
+                        "x": 2,
+                        "temperature": 0.9423298064982415,
+                        "timestamp": 1742840284543,
+                    },
+                    {
+                        "x": 3,
+                        "temperature": 0.10515714630483097,
+                        "timestamp": 1742840284543,
+                    },
+                    {
+                        "x": 4,
+                        "temperature": 0.4762397239741124,
+                        "timestamp": 1742840284544,
+                    },
+                    {
+                        "x": 5,
+                        "temperature": 0.4582519633139812,
+                        "timestamp": 1742840284544,
+                    },
+                    {
+                        "x": 6,
+                        "temperature": 0.7410067703889367,
+                        "timestamp": 1742840284544,
+                    },
+                    {
+                        "x": 7,
+                        "temperature": 0.9470705377266845,
+                        "timestamp": 1742840284545,
+                    },
+                    {
+                        "x": 8,
+                        "temperature": 0.3163335745289665,
+                        "timestamp": 1742840284545,
+                    },
+                    {
+                        "x": 9,
+                        "temperature": 0.2608475478209309,
+                        "timestamp": 1742840284545,
+                    },
+                ],
+            )
 
-        await _sqlite3_connection.commit()
+            print("executed")
 
-        await _sqlite3_connection.close()
+            await _sqlite3_connection.commit()
+
+            print("commited")
+
+            await _sqlite3_connection.close()
+
+        except Exception as e:
+            print(e)
 
     asyncio.run(main())
 

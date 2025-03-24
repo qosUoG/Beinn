@@ -92,7 +92,8 @@ class KVFloatSqlSaver(SqlSaverABC):
     @override
     def getCreateTableSql(self, table_name: str) -> str:
         return f"""CREATE TABLE "{table_name}" (
-            timestamp INTEGER PRIMARY KEY{"".join([f",\n{key} REAL" for key in self.keys])}
+            id INTEGER PRIMARY KEY,
+            timestamp INTEGER{"".join([f",\n{key} REAL" for key in self.keys])}
             ) """
 
     @override
