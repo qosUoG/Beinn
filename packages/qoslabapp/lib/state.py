@@ -238,16 +238,6 @@ class AppState(ChartManagerABC, SqlSaverManagerABC):
     Sqlsaver management
     """
 
-    @classmethod
-    def setChartUpdateRate(cls, experiment_id: str, title: str, rate: int):
-        if (
-            experiment_id not in cls._chart_proxies
-            or title not in cls._chart_proxies[experiment_id]
-        ):
-            return
-
-        cls._chart_proxies[experiment_id][title].setUpdateRate(rate)
-
     # Manages sql savers by experiment id and sql_saver name
     _sql_saver_proxies: dict[str, dict[str, SqlSaverProxy]] = {}
     _sql_saver_proxies_lock = Lock()

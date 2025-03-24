@@ -77,7 +77,7 @@ class KVFloatSqlSaver(SqlSaverABC):
         self.keys = kwargs["keys"]
 
         self.config = KVSqlSaverConfig(
-            type="KVFloatSqlSaver", title=self.title, x_name=self.keys
+            type="KVFloatSqlSaver", title=self.title, keys=self.keys
         )
 
         self._save_fn = save_fn
