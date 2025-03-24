@@ -43,11 +43,11 @@ class SqlWorker:
 
     @classmethod
     async def queueScript(cls, sql: str):
-        cls._queue.put(_SqlRequest(type="script", sql=sql))
+        await cls._queue.put(_SqlRequest(type="script", sql=sql))
 
     @classmethod
     async def queueMany(cls, sql: str, payload: Any):
-        cls._queue.put(_SqlRequest(type="script", sql=sql, payload=payload))
+        await cls._queue.put(_SqlRequest(type="script", sql=sql, payload=payload))
 
     @classmethod
     async def sqlWorker(cls):
@@ -55,8 +55,8 @@ class SqlWorker:
             request = await cls._queue.get()
 
             if request.type == "script":
-                cls._sqlite3_cursor.executescript(request.sql)
+                await cls._sqlite3_cursor.executescript(request.sql)
             elif request.type == "many":
-                cls._sqlite3_cursor.executemany(request.sql, request.payload)
+                await cls._sqlite3_cursor.executemany(request.sql, request.payload)
 
             await cls._sqlite3_connection.commit()
