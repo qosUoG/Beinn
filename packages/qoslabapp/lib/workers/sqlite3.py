@@ -33,7 +33,7 @@ class SqlWorker:
     @classmethod
     async def subscribe(cls):
         # Create connection and start the worker if haven't
-        if not cls._sqlite3_connection:
+        if not hasattr(cls, "_sqlite3_connection"):
             cls._sqlite3_connection = await aiosqlite.connect("data.db")
             cls._sqlite3_cursor = await cls._sqlite3_connection.cursor()
             cls._task = asyncio.create_task(cls.sqlWorker())
