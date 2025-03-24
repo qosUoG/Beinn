@@ -6,11 +6,14 @@ from typing import Any, Callable
 
 from qoslablib.extensions.saver import SqlSaverABC
 
+# Proxies are created in experiment thread
+
 
 class SqlSaverProxy:
     def __init__(
         self,
         *,
+        loop: asyncio.EventLoop,
         experiment_id: str,
         title: str,
         sql_saverT: type[SqlSaverABC],
@@ -31,22 +34,22 @@ class SqlSaverProxy:
         self._create_table_sql = self._sql_saver.getCreateTableSql(self._table_name)
         self._insert_sql = self._sql_saver.getInsertSql(self._table_name)
 
-        self._queueScript: Callable[[str], None]
-        self._queueMany: Callable[[str, Any], None]
         self._task: asyncio.Task
 
         from ..workers.sqlite3 import SqlWorker
 
-        self._queueScript, self._queueMany = SqlWorker.subscribe()
+        loop.call_soon_threadsafe(SqlWorker.start())
+
+        self._queueScript = SqlWorker.queueScript
+        self._queueMany = SqlWorker.queueMany
 
         # Create the table
-        self._queueScript(self._create_table_sql)
+        SqlWorker.queueScript(self._create_table_sql)
 
         # Create the task that continuously submit queue request for registering frames
-        self._task = asyncio.create_task(self.continuousSubmitFrames())
-
-    def initialize(self):
-        pass
+        self._task = asyncio.run_coroutine_threadsafe(
+            self.continuousSubmitFrames(), loop
+        )
 
     def getTableName(self):
         return self._table_name

@@ -1,8 +1,9 @@
 import asyncio
+import queue
 from typing import Any, Literal
 from aiosqlite import Connection, Cursor
 import aiosqlite
-from threading import Event
+from threading import Event, Thread
 from time import sleep
 
 from ..proxies.sql_saver import SqlSaverProxy
@@ -24,52 +25,32 @@ class _SqlRequest:
 
 # The worker shall run on main thread only
 class SqlWorker:
-    _sqlite3_connection: Connection
-    _sqlite3_cursor: Cursor
-
-    _queue: asyncio.Queue[_SqlRequest] = asyncio.Queue()
+    _queue: queue.Queue[_SqlRequest] = queue.Queue()
     _task: asyncio.Task
 
     @classmethod
-    def subscribe(cls):
-        if not hasattr(cls, "_sqlite3_connection"):
-            asyncio.create_task(cls._start())
-
-        # Return the functions they can interact with
-        return (cls.queueScript, cls.queueMany)
-
-    @classmethod
-    async def _start(cls):
-        # Create connection and start the worker if haven't
-        if not hasattr(cls, "_sqlite3_connection"):
-            cls._sqlite3_connection = await aiosqlite.connect("data.db")
-            cls._sqlite3_cursor = await cls._sqlite3_connection.cursor()
+    def start(cls):
+        if not hasattr(cls, "_task"):
             cls._task = asyncio.create_task(cls.sqlWorker())
 
     @classmethod
     def queueScript(cls, sql: str):
-        asyncio.create_task(cls._queueScript(sql))
-
-    @classmethod
-    async def _queueScript(cls, sql: str):
-        await cls._queue.put(_SqlRequest(type="script", sql=sql))
+        cls._queue.put(_SqlRequest(type="script", sql=sql))
 
     @classmethod
     def queueMany(cls, sql: str, payload: Any):
-        asyncio.create_task(cls._queueMany(sql, payload))
-
-    @classmethod
-    async def _queueMany(cls, sql: str, payload: Any):
-        await cls._queue.put(_SqlRequest(type="script", sql=sql, payload=payload))
+        cls._queue.put(_SqlRequest(type="script", sql=sql, payload=payload))
 
     @classmethod
     async def sqlWorker(cls):
+        _sqlite3_connection = await aiosqlite.connect("data.db")
+        _sqlite3_cursor = await _sqlite3_connection.cursor()
         while True:
-            request = await cls._queue.get()
+            request = cls._queue.get()
 
             if request.type == "script":
-                await cls._sqlite3_cursor.executescript(request.sql)
+                await _sqlite3_cursor.executescript(request.sql)
             elif request.type == "many":
-                await cls._sqlite3_cursor.executemany(request.sql, request.payload)
+                await _sqlite3_cursor.executemany(request.sql, request.payload)
 
-            await cls._sqlite3_connection.commit()
+            await _sqlite3_connection.commit()

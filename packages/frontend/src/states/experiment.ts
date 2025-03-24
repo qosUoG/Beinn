@@ -31,7 +31,7 @@ export function getExperimentEventFn(experiment: CreatedRuntimeExperiment) {
             { key: "loop_count", value: number } |
             { key: "proposed_total_loop", value: number }
             | { key: "status", value: "started" | "paused" | "continued" | "completed" | "initial" | "stopped" }
-            | { key: "chart_configs", value: Record<string, ChartConfigs> }
+            | { key: "chart_config", value: ChartConfigs }
 
         try {
             res = JSON.parse(event.data)
@@ -45,12 +45,12 @@ export function getExperimentEventFn(experiment: CreatedRuntimeExperiment) {
 
 
         // Pleasing the type checker
-        if (typeof res.value === "number")
-            experiment[res.key] = res.value
-        else if (typeof res.value === "string")
-            experiment[res.key] = res.value
-        else
-            experiment[res.key] = res.value
+        if (res.key !== "chart_config") {
+            if (typeof res.value === "number")
+                experiment[res.key] = res.value
+            else if (typeof res.value === "string")
+                experiment[res.key] = res.value
+        }
 
 
         // Handling status 
@@ -78,6 +78,9 @@ export function getExperimentEventFn(experiment: CreatedRuntimeExperiment) {
                         break
                 }
                 break
+            }
+            case "chart_config": {
+                experiment.chart_configs[res.value.title] = res.value
             }
         }
 

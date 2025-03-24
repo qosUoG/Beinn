@@ -1,5 +1,6 @@
 from abc import ABC, abstractmethod
 from asyncio import EventLoop
+from contextlib import contextmanager
 from dataclasses import dataclass
 
 import functools
@@ -17,10 +18,9 @@ class ManagerABC(SqlSaverManagerABC, ChartManagerABC):
 
     @classmethod
     @abstractmethod
-    def initializeExtensions(
-        self,
-        experiment_id: str,
-        appendObjMessage: Callable[[str, dict[str, Any]], None],
+    @contextmanager
+    def initializeExtensionsAs(
+        cls, experiment_id: str, sendObjMessage: Callable[[str, dict[str, Any]], None]
     ):
         raise NotImplementedError
 

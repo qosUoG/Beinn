@@ -210,14 +210,10 @@ def _experiment_runner(proxy: ExperimentProxy):
     # Wait the running event set_ before initializing
     proxy.runner_waitUntilShouldRun()
     # First run the inialize method and get the number of loops
-    proxy.proposed_total_loop = proxy._experiment.initialize(proxy.manager)
-
-    # Then run the initializer of extensions from appstate
-    proxy.manager.loop.call_soon_threadsafe(
-        lambda: proxy.manager.initializeExtensions(
-            proxy.experiment_id, proxy.runner_getMessengerAppendObjFn()
-        )
-    )
+    with proxy.manager.initializeExtensionsAs(
+        proxy.experiment_id, proxy.runner_getMessengerAppendObjFn()
+    ):
+        proxy.proposed_total_loop = proxy._experiment.initialize(proxy.manager)
 
     # Post Start event to message queue
     proxy.runner_sendStartedMessage()

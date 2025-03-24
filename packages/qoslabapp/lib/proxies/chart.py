@@ -23,9 +23,6 @@ class ChartProxy:
         self._frames_history = bytes()
         self._frames_history_lock = Lock()
 
-    def initialize(self):
-        pass
-
     def getConfig(self):
         return self._chart.config.toDict()
 

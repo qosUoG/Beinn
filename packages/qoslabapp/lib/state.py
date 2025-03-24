@@ -1,4 +1,5 @@
 import asyncio
+from contextlib import contextmanager
 import importlib
 from threading import Event, Lock
 
@@ -17,6 +18,8 @@ from qoslablib.extensions.saver import (
     SqlSaverManagerABC,
 )
 from qoslablib.params import Params
+
+from packages.qoslabapp.routers import experiment
 
 from ..lib.utils import singleKVDictMessage
 
@@ -95,20 +98,17 @@ class AppState(ChartManagerABC, SqlSaverManagerABC):
 
     @classmethod
     def createExperiment(cls, id: str, module_str: str, eCls: str):
-        with cls.handler_experiment_id_lock:
-            cls.handler_experiment_id = id
+        module = importlib.import_module(module_str)
+        if module in cls._experiment_imported_modules:
+            cls._experiment_imported_modules.remove(module)
+            module = importlib.reload(module)
+        cls._experiment_imported_modules.append(module)
 
-            module = importlib.import_module(module_str)
-            if module in cls._experiment_imported_modules:
-                cls._experiment_imported_modules.remove(module)
-                module = importlib.reload(module)
-            cls._experiment_imported_modules.append(module)
-
-            cls._experiment_proxies[id] = ExperimentProxy(
-                id=id,
-                experimentCls=getattr(module, eCls),
-                manager=cls,
-            )
+        cls._experiment_proxies[id] = ExperimentProxy(
+            id=id,
+            experimentCls=getattr(module, eCls),
+            manager=cls,
+        )
 
     @classmethod
     def getExperimentParams(cls, id: str):
@@ -169,34 +169,22 @@ class AppState(ChartManagerABC, SqlSaverManagerABC):
     """
     Extension Management
     """
-    handler_experiment_id_lock: Lock = Lock()
-    handler_experiment_id: str
+    current_initializer_lock = Lock()
+    current_initializer_id: str
+    current_initializer_sendObjMessage: Callable[[str, dict[str, Any]], None]
 
     @classmethod
-    def initializeExtensions(
+    @contextmanager
+    def initializeExtensionsAs(
         cls, experiment_id: str, sendObjMessage: Callable[[str, dict[str, Any]], None]
     ):
-        # Initialize and send configs of the charts
-        chart_configs: dict[str, ChartConfigABC] = {}
-        if experiment_id in cls._chart_proxies:
-            for [chart_title, chart_proxy] in cls._chart_proxies[experiment_id].items():
-                chart_proxy.initialize()
-                chart_configs[chart_title] = chart_proxy.getConfig()
-
-        if chart_configs:
-            sendObjMessage("chart_configs", chart_configs)
-
-        # Initialize sql savers and send configs of the sql savers
-        sql_saver_configs: dict[str, SqlSaverConfigABC] = {}
-        if experiment_id in cls._sql_saver_proxies:
-            for [sql_saver_title, sql_saver_proxy] in cls._sql_saver_proxies[
-                experiment_id
-            ].items():
-                sql_saver_proxy.initialize()
-                sql_saver_configs[sql_saver_title] = sql_saver_proxy.getConfig()
-
-        if sql_saver_configs:
-            sendObjMessage("sql_saver_configs", sql_saver_configs)
+        try:
+            with cls.current_initializer_lock:
+                cls.current_initializer_id = experiment_id
+                cls.current_initializer_sendObjMessage = sendObjMessage
+                yield
+        finally:
+            pass
 
     # The following creation methods are run in experiment initialization phase,
     # i.e. not in the main thread
@@ -213,16 +201,26 @@ class AppState(ChartManagerABC, SqlSaverManagerABC):
     def createChart(cls, chartT: ChartABC, kwargs: Any = {}):
         title = kwargs["title"]
         with cls._chart_proxies_lock:
-            if cls.handler_experiment_id not in cls._chart_proxies:
-                cls._chart_proxies[cls.handler_experiment_id] = {}
+            if cls.current_initializer_id not in cls._chart_proxies:
+                cls._chart_proxies[cls.current_initializer_id] = {}
 
-            cls._chart_proxies[cls.handler_experiment_id][title] = ChartProxy(
-                experiment_id=cls.handler_experiment_id,
+            chart_proxy = ChartProxy(
+                experiment_id=cls.current_initializer_id,
                 title=title,
                 chartT=chartT,
                 kwargs=kwargs,
             )
-            return cls._chart_proxies[cls.handler_experiment_id][title]._chart
+
+            cls._chart_proxies[cls.current_initializer_id][title] = ChartProxy(
+                experiment_id=cls.current_initializer_id,
+                title=title,
+                chartT=chartT,
+                kwargs=kwargs,
+            )
+            cls.current_initializer_sendObjMessage(
+                "chart_config", chart_proxy.getConfig()
+            )
+            return cls._chart_proxies[cls.current_initializer_id][title]._chart
 
     @classmethod
     def getChartSubscription(cls, experiment_id: str, title: str):
