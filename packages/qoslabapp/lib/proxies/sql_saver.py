@@ -65,12 +65,12 @@ class SqlSaverProxy:
     def _queueScript(self, sql: str):
         from ..workers.sqlite3 import SqlWorker
 
-        self._loop.call_soon_threadsafe(SqlWorker.queueScript(sql))
+        self._loop.call_soon_threadsafe(lambda: SqlWorker.queueScript(sql))
 
     def _queueMany(self, sql: str, payload: Any):
         from ..workers.sqlite3 import SqlWorker
 
-        self._loop.call_soon_threadsafe(SqlWorker.queueMany(sql, payload))
+        self._loop.call_soon_threadsafe(lambda: SqlWorker.queueMany(sql, payload))
 
     async def continuousSubmitFrames(self):
         while True:
