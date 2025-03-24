@@ -6,7 +6,8 @@ import importlib
 import inspect
 import json
 import pkgutil
-from threading import Event, Lock
+
+from threading import Event
 from time import sleep
 import types
 from typing import Any
@@ -16,9 +17,25 @@ from qoslablib.extensions.saver import KVSqlSaverConfig
 
 
 if __name__ == "__main__":
-    kv = KVSqlSaverConfig(type="KVFloatSqlSaver", title="title", keys=["keys"])
 
-    print(kv)
+    def main():
+        done_event = Event()
+        task = asyncio.create_task(wait())
+        task.add_done_callback(lambda: done_event.set())
+        done_event.wait()
+        result = task.result()
+        print("done" + result)
+
+    async def wait():
+        await asyncio.sleep(1)
+        return 1
+
+    async def mmain():
+        main()
+
+    asyncio.run(mmain())
+
+    print("hi")
 
     # def inside():
     #     warnings.filterwarnings("error")

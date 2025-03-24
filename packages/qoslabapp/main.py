@@ -11,7 +11,7 @@ from .routers import equipment, experiment, workspace, chart
 
 @asynccontextmanager
 async def lifespan(app: FastAPI):
-    AppState.loop = asyncio.get_event_loop()
+    AppState.loop = asyncio.get_running_loop()
     yield
     await AppState.disconnectAllWs()
     AppState.cancelAllExperiments()

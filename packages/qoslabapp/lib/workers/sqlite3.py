@@ -31,22 +31,35 @@ class SqlWorker:
     _task: asyncio.Task
 
     @classmethod
-    async def subscribe(cls):
+    def subscribe(cls):
+        if not hasattr(cls, "_sqlite3_connection"):
+            asyncio.create_task(cls._start())
+
+        # Return the functions they can interact with
+        return (cls.queueScript, cls.queueMany)
+
+    @classmethod
+    async def _start(cls):
         # Create connection and start the worker if haven't
         if not hasattr(cls, "_sqlite3_connection"):
             cls._sqlite3_connection = await aiosqlite.connect("data.db")
             cls._sqlite3_cursor = await cls._sqlite3_connection.cursor()
             cls._task = asyncio.create_task(cls.sqlWorker())
 
-        # Return the functions they can interact with
-        return (cls.queueScript, cls.queueMany)
+    @classmethod
+    def queueScript(cls, sql: str):
+        asyncio.create_task(cls._queueScript(sql))
 
     @classmethod
-    async def queueScript(cls, sql: str):
+    async def _queueScript(cls, sql: str):
         await cls._queue.put(_SqlRequest(type="script", sql=sql))
 
     @classmethod
-    async def queueMany(cls, sql: str, payload: Any):
+    def queueMany(cls, sql: str, payload: Any):
+        asyncio.create_task(cls._queueMany(sql, payload))
+
+    @classmethod
+    async def _queueMany(cls, sql: str, payload: Any):
         await cls._queue.put(_SqlRequest(type="script", sql=sql, payload=payload))
 
     @classmethod

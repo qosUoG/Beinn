@@ -252,7 +252,6 @@ class AppState(ChartManagerABC, SqlSaverManagerABC):
                 cls._sql_saver_proxies[cls.handler_experiment_id] = {}
 
             cls._sql_saver_proxies[cls.handler_experiment_id][title] = SqlSaverProxy(
-                loop=cls.loop,
                 experiment_id=cls.handler_experiment_id,
                 title=title,
                 sql_saverT=sql_saverT,
