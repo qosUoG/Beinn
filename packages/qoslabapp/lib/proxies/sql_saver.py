@@ -1,3 +1,4 @@
+import asyncio
 from threading import Lock
 import time
 from typing import Any
@@ -9,6 +10,7 @@ class SqlSaverProxy:
     def __init__(
         self,
         *,
+        loop: asyncio.EventLoop,
         experiment_id: str,
         title: str,
         sql_saverT: type[SqlSaverABC],
@@ -16,6 +18,7 @@ class SqlSaverProxy:
     ):
         # Identifier for the sql saver handler
         self.title = title
+        self.timestamp = int(time.time() * 1000)
         self.experiment_id = experiment_id
 
         # sql_saver instance for consumer of sql_saver
@@ -24,38 +27,52 @@ class SqlSaverProxy:
         self._frame_lock = Lock()
         self._frames: list[Any] = []
 
-        self.table_name: str
+        self._table_name = f"{self.title} timestamp:{self.timestamp}"
+        self._create_table_sql = self._sql_saver.getCreateTableSql(self._table_name)
+        self._insert_sql = self._sql_saver.getInsertSql(self._table_name)
+
+        from ..workers.sqlite3 import SqlWorker
+
+        self._queueScript, self._queueMany = loop.run_until_complete(
+            SqlWorker.subscribe()
+        )
+
+        # Create the table
+        loop.run_until_complete(self._queueScript(self._create_table_sql))
+
+        # Create the task that continuously submit queue request for registering frames
+        asyncio.create_task(self.continuousSubmitFrames())
+
+    def initialize(self):
+        pass
+
+    def getTableName(self):
+        return self._table_name
+
+    def getCreateTableSql(self):
+        return self._create_table_sql
 
     def getInsertSql(self):
-        return self._sql_saver.getInsertSql(self.table_name)
+        return self._insert_sql
 
     def getConfig(self):
         return self._sql_saver.config.toDict()
 
-    # This is in main thread
-    def initialize(self):
-        from ..workers.sqlite3 import SqlWorker
-
-        # Each sqlsaverhandler shall always call createconnection
-        SqlWorker.createSqlConnection()
-
-        # Create table with name and timestamp (ms)
-        self._table_name = f"{self.title} timestamp:{int(time.time() * 1000)}"
-
-        SqlWorker.runSql(self._sql_saver.getCreateTableSql(self._table_name))
+    async def continuousSubmitFrames(self):
+        while True:
+            asyncio.sleep(5)
+            frames = self.toOwnedFrames()
+            if frames:
+                await self._queueMany(self._insert_sql, frames)
 
     # Memory for saving
-
     def toOwnedFrames(self):
         with self._frame_lock:
             frames = self.frames
             self.frames = []
             return frames
 
-    def appendFrame(self, frame: Any):
-        with self._frame_lock:
-            self._frames.append(frame)
-
     # This would be called in the other thread
     def _save_fn(self, frame: Any):
-        self.appendFrame(frame)
+        with self._frame_lock:
+            self._frames.append(frame)

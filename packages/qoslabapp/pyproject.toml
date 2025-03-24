@@ -4,7 +4,11 @@ version = "0.1.0"
 description = "Add your description here"
 readme = "README.md"
 requires-python = ">=3.13"
-dependencies = ["fastapi>=0.115.8", "qoslablib"]
+dependencies = [
+    "aiosqlite>=0.21.0",
+    "fastapi>=0.115.8",
+ "qoslablib",
+]
 
 [dependency-groups]
 dev = ["fastapi[standard]>=0.115.8"]

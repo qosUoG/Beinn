@@ -59,7 +59,7 @@ class KVSqlSaverConfig(SqlSaverConfigABC):
     keys: list[str]
 
     def toDict(self):
-        return dataclasses.asdict()
+        return dataclasses.asdict(self)
 
 
 class KVFloatSqlSaver(SqlSaverABC):
