@@ -110,5 +110,5 @@ class KVFloatSqlSaver(SqlSaverABC):
     @override
     def getInsertSql(self, table_name: str):
         return f"""
-        INSERT INTO "{table_name}"({"timestamp,".join([f"{key}," for key in self.keys])}) VALUES({":timestamp,".join([f":{key}," for key in self.keys])})
+        INSERT INTO "{table_name}"({"timestamp,".join([f"{key}," for key in self.keys])[:-1]}) VALUES({":timestamp,".join([f":{key}," for key in self.keys])[:-1]})
     """
