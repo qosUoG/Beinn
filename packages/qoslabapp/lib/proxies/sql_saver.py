@@ -40,11 +40,18 @@ class SqlSaverProxy:
 
         loop.call_soon_threadsafe(SqlWorker.start)
 
-        self._queueScript = SqlWorker.queueScript
-        self._queueMany = SqlWorker.queueMany
+        self._queueScript: Callable[[str], None] = (
+            lambda sql: loop.call_soon_threadsafe(SqlWorker.queueScript(sql))
+        )
+
+        self._queueMany: Callable[[str, Any], None] = (
+            lambda sql, payload: loop.call_soon_threadsafe(
+                SqlWorker.queueMany(sql, payload)
+            )
+        )
 
         # Create the table
-        SqlWorker.queueScript(self._create_table_sql)
+        self._queueScript(self._create_table_sql)
 
         # Create the task that continuously submit queue request for registering frames
         self._task = asyncio.run_coroutine_threadsafe(
