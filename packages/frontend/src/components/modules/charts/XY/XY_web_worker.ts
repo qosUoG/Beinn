@@ -27,7 +27,7 @@ onmessage = function (event: MessageEvent<XYWebWorkerMessage>) {
                 options: {
                     responsive: true,
                     maintainAspectRatio: false,
-                    resizeDelay: 500,
+                    // resizeDelay: 500,
                     animation: false,
                     parsing: false,
                     scales: {

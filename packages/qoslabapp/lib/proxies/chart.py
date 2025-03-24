@@ -33,7 +33,7 @@ class ChartProxy:
 
     class Subscriber:
         def __init__(self):
-            self.rate = 1
+            self.rate = 10
             self._active_frames_lock = Lock()
             self._active_frames = bytes()
 

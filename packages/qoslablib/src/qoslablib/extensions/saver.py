@@ -53,21 +53,19 @@ class SqlSaverManagerABC(ABC):
 
 
 @dataclass
-class XYSqlSaverConfig(SqlSaverABC):
-    type: Literal["XYSqlSaver"]
+class KVSqlSaverConfig(SqlSaverABC):
+    type: Literal["KVFloatSqlSaver"]
     title: str
-    x_name: str
-    y_names: list[str]
+    keys: list[str]
 
     def toDict(self):
         return dataclasses.asdict()
 
 
-class XYSqlSaver(SqlSaverABC):
+class KVFloatSqlSaver(SqlSaverABC):
     class KW(TypedDict):
         title: str
-        x_name: str
-        y_names: list[str]
+        keys: list[str]
 
     def __init__(
         self,
@@ -76,14 +74,10 @@ class XYSqlSaver(SqlSaverABC):
         **kwargs: Unpack[KW],
     ):
         self.title = kwargs["title"]
-        self.x_name = kwargs["x_name"]
-        self.y_names = kwargs["y_names"]
+        self.keys = kwargs["keys"]
 
-        self.config = XYSqlSaverConfig(
-            type="XYSqlSaver",
-            title=self.title,
-            x_name=self.x_name,
-            y_names=self.y_names,
+        self.config = KVSqlSaverConfig(
+            type="KVFloatSqlSaver", title=self.title, x_name=self.keys
         )
 
         self._save_fn = save_fn
@@ -97,16 +91,15 @@ class XYSqlSaver(SqlSaverABC):
     def getCreateTableSql(self, table_name: str) -> str:
         return f"""CREATE TABLE "{table_name}" (
             timestamp INTEGER PRIMARY KEY,
-            {self.x_name} REAL,
-            {"".join([f",\n{y_name} REAL" for y_name in self.y_names])}
+            {"".join([f",\n{key} REAL" for key in self.keys])}
             ) """
 
     @override
     def save(self, frame: dict[str, float]):
         # Fill in Nones for missing keys
-        for y_name in self.y_names:
-            if y_name not in frame.keys():
-                frame[y_name] = None
+        for key in self.keys:
+            if key not in frame.keys():
+                frame[key] = None
 
         # Execute the functions
         self._save_fn(frame)
@@ -114,5 +107,5 @@ class XYSqlSaver(SqlSaverABC):
     @override
     def getInsertSql(self, table_name: str):
         return f"""
-        INSERT INTO "{table_name}" VALUES(:{self.x_name},{"".join([f":{y_name}," for y_name in self.y_names])})
+        INSERT INTO "{table_name}" VALUES({"".join([f":{key}," for key in self.keys])})
     """

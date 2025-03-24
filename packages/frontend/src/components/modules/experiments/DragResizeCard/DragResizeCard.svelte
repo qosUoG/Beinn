@@ -246,49 +246,49 @@
 	<!-- Top -->
 	<button
 		aria-label="top-resize"
-		class="absolute h-3 w-full -top-1.5 left-0 cursor-ns-resize mx-1.5"
+		class="absolute h-3.5 w-full -top-1 left-0 cursor-ns-resize mx-1"
 		use:resizehandle
 		onmousedown={tMousedownHandler}></button>
 
 	<!-- Right -->
 	<button
 		aria-label="right-resize"
-		class="absolute h-full w-3 -right-1.5 top-0 cursor-ew-resize my-1.5"
+		class="absolute h-full w-3.5 -right-1 top-0 cursor-ew-resize my-1"
 		use:resizehandle
 		onmousedown={rMousedownHandler}></button>
 
 	<!-- Bottom -->
 	<button
 		aria-label="bottom-resize"
-		class="absolute h-3 w-full -bottom-1.5 left-0 cursor-ns-resize mx-1.5"
+		class="absolute h-3.5 w-full -bottom-1 left-0 cursor-ns-resize mx-1"
 		use:resizehandle
 		onmousedown={bMousedownHandler}></button>
 
 	<!-- Left -->
 	<button
 		aria-label="left-resize"
-		class="absolute h-full w-3 -left-1.5 top-0 cursor-ew-resize my-1.5"
+		class="absolute h-full w-3.5 -left-1 top-0 cursor-ew-resize my-1"
 		use:resizehandle
 		onmousedown={lMousedownHandler}></button>
 
 	<!-- Top Left Corner -->
 	<button
 		aria-label="topleft-resize"
-		class="absolute h-3 w-3 -top-1.5 -left-1.5 cursor-nwse-resize"
+		class="absolute h-3.5 w-3.5 -top-1 -left-1 cursor-nwse-resize"
 		use:resizehandle
 		onmousedown={tlMousedownHandler}></button>
 
 	<!-- Top Right Corner -->
 	<button
 		aria-label="topright-resize"
-		class="absolute h-3 w-3 -top-1.5 -right-1.5 cursor-nesw-resize"
+		class="absolute h-3.5 w-3.5 -top-1 -right-1 cursor-nesw-resize"
 		use:resizehandle
 		onmousedown={trMousedownHandler}></button>
 
 	<!-- Bottom Right Corner -->
 	<button
 		aria-label="bottomright-resize"
-		class="absolute h-3 w-3 -bottom-1.5 -right-1.5 cursor-nwse-resize"
+		class="absolute h-3.5 w-3.5 -bottom-1 -right-1 cursor-nwse-resize"
 		use:resizehandle
 		onmousedown={brMousedownHandler}>
 	</button>
@@ -296,7 +296,7 @@
 	<!-- Bottom Left Corner -->
 	<button
 		aria-label="bottomleft-resize"
-		class="absolute h-3 w-3 -bottom-1.5 -left-1.5 cursor-nesw-resize"
+		class="absolute h-3.5 w-3.5 -bottom-1 -left-1 cursor-nesw-resize"
 		use:resizehandle
 		onmousedown={blMousedownHandler}>
 	</button>
@@ -304,7 +304,7 @@
 	<!-- Top Drag Bar -->
 	<button
 		class={cn(
-			" absolute top-1.5 left-1/2 -translate-x-1/2 rounded w-6 text-center h-6 py-1 text-slate-600 bg-slate-200 z-100000",
+			" absolute top-1 left-1/2 -translate-x-1/2 rounded w-6 text-center h-6 py-1 text-slate-600 bg-slate-200 z-100000",
 			moveable_state.moving
 				? "cursor-grabbing **:cursor-grabbing"
 				: "cursor-grab **:cursor-grab"

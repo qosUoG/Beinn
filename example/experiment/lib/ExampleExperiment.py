@@ -9,7 +9,7 @@ from qoslablib import params as p, exceptions as e, runtime as r
 import time
 
 from qoslablib.extensions.chart import XYPlot
-from qoslablib.extensions.saver import XYSqlSaver
+from qoslablib.extensions.saver import KVFloatSqlSaver
 from examplelib.ExampleDriver import ExampleEquipment
 
 
@@ -78,12 +78,10 @@ class ExampleExperiment(r.ExperimentABC):
         #     ),
         # )
 
-        # self.saver: XYSqlSaver = manager.createSqlSaver(
-        #     XYSqlSaver,
-        #     XYSqlSaver.kwargs(
-        #         title="ExampleSqlSaver", x_name="index", y_names=["temperature"]
-        #     ),
-        # )
+        self.saver: KVFloatSqlSaver = manager.createSqlSaver(
+            KVFloatSqlSaver,
+            KVFloatSqlSaver.kwargs(title="ExampleSqlSaver", keys=["x", "temperature"]),
+        )
 
         print("initialized experiment")
 
@@ -108,13 +106,15 @@ class ExampleExperiment(r.ExperimentABC):
 
         # Raise an exception such that qoslapapp knows experiment is ended
         print(f"loop: {index}")
-
+        value = random.random()
         self.xyplot.plot(
             {
                 "x": index,
-                "temperature": random.random(),
+                "temperature": value,
             }
         )
+
+        self.saver.save({"x": index, "temperature": value})
 
         if index >= 9:
             raise e.ExperimentEnded
