@@ -27,7 +27,7 @@ class SqlSaverProxy:
         # sql_saver instance for consumer of sql_saver
         self._sql_saver = sql_saverT(save_fn=self._save_fn, **kwargs)
 
-        self._frame_lock = Lock()
+        self._frames_lock = Lock()
         self._frames: list[Any] = []
 
         self._table_name = f"{self.title} timestamp:{self.timestamp}"
@@ -38,24 +38,16 @@ class SqlSaverProxy:
 
         from ..workers.sqlite3 import SqlWorker
 
-        loop.call_soon_threadsafe(SqlWorker.start)
+        self._loop = loop
 
-        self._queueScript: Callable[[str], None] = (
-            lambda sql: loop.call_soon_threadsafe(SqlWorker.queueScript(sql))
-        )
-
-        self._queueMany: Callable[[str, Any], None] = (
-            lambda sql, payload: loop.call_soon_threadsafe(
-                SqlWorker.queueMany(sql, payload)
-            )
-        )
+        self._loop.call_soon_threadsafe(SqlWorker.start)
 
         # Create the table
         self._queueScript(self._create_table_sql)
 
         # Create the task that continuously submit queue request for registering frames
-        self._task = asyncio.run_coroutine_threadsafe(
-            self.continuousSubmitFrames(), loop
+        self._task = self._loop.call_soon_threadsafe(
+            lambda: asyncio.create_task(self.continuousSubmitFrames())
         )
 
     def getTableName(self):
@@ -70,6 +62,16 @@ class SqlSaverProxy:
     def getConfig(self):
         return self._sql_saver.config.toDict()
 
+    def _queueScript(self, sql: str):
+        from ..workers.sqlite3 import SqlWorker
+
+        self._loop.call_soon_threadsafe(SqlWorker.queueScript(sql))
+
+    def _queueMany(self, sql: str, payload: Any):
+        from ..workers.sqlite3 import SqlWorker
+
+        self._loop.call_soon_threadsafe(SqlWorker.queueMany(sql, payload))
+
     async def continuousSubmitFrames(self):
         while True:
             await asyncio.sleep(5)
@@ -79,12 +81,12 @@ class SqlSaverProxy:
 
     # Memory for saving
     def toOwnedFrames(self):
-        with self._frame_lock:
-            frames = self.frames
-            self.frames = []
+        with self._frames_lock:
+            frames = self._frames
+            self._frames = []
             return frames
 
     # This would be called in the other thread
     def _save_fn(self, frame: Any):
-        with self._frame_lock:
+        with self._frames_lock:
             self._frames.append(frame)

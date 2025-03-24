@@ -17,32 +17,13 @@ from qoslablib.extensions.saver import KVSqlSaverConfig
 
 
 if __name__ == "__main__":
-    wow = 1
 
-    async def _print_wow():
-        await asyncio.sleep(0.2)
-        print(wow)
+    def xxx(i: int):
+        print("xxx" + str(i))
 
-    async def setwow():
-        await asyncio.sleep(0.2)
-        wow = 2
+    callback = lambda i: xxx(i)
 
-    def main():
-        task = asyncio.create_task(setwow())
-        tt = print_wow()
-
-    def print_wow():
-        asyncio.create_task(_print_wow())
-
-    async def mmain():
-        main()
-
-    asyncio.run(mmain())
-
-    print(wow)
-
-    sleep(2)
-    print(wow)
+    callback(1)
 
     # def inside():
     #     warnings.filterwarnings("error")

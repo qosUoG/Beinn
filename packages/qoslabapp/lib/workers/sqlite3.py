@@ -53,7 +53,7 @@ class SqlWorker:
 
     @classmethod
     def queueMany(cls, sql: str, payload: Any):
-        cls._queue.put_nowait(_SqlRequest(type="script", sql=sql, payload=payload))
+        cls._queue.put_nowait(_SqlRequest(type="many", sql=sql, payload=payload))
 
     @classmethod
     async def sqlWorker(cls):

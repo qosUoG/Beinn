@@ -113,8 +113,10 @@ class ExampleExperiment(r.ExperimentABC):
                 "temperature": value,
             }
         )
+        print("plotted")
 
         self.saver.save({"x": index, "temperature": value})
+        print("saved")
 
         if index >= 9:
             raise e.ExperimentEnded
