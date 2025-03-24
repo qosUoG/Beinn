@@ -193,7 +193,7 @@ class AppState(ChartManagerABC, SqlSaverManagerABC):
                 experiment_id
             ].items():
                 sql_saver_proxy.initialize()
-                sql_saver_configs[sql_saver_title] = SqlSaverProxy.getConfig()
+                sql_saver_configs[sql_saver_title] = sql_saver_proxy.getConfig()
 
         if sql_saver_configs:
             sendObjMessage("sql_saver_configs", sql_saver_configs)
