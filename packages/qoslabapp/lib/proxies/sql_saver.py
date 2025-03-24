@@ -31,8 +31,8 @@ class SqlSaverProxy:
         self._create_table_sql = self._sql_saver.getCreateTableSql(self._table_name)
         self._insert_sql = self._sql_saver.getInsertSql(self._table_name)
 
-        self._queueScript: Callable[[str], CoroutineType[Any, Any, None]]
-        self._queueMany: Callable[[str, Any], CoroutineType[Any, Any, None]]
+        self._queueScript: Callable[[str], None]
+        self._queueMany: Callable[[str, Any], None]
         self._task: asyncio.Task
 
         from ..workers.sqlite3 import SqlWorker
@@ -65,7 +65,7 @@ class SqlSaverProxy:
             await asyncio.sleep(5)
             frames = self.toOwnedFrames()
             if frames:
-                await self._queueMany(self._insert_sql, frames)
+                self._queueMany(self._insert_sql, frames)
 
     # Memory for saving
     def toOwnedFrames(self):
