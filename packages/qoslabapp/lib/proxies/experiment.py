@@ -5,7 +5,7 @@ from contextlib import contextmanager
 import os
 import signal
 from threading import Event
-from typing import Any, Callable, Coroutine, override
+from typing import Any, override
 
 
 from fastapi import WebSocket
@@ -36,7 +36,6 @@ class ExperimentRunner:
         self,
         experiment: ExperimentABC,
         messenger: Messenger,
-        done_callback: Callable[..., Coroutine],
     ):
         self._experiment = experiment
         self._messenger = messenger
@@ -44,12 +43,10 @@ class ExperimentRunner:
         self._running = Event()
         self._should_run = Event()
         self._should_stop = Event()
-        self._stopped = Event()
+        self.stopped = Event()
         self._ran = Event()
 
         self._pid: int
-
-        self._done_callback = done_callback
 
     def prepare(self):
         # The previous run, if there is one, shall not be running
@@ -62,7 +59,7 @@ class ExperimentRunner:
         self._running.clear()
         self._should_run.clear()
         self._should_stop.clear()
-        self._stopped.clear()
+        self.stopped.clear()
         self._ran.clear()
 
     def start(self):
@@ -71,16 +68,17 @@ class ExperimentRunner:
         self._should_run.set()
 
     async def _start(self):
-        await asyncio.to_thread(self._runner)
-        await self._done_callback()
+        res = await asyncio.to_thread(self._runner)
+        self.stopped.set()
+        if res:
+            self._messenger.put("status", "completed")
+        else:
+            self._messenger.put("status", "stopped")
 
     def stop(self):
         self._should_stop.set()
         # Set the running event as well just in case it is being paused
         self._should_run.set()
-
-    def waitUntil_stopped(self):
-        self._stopped.wait()
 
     def pause(self):
         self._should_run.clear()
@@ -97,6 +95,8 @@ class ExperimentRunner:
             os.kill(self._pid, signal.SIGTERM)
             # Cancel the task
             self._runner_task.cancel()
+
+        self._messenger.put("status", "stopped")
 
     def removable(self):
         # Only removable if the experiment is done, i.e. stopped or completed or raised exception
@@ -134,8 +134,7 @@ class ExperimentRunner:
                 if self._should_stop.is_set():
                     self._experiment.stop()
                     self._should_run.clear()
-                    self._stopped.set()
-                    return
+                    return False
 
                 # Loop the _experiment once with the newest index
 
@@ -147,9 +146,7 @@ class ExperimentRunner:
 
                     except ExperimentEnded:
                         print("experiment ended")
-                        self._stopped.set()
-                        self._messenger.put_threadsafe("status", "completed")
-                        return
+                        return True
 
                     if not self._should_run.is_set():
                         # Decrement to exclude the previous loop index
@@ -157,6 +154,7 @@ class ExperimentRunner:
         except Exception as e:
             print("Exception in experiment runner")
             print(e)
+            return False
 
 
 class ExperimentProxy(ManagerABC):
@@ -185,7 +183,6 @@ class ExperimentProxy(ManagerABC):
         self._runner = ExperimentRunner(
             self._experiment,
             self._messenger,
-            self._done_callback,
         )
 
     """Public Interface of self"""
@@ -197,15 +194,6 @@ class ExperimentProxy(ManagerABC):
         # Shutting down the queue shall close the websocket if there is one
         self._messenger.shutdown()
 
-        # Clean up charts
-        for chart in self._charts.values():
-            await chart.cleanup()
-
-        # Clean up sql_savers
-        for sql_saver in self._sql_savers.values():
-            await sql_saver.cleanup()
-
-    async def _done_callback(self):
         # Clean up charts
         for chart in self._charts.values():
             await chart.cleanup()
@@ -254,17 +242,8 @@ class ExperimentProxy(ManagerABC):
     def stop_async(self):
         self._runner.stop()
 
-    def waitUntil_stopped(self):
-        self._runner.waitUntil_stopped()
-
-    def stop_sync(self):
-        self.stop_async()
-        self._runner.waitUntil_stopped()
-        self._messenger.put("status", "stopped")
-
     def forceStop(self):
         self._runner.forceStop()
-        self._messenger.put("status", "stopped")
 
     def pause_async(self):
         self._runner.pause()
@@ -291,6 +270,7 @@ class ExperimentProxy(ManagerABC):
         title = kwargs["title"]
 
         self._charts[title] = ChartProxy(
+            experiment_stopped=self._runner.stopped,
             chartT=chartT,
             kwargs=kwargs,
         )

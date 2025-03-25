@@ -1,5 +1,5 @@
 import asyncio
-import json
+
 from fastapi import APIRouter, WebSocket, WebSocketDisconnect
 
 from ..lib.settings.state import AppState
@@ -20,9 +20,14 @@ async def getChartDataWs(experiment_id: str, title: str, ws: WebSocket):
 
     async def producer():
         try:
-            while True:
-                async for frames in yieldFn():
+            async for frames in yieldFn():
+                if frames:
                     await ws.send_bytes(frames)
+
+            await ws.close()
+            unsubscribe()
+            return
+
         except WebSocketDisconnect:
             unsubscribe()
 

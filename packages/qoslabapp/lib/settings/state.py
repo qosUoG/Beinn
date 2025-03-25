@@ -100,7 +100,7 @@ class AppState:
 
     @classmethod
     def stopExperiment_sync(cls, id: str):
-        cls._experiment_proxies[id].stop_sync()
+        cls._experiment_proxies[id].stop_async()
 
     @classmethod
     def subscribeExperimentMessage(cls, id: str, ws: WebSocket):

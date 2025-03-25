@@ -1,5 +1,5 @@
 import asyncio
-from threading import Lock
+from threading import Event, Lock
 import time
 from typing import Any, Literal
 
@@ -84,6 +84,7 @@ class SqlSaverProxy:
     def __init__(
         self,
         *,
+        experiment_stopped: Event,
         sql_saverT: type[SqlSaverABC],
         kwargs: Any,
     ):
@@ -101,6 +102,8 @@ class SqlSaverProxy:
 
         self._should_cancel = asyncio.Event()
         self._stopped = asyncio.Event()
+
+        self._experiment_stopped = experiment_stopped
 
         # Start the worker
         SqlWorker.start()
@@ -125,7 +128,9 @@ class SqlSaverProxy:
     """Private task to continuously submit frames to worker"""
 
     async def _worker(self):
-        while not self._should_cancel.is_set():
+        while (
+            not self._should_cancel.is_set() and not self._experiment_stopped.is_set()
+        ):
             await asyncio.sleep(2)
             self._flushFrames()
 
