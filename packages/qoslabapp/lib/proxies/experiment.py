@@ -202,7 +202,7 @@ class ExperimentProxy(ManagerABC):
         for sql_saver in self._sql_savers.values():
             await sql_saver.cleanup()
 
-    async def _done_callback(self):
+    async def _done_callback(self, _):
         # Clean up charts
         for chart in self._charts.values():
             await chart.cleanup()
