@@ -15,7 +15,7 @@ from . import params
 
 class ExperimentManagerABC(ABC):
     @abstractmethod
-    def suggestProposedTotalIterations(self, total_iterations: int):
+    def suggestTotalIterations(self, total_iterations: int):
         raise NotImplementedError
 
 
