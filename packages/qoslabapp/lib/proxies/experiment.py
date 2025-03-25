@@ -50,6 +50,8 @@ class ExperimentRunner:
             raise ExperimentRunner.PreviousNotFinished
 
         # Make sure the experiment starts in a fresh state
+        self._iteration_count = -1
+
         self._running.clear()
         self._should_run.clear()
         self._should_stop.clear()
@@ -105,41 +107,46 @@ class ExperimentRunner:
             self._running.clear()
             self._ran.set()
             # Post loop count event to message queue
-            self._messenger.put_threadsafe("iteration_count", self.iteration_count)
+            self._messenger.put_threadsafe("iteration_count", self._iteration_count)
 
     def _runner(self):
-        self._pid = os.getpid()
+        try:
+            self._pid = os.getpid()
 
-        # Post Start event to message queue
-        self._messenger.put_threadsafe("status", "started")
+            # Post Start event to message queue
+            self._messenger.put_threadsafe("status", "started")
 
-        while True:
-            # Wait until the running event is set in each loop
-            self._should_run.wait()
+            while True:
+                # Wait until the running event is set in each loop
+                self._should_run.wait()
 
-            # Stop the _experiment is the stop event is set
-            if self._should_stop.is_set():
-                self._experiment.stop()
-                self._should_run.clear()
-                self._stopped.set()
-                return
-
-            # Loop the _experiment once with the newest index
-
-            with self._iterate():
-                self.iteration_count += 1
-                try:
-                    self._experiment.loop(self.iteration_count)
-
-                except ExperimentEnded:
-                    print("experiment ended")
+                # Stop the _experiment is the stop event is set
+                if self._should_stop.is_set():
+                    self._experiment.stop()
+                    self._should_run.clear()
                     self._stopped.set()
-                    self._messenger.put_threadsafe("status", "completed")
                     return
 
-                if not self._should_run.is_set():
-                    # Decrement to exclude the previous loop index
-                    self.iteration_count -= 1
+                # Loop the _experiment once with the newest index
+
+                with self._iterate():
+                    self._iteration_count += 1
+
+                    try:
+                        self._experiment.loop(self._iteration_count)
+
+                    except ExperimentEnded:
+                        print("experiment ended")
+                        self._stopped.set()
+                        self._messenger.put_threadsafe("status", "completed")
+                        return
+
+                    if not self._should_run.is_set():
+                        # Decrement to exclude the previous loop index
+                        self._iteration_count -= 1
+        except Exception as e:
+            print("Exception in experiment runner")
+            print(e)
 
 
 class ExperimentProxy(ManagerABC):
