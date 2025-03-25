@@ -99,8 +99,6 @@ class SqlSaverProxy:
         create_table_sql = self._sql_saver.getCreateTableSql(table_name)
         self._insert_sql = self._sql_saver.getInsertSql(table_name)
 
-        self._task: asyncio.Task
-
         self._should_cancel = asyncio.Event()
         self._stopped = asyncio.Event()
 
@@ -120,8 +118,9 @@ class SqlSaverProxy:
 
     async def cleanup(self):
         # Cancel the task
-        self._should_cancel.set()
-        await self._stopped.wait()
+        if not self._task.done():
+            self._should_cancel.set()
+            await self._stopped.wait()
 
     """Private task to continuously submit frames to worker"""
 
