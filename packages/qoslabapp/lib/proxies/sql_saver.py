@@ -47,12 +47,12 @@ class SqlWorker:
 
     @singledispatchmethod
     @classmethod
-    def put(cls, sql: str, _=None):
+    def put(cls, sql: str, *_):
         cls._queue.put_nowait(_SqlRequest(type="script", sql=sql))
 
     @put.register
     @classmethod
-    def _(cls, sql: str, payload: Any):
+    def _(cls, sql: str, payload: list, *_):
         cls._queue.put_nowait(_SqlRequest(type="many", sql=sql, payload=payload))
 
     @classmethod
