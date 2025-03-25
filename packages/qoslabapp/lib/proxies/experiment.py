@@ -242,6 +242,9 @@ class ExperimentProxy(ManagerABC):
     def stop_async(self):
         self._runner.stop()
 
+    def waitUntil_stopped(self):
+        self._runner.stopped.wait()
+
     def forceStop(self):
         self._runner.forceStop()
 
@@ -290,6 +293,7 @@ class ExperimentProxy(ManagerABC):
         title = kwargs["title"]
 
         self._sql_savers[title] = SqlSaverProxy(
+            experiment_stopped=self._runner.stopped,
             sql_saverT=sql_saverT,
             kwargs=kwargs,
         )

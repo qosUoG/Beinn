@@ -22,8 +22,14 @@ serve({
 
 
 process.on("SIGINT", async () => {
-    const res = await fetch("http://localhost:8000/workspace/cleanup")
-    console.log(await res.json())
-    app_state.pyproc?.kill()
+
+    if (app_state.pyproc !== undefined) {
+        const res = await fetch("http://localhost:8000/workspace/cleanup")
+        console.log(await res.json())
+        app_state.pyproc?.kill()
+        // wait for 100 ms
+        await new Promise(_ => setTimeout(_, 100));
+    }
+
     process.exit();
 });
