@@ -32,17 +32,17 @@ class Messenger:
     @singledispatchmethod
     def put_threadsafe(self, key: str, value: str):
         self._loop.call_soon_threadsafe(
-            self._put_nowait("{" + f'"key": "{key}", "value": "{value}"' + "}")
+            lambda: self._put_nowait("{" + f'"key": "{key}", "value": "{value}"' + "}")
         )
 
     @put_threadsafe.register
     def _(self, key: str, value: float | int):
         self._loop.call_soon_threadsafe(
-            self._put_nowait("{" + f'"key": "{key}", "value": {value}' + "}")
+            lambda: self._put_nowait("{" + f'"key": "{key}", "value": {value}' + "}")
         )
 
     @put_threadsafe.register
     def _(self, key: str, value: dict[str, Any]):
         self._loop.call_soon_threadsafe(
-            self._put_nowait(json.dumps({"key": key, "value": value}))
+            lambda: self._put_nowait(json.dumps({"key": key, "value": value}))
         )

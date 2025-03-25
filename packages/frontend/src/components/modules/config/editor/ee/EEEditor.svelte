@@ -96,8 +96,8 @@
 								name: "",
 								chart_configs: {},
 								status: "initial",
-								loop_count: -1,
-								loop_time_start: 0,
+								iteration_count: -1,
+								iteration_time_start: 0,
 								total_time: 0,
 							};
 

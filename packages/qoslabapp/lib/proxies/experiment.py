@@ -58,7 +58,7 @@ class ExperimentRunner:
 
     def start(self):
         self._runner_thread = asyncio.to_thread(self._runner)
-        self._runner_task = asyncio.create_task(self._runner_thread())
+        self._runner_task = asyncio.create_task(self._runner_thread)
 
         self._should_run.set()
 

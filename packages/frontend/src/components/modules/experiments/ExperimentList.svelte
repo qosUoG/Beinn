@@ -41,8 +41,8 @@
 	<div class="h-full overflow-y-scroll col-2 min-h-0">
 		{#each runnable_experiments as experiment}
 			{console.log(experiment.chart_configs)}
-			{@const loop_time =
-				experiment.total_time - experiment.loop_time_start}
+			{@const iteration_time =
+				experiment.total_time - experiment.iteration_time_start}
 
 			<div class="section bg-white col-2 justify-between w-full">
 				<div class="grid grid-cols-2">
@@ -59,7 +59,7 @@
 								<StopWatch />
 							</div>
 							<div class="p-1 rounded pr-2 flex-grow text-center">
-								{#if experiment.total_time >= 0 && experiment.proposed_total_loop !== undefined}
+								{#if experiment.total_time >= 0 && experiment.proposed_total_iterations !== undefined}
 									{@render timer(experiment.total_time)}
 								{:else}
 									-
@@ -71,8 +71,8 @@
 								<Rotate />
 							</div>
 							<div class="p-1 rounded pr-2 flex-grow text-center">
-								{#if loop_time >= 0 && experiment.status !== "initial"}
-									{@render timer(loop_time)}
+								{#if iteration_time >= 0 && experiment.status !== "initial"}
+									{@render timer(iteration_time)}
 								{:else}
 									-
 								{/if}
@@ -80,18 +80,18 @@
 						</div>
 
 						<div class="wrapped bg-slate-200 min-w-12 text-center">
-							{#if experiment.loop_count + 1 < 0 || experiment.proposed_total_loop === undefined}
+							{#if experiment.iteration_count + 1 < 0 || experiment.proposed_total_iterations === undefined}
 								-
 							{:else}
-								{experiment.loop_count + 1}
+								{experiment.iteration_count + 1}
 							{/if}
 
-							/ {#if experiment.proposed_total_loop === undefined}
+							/ {#if experiment.proposed_total_iterations === undefined}
 								-
-							{:else if experiment.proposed_total_loop === -1}
+							{:else if experiment.proposed_total_iterations === -1}
 								∞
 							{:else}
-								{experiment.proposed_total_loop}
+								{experiment.proposed_total_iterations}
 							{/if}
 						</div>
 					</div>
@@ -100,7 +100,7 @@
 							<button
 								class="icon-btn-sm green"
 								onclick={async () => {
-									experiment.loop_count = -1;
+									experiment.iteration_count = -1;
 									experiment.status = "starting";
 									await startExperiment(experiment);
 								}}><Play /></button>

@@ -54,22 +54,27 @@ class SqlWorker:
 
     @classmethod
     async def sqlWorker(cls):
-        cls._sqlite3_connection = await aiosqlite.connect("data.db")
-        cls._sqlite3_cursor = await cls._sqlite3_connection.cursor()
-        while True:
-            request = await cls._queue.get()
+        try:
+            cls._sqlite3_connection = await aiosqlite.connect("data.db")
+            cls._sqlite3_cursor = await cls._sqlite3_connection.cursor()
+            while True:
+                request = await cls._queue.get()
 
-            if request.type == "stop":
-                await cls._sqlite3_connection.close()
-                cls._task_cancelled.set()
-                return
+                if request.type == "stop":
+                    await cls._sqlite3_connection.close()
+                    cls._task_cancelled.set()
+                    return
 
-            if request.type == "script":
-                await cls._sqlite3_cursor.executescript(request.sql)
-            elif request.type == "many":
-                await cls._sqlite3_cursor.executemany(request.sql, request.payload)
+                if request.type == "script":
+                    await cls._sqlite3_cursor.executescript(request.sql)
+                elif request.type == "many":
+                    await cls._sqlite3_cursor.executemany(request.sql, request.payload)
 
-            await cls._sqlite3_connection.commit()
+                await cls._sqlite3_connection.commit()
+
+        except Exception as e:
+            print("Exception in sqlWorker task")
+            print(e)
 
 
 class SqlSaverProxy:

@@ -13,14 +13,14 @@ from .extensions.chart import ChartManagerABC
 from . import params
 
 
-class ManagerABC(SqlSaverManagerABC, ChartManagerABC):
-    pass
-
-
-class ExperimentManager(ABC):
+class ExperimentManagerABC(ABC):
     @abstractmethod
     def suggestProposedTotalIterations(self, total_iterations: int):
         raise NotImplementedError
+
+
+class ManagerABC(SqlSaverManagerABC, ChartManagerABC, ExperimentManagerABC):
+    pass
 
 
 @dataclass

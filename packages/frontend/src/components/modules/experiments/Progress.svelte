@@ -4,15 +4,16 @@
 	let { experiment }: { experiment: RuntimeExperiment } = $props();
 </script>
 
-{#if experiment.proposed_total_loop === -1}
+{#if experiment.proposed_total_iterations === -1}
 	<div
 		class="wrapped text-center bg-slate-950 text-white rounded-full w-full">
 		∞
 	</div>
-{:else if experiment.proposed_total_loop !== undefined}
+{:else if experiment.proposed_total_iterations !== undefined}
 	{@const percentage =
 		Math.round(
-			((experiment.loop_count + 1) / experiment.proposed_total_loop!) *
+			((experiment.iteration_count + 1) /
+				experiment.proposed_total_iterations!) *
 				10000
 		) / 100}
 	{@render progress(percentage)}

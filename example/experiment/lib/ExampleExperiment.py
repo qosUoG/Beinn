@@ -85,7 +85,7 @@ class ExampleExperiment(r.ExperimentABC):
 
         print("initialized experiment")
 
-        return ExampleExperiment.LoopCount.FINITE(10)
+        manager.suggestTotalIterations(10)
 
     @override
     def loop(self, index: int):
