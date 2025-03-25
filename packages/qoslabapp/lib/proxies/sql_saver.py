@@ -1,5 +1,4 @@
 import asyncio
-from functools import singledispatchmethod
 from threading import Lock
 import time
 from typing import Any, Literal
@@ -45,14 +44,12 @@ class SqlWorker:
         cls._queue.put_nowait({"type": "stop"})
         await cls._task_cancelled.wait()
 
-    @singledispatchmethod
     @classmethod
-    def put(cls, sql: str, *_):
+    def putScript(cls, sql: str):
         cls._queue.put_nowait(_SqlRequest(type="script", sql=sql))
 
-    @put.register
     @classmethod
-    def _(cls, sql: str, payload: list, *_):
+    def putMany(cls, sql: str, payload: list):
         cls._queue.put_nowait(_SqlRequest(type="many", sql=sql, payload=payload))
 
     @classmethod
@@ -103,7 +100,7 @@ class SqlSaverProxy:
         SqlWorker.start()
 
         # Create the table
-        SqlWorker.put(create_table_sql)
+        SqlWorker.putScript(create_table_sql)
 
         # Create the task that continuously submit put request for registering frames
         self._task = asyncio.create_task(self._worker())
@@ -133,7 +130,7 @@ class SqlSaverProxy:
     def _flushFrames(self):
         frames = self._toOwnedFrames()
         if frames:
-            SqlWorker.put(self._insert_sql, frames)
+            SqlWorker.putMany(self._insert_sql, frames)
 
     def _toOwnedFrames(self):
         with self._frames_lock:
