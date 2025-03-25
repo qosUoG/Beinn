@@ -68,6 +68,8 @@ class ExperimentRunner:
     def start(self):
         self._runner_task = asyncio.create_task(self._start())
 
+        self._should_run.set()
+
     async def _start(self):
         await asyncio.to_thread(self._runner)
         await self._done_callback()
