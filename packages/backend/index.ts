@@ -21,7 +21,9 @@ serve({
 
 
 
-process.on("SIGINT", () => {
+process.on("SIGINT", async () => {
+    const res = await fetch("http://localhost:8000/workspace/cleanup")
+    console.log(await res.json())
     app_state.pyproc?.kill()
     process.exit();
 });

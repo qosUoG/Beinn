@@ -182,7 +182,7 @@ class ExperimentProxy(ManagerABC):
 
         # Clean up message subscriber
         if hasattr(self, "_subscriber"):
-            self._subscriber.close(code=1001)
+            await self._subscriber.close(code=1001)
 
         # Clean up charts
         for chart in self._charts.values():
