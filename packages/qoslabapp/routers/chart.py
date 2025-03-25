@@ -1,11 +1,8 @@
 import asyncio
 import json
-from typing import Any, TypedDict
 from fastapi import APIRouter, WebSocket, WebSocketDisconnect
-from pydantic import BaseModel
 
-
-from ..lib.state import AppState
+from ..lib.settings.state import AppState
 
 
 router = APIRouter()
@@ -15,9 +12,7 @@ router = APIRouter()
 async def getChartDataWs(experiment_id: str, title: str, ws: WebSocket):
     await ws.accept()
 
-    (yieldFn, unsubscribe, setRate) = AppState.getChartSubscription(
-        experiment_id, title
-    )
+    (yieldFn, unsubscribe, setRate) = AppState.subscribeChart(experiment_id, title, ws)
 
     if yieldFn is None:
         await ws.close()

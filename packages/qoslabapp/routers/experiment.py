@@ -9,7 +9,7 @@ from qoslablib.params import ParamModels, ParamModels2Params, Params2ParamModels
 
 from ._eeshared import getAvailableEEs, populateParam
 
-from ..lib.state import AppState
+from ..lib.settings.state import AppState
 
 
 router = APIRouter()
@@ -70,17 +70,16 @@ async def set_params(payload: SetParamsPayload):
 
 # Websockets implemented with non async as the underlying event used is Threading ones
 @router.websocket("/experiment/{experiment_id}/events")
-async def getMessageQueueFn(ws: WebSocket, experiment_id: str):
-    AppState.appendWs(ws)
+async def subscribeExperimentEvents(ws: WebSocket, experiment_id: str):
     await ws.accept()
 
-    getFn = AppState.getMessageQueueGetFn(experiment_id)
+    (getFn, unsubscribe) = AppState.subscribeExperimentMessage(experiment_id, ws)
     try:
         while True:
             await ws.send_text(await getFn())
 
     except WebSocketDisconnect:
-        AppState.removeWs(ws)
+        unsubscribe()
 
 
 class controlExperimentPayload(BaseModel):
@@ -96,7 +95,7 @@ async def start_experiment(payload: controlExperimentPayload):
 @router.post("/experiment/pause")
 async def pause_experiment(payload: controlExperimentPayload):
     # Run the experiments
-    AppState.pauseExperiment(payload.id)
+    AppState.pauseExperiment_sync(payload.id)
 
 
 @router.post("/experiment/continue")
@@ -108,4 +107,4 @@ async def continue_experiment(payload: controlExperimentPayload):
 @router.post("/experiment/stop")
 async def stop_experiment(payload: controlExperimentPayload):
     # Run the experiments
-    AppState.stopExperiment(payload.id)
+    AppState.stopExperiment_sync(payload.id)

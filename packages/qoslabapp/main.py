@@ -3,9 +3,9 @@ from contextlib import asynccontextmanager
 from fastapi import FastAPI
 from fastapi.middleware.cors import CORSMiddleware
 
-from .lib.workers.sqlite3 import SqlWorker
+from .lib.settings.foundation import Foundation
 
-from .lib.state import AppState
+from .lib.settings.state import AppState
 
 
 from .routers import equipment, experiment, workspace, chart
@@ -13,11 +13,9 @@ from .routers import equipment, experiment, workspace, chart
 
 @asynccontextmanager
 async def lifespan(app: FastAPI):
-    AppState.loop = asyncio.get_running_loop()
+    Foundation.setLoop(asyncio.get_running_loop())
     yield
-    await AppState.disconnectAllWs()
-    await SqlWorker.stop()
-    AppState.cancelAllExperiments()
+    await AppState.cleanup()
 
 
 app = FastAPI(lifespan=lifespan)

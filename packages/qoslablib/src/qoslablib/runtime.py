@@ -14,14 +14,12 @@ from . import params
 
 
 class ManagerABC(SqlSaverManagerABC, ChartManagerABC):
-    loop: EventLoop
+    pass
 
-    @classmethod
+
+class ExperimentManager(ABC):
     @abstractmethod
-    @contextmanager
-    def initializeExtensionsAs(
-        cls, experiment_id: str, sendObjMessage: Callable[[str, dict[str, Any]], None]
-    ):
+    def suggestProposedTotalIterations(self, total_iterations: int):
         raise NotImplementedError
 
 

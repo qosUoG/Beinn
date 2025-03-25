@@ -1,92 +1,148 @@
 import asyncio
+from functools import singledispatchmethod
 from threading import Lock
 import time
-from types import CoroutineType
-from typing import Any, Callable
+from typing import Any, Literal
 
+import aiosqlite
 from qoslablib.extensions.saver import SqlSaverABC
 
-# Proxies are created in experiment thread
+
+class _SqlRequest:
+    def __init__(
+        self, type: Literal["script"] | Literal["many"], sql: str, payload: Any = None
+    ):
+        self.type = type
+        self.sql = sql
+        self.payload = payload
+
+        if self.type == "many":
+            assert payload is not None
+        elif self.type == "script":
+            assert payload is None
+
+
+class SqlWorker:
+    _queue: asyncio.Queue[_SqlRequest] = asyncio.Queue()
+    _task: asyncio.Task
+
+    _sqlite3_connection: aiosqlite.Connection
+    _sqlite3_cursor: aiosqlite.Cursor
+
+    _task_cancelled = asyncio.Event()
+
+    @classmethod
+    def start(cls):
+        if not hasattr(cls, "_task"):
+            cls._task = asyncio.create_task(cls.sqlWorker())
+
+    @classmethod
+    async def stop(cls):
+        if not hasattr(cls, "_task"):
+            return
+
+        # Anything put after the stop is lost
+        cls._queue.put_nowait({"type": "stop"})
+        await cls._task_cancelled.wait()
+
+    @singledispatchmethod
+    @classmethod
+    def put(cls, sql: str):
+        cls._queue.put_nowait(_SqlRequest(type="script", sql=sql))
+
+    @put.register
+    @classmethod
+    def _(cls, sql: str, payload: Any):
+        cls._queue.put_nowait(_SqlRequest(type="many", sql=sql, payload=payload))
+
+    @classmethod
+    async def sqlWorker(cls):
+        cls._sqlite3_connection = await aiosqlite.connect("data.db")
+        cls._sqlite3_cursor = await cls._sqlite3_connection.cursor()
+        while True:
+            request = await cls._queue.get()
+
+            if request.type == "stop":
+                await cls._sqlite3_connection.close()
+                cls._task_cancelled.set()
+                return
+
+            if request.type == "script":
+                await cls._sqlite3_cursor.executescript(request.sql)
+            elif request.type == "many":
+                await cls._sqlite3_cursor.executemany(request.sql, request.payload)
+
+            await cls._sqlite3_connection.commit()
 
 
 class SqlSaverProxy:
     def __init__(
         self,
         *,
-        loop: asyncio.EventLoop,
-        experiment_id: str,
-        title: str,
         sql_saverT: type[SqlSaverABC],
         kwargs: Any,
     ):
-        # Identifier for the sql saver handler
-        self.title = title
-        self.timestamp = int(time.time() * 1000)
-        self.experiment_id = experiment_id
-
         # sql_saver instance for consumer of sql_saver
         self._sql_saver = sql_saverT(save_fn=self._save_fn, **kwargs)
 
         self._frames_lock = Lock()
         self._frames: list[Any] = []
 
-        self._table_name = f"{self.title} timestamp:{self.timestamp}"
-        self._create_table_sql = self._sql_saver.getCreateTableSql(self._table_name)
-        self._insert_sql = self._sql_saver.getInsertSql(self._table_name)
+        table_name = (
+            f"{self._sql_saver.config.title} timestamp:{int(time.time() * 1000)}"
+        )
+        create_table_sql = self._sql_saver.getCreateTableSql(table_name)
+        self._insert_sql = self._sql_saver.getInsertSql(table_name)
 
         self._task: asyncio.Task
 
-        from ..workers.sqlite3 import SqlWorker
+        self._should_cancel = asyncio.Event()
+        self._stopped = asyncio.Event()
 
-        self._loop = loop
-
-        self._loop.call_soon_threadsafe(SqlWorker.start)
+        # Start the worker
+        SqlWorker.start()
 
         # Create the table
-        self._queueScript(self._create_table_sql)
+        SqlWorker.put(create_table_sql)
 
-        # Create the task that continuously submit queue request for registering frames
-        self._task = self._loop.call_soon_threadsafe(
-            lambda: asyncio.create_task(self.continuousSubmitFrames())
-        )
+        # Create the task that continuously submit put request for registering frames
+        self._task = asyncio.create_task(self._worker())
 
-    def getTableName(self):
-        return self._table_name
-
-    def getCreateTableSql(self):
-        return self._create_table_sql
-
-    def getInsertSql(self):
-        return self._insert_sql
+    """Public Interface"""
 
     def getConfig(self):
         return self._sql_saver.config.toDict()
 
-    def _queueScript(self, sql: str):
-        from ..workers.sqlite3 import SqlWorker
+    async def cleanup(self):
+        # Cancel the task
+        self._should_cancel.set()
+        await self._stopped.wait()
 
-        self._loop.call_soon_threadsafe(lambda: SqlWorker.queueScript(sql))
+    """Private task to continuously submit frames to worker"""
 
-    def _queueMany(self, sql: str, payload: Any):
-        from ..workers.sqlite3 import SqlWorker
-
-        self._loop.call_soon_threadsafe(lambda: SqlWorker.queueMany(sql, payload))
-
-    async def continuousSubmitFrames(self):
-        while True:
+    async def _worker(self):
+        while not self._should_cancel.is_set():
             await asyncio.sleep(2)
-            frames = self.toOwnedFrames()
-            if frames:
-                self._queueMany(self._insert_sql, frames)
+            self._flushFrames()
 
-    # Memory for saving
-    def toOwnedFrames(self):
+        # flush the frames one last time
+        self._flushFrames()
+        self._stopped.set()
+        return
+
+    def _flushFrames(self):
+        frames = self._toOwnedFrames()
+        if frames:
+            SqlWorker.put(self._insert_sql, frames)
+
+    def _toOwnedFrames(self):
         with self._frames_lock:
             frames = self._frames
             self._frames = []
             return frames
 
-    # This would be called in the other thread
+    """_save_fn to be used by underlying saver"""
+
     def _save_fn(self, frame: Any):
         with self._frames_lock:
             self._frames.append(frame)

@@ -9,7 +9,7 @@ from qoslablib.params import AllParamTypes
 from qoslablib.runtime import EquipmentABC, ExperimentABC
 
 
-from ..lib.state import AppState
+from ..lib.settings.state import AppState
 
 type EELiteral = Literal["equipment"] | Literal["experiment"]
 type EEABC = type[ExperimentABC] | type[EquipmentABC]
@@ -72,7 +72,7 @@ def getAvailableEEs(eeABC: EEABC, names: list[str]):
 def populateParam(param: AllParamTypes):
     match param.type:
         case "instance.equipment":
-            param.instance = AppState._equipments_proxies[param.instance_id]
+            param.instance = AppState.getEquipment[param.instance_id]
 
         case "instance.experiment":
             raise Exception("Playlist is not being implemented yet")

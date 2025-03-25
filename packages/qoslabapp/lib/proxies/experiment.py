@@ -1,100 +1,200 @@
 import asyncio
 
-import json
-from threading import Event, Lock
-import time
-from typing import Any, Callable
+from contextlib import contextmanager
 
+import os
+import signal
+from threading import Event
+from typing import Any, override
+
+
+from fastapi import WebSocket
 
 from qoslablib.exceptions import ExperimentEnded
+from qoslablib.extensions.chart import ChartABC
+
+from qoslablib.extensions.saver import SqlSaverABC
 from qoslablib.params import Params
 from qoslablib.runtime import ExperimentABC
 
 from qoslablib.runtime import ManagerABC
 
-from ..utils import singleKVDictMessage, singleKVNumberMessage, singleKVStrMessage
+from .chart import ChartProxy
+from .sql_saver import SqlSaverProxy
+
+from ..settings.foundation import Foundation
 
 
-# Experiment Messenger shall be instantiated in the main thread
-class ExperimentMessenger:
-    def __init__(self, loop: asyncio.EventLoop):
-        self._loop = loop
-        self._message_queue = asyncio.Queue()
-
-    def getMessageQueueGetFn(self):
-        # return a function that keeps yielding new event
-        return self._message_queue.get
-
-    def appendObjMessage(self, key: str, obj: dict[str, Any]):
-        self._appendMessage(singleKVDictMessage(key, obj))
-
-    def _appendMessage(self, message: str):
-        self._message_queue.put_nowait(message)
-
-    # This is meant to be consumed by functions calling from other threads
-    def _threadSafeAppendMessage(self, message: str):
-        self._loop.call_soon_threadsafe(lambda: self._appendMessage(message))
-
-    # thread safe API
-    def threadSafeSendStarted(self):
-        self._threadSafeAppendMessage(singleKVStrMessage("status", "started"))
-
-    def threadSafeSendStopped(self):
-        self._threadSafeAppendMessage(singleKVStrMessage("status", "stopped"))
-
-    def threadSafeSendPaused(self):
-        self._threadSafeAppendMessage(singleKVStrMessage("status", "paused"))
-
-    def threadSafeSendContinued(self):
-        self._threadSafeAppendMessage(singleKVStrMessage("status", "continued"))
-
-    def threadSafeSendCompleted(self):
-        self._threadSafeAppendMessage(singleKVStrMessage("status", "completed"))
-
-    def threadSafeSendLoopCount(self, loop_count: int):
-        self._threadSafeAppendMessage(singleKVNumberMessage("loop_count", loop_count))
-
-    def threadSafeSendProposedTotalLoop(self, proposed_total_loop: int):
-        self._threadSafeAppendMessage(
-            singleKVNumberMessage("proposed_total_loop", proposed_total_loop)
-        )
+from ..utils.messenger import Messenger
 
 
-class ExperimentProxy:
+class ExperimentRunner:
+    class PreviousNotFinished(Exception):
+        pass
+
+    def __init__(self, experiment: ExperimentABC, messenger: Messenger):
+        self._experiment = experiment
+        self._messenger = messenger
+
+        self._running = Event()
+        self._should_run = Event()
+        self._should_stop = Event()
+        self._stopped = Event()
+        self._ran = Event()
+
+        self._pid: int
+
+    def prepare(self):
+        # The previous run, if there is one, shall not be running
+        if not self._runner_task.done():
+            raise ExperimentRunner.PreviousNotFinished
+
+        # Make sure the experiment starts in a fresh state
+        self._running.clear()
+        self._should_run.clear()
+        self._should_stop.clear()
+        self._stopped.clear()
+        self._ran.clear()
+
+    def start(self):
+        self._runner_thread = asyncio.to_thread(self._runner)
+        self._runner_task = asyncio.create_task(self._runner_thread())
+
+        self._should_run.set()
+
+    def stop(self):
+        self._should_stop.set()
+        # Set the running event as well just in case it is being paused
+        self._should_run.set()
+
+    def waitUntil_stopped(self):
+        self._stopped.wait()
+
+    def pause(self):
+        self._should_run.clear()
+
+    def waitUntil_paused(self):
+        self._ran.wait()
+
+    def unpause(self):
+        self._should_run.set()
+
+    def forceStop(self):
+        # Unconditionally killing the thread
+        os.kill(self._pid, signal.SIGTERM)
+        # Cancel the task
+        self._runner_task.cancel()
+
+    def removable(self):
+        # Only removable if the experiment is done, i.e. stopped or completed or raised exception
+        return self._runner_task.done()
+
+    """All methods below are consumed in the runner thread"""
+
+    @contextmanager
+    def _iterate(self):
+        try:
+            self._running.set()
+            self._ran.clear()
+            yield
+        finally:
+            self._running.clear()
+            self._ran.set()
+            # Post loop count event to message queue
+            self._messenger.put_threadsafe("iteration_count", self.iteration_count)
+
+    def _runner(self):
+        self._pid = os.getpid()
+
+        # Post Start event to message queue
+        self._messenger.put_threadsafe("status", "started")
+
+        while True:
+            # Wait until the running event is set in each loop
+            self._should_run.wait()
+
+            # Stop the _experiment is the stop event is set
+            if self._should_stop.is_set():
+                self._experiment.stop()
+                self._should_run.clear()
+                self._stopped.set()
+                return
+
+            # Loop the _experiment once with the newest index
+
+            with self._iterate():
+                self.iteration_count += 1
+                try:
+                    self._experiment.loop(self.iteration_count)
+
+                except ExperimentEnded:
+                    print("experiment ended")
+                    self._stopped.set()
+                    self._messenger.put_threadsafe("status", "completed")
+                    return
+
+                if not self._should_run.is_set():
+                    # Decrement to exclude the previous loop index
+                    self.iteration_count -= 1
+
+
+class ExperimentProxy(ManagerABC):
+    class NotRemovable(Exception):
+        pass
+
     def __init__(
         self,
         *,
         id: str,
         experimentCls: type[ExperimentABC],
-        manager: type[ManagerABC],
     ):
+        # Experiment Instance
         self.experiment_id = id
         self._experiment = experimentCls()
 
-        self.manager = manager
+        # Extensions
+        self._charts: dict[str, ChartProxy] = {}
+        self._sql_savers: dict[str, SqlSaverProxy] = {}
 
-        # Loop Count
-        # Setting to -1 makes it start looping at 0
+        # Runner
+        self._runner = ExperimentRunner(self._experiment)
 
-        self._loop_count_lock = Lock()
-        self._loop_count: int = -1
+        # Messenger
+        self._messenger = Messenger(Foundation.getLoop())
+        self._subscriber: WebSocket
 
-        # These would be used with _expeirment_runner
-        self._running = Event()
-        self._should_run = Event()
-        self._should_stop = Event()
-        self._stopped = Event()
-        self._loop_ended = Event()
+    """Public Interface of self"""
 
-        self._proposed_total_loop_lock = Lock()
-        self._proposed_total_loop: int = 0
+    async def cleanup(self):
+        if not self._runner.removable():
+            raise ExperimentProxy.NotRemovable
 
-        self._messenger = ExperimentMessenger(self.manager.loop)
+        # Clean up message subscriber
+        if hasattr(self, "_subscriber"):
+            self._subscriber.close(code=1001)
 
-        self._experiment_task: asyncio.Task
+        # Clean up charts
+        for chart in self._charts.values():
+            await chart.cleanup()
 
-    def getMessageQueueGetFn(self):
-        return self._messenger.getMessageQueueGetFn()
+        # Clean up sql_savers
+        for sql_saver in self._sql_savers.values():
+            await sql_saver.cleanup()
+
+    """Public Interface to messenger"""
+
+    def subscribeMessage(self, ws: WebSocket):
+        self._subscriber = ws
+
+        def unsubscribe():
+            del self._subscriber
+
+        return (self._getMessage, unsubscribe)
+
+    async def _getMessage(self):
+        return await self._messenger.get()
+
+    """Public Interface to experiment"""
 
     @property
     def params(self):
@@ -104,146 +204,81 @@ class ExperimentProxy:
     def params(self, params: Params):
         self._experiment.params = params
 
-    @property
-    def loop_count(self):
-        with self._loop_count_lock:
-            return self._loop_count
-
-    @loop_count.setter
-    def loop_count(self, value: int):
-        with self._loop_count_lock:
-            self._loop_count = value
+    """Public Interface to runner"""
 
     def start(self):
-        # Make sure experiment is at fresh state
-        self.loop_count = -1
+        # Prepare the runner
+        try:
+            self._runner.prepare()
+        except ExperimentRunner.PreviousNotFinished:
+            self._messenger.put("error", "PreviousNotFinished")
 
-        # Reset All Events
-        self._running = Event()
-        self._should_run = Event()
-        self._should_stop = Event()
-        self._stopped = Event()
-        self._loop_ended = Event()
+        # Initialize and send the proposed total iteration
+        self._experiment.initialize(self)
 
-        self._experiment_task = asyncio.create_task(
-            asyncio.to_thread(_experiment_runner, self)
-        )
+        self._runner.start()
 
-        # run the experiment!
-        self._should_run.set()
+    def stop_async(self):
+        self._runner.stop()
 
-    def cancelExperimentTask(self):
-        self.stop()
-        self._experiment_task.cancel()
+    def waitUntil_stopped(self):
+        self._runner.waitUntil_stopped()
 
-    def stop(self):
-        self._should_stop.set()
-        # Set the running event as well just in case it is being paused
-        self._should_run.set()
-        # Wait till it actually stopped
-        self._stopped.wait()
+    def stop_sync(self):
+        self.stop_async()
+        self._runner.waitUntil_stopped()
+        self._messenger.put("status", "stopped")
 
-        self._messenger.threadSafeSendStopped()
+    def forceStop(self):
+        self._runner.forceStop()
+        self._messenger.put("status", "stopped")
 
-    def pause(self):
-        self._should_run.clear()
-        self._loop_ended.wait()
+    def pause_async(self):
+        self._runner.pause()
 
-        self._messenger.threadSafeSendPaused()
-
-    def stopped(self):
-        return self._stopped.is_set()
+    def pause_sync(self):
+        self.pause_async()
+        self._runner.waitUntil_paused()
+        self._messenger.put("status", "paused")
 
     def unpause(self):
-        self._should_run.set()
-        self._messenger.threadSafeSendContinued()
+        self._runner.unpause()
+        self._messenger.put("status", "continued")
 
-    # Following runner functions are only called in runner and must be thread safe
-    def runner_shouldRun(self):
-        return self._should_run.is_set()
+    """Experiment Manager override"""
 
-    def runner_shouldStop(self):
-        return self._should_stop.is_set()
+    @override
+    def suggestTotalIterations(self, total_iterations: int):
+        self._messenger.put("proposed_total_iterations", total_iterations)
 
-    def runner_toStopped(self):
-        self._should_run.clear()
-        self._stopped.set()
+    """Chart Manager override"""
 
-    def runner_waitUntilShouldRun(self):
-        self._should_run.wait()
+    @override
+    def createChart(self, chartT: ChartABC, kwargs: Any = {}):
+        title = kwargs["title"]
 
-    def runner_startLoop(self):
-        self._running.set()
-        self._loop_ended.clear()
+        self._charts[title] = ChartProxy(
+            chartT=chartT,
+            kwargs=kwargs,
+        )
 
-    def runner_endLoop(self):
-        self._running.clear()
-        self._loop_ended.set()
+        self._messenger.put("chart_config", self._charts[title].getConfig())
+        return self._charts[title]._chart
 
-        # Post loop count event to message queue
-        self._messenger.threadSafeSendLoopCount(self.loop_count)
+    """Public Interface to Chart"""
 
-    def runner_sendStartedMessage(self):
-        self._messenger.threadSafeSendStarted()
+    def subscribeChart(self, title: str, ws: WebSocket):
+        return self._charts[title].subscribe(ws)
 
-    def runner_getMessengerAppendObjFn(self):
-        return self._messenger.appendObjMessage
+    """Sql Saver Manager override"""
 
-    def runner_completed(self):
-        self._messenger.threadSafeSendCompleted()
+    @override
+    def createSqlSaver(self, sql_saverT: type[SqlSaverABC], kwargs: Any = {}):
+        title = kwargs["title"]
 
-    @property
-    def proposed_total_loop(self):
-        with self._proposed_total_loop_lock:
-            return self._proposed_total_loop
+        self._sql_savers[title] = SqlSaverProxy(
+            sql_saverT=sql_saverT,
+            kwargs=kwargs,
+        )
 
-    @proposed_total_loop.setter
-    def proposed_total_loop(self, value: int):
-        with self._proposed_total_loop_lock:
-            self._proposed_total_loop = value
-
-            # Post to event message queue
-            self._messenger.threadSafeSendProposedTotalLoop(self._proposed_total_loop)
-
-
-def _experiment_runner(proxy: ExperimentProxy):
-    # Wait the running event set_ before initializing
-    proxy.runner_waitUntilShouldRun()
-    # First run the inialize method and get the number of loops
-    with proxy.manager.initializeExtensionsAs(
-        proxy.experiment_id, proxy.runner_getMessengerAppendObjFn()
-    ):
-        proxy.proposed_total_loop = proxy._experiment.initialize(proxy.manager)
-
-    # Post Start event to message queue
-    proxy.runner_sendStartedMessage()
-
-    while True:
-        # Wait until the running event is set in each loop
-        proxy.runner_waitUntilShouldRun()
-
-        # Stop the _experiment is the stop event is set
-        if proxy.runner_shouldStop():
-            proxy._experiment.stop()
-            proxy.runner_toStopped()
-            return
-
-        proxy.runner_startLoop()
-
-        # Loop the _experiment once with the newest index
-        try:
-            proxy.loop_count += 1
-            proxy._experiment.loop(proxy.loop_count)
-
-            if not proxy.runner_shouldRun():
-                # Decrement to exclude the previous loop index
-                proxy.loop_count -= 1
-
-            proxy.runner_endLoop()
-
-        except ExperimentEnded:
-            print("experiment ended")
-            proxy.runner_endLoop()
-            proxy.runner_completed()
-
-            return
+        return self._sql_savers[title]._sql_saver

@@ -1,4 +1,3 @@
-import importlib
 from fastapi import APIRouter
 from pydantic import BaseModel
 
@@ -11,7 +10,7 @@ from qoslablib.params import ParamModels, Params2ParamModels, ParamModels2Params
 from ._eeshared import getAvailableEEs, populateParam
 
 
-from ..lib.state import AppState
+from ..lib.settings.state import AppState
 
 
 router = APIRouter()
