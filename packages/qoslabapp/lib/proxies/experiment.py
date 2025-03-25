@@ -5,7 +5,7 @@ from contextlib import contextmanager
 import os
 import signal
 from threading import Event
-from typing import Any, override
+from typing import Any, Callable, override
 
 
 from fastapi import WebSocket
@@ -32,7 +32,12 @@ class ExperimentRunner:
     class PreviousNotFinished(Exception):
         pass
 
-    def __init__(self, experiment: ExperimentABC, messenger: Messenger):
+    def __init__(
+        self,
+        experiment: ExperimentABC,
+        messenger: Messenger,
+        done_callback: Callable,
+    ):
         self._experiment = experiment
         self._messenger = messenger
 
@@ -43,6 +48,8 @@ class ExperimentRunner:
         self._ran = Event()
 
         self._pid: int
+
+        self._done_callback = done_callback
 
     def prepare(self):
         # The previous run, if there is one, shall not be running
@@ -62,7 +69,7 @@ class ExperimentRunner:
         self._runner_thread = asyncio.to_thread(self._runner)
         self._runner_task = asyncio.create_task(self._runner_thread)
 
-        self._should_run.set()
+        self._runner_task.add_done_callback(self._done_callback)
 
     def stop(self):
         self._should_stop.set()
@@ -172,7 +179,11 @@ class ExperimentProxy(ManagerABC):
         self._subscriber: WebSocket
 
         # Runner
-        self._runner = ExperimentRunner(self._experiment, self._messenger)
+        self._runner = ExperimentRunner(
+            self._experiment,
+            self._messenger,
+            lambda: asyncio.create_task(self._done_callback()),
+        )
 
     """Public Interface of self"""
 
@@ -183,6 +194,15 @@ class ExperimentProxy(ManagerABC):
         # Shutting down the queue shall close the websocket if there is one
         self._messenger.shutdown()
 
+        # Clean up charts
+        for chart in self._charts.values():
+            await chart.cleanup()
+
+        # Clean up sql_savers
+        for sql_saver in self._sql_savers.values():
+            await sql_saver.cleanup()
+
+    async def _done_callback(self):
         # Clean up charts
         for chart in self._charts.values():
             await chart.cleanup()
