@@ -5,7 +5,7 @@ from contextlib import contextmanager
 import os
 import signal
 from threading import Event
-from typing import Any, Callable, override
+from typing import Any, Callable, Coroutine, override
 
 
 from fastapi import WebSocket
@@ -36,7 +36,7 @@ class ExperimentRunner:
         self,
         experiment: ExperimentABC,
         messenger: Messenger,
-        done_callback: Callable,
+        done_callback: Callable[..., Coroutine],
     ):
         self._experiment = experiment
         self._messenger = messenger
@@ -66,10 +66,11 @@ class ExperimentRunner:
         self._ran.clear()
 
     def start(self):
-        self._runner_thread = asyncio.to_thread(self._runner)
-        self._runner_task = asyncio.create_task(self._runner_thread)
+        self._runner_task = asyncio.create_task(self._start())
 
-        self._runner_task.add_done_callback(self._done_callback)
+    async def _start(self):
+        await asyncio.to_thread(self._runner)
+        await self._done_callback()
 
     def stop(self):
         self._should_stop.set()
@@ -182,7 +183,7 @@ class ExperimentProxy(ManagerABC):
         self._runner = ExperimentRunner(
             self._experiment,
             self._messenger,
-            lambda _: asyncio.create_task(self._done_callback()),
+            self._done_callback,
         )
 
     """Public Interface of self"""
