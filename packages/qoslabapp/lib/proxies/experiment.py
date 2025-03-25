@@ -182,7 +182,7 @@ class ExperimentProxy(ManagerABC):
         self._runner = ExperimentRunner(
             self._experiment,
             self._messenger,
-            lambda: asyncio.create_task(self._done_callback()),
+            lambda _: asyncio.create_task(self._done_callback()),
         )
 
     """Public Interface of self"""
@@ -202,7 +202,7 @@ class ExperimentProxy(ManagerABC):
         for sql_saver in self._sql_savers.values():
             await sql_saver.cleanup()
 
-    async def _done_callback(self, _):
+    async def _done_callback(self):
         # Clean up charts
         for chart in self._charts.values():
             await chart.cleanup()
