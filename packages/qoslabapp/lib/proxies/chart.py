@@ -68,7 +68,7 @@ class ChartProxy:
         # Shares the frames history lock such that make sure the subscriber gets a history right at the moment of creation, such that
         with self.tick_lock:
             frames_history = self._frames_history
-            subscriber = _Subscriber(ws)
+            subscriber = _Subscriber()
             self._subscribers[ws] = subscriber
 
         # Function that yield frames according to the rate

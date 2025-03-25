@@ -46,7 +46,7 @@ class ExperimentRunner:
 
     def prepare(self):
         # The previous run, if there is one, shall not be running
-        if not self._runner_task.done():
+        if hasattr(self, "_runner_task") and not self._runner_task.done():
             raise ExperimentRunner.PreviousNotFinished
 
         # Make sure the experiment starts in a fresh state
@@ -80,14 +80,18 @@ class ExperimentRunner:
         self._should_run.set()
 
     def forceStop(self):
-        # Unconditionally killing the thread
-        os.kill(self._pid, signal.SIGTERM)
-        # Cancel the task
-        self._runner_task.cancel()
+        if hasattr(self, "_runner_task"):
+            # Unconditionally killing the thread
+            os.kill(self._pid, signal.SIGTERM)
+            # Cancel the task
+            self._runner_task.cancel()
 
     def removable(self):
         # Only removable if the experiment is done, i.e. stopped or completed or raised exception
-        return self._runner_task.done()
+        if hasattr(self, "_runner_task"):
+            return self._runner_task.done()
+
+        return True
 
     """All methods below are consumed in the runner thread"""
 
@@ -156,12 +160,12 @@ class ExperimentProxy(ManagerABC):
         self._charts: dict[str, ChartProxy] = {}
         self._sql_savers: dict[str, SqlSaverProxy] = {}
 
-        # Runner
-        self._runner = ExperimentRunner(self._experiment)
-
         # Messenger
         self._messenger = Messenger(Foundation.getLoop())
         self._subscriber: WebSocket
+
+        # Runner
+        self._runner = ExperimentRunner(self._experiment, self._messenger)
 
     """Public Interface of self"""
 
