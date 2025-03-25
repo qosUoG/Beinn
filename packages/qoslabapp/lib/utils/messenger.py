@@ -13,6 +13,9 @@ class Messenger:
         # Return a single item
         return await self._message_queue.get()
 
+    def shutdown(self):
+        self._message_queue.shutdown()
+
     def _put_nowait(self, message: str):
         self._message_queue.put_nowait(message)
 

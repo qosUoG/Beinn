@@ -27,8 +27,9 @@ async def getChartDataWs(experiment_id: str, title: str, ws: WebSocket):
             unsubscribe()
 
     async def consumer():
-        async for message in ws:
-            data = json.loads(message)
+        while True:
+            data = await ws.receive_json()
+
             assert data["type"] == "rate"
             await setRate(data["value"])
 

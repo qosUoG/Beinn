@@ -180,9 +180,8 @@ class ExperimentProxy(ManagerABC):
         if not self._runner.removable():
             raise ExperimentProxy.NotRemovable
 
-        # Clean up message subscriber
-        if hasattr(self, "_subscriber"):
-            await self._subscriber.close(code=1001)
+        # Shutting down the queue shall close the websocket if there is one
+        self._messenger.shutdown()
 
         # Clean up charts
         for chart in self._charts.values():

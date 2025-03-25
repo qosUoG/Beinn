@@ -9,7 +9,10 @@ from qoslablib.extensions.saver import SqlSaverABC
 
 class _SqlRequest:
     def __init__(
-        self, type: Literal["script"] | Literal["many"], sql: str, payload: Any = None
+        self,
+        type: Literal["script"] | Literal["many"] | Literal["stop"],
+        sql: str = None,
+        payload: list = None,
     ):
         self.type = type
         self.sql = sql
@@ -41,7 +44,7 @@ class SqlWorker:
             return
 
         # Anything put after the stop is lost
-        cls._queue.put_nowait({"type": "stop"})
+        cls._queue.put_nowait(_SqlRequest(type="stop"))
         await cls._task_cancelled.wait()
 
     @classmethod

@@ -1,3 +1,4 @@
+import asyncio
 from fastapi import APIRouter, WebSocket, WebSocketDisconnect
 
 from pydantic import BaseModel
@@ -79,6 +80,9 @@ async def subscribeExperimentEvents(ws: WebSocket, experiment_id: str):
             await ws.send_text(await getFn())
 
     except WebSocketDisconnect:
+        unsubscribe()
+    except asyncio.QueueShutDown:
+        await ws.close()
         unsubscribe()
 
 
