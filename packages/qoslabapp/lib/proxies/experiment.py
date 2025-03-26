@@ -97,8 +97,6 @@ class ExperimentRunner:
             # Cancel the task
             self._runner_task.cancel()
 
-        self._messenger.put("status", "stopped")
-
     def removable(self):
         # Only removable if the experiment is done, i.e. stopped or completed or raised exception
         if hasattr(self, "_runner_task"):
