@@ -121,15 +121,15 @@ class XYFloatSqlSaver(SqlSaverABC):
 
     @override
     def getCreateTableSql(self) -> str:
-        return f"""CREATE TABLE "{self.title}" (
+        return f"""CREATE TABLE "{self.table_name}" (
             id INTEGER PRIMARY KEY,
-            timestamp INTEGER NOT NULL,
-            {"x REAL NOT NULL".join([f",\n{key} REAL" for key in self.y_names])}
+            x REAL NOT NULL,
+            {",\n".join([f"{key} REAL" for key in self.y_names])}
             ) """
 
     @override
     def getSelectAllSql(self) -> str:
-        return f'''SELECT {"id,x,".join([f"{key}," for key in self.y_names])[:-1]} from "{self.title}" ORDER BY id DESC'''
+        return f'''SELECT id,x,{",".join([f"{key}" for key in self.y_names])} from "{self.table_name}" ORDER BY id DESC'''
 
     @override
     def finalize(self, raw: Iterable[Row]):
@@ -186,5 +186,5 @@ class XYFloatSqlSaver(SqlSaverABC):
     @override
     def getInsertSql(self):
         return f"""
-        INSERT INTO "{self.title}"({"x,".join([f"{key}," for key in self.y_names])[:-1]}) VALUES({":x,".join([f":{key}," for key in self.y_names])[:-1]})
+        INSERT INTO "{self.table_name}"(x,{",".join([f"{key}" for key in self.y_names])}) VALUES(:x,{",".join([f":{key}" for key in self.y_names])})
     """
