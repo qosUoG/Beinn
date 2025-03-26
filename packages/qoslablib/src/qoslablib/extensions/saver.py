@@ -150,7 +150,7 @@ class XYFloatSqlSaver(SqlSaverABC):
                 if x in stage_1[y_name]:
                     continue
 
-                stage_1[y_name][x] = row[i]
+                stage_1[y_name][x] = row[i + 2]
 
         # Convert the dict into a list of {x: float, y:float} such that they can be sorted
         class Value(TypedDict):
