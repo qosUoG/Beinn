@@ -44,6 +44,7 @@ class ExperimentRunner:
         self._should_run = Event()
         self._should_stop = Event()
         self.stopped = Event()
+        self.success = Event()
         self._ran = Event()
 
         self._pid: int
@@ -60,6 +61,7 @@ class ExperimentRunner:
         self._should_run.clear()
         self._should_stop.clear()
         self.stopped.clear()
+        self.success.clear()
         self._ran.clear()
 
     def start(self):
@@ -69,9 +71,16 @@ class ExperimentRunner:
 
     async def _start(self):
         res = await asyncio.to_thread(self._runner)
+        if res:
+            self.success.set()
+        else:
+            self.success.clear()
+
         self.stopped.set()
+
         if res:
             self._messenger.put("status", "completed")
+            # TODO: save all equipment and experiment params into db after completion
         else:
             self._messenger.put("status", "stopped")
 
@@ -237,7 +246,14 @@ class ExperimentProxy(ManagerABC):
         # Initialize and send the proposed total iteration
         self._experiment.initialize(self)
 
+        # TODO: save all equipment and experiment params into db before start
+
         self._runner.start()
+
+    """This function is used to interact with the sqlite db"""
+
+    def _saveParams(self):
+        pass
 
     def stop_async(self):
         self._runner.stop()

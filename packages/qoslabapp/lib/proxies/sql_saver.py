@@ -85,6 +85,7 @@ class SqlSaverProxy:
         self,
         *,
         experiment_stopped: Event,
+        experiment_success: Event,
         sql_saverT: type[SqlSaverABC],
         kwargs: Any,
     ):
@@ -104,6 +105,7 @@ class SqlSaverProxy:
         self._stopped = asyncio.Event()
 
         self._experiment_stopped = experiment_stopped
+        self._experiment_success = experiment_success
 
         # Start the worker
         SqlWorker.start()
@@ -129,7 +131,9 @@ class SqlSaverProxy:
 
     async def _worker(self):
         while (
-            not self._should_cancel.is_set() and not self._experiment_stopped.is_set()
+            not self._should_cancel.is_set()
+            and not self._experiment_stopped.is_set()
+            and not self._experiment_success.is_set()
         ):
             await asyncio.sleep(2)
             self._flushFrames()
@@ -137,6 +141,10 @@ class SqlSaverProxy:
         # flush the frames one last time
         self._flushFrames()
         self._stopped.set()
+
+        if self._experiment_success.is_set():
+            # TODO: fetch all data out and save to the sqlite db
+            pass
         return
 
     def _flushFrames(self):
