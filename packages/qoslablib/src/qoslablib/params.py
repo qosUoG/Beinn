@@ -330,8 +330,8 @@ def ParamModels2Params(param_models: ParamModels):
 def ExperimentParamsToBackup(experiment_id: str, params: Params):
     res: dict[str, dict[str, str]] = {"experiment_id": experiment_id}
 
-    def parseParams(id: str, _params: Params):
-        if id in res:
+    def parseParams(id: str, _params: Params | None):
+        if id in res or _params is None:
             return
 
         res[id] = {}
