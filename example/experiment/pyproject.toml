@@ -8,11 +8,8 @@ dependencies = [
     "aiosqlite>=0.21.0",
     "examplelib",
     "fastapi[standard]>=0.115.11",
-    "h5py>=3.13.0",
     "numpy>=2.2.3",
-    "pandas>=2.2.3",
     "qoslablib",
-    "tables>=3.10.2",
 ]
 
 [tool]

@@ -1,7 +1,9 @@
 import asyncio
+import os
+import pickle
 from threading import Lock
 
-from typing import Any
+from typing import Any, TypedDict
 
 import h5py
 import pandas as pd
@@ -74,10 +76,26 @@ class SqlSaverProxy:
             )
 
             meta = self._status.params_backup
-            # Write the data and metadata into a hf file
-            df = pd.DataFrame({"data": data, "meta": meta})
-            df.to_hdf(f"./data/{self._sql_saver.config.title}.h5", key=timestamp)
-            pass
+
+            filename = f"./data/{self._sql_saver.config.title}.pickle"
+
+            if not os.path.isfile(filename):
+                with open(filename, "wb") as f:
+                    pickle.dump({timestamp: {"data": data, "meta": meta}}, f)
+
+            else:
+                # Read the past data
+                class Entry(TypedDict):
+                    data: Any
+                    meta: dict[str, dict[str, str]]
+
+                with open(filename, "rb") as f:
+                    dataset: dict[str, Entry] = pickle.load(f)
+
+                dataset[timestamp] = {"data": data, "meta": meta}
+
+                with open(filename, "wb") as f:
+                    pickle.dump(dataset, f)
 
         self._stopped.set()
         return
