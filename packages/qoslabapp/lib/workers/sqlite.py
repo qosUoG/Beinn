@@ -102,5 +102,6 @@ class SqlWorker:
                 request.executed.set()
 
         except Exception as e:
-            print("Exception in sqlWorker task")
+            print("Exception in sqlWorker task in request:")
+            print(request)
             print(e)

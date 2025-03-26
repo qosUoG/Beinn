@@ -80,7 +80,7 @@ class ExampleExperiment(r.ExperimentABC):
 
         self.saver: XYFloatSqlSaver = manager.createSqlSaver(
             XYFloatSqlSaver,
-            XYFloatSqlSaver.kwargs(title="ExampleSqlSaver", ynames=["temperature"]),
+            XYFloatSqlSaver.kwargs(title="ExampleSqlSaver", y_names=["temperature"]),
         )
 
         print("initialized experiment")
