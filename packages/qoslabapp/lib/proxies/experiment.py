@@ -192,7 +192,6 @@ class ExperimentProxy(ManagerABC):
         self._runner = ExperimentRunner(
             self._experiment,
             self._messenger,
-            self._status,
         )
 
         self._params_backup: dict[str, dict[str, str]]
@@ -240,7 +239,9 @@ class ExperimentProxy(ManagerABC):
     """Public Interface to runner"""
 
     def start(self):
-        self._status = ExperimentStatus(ExperimentParamsToBackup(self.experiment_id))
+        self._status = ExperimentStatus(
+            ExperimentParamsToBackup(self.experiment_id, self._experiment.params)
+        )
         # Prepare the runner
         try:
             self._runner.prepare(self._status)

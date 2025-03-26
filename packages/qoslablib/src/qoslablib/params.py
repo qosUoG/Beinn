@@ -337,7 +337,7 @@ def ExperimentParamsToBackup(experiment_id: str, params: Params):
         res[id] = {}
 
         for [name, param] in _params.items():
-            res[experiment_id][param] = param.getValue()
+            res[experiment_id][name] = param.getValue()
 
         # If the param is an instance, recursively parse the params as well
         if param.type == "instance.equipment" or param.type == "instance.experiment":
