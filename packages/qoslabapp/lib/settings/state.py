@@ -10,13 +10,6 @@ from ..proxies.equipment import EquipmentProxy
 
 
 class AppState:
-    """Start up setup"""
-
-    @classmethod
-    def start(cls):
-        # Start the worker
-        SqlWorker.start()
-
     """Equipments Experiments shared code"""
 
     @classmethod
@@ -122,6 +115,11 @@ class AppState:
     """App Life cycle"""
 
     @classmethod
+    def start(cls):
+        # Start the worker
+        SqlWorker.start()
+
+    @classmethod
     async def cleanup(cls):
         """This function is meant to be stopping gracefully. Timeout should be handled outside of this function"""
 
@@ -132,7 +130,7 @@ class AppState:
         # Then wait until each experiment is actually stopped and do cleanup
         for experiment_proxy in cls._experiment_proxies.values():
             experiment_proxy.waitUntil_stopped()
-            await experiment_proxy.cleanup()
+            await experiment_proxy.forceStop()
 
         # Stop all workers
         await SqlWorker.stop()

@@ -64,7 +64,6 @@ class SqlSaverProxy:
 
         # flush the frames one last time
         self._flushFrames()
-        self._stopped.set()
 
         if self._status.success.is_set():
             # Each dataset -> experiment instance (experiment and equipment params)
@@ -79,6 +78,8 @@ class SqlSaverProxy:
             df = pd.DataFrame({"data": data, "meta": meta})
             df.to_hdf(f"./data/{self._sql_saver.config.title}.h5", key=timestamp)
             pass
+
+        self._stopped.set()
         return
 
     def _flushFrames(self):

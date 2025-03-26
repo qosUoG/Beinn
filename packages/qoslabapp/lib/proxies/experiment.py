@@ -76,11 +76,6 @@ class ExperimentRunner:
 
         status.stopped.set()
 
-        if res:
-            self._messenger.put("status", "completed")
-        else:
-            self._messenger.put("status", "stopped")
-
     def stop(self):
         self._should_stop.set()
         # Set the running event as well just in case it is being paused
@@ -198,20 +193,24 @@ class ExperimentProxy(ManagerABC):
 
     """Public Interface of self"""
 
-    async def cleanup(self):
-        if not self._runner.removable():
-            raise ExperimentProxy.NotRemovable
+    async def forceStop(self):
+        # Stop the runner
+        self._runner.forceStop()
+
+        # Cancel _done_task
+        if hasattr(self, "_done_task"):
+            self._done_task.cancel()
+
+        # Chart gracefully shutdown itself
+        for chart in self._charts.values():
+            await chart.forceStop()
+
+        # Still try to gracefully clean up sql_savers as there may be important data
+        for sql_saver in self._sql_savers.values():
+            await sql_saver.cleanup()
 
         # Shutting down the queue shall close the websocket if there is one
         self._messenger.shutdown()
-
-        # Clean up charts
-        for chart in self._charts.values():
-            await chart.cleanup()
-
-        # Clean up sql_savers
-        for sql_saver in self._sql_savers.values():
-            await sql_saver.cleanup()
 
     """Public Interface to messenger"""
 
@@ -252,9 +251,24 @@ class ExperimentProxy(ManagerABC):
 
         self._experiment.initialize(self)
 
+        # Schedule the done procedure before starting the runner
+        self._done_task = asyncio.create_task(self._doneExperiment())
+
         self._runner.start(self._status)
 
-    """This function is used to interact with the sqlite db"""
+    async def _doneExperiment(self):
+        await self._status.stopped.wait()
+
+        # Charts shutdown itself
+
+        # Clean up sql_savers
+        for sql_saver in self._sql_savers.values():
+            await sql_saver.cleanup()
+
+        if self._status.success:
+            self._messenger.put("status", "completed")
+        else:
+            self._messenger.put("status", "stopped")
 
     def _saveParams(self):
         pass
@@ -264,9 +278,6 @@ class ExperimentProxy(ManagerABC):
 
     def waitUntil_stopped(self):
         self._status.stopped.wait()
-
-    def forceStop(self):
-        self._runner.forceStop()
 
     def pause_async(self):
         self._runner.pause()

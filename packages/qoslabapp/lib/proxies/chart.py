@@ -56,7 +56,7 @@ class ChartProxy:
     def getChart(self):
         return self._chart
 
-    async def cleanup(self):
+    async def forceStop(self):
         # Close all ws connetions
         # Chart is not gracefully shut down as data is ephemeral anyways
         for ws in self._subscribers.keys():
