@@ -5,13 +5,15 @@ import { postRequestJsonInOut, qoslabappUrl, qoslabappWs } from "./utils";
 
 
 export async function getAvailableEEs(eetype: EEType): Promise<typeof gstore.workspace.available_equipments> {
-    return await postRequestJsonInOut(
+    const res = await postRequestJsonInOut(
         qoslabappUrl(`${eetype}/available_${eetype}s`), {
         prefixes: $state.snapshot(
             Object.values(gstore.workspace.dependencies)
                 .filter(d => d.confirmed)
                 .map(d => d.name))
     })
+    console.log(res)
+    return res
 }
 
 export async function createEE(eetype: EEType, payload: { id: string, module_cls: { module: string, cls: string } }) {

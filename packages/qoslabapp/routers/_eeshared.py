@@ -27,7 +27,7 @@ def getAvailableEEs(eeABC: EEABC, names: list[str]):
     warnings.filterwarnings("ignore")
 
     # Check all possible paths
-    for package in pkgutil.walk_packages():
+    for package in pkgutil.walk_packages(["."]):
         for module in names:
             # Only search for declared dependencies
             if not package.name.startswith(module):

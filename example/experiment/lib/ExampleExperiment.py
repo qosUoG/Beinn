@@ -1,10 +1,10 @@
 from dataclasses import dataclass
-import math
+
 import random
 from typing import TypedDict, override
 
 from click import ParamType
-import numpy
+
 from qoslablib import params as p, exceptions as e, runtime as r
 import time
 

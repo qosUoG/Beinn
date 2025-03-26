@@ -1,26 +1,11 @@
-import array
-import asyncio
-from dataclasses import dataclass
-import dataclasses
-import importlib
-import inspect
-import json
-import math
 import pkgutil
+import uvicorn
 
-from threading import Event
-from time import sleep
-import time
-import types
-from typing import Any
-
-import aiosqlite
-from qoslablib.extensions.chart import XYPlotConfig
-from qoslablib.extensions.saver import KVSqlSaverConfig
-
-from lib.ExampleExperiment import ExampleExperiment
+# from lib.ExampleExperiment import ExampleExperiment
+from app.main import app
+from ttt.ttt import TTT
 
 
 if __name__ == "__main__":
-    a = ExampleExperiment()
-    print(inspect.getsource(inspect.getmodule(a)))
+    ttt = TTT()
+    ttt.run()

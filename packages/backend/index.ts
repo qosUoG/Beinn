@@ -28,7 +28,7 @@ process.on("SIGINT", async () => {
         console.log(await res.json())
         app_state.pyproc?.kill()
         // wait for 100 ms
-        await new Promise(_ => setTimeout(_, 100));
+        await new Promise(_ => setTimeout(_, 1000));
     }
 
     process.exit();

@@ -2,7 +2,8 @@ import { $, fetch, file, randomUUIDv7, spawn, write } from "bun"
 import { app_state } from "./app_state"
 import { parse, stringify } from "smol-toml"
 import { retryOnError, type Dependency } from "qoslab-shared";
-
+import { pathExist } from "./fs";
+import { mkdir } from "node:fs/promises";
 
 export async function initiateWorkspace(path: string) {
     $.cwd(path);
@@ -94,6 +95,10 @@ export async function readAllUvDependencies(path: string) {
 }
 
 export async function runProject(path: string) {
+    if (!(await pathExist(path + "/data")))
+        await mkdir(path + "/data")
+
+
     if (app_state.pyproc !== undefined && !app_state.pyproc.killed)
         return
 
