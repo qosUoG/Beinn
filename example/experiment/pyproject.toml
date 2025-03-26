@@ -12,6 +12,7 @@ dependencies = [
     "numpy>=2.2.3",
     "pandas>=2.2.3",
     "qoslablib",
+    "tables>=3.10.2",
 ]
 
 [tool]
