@@ -7,7 +7,7 @@ import h5py
 import pandas as pd
 from qoslablib.extensions.saver import SqlSaverABC
 
-from .experiment import ExperimentStatus
+from ..settings.foundation import ExperimentStatus
 
 from ..workers.sqlite import SqlWorker
 

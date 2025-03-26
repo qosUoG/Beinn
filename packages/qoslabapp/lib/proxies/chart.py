@@ -7,7 +7,7 @@ from fastapi import WebSocket
 
 from qoslablib.extensions.chart import ChartABC
 
-from .experiment import ExperimentStatus
+from ..settings.foundation import ExperimentStatus
 
 
 class _Subscriber:

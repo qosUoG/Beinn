@@ -23,18 +23,10 @@ from qoslablib.runtime import ManagerABC
 from .chart import ChartProxy
 from .sql_saver import SqlSaverProxy
 
-from ..settings.foundation import Foundation
+from ..settings.foundation import ExperimentStatus, Foundation
 
 
 from ..utils.messenger import Messenger
-
-
-class ExperimentStatus:
-    def __init__(self, params_backup):
-        self.stopped = Event()
-        self.success = Event()
-        self.timestamp = int(time.time() * 1000)
-        self.params_backup = params_backup
 
 
 class ExperimentRunner:
