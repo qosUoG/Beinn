@@ -120,7 +120,7 @@ class AppState:
         SqlWorker.start()
 
     @classmethod
-    async def cleanup(cls):
+    async def forceStop(cls):
         """This function is meant to be stopping gracefully. Timeout should be handled outside of this function"""
 
         # First stop async for each function

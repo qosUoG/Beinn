@@ -17,7 +17,7 @@ async def lifespan(app: FastAPI):
     # Run setup functions
     AppState.start()
     yield
-    await AppState.cleanup()
+    await AppState.forceStop()
 
 
 app = FastAPI(lifespan=lifespan)
