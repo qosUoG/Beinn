@@ -1,42 +1,41 @@
 import asyncio
-from threading import Event, Lock
-import time
+from threading import Lock
+
 from typing import Any
 
+import h5py
+import pandas as pd
 from qoslablib.extensions.saver import SqlSaverABC
 
-from ..workers.sqllite import SqlWorker
+from .experiment import ExperimentStatus
+
+from ..workers.sqlite import SqlWorker
 
 
 class SqlSaverProxy:
     def __init__(
         self,
         *,
-        experiment_stopped: Event,
-        experiment_success: Event,
+        status: ExperimentStatus,
         sql_saverT: type[SqlSaverABC],
         kwargs: Any,
     ):
+        self._status = status
         # sql_saver instance for consumer of sql_saver
-        self._sql_saver = sql_saverT(save_fn=self._save_fn, **kwargs)
+        self._sql_saver = sql_saverT(
+            timestamp=self._status.timestamp, save_fn=self._save_fn, **kwargs
+        )
 
         self._frames_lock = Lock()
         self._frames: list[Any] = []
 
-        table_name = (
-            f"{self._sql_saver.config.title} timestamp:{int(time.time() * 1000)}"
-        )
-        create_table_sql = self._sql_saver.getCreateTableSql(table_name)
-        self._insert_sql = self._sql_saver.getInsertSql(table_name)
+        self._insert_sql = self._sql_saver.getInsertSql()
 
         self._should_cancel = asyncio.Event()
         self._stopped = asyncio.Event()
 
-        self._experiment_stopped = experiment_stopped
-        self._experiment_success = experiment_success
-
         # Create the table
-        SqlWorker.putScript(create_table_sql)
+        SqlWorker.putScript(self._sql_saver.getCreateTableSql())
 
         # Create the task that continuously submit put request for registering frames
         self._task = asyncio.create_task(self._worker())
@@ -57,8 +56,8 @@ class SqlSaverProxy:
     async def _worker(self):
         while (
             not self._should_cancel.is_set()
-            and not self._experiment_stopped.is_set()
-            and not self._experiment_success.is_set()
+            and not self._status.stopped.is_set()
+            and not self._status.success.is_set()
         ):
             await asyncio.sleep(2)
             self._flushFrames()
@@ -67,8 +66,18 @@ class SqlSaverProxy:
         self._flushFrames()
         self._stopped.set()
 
-        if self._experiment_success.is_set():
-            # TODO: fetch all data out and save to the sqlite db
+        if self._status.success.is_set():
+            # Each dataset -> experiment instance (experiment and equipment params)
+            timestamp = self._status.timestamp
+
+            data = self._sql_saver.finalize(
+                await SqlWorker.putFetchall(self._sql_saver.getSelectAllSql())
+            )
+
+            meta = self._status.params_backup
+            # Write the data and metadata into a hf file
+            df = pd.DataFrame({"data": data, "meta": meta})
+            df.to_hdf(f"./data/{self._sql_saver.config.title}.h5", key=timestamp)
             pass
         return
 

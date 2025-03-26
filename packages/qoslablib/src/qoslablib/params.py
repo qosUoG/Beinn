@@ -1,6 +1,7 @@
 from abc import ABC, abstractmethod
 from dataclasses import dataclass
-from typing import Literal, override
+import dataclasses
+from typing import Any, Literal, override
 from pydantic import BaseModel
 
 
@@ -8,6 +9,10 @@ class QosParam[T: BaseModel](ABC):
     @abstractmethod
     def toBaseModel(self) -> T:
         # This function should return a BaseModel
+        raise NotImplementedError
+
+    @abstractmethod
+    def getValue(self) -> str:
         raise NotImplementedError
 
 
@@ -39,6 +44,10 @@ class SelectStrParam(QosParam):
             type=self.type, options=self.options, value=self.value
         )
 
+    @override
+    def getValue(self):
+        return self.value
+
 
 @dataclass
 class SelectIntParam(QosParam):
@@ -67,6 +76,10 @@ class SelectIntParam(QosParam):
         return self.PydanticBaseModel(
             type=self.type, options=self.options, value=self.value
         )
+
+    @override
+    def getValue(self):
+        return f"{self.value}"
 
 
 @dataclass
@@ -97,6 +110,10 @@ class SelectFloatParam:
             type=self.type, options=self.options, value=self.value
         )
 
+    @override
+    def getValue(self):
+        return f"{self.value}"
+
 
 @dataclass
 class IntParam:
@@ -122,6 +139,10 @@ class IntParam:
         return self.PydanticBaseModel(
             type=self.type, suffix=self.suffix, value=self.value
         )
+
+    @override
+    def getValue(self):
+        return f"{self.value} {self.suffix}"
 
 
 @dataclass
@@ -149,6 +170,10 @@ class FloatParam:
             type=self.type, suffix=self.suffix, value=self.value
         )
 
+    @override
+    def getValue(self):
+        return f"{self.value} {self.suffix}"
+
 
 @dataclass
 class StrParam:
@@ -170,6 +195,10 @@ class StrParam:
     def toBaseModel(self) -> PydanticBaseModel:
         return self.PydanticBaseModel(type=self.type, value=self.value)
 
+    @override
+    def getValue(self):
+        return self.value
+
 
 @dataclass
 class BoolParam:
@@ -190,6 +219,10 @@ class BoolParam:
     @override
     def toBaseModel(self) -> PydanticBaseModel:
         return self.PydanticBaseModel(type=self.type, value=self.value)
+
+    @override
+    def getValue(self):
+        return f"{self.value}"
 
 
 @dataclass
@@ -214,6 +247,10 @@ class InstanceEquipmentParam[T]:
     def toBaseModel(self) -> PydanticBaseModel:
         return self.PydanticBaseModel(type=self.type, instance_id=self.instance_id)
 
+    @override
+    def getValue(self):
+        return f"{self.instance_id}"
+
 
 @dataclass
 class InstanceExperimentParam[T]:
@@ -236,6 +273,10 @@ class InstanceExperimentParam[T]:
     @override
     def toBaseModel(self) -> PydanticBaseModel:
         return self.PydanticBaseModel(type=self.type, instance_id=self.instance_id)
+
+    @override
+    def getValue(self):
+        return f"{self.instance_id}"
 
 
 type AllParamTypes = (
@@ -282,6 +323,27 @@ def ParamModels2Params(param_models: ParamModels):
     res: Params = {}
     for [name, param_model] in param_models.items():
         res[name] = param_model.toParam()
+
+    return res
+
+
+def ExperimentParamsToBackup(experiment_id: str, params: Params):
+    res: dict[str, dict[str, str]] = {"experiment_id": experiment_id}
+
+    def parseParams(id: str, _params: Params):
+        if id in res:
+            return
+
+        res[id] = {}
+
+        for [name, param] in _params.items():
+            res[experiment_id][param] = param.getValue()
+
+        # If the param is an instance, recursively parse the params as well
+        if param.type == "instance.equipment" or param.type == "instance.experiment":
+            parseParams(param.instance_id, param.instance.params)
+
+    parseParams(experiment_id, params)
 
     return res
 

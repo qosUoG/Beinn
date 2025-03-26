@@ -9,7 +9,7 @@ from qoslablib import params as p, exceptions as e, runtime as r
 import time
 
 from qoslablib.extensions.chart import XYPlot
-from qoslablib.extensions.saver import KVFloatSqlSaver
+from qoslablib.extensions.saver import XYFloatSqlSaver
 from examplelib.ExampleDriver import ExampleEquipment
 
 
@@ -78,9 +78,9 @@ class ExampleExperiment(r.ExperimentABC):
         #     ),
         # )
 
-        self.saver: KVFloatSqlSaver = manager.createSqlSaver(
-            KVFloatSqlSaver,
-            KVFloatSqlSaver.kwargs(title="ExampleSqlSaver", keys=["x", "temperature"]),
+        self.saver: XYFloatSqlSaver = manager.createSqlSaver(
+            XYFloatSqlSaver,
+            XYFloatSqlSaver.kwargs(title="ExampleSqlSaver", ynames=["temperature"]),
         )
 
         print("initialized experiment")

@@ -7,6 +7,8 @@ from fastapi import WebSocket
 
 from qoslablib.extensions.chart import ChartABC
 
+from .experiment import ExperimentStatus
+
 
 class _Subscriber:
     def __init__(self):
@@ -33,7 +35,7 @@ class _Subscriber:
 
 class ChartProxy:
     def __init__(
-        self, *, experiment_stopped: Event, chartT: type[ChartABC], kwargs: Any
+        self, *, status: ExperimentStatus, chartT: type[ChartABC], kwargs: Any
     ):
         # underlying chart instance
         self._chart = chartT(self._plot_fn, **kwargs)
@@ -44,7 +46,7 @@ class ChartProxy:
 
         self._tick_lock = Lock()
 
-        self._experiment_stopped = experiment_stopped
+        self._experiment_stopped = status.stopped
 
     """Public Interface towards ExperimentProxy"""
 

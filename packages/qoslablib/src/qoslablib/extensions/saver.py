@@ -3,8 +3,11 @@ from dataclasses import dataclass
 
 import dataclasses
 
+import enum
 import time
-from typing import Any, Callable, Literal, TypedDict, Unpack, override
+from typing import Any, Callable, Iterable, Literal, TypedDict, Unpack, override
+
+from aiosqlite import Row
 
 
 @dataclass
@@ -21,6 +24,16 @@ class SqlSaverConfigABC(ABC):
 class SqlSaverABC(ABC):
     _save_fn: Callable[[dict[str, float]], None]
     config: SqlSaverConfigABC
+
+    @abstractmethod
+    def __init__(
+        self,
+        *,
+        save_fn: Callable[[dict[str, float]], None],
+        timestamp: int,
+        **kwargs: Unpack[Any],
+    ):
+        raise NotImplementedError
 
     @classmethod
     @abstractmethod
@@ -43,6 +56,16 @@ class SqlSaverABC(ABC):
         # This function returns the string used for the sql creating table
         raise NotImplementedError
 
+    @abstractmethod
+    def getSelectAllSql(self) -> str:
+        # this function returns the sql that fetchs all data for finalize function
+        raise NotImplementedError
+
+    @abstractmethod
+    def finalize(self, raw: Any) -> Any:
+        # this function returns the actual final dataset
+        raise NotImplementedError
+
 
 class SqlSaverManagerABC(ABC):
     # The holder shall manage the database connection, and provide a method that would be consumed bu the SaverABC method
@@ -55,31 +78,38 @@ class SqlSaverManagerABC(ABC):
 
 
 @dataclass
-class KVSqlSaverConfig(SqlSaverConfigABC):
-    type: Literal["KVFloatSqlSaver"]
+class XYFloatSqlSaverConfig(SqlSaverConfigABC):
+    type: Literal["XYFloatSqlSaver"]
     title: str
-    keys: list[str]
+    timestamp: int
+    y_names: list[str]
 
     def toDict(self):
         return dataclasses.asdict(self)
 
 
-class KVFloatSqlSaver(SqlSaverABC):
+class XYFloatSqlSaver(SqlSaverABC):
     class KW(TypedDict):
         title: str
-        keys: list[str]
+        y_names: list[str]
 
     def __init__(
         self,
         *,
         save_fn: Callable[[dict[str, float]], None],
+        timestamp: int,
         **kwargs: Unpack[KW],
     ):
         self.title = kwargs["title"]
-        self.keys = kwargs["keys"]
+        self.timestamp = timestamp
+        self.table_name = f"{self.title} %ts{timestamp}ts%"
+        self.y_names = kwargs["y_names"]
 
-        self.config = KVSqlSaverConfig(
-            type="KVFloatSqlSaver", title=self.title, keys=self.keys
+        self.config = XYFloatSqlSaverConfig(
+            type="XYFloatSqlSaver",
+            title=self.title,
+            timestamp=self.timestamp,
+            y_names=self.y_names,
         )
 
         self._save_fn = save_fn
@@ -90,26 +120,71 @@ class KVFloatSqlSaver(SqlSaverABC):
         return kwargs
 
     @override
-    def getCreateTableSql(self, table_name: str) -> str:
-        return f"""CREATE TABLE "{table_name}" (
+    def getCreateTableSql(self) -> str:
+        return f"""CREATE TABLE "{self.title}" (
             id INTEGER PRIMARY KEY,
-            timestamp INTEGER{"".join([f",\n{key} REAL" for key in self.keys])}
+            timestamp INTEGER NOT NULL,
+            {"x REAL NOT NULL".join([f",\n{key} REAL" for key in self.y_names])}
             ) """
 
     @override
+    def getSelectAllSql(self) -> str:
+        return f'''SELECT {"id,x,".join([f"{key}," for key in self.y_names])[:-1]} from "{self.title}" ORDER BY id DESC'''
+
+    @override
+    def finalize(self, raw: Iterable[Row]):
+        # Put in the keys of the data, each y_name is a {x: y}, where x and y are pair of values
+
+        class Value(TypedDict):
+            x: float
+            y: float
+
+        intermediate: dict[str, list[Value]] = {}
+
+        for y_name in self.y_names:
+            intermediate[y_name] = {}
+
+        # The raw is traversed backward, from later in time to earlier in time.
+        for row in raw:
+            # id = row[0]
+            x = row[1]
+            # Then the index in the tuple shall match the index of y_name in y_names
+            for i, y_name in enumerate(self.y_names):
+                # Only put y in if x did not exist
+                if x in intermediate[y_name]:
+                    continue
+
+                intermediate[y_name][x] = row[i]
+
+        # Flatten each y_name in to {x: [],y:[]}, where x and y are arrays of values
+
+        class Dataset(TypedDict):
+            x: list[float]
+            y: list[float]
+
+        res: dict[str, Dataset] = {}
+
+        for y_name, values in intermediate.items():
+            res[y_name] = {"x": [], "y": []}
+            for value in values:
+                res[y_name]["x"].append(value["x"])
+                res[y_name]["y"].append(value["y"])
+
+        return res
+
+    @override
     def save(self, frame: dict[str, float]):
-        # Fill in Nones for missing keys
-        for key in self.keys:
+        # x is asuumed to exist
+        # Fill in Nones for missing y_names
+        for key in self.y_names:
             if key not in frame.keys():
                 frame[key] = None
-        # Fill in timestamp
-        frame["timestamp"] = int(time.time() * 1000)
 
         # Execute the functions
         self._save_fn(frame)
 
     @override
-    def getInsertSql(self, table_name: str):
+    def getInsertSql(self):
         return f"""
-        INSERT INTO "{table_name}"({"timestamp,".join([f"{key}," for key in self.keys])[:-1]}) VALUES({":timestamp,".join([f":{key}," for key in self.keys])[:-1]})
+        INSERT INTO "{self.title}"({"x,".join([f"{key}," for key in self.y_names])[:-1]}) VALUES({":x,".join([f":{key}," for key in self.y_names])[:-1]})
     """

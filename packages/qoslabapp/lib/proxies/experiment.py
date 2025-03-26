@@ -15,7 +15,7 @@ from qoslablib.exceptions import ExperimentEnded
 from qoslablib.extensions.chart import ChartABC
 
 from qoslablib.extensions.saver import SqlSaverABC
-from qoslablib.params import Params
+from qoslablib.params import ExperimentParamsToBackup, Params
 from qoslablib.runtime import ExperimentABC
 
 from qoslablib.runtime import ManagerABC
@@ -29,6 +29,14 @@ from ..settings.foundation import Foundation
 from ..utils.messenger import Messenger
 
 
+class ExperimentStatus:
+    def __init__(self, params_backup):
+        self.stopped = Event()
+        self.success = Event()
+        self.timestamp = int(time.time() * 1000)
+        self.params_backup = params_backup
+
+
 class ExperimentRunner:
     class PreviousNotFinished(Exception):
         pass
@@ -37,17 +45,16 @@ class ExperimentRunner:
         self,
         experiment: ExperimentABC,
         messenger: Messenger,
+        status: ExperimentStatus,
     ):
         self._experiment = experiment
         self._messenger = messenger
+        self._status = status
 
         self._running = Event()
         self._should_run = Event()
         self._should_stop = Event()
-        self.stopped = Event()
-        self.success = Event()
         self._ran = Event()
-
         self._pid: int
 
     def prepare(self):
@@ -61,8 +68,8 @@ class ExperimentRunner:
         self._running.clear()
         self._should_run.clear()
         self._should_stop.clear()
-        self.stopped.clear()
-        self.success.clear()
+        self._status.stopped.clear()
+        self._status.success.clear()
         self._ran.clear()
 
     def start(self):
@@ -73,15 +80,14 @@ class ExperimentRunner:
     async def _start(self):
         res = await asyncio.to_thread(self._runner)
         if res:
-            self.success.set()
+            self._status.success.set()
         else:
-            self.success.clear()
+            self._status.success.clear()
 
-        self.stopped.set()
+        self._status.stopped.set()
 
         if res:
             self._messenger.put("status", "completed")
-            # TODO: save all equipment and experiment params into db after completion
         else:
             self._messenger.put("status", "stopped")
 
@@ -189,11 +195,17 @@ class ExperimentProxy(ManagerABC):
         self._messenger = Messenger(Foundation.getLoop())
         self._subscriber: WebSocket
 
+        # Status
+        self._status: ExperimentStatus
+
         # Runner
         self._runner = ExperimentRunner(
             self._experiment,
             self._messenger,
+            self._status,
         )
+
+        self._params_backup: dict[str, dict[str, str]]
 
     """Public Interface of self"""
 
@@ -245,10 +257,9 @@ class ExperimentProxy(ManagerABC):
             self._messenger.put("error", "PreviousNotFinished")
 
         # Manager functions are also executed in the initalize function
-        self.timestamp = int(time.time() * 1000)
-        self._experiment.initialize(self)
+        self._status = ExperimentStatus(ExperimentParamsToBackup(self.experiment_id))
 
-        # TODO: save all equipment and experiment params into db before start
+        self._experiment.initialize(self)
 
         self._runner.start()
 
@@ -261,7 +272,7 @@ class ExperimentProxy(ManagerABC):
         self._runner.stop()
 
     def waitUntil_stopped(self):
-        self._runner.stopped.wait()
+        self._status.stopped.wait()
 
     def forceStop(self):
         self._runner.forceStop()
@@ -291,7 +302,7 @@ class ExperimentProxy(ManagerABC):
         title = kwargs["title"]
 
         self._charts[title] = ChartProxy(
-            experiment_stopped=self._runner.stopped,
+            status=self._status,
             chartT=chartT,
             kwargs=kwargs,
         )
@@ -311,7 +322,7 @@ class ExperimentProxy(ManagerABC):
         title = kwargs["title"]
 
         self._sql_savers[title] = SqlSaverProxy(
-            experiment_stopped=self._runner.stopped,
+            status=self._status,
             sql_saverT=sql_saverT,
             kwargs=kwargs,
         )
