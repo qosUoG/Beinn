@@ -135,14 +135,10 @@ class XYFloatSqlSaver(SqlSaverABC):
     def finalize(self, raw: Iterable[Row]):
         # Put in the keys of the data, each y_name is a {x: y}, where x and y are pair of values
 
-        class Value(TypedDict):
-            x: float
-            y: float
-
-        intermediate: dict[str, list[Value]] = {}
+        stage_1: dict[str, dict[float, float]] = {}
 
         for y_name in self.y_names:
-            intermediate[y_name] = {}
+            stage_1[y_name] = {}
 
         # The raw is traversed backward, from later in time to earlier in time.
         for row in raw:
@@ -151,20 +147,36 @@ class XYFloatSqlSaver(SqlSaverABC):
             # Then the index in the tuple shall match the index of y_name in y_names
             for i, y_name in enumerate(self.y_names):
                 # Only put y in if x did not exist
-                if x in intermediate[y_name]:
+                if x in stage_1[y_name]:
                     continue
 
-                intermediate[y_name][x] = row[i]
+                stage_1[y_name][x] = row[i]
+
+        # Convert the dict into a list of {x: float, y:float} such that they can be sorted
+        class Value(TypedDict):
+            x: float
+            y: float
+
+        stage_2: dict[str, list[Value]] = {}
+        for y_name in self.y_names:
+            stage_2[y_name] = []
+
+        for y_name, values in stage_1.items():
+            for x, y in values.items():
+                stage_2[y_name].append({"x": x, "y": y})
+
+        # Sort each y_name list by each value's x
+        for values in stage_2.values():
+            values.sort(key=lambda v: v["x"])
 
         # Flatten each y_name in to {x: [],y:[]}, where x and y are arrays of values
-
         class Dataset(TypedDict):
             x: list[float]
             y: list[float]
 
         res: dict[str, Dataset] = {}
 
-        for y_name, values in intermediate.items():
+        for y_name, values in stage_2.items():
             res[y_name] = {"x": [], "y": []}
             for value in values:
                 res[y_name]["x"].append(value["x"])
