@@ -276,8 +276,8 @@ class ExperimentProxy(ManagerABC):
     def stop_async(self):
         self._runner.stop()
 
-    def waitUntil_stopped(self):
-        self._status.stopped.wait()
+    async def waitUntil_stopped(self):
+        await self._status.stopped.wait()
 
     def pause_async(self):
         self._runner.pause()

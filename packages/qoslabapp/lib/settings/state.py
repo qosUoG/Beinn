@@ -129,8 +129,8 @@ class AppState:
 
         # Then wait until each experiment is actually stopped and do cleanup
         for experiment_proxy in cls._experiment_proxies.values():
-            experiment_proxy.waitUntil_stopped()
             await experiment_proxy.forceStop()
+            await experiment_proxy.waitUntil_stopped()
 
         # Stop all workers
         await SqlWorker.stop()

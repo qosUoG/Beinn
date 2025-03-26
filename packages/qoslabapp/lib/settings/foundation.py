@@ -1,5 +1,5 @@
 import asyncio
-from threading import Event
+from asyncio import Event
 import time
 
 
