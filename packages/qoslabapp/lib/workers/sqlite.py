@@ -3,11 +3,6 @@ from typing import Iterable, Literal
 import aiosqlite
 
 
-class ResponsePointer:
-    def __init__(self):
-        self.value: Iterable[aiosqlite.Row] = []
-
-
 class _Request:
     def __init__(
         self,
@@ -18,12 +13,10 @@ class _Request:
         | Literal["fetchall"],
         sql: str = None,
         payload: list = None,
-        response_pointer: ResponsePointer = None,
     ):
         self.type = type
         self.sql = sql
         self.payload = payload
-        self.response_pointer = response_pointer
         self.executed = asyncio.Event()
 
         if self.type == "many":
@@ -31,10 +24,8 @@ class _Request:
         else:
             assert self.payload is None
 
-        if self.type == "fetchall":
-            assert self.response_pointer is not None
-        else:
-            assert self.response_pointer is None
+        # This is only used in "fetchall"
+        self.value: Iterable[aiosqlite.Row]
 
 
 class SqlWorker:
@@ -69,13 +60,11 @@ class SqlWorker:
         cls._queue.put_nowait(_Request(type="many", sql=sql, payload=payload))
 
     @classmethod
-    async def putFetchall(cls, sql: str, response_pointer: ResponsePointer):
-        req = _Request(type="fetchall", sql=sql, response_pointer=response_pointer)
-        cls._queue.put_nowait(
-            _Request(type="fetchall", sql=sql, response_pointer=response_pointer)
-        )
+    async def putFetchall(cls, sql: str):
+        req = _Request(type="fetchall", sql=sql)
+        cls._queue.put_nowait(req)
         await req.executed.wait()
-        return req.response_pointer.value
+        return req.value
 
     @classmethod
     async def sqlWorker(cls):
@@ -96,7 +85,7 @@ class SqlWorker:
                     await cls._sqlite3_cursor.executemany(request.sql, request.payload)
                 elif request.type == "fetchall":
                     res = await cls._sqlite3_cursor.execute(request.sql)
-                    request.response_pointer.value = await res.fetchall()
+                    request.value = await res.fetchall()
 
                 await cls._sqlite3_connection.commit()
                 request.executed.set()
