@@ -11,7 +11,7 @@ async def workspace_status():
     return {"status": "online"}
 
 
-@router.get("/workspace/cleanup")
-async def workspace_cleanup():
-    await AppState.cleanup()
-    return {"cleanup": "success"}
+@router.get("/workspace/forcestop")
+async def workspace_forcestop():
+    await AppState.forceStop()
+    return {"forcestop": "success"}

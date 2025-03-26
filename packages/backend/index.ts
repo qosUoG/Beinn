@@ -24,7 +24,7 @@ serve({
 process.on("SIGINT", async () => {
 
     if (app_state.pyproc !== undefined) {
-        const res = await fetch("http://localhost:8000/workspace/cleanup")
+        const res = await fetch("http://localhost:8000/workspace/forcestop")
         console.log(await res.json())
         app_state.pyproc?.kill()
         // wait for 100 ms
