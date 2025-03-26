@@ -103,5 +103,7 @@ class SqlWorker:
 
         except Exception as e:
             print("Exception in sqlWorker task in request:")
-            print(request)
+            print(request.type)
+            print(request.sql)
+            print(request.payload)
             print(e)
