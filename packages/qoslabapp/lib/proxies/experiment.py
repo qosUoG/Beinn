@@ -37,11 +37,9 @@ class ExperimentRunner:
         self,
         experiment: ExperimentABC,
         messenger: Messenger,
-        status: ExperimentStatus,
     ):
         self._experiment = experiment
         self._messenger = messenger
-        self._status = status
 
         self._running = Event()
         self._should_run = Event()
@@ -49,7 +47,7 @@ class ExperimentRunner:
         self._ran = Event()
         self._pid: int
 
-    def prepare(self):
+    def prepare(self, status: ExperimentStatus):
         # The previous run, if there is one, shall not be running
         if hasattr(self, "_runner_task") and not self._runner_task.done():
             raise ExperimentRunner.PreviousNotFinished
@@ -60,23 +58,23 @@ class ExperimentRunner:
         self._running.clear()
         self._should_run.clear()
         self._should_stop.clear()
-        self._status.stopped.clear()
-        self._status.success.clear()
+        status.stopped.clear()
+        status.success.clear()
         self._ran.clear()
 
-    def start(self):
-        self._runner_task = asyncio.create_task(self._start())
+    def start(self, status: ExperimentStatus):
+        self._runner_task = asyncio.create_task(self._start(status))
 
         self._should_run.set()
 
-    async def _start(self):
+    async def _start(self, status: ExperimentStatus):
         res = await asyncio.to_thread(self._runner)
         if res:
-            self._status.success.set()
+            status.success.set()
         else:
-            self._status.success.clear()
+            status.success.clear()
 
-        self._status.stopped.set()
+        status.stopped.set()
 
         if res:
             self._messenger.put("status", "completed")
@@ -242,18 +240,18 @@ class ExperimentProxy(ManagerABC):
     """Public Interface to runner"""
 
     def start(self):
+        self._status = ExperimentStatus(ExperimentParamsToBackup(self.experiment_id))
         # Prepare the runner
         try:
-            self._runner.prepare()
+            self._runner.prepare(self._status)
         except ExperimentRunner.PreviousNotFinished:
             self._messenger.put("error", "PreviousNotFinished")
 
         # Manager functions are also executed in the initalize function
-        self._status = ExperimentStatus(ExperimentParamsToBackup(self.experiment_id))
 
         self._experiment.initialize(self)
 
-        self._runner.start()
+        self._runner.start(self._status)
 
     """This function is used to interact with the sqlite db"""
 
