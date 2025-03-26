@@ -331,7 +331,7 @@ def ExperimentParamsToBackup(experiment_id: str, params: Params):
     res: dict[str, dict[str, str]] = {"experiment_id": experiment_id}
 
     def parseParams(id: str, _params: Params | None):
-        if id in res or _params is None:
+        if id in res:
             return
 
         res[id] = {}
@@ -341,7 +341,8 @@ def ExperimentParamsToBackup(experiment_id: str, params: Params):
 
         # If the param is an instance, recursively parse the params as well
         if param.type == "instance.equipment" or param.type == "instance.experiment":
-            parseParams(param.instance_id, param.instance.params)
+            if param.instance is not None:
+                parseParams(param.instance_id, param.instance.params)
 
     parseParams(experiment_id, params)
 
