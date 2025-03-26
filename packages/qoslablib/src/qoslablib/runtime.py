@@ -11,7 +11,11 @@ from .extensions.chart import ChartManagerABC
 from . import params
 
 
+@dataclass
 class ExperimentManagerABC(ABC):
+    # In ms
+    timestamp: int
+
     @abstractmethod
     def suggestTotalIterations(self, total_iterations: int):
         raise NotImplementedError

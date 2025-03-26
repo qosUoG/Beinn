@@ -5,6 +5,7 @@ from contextlib import contextmanager
 import os
 import signal
 from threading import Event
+import time
 from typing import Any, override
 
 
@@ -243,7 +244,8 @@ class ExperimentProxy(ManagerABC):
         except ExperimentRunner.PreviousNotFinished:
             self._messenger.put("error", "PreviousNotFinished")
 
-        # Initialize and send the proposed total iteration
+        # Manager functions are also executed in the initalize function
+        self.timestamp = int(time.time() * 1000)
         self._experiment.initialize(self)
 
         # TODO: save all equipment and experiment params into db before start

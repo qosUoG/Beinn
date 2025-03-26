@@ -10,6 +10,13 @@ from ..proxies.equipment import EquipmentProxy
 
 
 class AppState:
+    """Start up setup"""
+
+    @classmethod
+    def start(cls):
+        # Start the worker
+        SqlWorker.start()
+
     """Equipments Experiments shared code"""
 
     @classmethod
