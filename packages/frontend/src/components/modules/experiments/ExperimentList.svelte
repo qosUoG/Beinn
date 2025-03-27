@@ -26,8 +26,8 @@
 				experiment.name.length > 0 &&
 				JSON.stringify(experiment.params) ===
 					JSON.stringify(experiment.temp_params) &&
-				experiment.params !== undefined
-		) as CreatedRuntimeExperiment[]
+				experiment.params !== undefined,
+		) as CreatedRuntimeExperiment[],
 	);
 
 	function zeropad(num: number) {
@@ -36,15 +36,15 @@
 	}
 </script>
 
-<div class="col-2 w-96 section bg-slate-200 h-full min-h-0">
+<div class="fcol-2 w-96 section bg-slate-200 h-full min-h-0">
 	<div class="title wrapped bg-white w-fit">Experiments</div>
-	<div class="h-full overflow-y-scroll col-2 min-h-0">
+	<div class="h-full overflow-y-scroll fcol-2 min-h-0">
 		{#each runnable_experiments as experiment}
 			{console.log(experiment.chart_configs)}
 			{@const iteration_time =
 				experiment.total_time - experiment.iteration_time_start}
 
-			<div class="section bg-white col-2 justify-between w-full">
+			<div class="section bg-white fcol-2 justify-between w-full">
 				<div class="grid grid-cols-2">
 					<div class="wrapped bg-slate-200 w-fit">
 						{experiment.name}
@@ -52,9 +52,11 @@
 					<Progress {experiment} />
 				</div>
 
-				<div class="row justify-between">
-					<div class="row-1">
-						<div class="bg-slate-200 row rounded items-center w-24">
+				<div class="frow justify-between">
+					<div class="frow-1">
+						<div
+							class="bg-slate-200 frow rounded items-center w-24"
+						>
 							<div class="icon-btn-sm">
 								<StopWatch />
 							</div>
@@ -66,7 +68,9 @@
 								{/if}
 							</div>
 						</div>
-						<div class="bg-slate-200 row rounded items-center w-24">
+						<div
+							class="bg-slate-200 frow rounded items-center w-24"
+						>
 							<div class="icon-btn-sm">
 								<Rotate />
 							</div>
@@ -95,7 +99,7 @@
 							{/if}
 						</div>
 					</div>
-					<div class="row-1">
+					<div class="frow-1">
 						{#if experiment.status === "initial" || experiment.status === "completed" || experiment.status === "stopped"}
 							<button
 								class="icon-btn-sm green"
@@ -103,21 +107,24 @@
 									experiment.iteration_count = -1;
 									experiment.status = "starting";
 									await startExperiment(experiment);
-								}}><Play /></button>
+								}}><Play /></button
+							>
 						{:else if experiment.status === "continuing" || experiment.status === "started" || experiment.status === "starting" || experiment.status === "continued"}
 							<button
 								class="icon-btn-sm red"
 								onclick={async () => {
 									experiment.status = "pausing";
 									await pauseExperiment(experiment);
-								}}><Pause /></button>
+								}}><Pause /></button
+							>
 						{:else if experiment.status === "paused" || experiment.status === "pausing"}
 							<button
 								class="icon-btn-sm red"
 								onclick={async () => {
 									experiment.status = "stopping";
 									await stopExperiment(experiment);
-								}}><Stop /></button>
+								}}><Stop /></button
+							>
 						{/if}
 						{#if experiment.status === "paused"}
 							<button
@@ -125,7 +132,8 @@
 								onclick={async () => {
 									experiment.status = "continuing";
 									await continueExperiment(experiment);
-								}}><Play /></button>
+								}}><Play /></button
+							>
 						{/if}
 						{#if experiment.status === "stopping" || experiment.status === "pausing"}
 							<div class="icon-btn-sm bg-slate-200">

@@ -18,7 +18,7 @@
 	const id = getRandomId([]);
 </script>
 
-<div class="row-2 bg-white wrapped flex-grow min-w-0 h-full">
+<div class="frow-2 bg-white wrapped flex-grow min-w-0 h-full">
 	<div class="editor-label">Class</div>
 	<Separator />
 	<div class="relative flex-grow -mx-2 px-2 flex items-center min-w-0">
@@ -27,7 +27,8 @@
 			onclick={async (e) => {
 				open = !open;
 			}}
-			{id}>
+			{id}
+		>
 			{#if value.module !== "" && value.cls !== ""}
 				from {value.module} import
 				{value.cls}
@@ -40,16 +41,18 @@
 				onoutsideclick={() => {
 					open = false;
 				}}
-				class=" absolute left-0 top-6 bg-white col z-10 shadow-xl rounded min-w-full">
+				class=" absolute left-0 top-6 bg-white fcol z-10 shadow-xl rounded min-w-full"
+			>
 				{#each options as { cls, modules }}
-					<div class={cn(" wrapped col group")}>
+					<div class={cn(" wrapped fcol group")}>
 						<div
 							class={cn(
 								" wrapped ",
 								value.cls === cls
 									? "bg-slate-500 text-slate-50"
-									: "group-hover:bg-slate-300"
-							)}>
+									: "group-hover:bg-slate-300",
+							)}
+						>
 							{cls}
 						</div>
 						{#each modules as module}
@@ -58,13 +61,14 @@
 									"   text-nowrap text-left ml-6 wrapped flex-grow",
 									value.module === module
 										? "bg-slate-500 text-slate-50"
-										: "hover:bg-slate-300"
+										: "hover:bg-slate-300",
 								)}
 								onclick={() => {
 									value.module = module;
 									value.cls = cls;
 									open = false;
-								}}>
+								}}
+							>
 								{module}
 							</button>
 						{/each}

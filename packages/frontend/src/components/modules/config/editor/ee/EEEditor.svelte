@@ -44,8 +44,8 @@
 {#key eeeditor.id}
 	<div class="section bg-slate-200 col-span-2 min-w-0 w-full">
 		{#if eeeditor.id !== undefined && target !== undefined}
-			<div class="col-2 min-w-0 w-full">
-				<div class="row justify-between items-end">
+			<div class="fcol-2 min-w-0 w-full">
+				<div class="frow justify-between items-end">
 					<div class="title bg-white wrapped">
 						Editor - {capitalise(eeeditor.mode)}
 					</div>
@@ -54,13 +54,14 @@
 						onclick={async () => {
 							if (eeeditor.id === undefined)
 								throw Error(
-									"ERROR: eeeditor.id shall not be undeifned"
+									"ERROR: eeeditor.id shall not be undeifned",
 								);
 
 							await removeEE(eeeditor.mode, { id: eeeditor.id });
 							delete gstore[`${eeeditor.mode}s`][eeeditor.id];
 							eeeditor.id = undefined;
-						}}><Trash /></button>
+						}}><Trash /></button
+					>
 				</div>
 
 				<EEPath
@@ -109,14 +110,15 @@
 								onmessage: getExperimentEventFn(
 									gstore.experiments[
 										eeeditor.id
-									] as CreatedRuntimeExperiment
+									] as CreatedRuntimeExperiment,
 								),
 							});
 						}
-					}} />
+					}}
+				/>
 
 				{#if target.created}
-					<div class="row justify-between mt-4 items-end">
+					<div class="frow justify-between mt-4 items-end">
 						<div class="title bg-white wrapped">Instance</div>
 					</div>
 					<FixedField key="id" value={target.id} />
@@ -132,32 +134,35 @@
 								e.preventDefault();
 							}}
 							bind:value={target.name}
-							onfocus={autofocus} />
+							onfocus={autofocus}
+						/>
 					</LabelField>
 
-					<div class="row justify-between mt-4 items-end">
+					<div class="frow justify-between mt-4 items-end">
 						<div class="title bg-white wrapped">Parameters</div>
-						<div class="row-1">
+						<div class="frow-1">
 							{#if params_edited}
 								<button
 									class="icon-btn-sm red"
 									onclick={() => {
 										target.temp_params = JSON.parse(
-											JSON.stringify(target.params)
+											JSON.stringify(target.params),
 										);
-									}}><Cancel /></button>
+									}}><Cancel /></button
+								>
 								<button
 									class="icon-btn-sm green"
 									onclick={async () => {
 										target.params = JSON.parse(
-											JSON.stringify(target.temp_params)
+											JSON.stringify(target.temp_params),
 										);
 										await tick();
 										await setEEParams(
 											eeeditor.mode,
-											target
+											target,
 										);
-									}}><Disk /></button>
+									}}><Disk /></button
+								>
 							{:else}
 								<div class="h-6"></div>
 							{/if}

@@ -22,7 +22,7 @@
 		if (!value) return "";
 
 		return (options as { key: string; value: T }[]).find(
-			(option) => option.value === value
+			(option) => option.value === value,
 		)!.key;
 	});
 </script>
@@ -32,7 +32,8 @@
 	onclick={async (e) => {
 		open = !open;
 	}}
-	{id}>
+	{id}
+>
 	{selected_key}
 </button>
 
@@ -42,7 +43,8 @@
 		onoutsideclick={() => {
 			open = false;
 		}}
-		class="absolute left-0 top-6 bg-white col z-10 shadow-xl rounded min-w-full">
+		class="absolute left-0 top-6 bg-white fcol z-10 shadow-xl rounded min-w-full"
+	>
 		{#each options as option, i}
 			<button
 				class={cn(
@@ -51,7 +53,7 @@
 					i === options.length - 1 ? "rounded-b" : "",
 					value === option
 						? "bg-slate-500 text-slate-50"
-						: "hover:bg-slate-300"
+						: "hover:bg-slate-300",
 				)}
 				onclick={() => {
 					if (
@@ -62,7 +64,8 @@
 					else value = option.value;
 
 					open = false;
-				}}>
+				}}
+			>
 				{#if typeof option === "string" || typeof option === "number"}
 					{option}
 				{:else}

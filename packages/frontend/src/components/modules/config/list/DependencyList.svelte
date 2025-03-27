@@ -13,11 +13,11 @@
 	import { type Dependency } from "qoslab-shared";
 </script>
 
-<div class="section col-2 bg-slate-200">
-	<div class="col-2">
-		<div class="row justify-between items-center">
+<div class="section fcol-2 bg-slate-200">
+	<div class="fcol-2">
+		<div class="frow justify-between items-center">
 			<div class="title bg-white wrapped self-start">Dependencies</div>
-			<div class="row-1">
+			<div class="frow-1">
 				<button
 					class="icon-btn-sm slate"
 					onclick={async (e) => {
@@ -28,12 +28,13 @@
 						});
 
 						gstore.workspace.dependencies = res;
-					}}><Reload /></button>
+					}}><Reload /></button
+				>
 				<button
 					class="icon-btn-sm slate"
 					onclick={async (e) => {
 						const id = getRandomId(
-							Object.keys(gstore.workspace.dependencies)
+							Object.keys(gstore.workspace.dependencies),
 						);
 						gstore.workspace.dependencies[id] = {
 							id,
@@ -45,24 +46,26 @@
 						editor.mode = "dependency";
 						eeeditor.id = undefined;
 						dependency_editor.id = id;
-					}}><Plus /></button>
+					}}><Plus /></button
+				>
 			</div>
 		</div>
 
 		{#each Object.values(gstore.workspace.dependencies) as dependency}
 			<button
 				class={cn(
-					"section text-start bg-white row justify-between items-center ",
+					"section text-start bg-white frow justify-between items-center ",
 					dependency.id === dependency_editor.id
 						? "outline outline-offset-2 outline-slate-600"
-						: ""
+						: "",
 				)}
 				onclick={() => {
 					editor.mode = "dependency";
 					dependency_editor.id = dependency.id;
 					eeeditor.id = undefined;
 				}}
-				id={`equipment-${dependency.id}`}>
+				id={`equipment-${dependency.id}`}
+			>
 				{#if dependency.confirmed}
 					<div>
 						{dependency.name}
@@ -70,10 +73,11 @@
 				{:else}
 					<div class="italic text-slate-500/75">Setup Dependency</div>
 				{/if}
-				<div class="row-1 flex-row-reverse">
+				<div class="frow-1 flex-row-reverse">
 					{#if !dependency.confirmed}
 						<div
-							class="icon-btn-sm border border-red-500 text-red-500">
+							class="icon-btn-sm border border-red-500 text-red-500"
+						>
 							<ExclamationMark />
 						</div>
 					{:else}

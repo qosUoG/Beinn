@@ -21,7 +21,7 @@
 	let temp_module_cls = $state(value);
 </script>
 
-<div class="row-2 min-w-0">
+<div class="frow-2 min-w-0">
 	{#if !created}
 		<EEPathSelect bind:value={temp_module_cls} {options} />
 
@@ -42,13 +42,15 @@
 				await tick();
 
 				onconfirm();
-			}}><Tick /></button>
+			}}><Tick /></button
+		>
 	{:else}
 		<FixedField
 			key="Class"
-			value={`from ${value.module} import ${value.cls}`} />
+			value={`from ${value.module} import ${value.cls}`}
+		/>
 
-		<!-- <div class="row-1">
+		<!-- <div class="frow-1">
 			<button
 				class="icon-btn-sm slate"
 				onclick={() => {

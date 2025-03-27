@@ -48,7 +48,7 @@
 			case "local":
 				// Check init is available
 				const { success } = await checkDependencyInit(
-					temp_source.directory
+					temp_source.directory,
 				);
 
 				if (!success) return;
@@ -89,7 +89,7 @@
 			temp_source = { type: "pip", package: "" };
 
 			const current_dependency_names = Object.values(
-				$state.snapshot(gstore.workspace.dependencies)
+				$state.snapshot(gstore.workspace.dependencies),
 			)
 				.filter((d) => d.confirmed)
 				.map((d) => d.name);
@@ -105,7 +105,7 @@
 							id: dependency_editor.id!,
 						};
 					}
-				}
+				},
 			);
 		}
 
@@ -120,30 +120,34 @@
 {#key dependency_editor.id}
 	<div class="section bg-slate-200 col-span-2">
 		{#if dependency !== undefined}
-			<div class="col-2">
-				<div class="row justify-between items-end">
+			<div class="fcol-2">
+				<div class="frow justify-between items-end">
 					<div class="title bg-white wrapped">
 						Editor - Dependency
 					</div>
 					<button
 						class="icon-btn-sm red"
-						onclick={handleRemoveDependency}><Trash /></button>
+						onclick={handleRemoveDependency}><Trash /></button
+					>
 				</div>
 
 				{#if !dependency.confirmed}
-					<div class="row-2">
+					<div class="frow-2">
 						<SelectField
 							key="Type"
 							bind:value={temp_source.type}
-							options={type_options} />
+							options={type_options}
+						/>
 						{#if temp_source.type === "path"}
 							<SelfToggle
 								key="editable"
-								bind:value={temp_source.editable} />
+								bind:value={temp_source.editable}
+							/>
 						{/if}
 						<button
 							class="icon-btn-sm green"
-							onclick={handleAddDependency}><Download /></button>
+							onclick={handleAddDependency}><Download /></button
+						>
 					</div>
 
 					{#if temp_source.type === "pip"}
@@ -152,7 +156,8 @@
 								type="text"
 								class="flex-grow"
 								bind:value={temp_source.package}
-								onfocus={autofocus} />
+								onfocus={autofocus}
+							/>
 						</LabelField>
 					{:else if temp_source.type === "git"}
 						<LabelField key="Url">
@@ -160,14 +165,16 @@
 								type="text"
 								class="flex-grow"
 								bind:value={temp_source.git}
-								onfocus={autofocus} />
+								onfocus={autofocus}
+							/>
 						</LabelField>
 						<LabelField key="Branch">
 							<input
 								type="text"
 								class="flex-grow"
 								bind:value={temp_source.branch}
-								onfocus={autofocus} />
+								onfocus={autofocus}
+							/>
 						</LabelField>
 
 						<LabelField key="Subdirectory">
@@ -175,7 +182,8 @@
 								type="text"
 								class="flex-grow"
 								bind:value={temp_source.subdirectory}
-								onfocus={autofocus} />
+								onfocus={autofocus}
+							/>
 						</LabelField>
 					{:else if temp_source.type === "path"}
 						<LabelField key="Path">
@@ -183,7 +191,8 @@
 								type="text"
 								class="flex-grow"
 								bind:value={temp_source.path}
-								onfocus={autofocus} />
+								onfocus={autofocus}
+							/>
 						</LabelField>
 					{:else if temp_source.type === "local"}
 						<LabelField key="Directory">
@@ -191,7 +200,8 @@
 								type="text"
 								class="flex-grow"
 								bind:value={temp_source.directory}
-								onfocus={autofocus} />
+								onfocus={autofocus}
+							/>
 						</LabelField>
 					{/if}
 				{:else if dependency.source!.type === "pip"}
@@ -202,7 +212,8 @@
 					{#if dependency.source!.subdirectory}
 						<FixedField
 							key="Subdirectory"
-							value={dependency.source.subdirectory} />
+							value={dependency.source.subdirectory}
+						/>
 					{/if}
 				{:else if dependency.source!.type === "path"}
 					<FixedField key="Path" value={dependency.source.path} />

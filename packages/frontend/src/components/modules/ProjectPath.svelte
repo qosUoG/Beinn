@@ -11,7 +11,7 @@
 	import { retryOnError, type Dependency } from "qoslab-shared";
 </script>
 
-<label class=" row-1 flex-grow">
+<label class=" frow-1 flex-grow">
 	<div class="w-fit wrapped text-nowrap bg-slate-200 flex items-center">
 		Project Directory
 	</div>
@@ -19,7 +19,8 @@
 		spellcheck="false"
 		class="flex-grow wrapped bg-slate-200"
 		type="text"
-		bind:value={gstore.workspace.path} />
+		bind:value={gstore.workspace.path}
+	/>
 	<button
 		class="wrapped slate"
 		onclick={async () => {
@@ -42,5 +43,6 @@
 
 			gstore.workspace.available_experiments =
 				await getAvailableEEs("experiment");
-		}}>Set</button>
+		}}>Set</button
+	>
 </label>

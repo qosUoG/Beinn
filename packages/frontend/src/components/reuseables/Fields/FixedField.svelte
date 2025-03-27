@@ -4,7 +4,7 @@
 	let { key, value }: { key: string; value: string } = $props();
 </script>
 
-<div class=" row-2 bg-white wrapped min-w-0 flex-grow">
+<div class=" frow-2 bg-white wrapped min-w-0 flex-grow">
 	<div class="editor-label">{key}</div>
 	<Separator />
 	<div>{value}</div>

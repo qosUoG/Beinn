@@ -21,8 +21,8 @@
 	const capitalised = capitalise(eetype);
 </script>
 
-<div class="section col-2 bg-slate-200">
-	<div class="row justify-between items-center">
+<div class="section fcol-2 bg-slate-200">
+	<div class="frow justify-between items-center">
 		<div class="title bg-white wrapped">
 			{capitalised}
 		</div>
@@ -45,7 +45,8 @@
 				eeeditor.id = id;
 				eeeditor.mode = eetype;
 				dependency_editor.id = undefined;
-			}}><Plus /></button>
+			}}><Plus /></button
+		>
 	</div>
 	{#each Object.values(gstore[`${eetype}s`]) as target}
 		{@const params_edited = target.created
@@ -54,10 +55,10 @@
 			: false}
 		<button
 			class={cn(
-				"section text-start bg-white row justify-between items-center ",
+				"section text-start bg-white frow justify-between items-center ",
 				target.id === eeeditor.id
 					? "outline outline-offset-2 outline-slate-600"
-					: ""
+					: "",
 			)}
 			onclick={() => {
 				editor.mode = "ee";
@@ -65,7 +66,8 @@
 				eeeditor.id = target.id;
 				eeeditor.mode = eetype;
 			}}
-			id={`equipment-${target.id}`}>
+			id={`equipment-${target.id}`}
+		>
 			{#if "name" in target && target.name !== ""}
 				<div>
 					{target.name}
@@ -73,7 +75,7 @@
 			{:else}
 				<div class="italic text-slate-500/75">Setup {capitalised}</div>
 			{/if}
-			<div class="row-1 flex-row-reverse">
+			<div class="frow-1 flex-row-reverse">
 				{#if !target.created}
 					<div class="icon-btn-sm border border-red-500 text-red-500">
 						<FolderQuestion />
@@ -81,13 +83,15 @@
 				{:else}
 					{#if target.name === undefined || target.name === ""}
 						<div
-							class="icon-btn-sm border border-red-500 text-red-500">
+							class="icon-btn-sm border border-red-500 text-red-500"
+						>
 							<Sign />
 						</div>
 					{/if}
 					{#if params_edited}
 						<div
-							class="icon-btn-sm border border-red-500 text-red-500">
+							class="icon-btn-sm border border-red-500 text-red-500"
+						>
 							<Disk />
 						</div>
 					{/if}

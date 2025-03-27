@@ -13,7 +13,7 @@
 	} = $props();
 </script>
 
-<div class="row-2 bg-white wrapped flex-grow min-w-0 h-full">
+<div class="frow-2 bg-white wrapped flex-grow min-w-0 h-full">
 	<div class="editor-label">{key}</div>
 	<Separator />
 	<div class="relative flex-grow -mx-2 px-2 flex items-center min-w-0">

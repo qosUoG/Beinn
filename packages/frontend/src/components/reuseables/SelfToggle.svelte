@@ -7,10 +7,11 @@
 </script>
 
 <button
-	class=" row-2 bg-white min-w-0 rounded relative pl-6"
+	class=" frow-2 bg-white min-w-0 rounded relative pl-6"
 	onclick={() => {
 		value = !value;
-	}}>
+	}}
+>
 	<div class="absolute left-0 icon-btn-sm">
 		{#if value}
 			<CheckedSquare />
