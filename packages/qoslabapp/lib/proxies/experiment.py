@@ -5,7 +5,6 @@ from contextlib import contextmanager
 import os
 import signal
 from threading import Event
-import time
 from typing import Any, override
 
 
