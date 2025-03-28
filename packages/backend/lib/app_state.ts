@@ -1,7 +1,21 @@
-import type { Subprocess } from "bun"
+import type { ServerWebSocket, Subprocess } from "bun"
 
 export let app_state: {
     pyproc: Subprocess | undefined
+    ws: ServerWebSocket<any> | undefined
+    logs: {
+        source: "backend" | "qoslabapp",
+        content: string,
+        timestamp: number
+    }[]
 } = {
-    pyproc: undefined
+    pyproc: undefined,
+    ws: undefined,
+    logs: []
+}
+
+export const postCli = (source: "backend" | "qoslabapp", content: string) => {
+    if (app_state.ws === undefined)
+        app_state.logs.push({ source, content, timestamp: Date.now() })
+    else app_state.ws.send(JSON.stringify({ logs: [{ source, content, timestamp: Date.now() }] }))
 }

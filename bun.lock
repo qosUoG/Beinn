@@ -187,7 +187,7 @@
 
     "@tsconfig/svelte": ["@tsconfig/svelte@5.0.4", "", {}, "sha512-BV9NplVgLmSi4mwKzD8BD/NQ8erOY/nUE/GpgWe2ckx+wIQF5RyRirn/QsSSCPeulVpc3RA/iJt6DpfTIZps0Q=="],
 
-    "@types/bun": ["@types/bun@1.2.7", "", { "dependencies": { "bun-types": "1.2.7" } }, "sha512-Xf/nkx1V03GvWEzWrYsOGB1VUvWVtU5p6jHalCxixhhfLgsJN59iT7CRvfBXyEBnYoGCa2orzWj6car/QfTjxw=="],
+    "@types/bun": ["@types/bun@1.2.8", "", { "dependencies": { "bun-types": "1.2.7" } }, "sha512-t8L1RvJVUghW5V+M/fL3Thbxcs0HwNsXsnTEBEfEVqGteiJToOlZ/fyOEaR1kZsNqnu+3XA4RI/qmnX4w6+S+w=="],
 
     "@types/estree": ["@types/estree@1.0.6", "", {}, "sha512-AYnb1nQyY49te+VRAVgmzfcgjYS91mY5P0TKUDCLEM+gNnA+3T6rWITXRLYCpahpqSQbN5cE+gHpnPyXjHWxcw=="],
 

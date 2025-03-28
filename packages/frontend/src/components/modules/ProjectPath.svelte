@@ -5,10 +5,10 @@
 		readAllUvDependencies,
 		setWorkspaceDirectory,
 	} from "$services/backend.svelte";
-	import { getAvailableEEs } from "$services/qoslabapp.svelte";
+	import { connnectCliWs, getAvailableEEs } from "$services/qoslabapp.svelte";
 
 	import { gstore } from "$states/global.svelte";
-	import { retryOnError, type Dependency } from "qoslab-shared";
+	import { type Dependency } from "qoslab-shared";
 </script>
 
 <label class=" frow-1 flex-grow">
@@ -19,8 +19,7 @@
 		spellcheck="false"
 		class="flex-grow wrapped bg-slate-200"
 		type="text"
-		bind:value={gstore.workspace.path}
-	/>
+		bind:value={gstore.workspace.path} />
 	<button
 		class="wrapped slate"
 		onclick={async () => {
@@ -38,11 +37,21 @@
 
 			gstore.workspace.dependencies = new_dependencies;
 
+			// Connect to cli ws
+			gstore.log_socket = connnectCliWs<string>({
+				onmessage: (message) => {
+					gstore.logs.push({
+						source: "equipment",
+						timestamp: Date.now(),
+						content: message.data,
+					});
+				},
+			});
+
 			gstore.workspace.available_equipments =
 				await getAvailableEEs("equipment");
 
 			gstore.workspace.available_experiments =
 				await getAvailableEEs("experiment");
-		}}>Set</button
-	>
+		}}>Set</button>
 </label>

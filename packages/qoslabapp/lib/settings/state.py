@@ -82,7 +82,8 @@ class AppState:
         if id not in cls._experiment_proxies:
             return
 
-        cls._experiment_proxies[id].cleanup()
+        if not cls._experiment_proxies[id].removable():
+            raise Exception("Experiment that is running cannot be removed")
 
         del cls._experiment_proxies[id]
 
@@ -134,3 +135,8 @@ class AppState:
 
         # Stop all workers
         await SqlWorker.stop()
+
+    """CLI"""
+
+    def equipmentCli(cls, equipment_id: str, command: str):
+        return eval(f"cls._equipment_proxies[{equipment_id}]{command}")

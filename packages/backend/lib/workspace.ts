@@ -1,9 +1,10 @@
-import { $, fetch, file, randomUUIDv7, spawn, write } from "bun"
-import { app_state } from "./app_state"
+import { $, fetch, file, randomUUIDv7, spawn, write, type SpawnOptions } from "bun"
+import { app_state, postCli } from "./app_state"
 import { parse, stringify } from "smol-toml"
 import { retryOnError, type Dependency } from "qoslab-shared";
 import { pathExist } from "./fs";
 import { mkdir } from "node:fs/promises";
+import { Readable } from 'node:stream'
 
 export async function initiateWorkspace(path: string) {
     $.cwd(path);
@@ -104,8 +105,37 @@ export async function runProject(path: string) {
 
     app_state.pyproc = spawn(
         "uv run uvicorn app.main:app --host localhost --port 8000".split(" "),
-        { stdout: "inherit", cwd: path }
+        { stdout: "pipe", cwd: path }
     )
+
+    async function forever() {
+
+
+        interface ReadableStream<R = any> {
+            [Symbol.asyncIterator](): AsyncIterableIterator<R>;
+        }
+
+        for await (const line of app_state.pyproc.stdout as unknown as ReadableStream) {
+            const output = await new Response(line).text();
+            postCli("qoslabapp", output)
+        }
+
+        // const output = await new Response(app_state.pyproc.stdout).text();
+        // console.log(output)
+
+        // for await (const out of app_state.pyproc!.stdout as unknown as ReadableStream) {
+        //     console.log("printing")
+        //     console.log(new Response(out).text())
+        // }
+    }
+
+    forever()
+
+
+
+
+
+
 
 
     // Wait until the app is online

@@ -209,6 +209,10 @@ class ExperimentProxy(ManagerABC):
         # Shutting down the queue shall close the websocket if there is one
         self._messenger.shutdown()
 
+    def removable(self):
+        # Can only remove experiment that is not currently running
+        return self._runner.removable()
+
     """Public Interface to messenger"""
 
     def subscribeMessage(self, ws: WebSocket):

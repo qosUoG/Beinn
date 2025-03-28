@@ -58,3 +58,9 @@ export function subscribeChartDataWs<T extends any>(payload: { id: string, title
     const socket = new WebSocket(qoslabappWs(`chart/${payload.id}/events`))
     socket.onmessage = payload.onmessage
 }
+
+export function connnectCliWs<T extends any>(payload: { onmessage: (this: WebSocket, event: MessageEvent<T>) => any }) {
+    const socket = new WebSocket(qoslabappWs(`cli`))
+    socket.onmessage = payload.onmessage
+    return socket
+}

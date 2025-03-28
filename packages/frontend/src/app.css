@@ -51,8 +51,6 @@
 		@apply cursor-pointer;
 	}
 
-
-
 	input[type="number"]::-webkit-outer-spin-button,
 	input[type="number"]::-webkit-inner-spin-button,
 	input[type="number"] {
@@ -60,7 +58,6 @@
 		margin: 0;
 		-moz-appearance: textfield !important;
 	}
-
 }
 
 @layer components {
@@ -109,15 +106,15 @@
 	}
 
 	.frow-4 {
-		@apply flex gap-4;
+		@apply flex gap-x-4;
 	}
 
 	.frow-2 {
-		@apply flex gap-2;
+		@apply flex gap-x-2;
 	}
 
 	.frow-1 {
-		@apply flex gap-1;
+		@apply flex gap-x-1;
 	}
 
 	.frow {
@@ -125,15 +122,15 @@
 	}
 
 	.fcol-4 {
-		@apply flex flex-col gap-4;
+		@apply flex flex-col gap-y-4;
 	}
 
 	.fcol-2 {
-		@apply flex flex-col gap-2;
+		@apply flex flex-col gap-y-2;
 	}
 
 	.fcol-1 {
-		@apply flex flex-col gap-1;
+		@apply flex flex-col gap-y-1;
 	}
 
 	.fcol {

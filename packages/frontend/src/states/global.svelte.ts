@@ -14,6 +14,8 @@ export let gstore:
         equipments: Record<string, Equipment>
         experiments: Record<string, RuntimeExperiment>
         mode: "CONFIG" | "EXPERIMENTS",
+        logs: Log[]
+        log_socket: WebSocket | undefined
 
 
     } = $state({
@@ -27,4 +29,12 @@ export let gstore:
         equipments: {},
         experiments: {},
         mode: "CONFIG",
+        logs: [],
+        log_socket: undefined
     })
+
+export type Log = {
+    source: "backend" | "qoslabapp" | "equipment",
+    timestamp: number,
+    content: string
+}
