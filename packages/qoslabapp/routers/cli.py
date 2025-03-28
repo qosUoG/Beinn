@@ -13,7 +13,7 @@ async def cli(ws: WebSocket):
 
     while True:
         data = await ws.receive_json()
-        if data.type == "equipment":
-            await ws.send_text(f"{AppState.cli(data.id, data.command)}")
+        if data["type"] == "equipment":
+            await ws.send_text(f"{AppState.equipmentCli(data['id'], data['command'])}")
         else:
-            await ws.send_text(f"{eval(data.command)}")
+            await ws.send_text(f"{eval(data['command'])}")
