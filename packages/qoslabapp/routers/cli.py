@@ -17,13 +17,11 @@ async def cli(ws: WebSocket):
             except Exception as e:
                 print(e, flush=True)
 
-                if data["type"] == "equipment":
-                    code = (
-                        f"AppState._equipment_proxies['{data['id']}']{data['command']}"
-                    )
-                    await ws.send_json(AppState.interpret(code))
-                else:
-                    await ws.send_json(AppState.interpret(data["command"]))
+            if data["type"] == "equipment":
+                code = f"AppState._equipment_proxies['{data['id']}']{data['command']}"
+                await ws.send_json(AppState.interpret(code))
+            else:
+                await ws.send_json(AppState.interpret(data["command"]))
     except WebSocketDisconnect:
         pass
     except Exception as e:
