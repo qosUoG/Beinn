@@ -19,7 +19,6 @@
 	});
 
 	$effect(() => {
-		console.log({ width, height });
 		const message: XYWebWorkerMessage = {
 			type: "resize",
 			payload: {

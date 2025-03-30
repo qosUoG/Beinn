@@ -24,7 +24,6 @@
 		if (canvas_wrapper) {
 			width = canvas_wrapper.clientWidth;
 			height = canvas_wrapper.clientHeight;
-			console.log({ width, height });
 		}
 	});
 </script>
@@ -42,7 +41,6 @@
 			ondivresize={({
 				detail: { width: raw_width, height: raw_height },
 			}) => {
-				console.log({ raw_height, raw_width });
 				width = raw_width;
 				height = raw_height;
 			}}>

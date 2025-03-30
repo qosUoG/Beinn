@@ -91,7 +91,6 @@ class ExampleEquipment(r.EquipmentABC):
     # @property decorator allows the instance method to be executed as if it is a instance attribute
     # In other words, it intercepts during instance attribute acquisition and assignment
     @property
-    @r.EquipmentTLock
     def power(self):
         # # In real life one should do something with the equipment,
         # # Which shall be acuired with pyvisa
@@ -104,17 +103,16 @@ class ExampleEquipment(r.EquipmentABC):
     # "value" for the example below
 
     @power.setter
-    @r.EquipmentTLock
     def power(self, input: int):
         self._power = input
 
     # For actions that isn't a property, such as one off movement of a spectrometer turret, one
     # may write a normal function
-    @r.EquipmentTLock
+
     def echo(self, input: str):
         return input
 
     # While you may implement everything with @property, I like to define read only with methods and treat them as instead
-    @r.EquipmentTLock
+
     def measureTemp(self):
         return random() * 100 * self._power

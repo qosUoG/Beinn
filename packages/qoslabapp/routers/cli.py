@@ -12,11 +12,19 @@ async def cli(ws: WebSocket):
     await ws.accept()
     try:
         while True:
-            data = await ws.receive_json()
-            if data["type"] == "equipment":
-                code = f"cls._equipment_proxies[{data['id']}]{data['command']}"
-                await ws.send_json(AppState.interpret(code))
-            else:
-                await ws.send_json(AppState.interpret(data["command"]))
+            try:
+                data = await ws.receive_json()
+            except Exception as e:
+                print(e, flush=True)
+
+                if data["type"] == "equipment":
+                    code = (
+                        f"AppState._equipment_proxies['{data['id']}']{data['command']}"
+                    )
+                    await ws.send_json(AppState.interpret(code))
+                else:
+                    await ws.send_json(AppState.interpret(data["command"]))
     except WebSocketDisconnect:
         pass
+    except Exception as e:
+        print(e, flush=True)

@@ -100,18 +100,6 @@ class ExperimentABC(ABC):
         pass
 
 
-# This is a decorator to ensure thread safe access of equipment
-# All equipment functions shall use this decorator
-# Example refer to the EquipmentABC below
-def EquipmentTLock(func):
-    @functools.wraps(func)
-    def wrapper(self: EquipmentABC, *args, **kwargs):
-        with self._qoslab_equipment_thread_lock:
-            return func(self, *args, **kwargs)
-
-    return wrapper
-
-
 @dataclass
 class EquipmentABC(ABC):
     # Instance shall initiate params in __init__() function

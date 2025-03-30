@@ -86,7 +86,7 @@ const getWsOnmessageHandler = (y_length: number, mode: XYChartMode) => {
 
         const frames_bytes = new DataView(event.data)
         // Frame size is assumed to be right, thus not checked
-        console.log({ frames_bytes })
+
 
         function* parseFrames(frames_bytes: DataView<ArrayBuffer>) {
             let offset = 0

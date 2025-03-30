@@ -54,16 +54,21 @@
 		} else {
 			// Targeting equipment, first check if the equipment name exist
 			const equipment_name = input.split(".")[0];
-			if (gstore.equipments[equipment_name] === undefined) return;
+			for (const equipment of Object.values(gstore.equipments)) {
+				if (!equipment.created) return;
 
-			// Reconstruct the command and send to python
-			gstore.log_socket.send(
-				JSON.stringify({
-					type: "equipment",
-					id: gstore.equipments[equipment_name].id,
-					command: input.slice(equipment_name.length),
-				})
-			);
+				if (equipment.name === equipment_name) {
+					console.log(input.slice(equipment_name.length));
+					// Reconstruct the command and send to python
+					gstore.log_socket.send(
+						JSON.stringify({
+							type: "equipment",
+							id: equipment.id,
+							command: input.slice(equipment_name.length),
+						})
+					);
+				}
+			}
 		}
 
 		// Record the command into the log

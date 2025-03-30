@@ -30,30 +30,30 @@ class AppState:
     Equipments 
     """
 
-    _equipments_proxies: dict[str, EquipmentProxy] = {}
+    _equipment_proxies: dict[str, EquipmentProxy] = {}
     _equipment_imported_modules: list[ModuleType] = []
 
     @classmethod
     def createEquipment(cls, id: str, module_str: str, ecls_str: str):
         module = cls.importModule(cls._equipment_imported_modules, module_str)
-        cls._equipments_proxies[id] = EquipmentProxy(getattr(module, ecls_str))
+        cls._equipment_proxies[id] = EquipmentProxy(getattr(module, ecls_str))
 
     @classmethod
     def getEquipment(cls, id: str):
-        return cls._equipments_proxies[id]
+        return cls._equipment_proxies[id]
 
     @classmethod
     def getEquipmentParams(cls, id: str):
-        return cls._equipments_proxies[id].params
+        return cls._equipment_proxies[id].params
 
     @classmethod
     def setEquipmentParams(cls, id: str, params: Params):
-        cls._equipments_proxies[id].params = params
+        cls._equipment_proxies[id].params = params
 
     @classmethod
     def removeEquipment(cls, id: str):
-        if id in cls._equipments_proxies:
-            del cls._equipments_proxies[id]
+        if id in cls._equipment_proxies:
+            del cls._equipment_proxies[id]
 
     """
     Experiments 

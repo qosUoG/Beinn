@@ -17,7 +17,7 @@
 		let ws = new WebSocket(backendWs("cli"));
 		ws.onmessage = async (event: MessageEvent<string>) => {
 			const payload = JSON.parse(event.data) as { logs: Log[] };
-			console.log(payload);
+
 			gstore.logs.push(...payload.logs);
 		};
 		ws.onclose = () => {

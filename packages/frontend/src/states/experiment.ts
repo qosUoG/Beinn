@@ -25,7 +25,7 @@ export function getExperimentEventFn(experiment: CreatedRuntimeExperiment) {
 
     function updateEventFromWsFn(event: MessageEvent<string>) {
 
-        console.log(event.data)
+
 
         let res:
             { key: "iteration_count", value: number } |
