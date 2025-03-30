@@ -1,3 +1,4 @@
+import ast
 import importlib
 from types import ModuleType
 from fastapi import WebSocket
@@ -138,5 +139,30 @@ class AppState:
 
     """CLI"""
 
-    def equipmentCli(cls, equipment_id: str, command: str):
-        return eval(f"cls._equipment_proxies[{equipment_id}]{command}")
+    @classmethod
+    def interpret(cls, code: str):
+        try:
+            return {
+                "type": "eval",
+                "result": f"{eval(code)}",
+            }
+
+        except SyntaxError:
+            pass
+        except Exception as e:
+            return {
+                "type": "error",
+                "result": f"{e}",
+            }
+
+        try:
+            return {
+                "type": "exec",
+                "result": f"{exec(code)}",
+            }
+
+        except Exception as e:
+            return {
+                "type": "error",
+                "result": f"{e}",
+            }
