@@ -10,7 +10,7 @@ function consoleIterator(...data: any[]) {
     postCli("backend", typeof data[0] === "string" ? data[0] : JSON.stringify(data[0]))
 }
 
-// console.log = consoleIterator
+console.log = consoleIterator
 
 
 

@@ -26,13 +26,17 @@
 	let input = $state("");
 
 	let displaying_logs = $derived.by(() => {
-		return gstore.logs.filter((log) => {
-			if (log.source === "backend" && display_backend) return true;
-			if (log.source === "qoslabapp" && display_qoslabapp) return true;
-			if (log.source === "equipment" && display_equipment) return true;
+		return gstore.logs
+			.filter((log) => {
+				if (log.source === "backend" && display_backend) return true;
+				if (log.source === "qoslabapp" && display_qoslabapp)
+					return true;
+				if (log.source === "equipment" && display_equipment)
+					return true;
 
-			return false;
-		});
+				return false;
+			})
+			.sort((a, b) => a.timestamp - b.timestamp);
 	});
 
 	function handleSend() {
@@ -132,7 +136,12 @@
 				{/if}
 
 				<div
-					class="min-w-16 w-16 max-w-16 frow-1 text-yellow-500 text-nowrap">
+					class={cn(
+						"min-w-16 w-16 max-w-16 frow-1 text-nowrap",
+						source === "backend" ? "text-yellow-300" : "",
+						source === "qoslabapp" ? "text-cyan-300" : "",
+						source === "equipment" ? "text-indigo-300" : ""
+					)}>
 					{source}
 				</div>
 

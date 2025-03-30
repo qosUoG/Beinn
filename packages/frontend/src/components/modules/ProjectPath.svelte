@@ -40,11 +40,24 @@
 			// Connect to cli ws
 			gstore.log_socket = connnectCliWs<string>({
 				onmessage: (message) => {
-					gstore.logs.push({
-						source: "equipment",
-						timestamp: Date.now(),
-						content: message.data,
-					});
+					const res = JSON.parse(message.data) as
+						| {
+								type: "exec";
+								result: null;
+						  }
+						| { type: "eval"; result: string }
+						| {
+								type: "error";
+								result: string;
+						  };
+					console.log({ res });
+
+					if (res.type !== "exec")
+						gstore.logs.push({
+							source: "equipment",
+							timestamp: Date.now(),
+							content: res.result,
+						});
 				},
 			});
 
