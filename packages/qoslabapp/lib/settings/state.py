@@ -144,7 +144,7 @@ class AppState:
         try:
             return {
                 "type": "eval",
-                "result": f"{eval(code)}",
+                "result": f"{eval(code, globals=globals())}",
             }
 
         except SyntaxError:
@@ -158,7 +158,7 @@ class AppState:
         try:
             return {
                 "type": "exec",
-                "result": f"{exec(code)}",
+                "result": f"{exec(code, globals=globals())}",
             }
 
         except Exception as e:
