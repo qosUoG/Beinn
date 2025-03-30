@@ -10,7 +10,7 @@ function consoleIterator(...data: any[]) {
     postCli("backend", typeof data[0] === "string" ? data[0] : JSON.stringify(data[0]))
 }
 
-console.log = consoleIterator
+// console.log = consoleIterator
 
 
 
@@ -74,7 +74,7 @@ serve({
                 const { path, source } = await req.json() as { source: string, path: string }
                 $.cwd(path)
                 // Could be from pip, git path or local path
-                await $`uv add ${{ raw: source }}`
+                postCli("backend", await $`uv add ${{ raw: source }}`.text())
                 return Response.json({}, { headers })
             }
         },
@@ -82,7 +82,7 @@ serve({
             POST: async req => {
                 const { path, name } = await req.json() as { name: string, path: string }
                 $.cwd(path)
-                await $`uv remove ${name}`
+                postCli("backend", await $`uv remove ${name}`.text())
                 return Response.json({}, { headers })
             }
         },

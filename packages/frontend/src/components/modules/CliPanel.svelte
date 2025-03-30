@@ -145,8 +145,9 @@
 					{source}
 				</div>
 
-				<div class="text-slate-100 text-wrap flex-grow">
-					>> {content}
+				<div
+					class="text-slate-100 text-wrap flex-grow whitespace-pre-line">
+					>> {content.replace(/\u001b\[.*?m/g, "")}
 				</div>
 			</div>
 		{/each}

@@ -50,7 +50,6 @@
 								type: "error";
 								result: string;
 						  };
-					console.log({ res });
 
 					if (res.type !== "exec")
 						gstore.logs.push({

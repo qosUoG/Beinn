@@ -1,17 +1,23 @@
-import { $, fetch, file, randomUUIDv7, spawn, write, type SpawnOptions } from "bun"
+import { $, fetch, file, randomUUIDv7, spawn, spawnSync, write, type SpawnOptions } from "bun"
 import { app_state, postCli } from "./app_state"
 import { parse, stringify } from "smol-toml"
 import { retryOnError, type Dependency } from "qoslab-shared";
 import { pathExist } from "./fs";
 import { mkdir } from "node:fs/promises";
-import { Readable } from 'node:stream'
+
+function shell(command: string, path: string) {
+    const text = spawnSync(command.split(" "),
+        { cwd: path }).stderr.toString()
+    console.log(JSON.stringify({ text }))
+    postCli("backend", text)
+}
 
 export async function initiateWorkspace(path: string) {
-    $.cwd(path);
     // TODO Check if uv exists
 
     // init barebone project
-    await $`uv init`
+    shell("uv init", path)
+
 
     // check if uv init successfully
     const pyproject = file(path + "/pyproject.toml")
@@ -27,7 +33,7 @@ export async function initiateWorkspace(path: string) {
 }
 
 export async function copyApp(path: string) {
-    $.cwd(path);
+
     // check if .gitignore exists
     const gitignore = file(path + "/.gitignore")
 
@@ -40,11 +46,13 @@ export async function copyApp(path: string) {
     }
 
     // install all dependency
-    await $`uv add fastapi fastapi[standard] aiosqlite`
-    await $`uv add git+https://github.com/qosUoG/QosLab#subdirectory=packages/qoslablib --branch main`
+    shell("uv add fastapi fastapi[standard] aiosqlite", path)
+    shell("uv add git+https://github.com/qosUoG/QosLab#subdirectory=packages/qoslablib --branch main", path)
+
     // In case qoslablib is already installed and stale
-    await $`uv lock --upgrade-package qoslablib`
-    await $`uvx copier copy git+https://github.com/qosUoG/QosLab.git ./app`
+    shell("uv lock --upgrade-package qoslablib", path)
+    shell("uvx copier copy git+https://github.com/qosUoG/QosLab.git ./app", path)
+
 }
 
 export async function readAllUvDependencies(path: string) {
