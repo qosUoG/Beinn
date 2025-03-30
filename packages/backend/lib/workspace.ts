@@ -5,11 +5,11 @@ import { retryOnError, type Dependency } from "qoslab-shared";
 import { pathExist } from "./fs";
 import { mkdir } from "node:fs/promises";
 
-function shell(command: string, path: string) {
-    const text = spawnSync(command.split(" "),
-        { cwd: path }).stderr.toString()
-    console.log(JSON.stringify({ text }))
-    postCli("backend", text)
+export function shell(command: string, path: string) {
+
+
+    postCli("backend", spawnSync(command.split(" "),
+        { cwd: path }).stderr.toString())
 }
 
 export async function initiateWorkspace(path: string) {

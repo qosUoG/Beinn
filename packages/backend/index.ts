@@ -1,7 +1,7 @@
 import { $, file, serve, type RouterTypes } from "bun"
 import { headers } from "./lib/_shared";
 import { app_state, postCli } from "./lib/app_state";
-import { copyApp, initiateWorkspace, readAllUvDependencies, runProject } from "./lib/workspace";
+import { copyApp, initiateWorkspace, readAllUvDependencies, runProject, shell } from "./lib/workspace";
 import { pathExist } from "./lib/fs";
 import { mkdir } from "node:fs/promises"
 
@@ -10,7 +10,7 @@ function consoleIterator(...data: any[]) {
     postCli("backend", typeof data[0] === "string" ? data[0] : JSON.stringify(data[0]))
 }
 
-// console.log = consoleIterator
+console.log = consoleIterator
 
 
 
@@ -72,17 +72,17 @@ serve({
         "/workspace/dependency/add": {
             POST: async req => {
                 const { path, source } = await req.json() as { source: string, path: string }
-                $.cwd(path)
+
                 // Could be from pip, git path or local path
-                postCli("backend", await $`uv add ${{ raw: source }}`.text())
+                shell(`uv add ${{ raw: source }}`, path)
                 return Response.json({}, { headers })
             }
         },
         "/workspace/dependency/remove": {
             POST: async req => {
                 const { path, name } = await req.json() as { name: string, path: string }
-                $.cwd(path)
-                postCli("backend", await $`uv remove ${name}`.text())
+
+                shell(`uv remove ${name}`, path)
                 return Response.json({}, { headers })
             }
         },
