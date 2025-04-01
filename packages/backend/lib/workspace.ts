@@ -58,7 +58,7 @@ export async function copyApp(path: string) {
 export async function readAllUvDependencies(path: string) {
     // Get the list of dependencies from pyproject.toml
     const pyproject = file(path + "/pyproject.toml")
-    if (! await pyproject.exists()) throw Error()
+    if (! await pyproject.exists()) throw Error("pyproject.toml not found")
 
     const parsed = parse(await pyproject.text()) as any
 
@@ -140,5 +140,17 @@ export async function runProject(path: string) {
     });
 
 
+}
+
+export async function loadWorkspace(path: string) {
+    const save_file = file(path + "/.qoslabapp_state")
+    if (! await save_file.exists()) return { save: undefined }
+
+    return { save: JSON.parse(await save_file.text()) }
+}
+
+export async function saveWorkspace(path: string, payload: any) {
+    const save_file = file(path + "/.qoslabapp_state")
+    await save_file.write(JSON.stringify(payload))
 }
 

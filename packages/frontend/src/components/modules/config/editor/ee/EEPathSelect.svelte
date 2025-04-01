@@ -23,12 +23,11 @@
 	<Separator />
 	<div class="relative flex-grow -mx-2 px-2 min-w-0">
 		<button
-			class="min-w-0 overflow-x-scroll text-nowrap w-full absolute top-0 left-0 text-left pl-2"
+			class="w-full h-full text-left"
 			onclick={async (e) => {
 				open = !open;
 			}}
-			{id}
-		>
+			{id}>
 			{#if value.module !== "" && value.cls !== ""}
 				from {value.module} import
 				{value.cls}
@@ -41,8 +40,7 @@
 				onoutsideclick={() => {
 					open = false;
 				}}
-				class=" absolute left-0 top-6 bg-white fcol z-10 shadow-xl rounded min-w-full"
-			>
+				class=" absolute left-0 top-6 bg-white fcol z-10 shadow-xl rounded min-w-full">
 				{#each options as { cls, modules }}
 					<div class={cn(" wrapped fcol group")}>
 						<div
@@ -50,9 +48,8 @@
 								" wrapped ",
 								value.cls === cls
 									? "bg-slate-500 text-slate-50"
-									: "group-hover:bg-slate-300",
-							)}
-						>
+									: "group-hover:bg-slate-300"
+							)}>
 							{cls}
 						</div>
 						{#each modules as module}
@@ -61,14 +58,13 @@
 									"   text-nowrap text-left ml-6 wrapped flex-grow",
 									value.module === module
 										? "bg-slate-500 text-slate-50"
-										: "hover:bg-slate-300",
+										: "hover:bg-slate-300"
 								)}
 								onclick={() => {
 									value.module = module;
 									value.cls = cls;
 									open = false;
-								}}
-							>
+								}}>
 								{module}
 							</button>
 						{/each}

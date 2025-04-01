@@ -41,7 +41,15 @@
 			}}><Cli /></button>
 	</div>
 
-	<div class="h-full w-full frow-4 min-h-0">
+	<div class="h-full w-full frow-4 min-h-0 relative">
+		{#if !gstore.workspace.connected}
+			<div
+				class="h-full w-full z-100 absolute top-0 left-0 backdrop-blur-xs rounded flex justify-center items-center">
+				<div class="text-3xl bg-white p-20 rounded">
+					Connect to a workspace to begin
+				</div>
+			</div>
+		{/if}
 		{#if gstore.mode === "CONFIG"}
 			<Config />
 		{:else if gstore.mode === "EXPERIMENTS"}

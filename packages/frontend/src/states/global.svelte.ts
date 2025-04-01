@@ -2,39 +2,7 @@
 import type { Equipment, Directory, Dependency } from "qoslab-shared";
 import type { RuntimeExperiment } from "./experiment";
 
-export const gstore_template: {
-    workspace: {
-        path: string,
-        directory: Directory,
-        dependencies: Record<string, Dependency>
-        available_equipments: { modules: string[], cls: string }[]
-        available_experiments: { modules: string[], cls: string }[]
-    }
-    equipments: Record<string, Equipment>
-    experiments: Record<string, RuntimeExperiment>
-    mode: "CONFIG" | "EXPERIMENTS",
-    logs: Log[]
-    command_history: string[],
-    log_socket: WebSocket | undefined,
-    workspace_connected: boolean
 
-
-} = {
-    workspace: {
-        path: import.meta.env.VITE_DEFAULT_EXPERIMENT_PATH,
-        directory: { files: [], dirs: {} },
-        dependencies: {},
-        available_equipments: [],
-        available_experiments: [],
-    },
-    equipments: {},
-    experiments: {},
-    mode: "CONFIG",
-    logs: [],
-    command_history: [],
-    log_socket: undefined,
-    workspace_connected: false
-}
 
 export let gstore: {
     workspace: {
@@ -43,6 +11,7 @@ export let gstore: {
         dependencies: Record<string, Dependency>
         available_equipments: { modules: string[], cls: string }[]
         available_experiments: { modules: string[], cls: string }[]
+        connected: boolean
     }
     equipments: Record<string, Equipment>
     experiments: Record<string, RuntimeExperiment>
@@ -50,7 +19,8 @@ export let gstore: {
     logs: Log[]
     command_history: string[],
     log_socket: WebSocket | undefined,
-    workspace_connected: boolean
+
+
 
 
 } = $state({
@@ -60,6 +30,7 @@ export let gstore: {
         dependencies: {},
         available_equipments: [],
         available_experiments: [],
+        connected: false
     },
     equipments: {},
     experiments: {},
@@ -67,7 +38,8 @@ export let gstore: {
     logs: [],
     command_history: [],
     log_socket: undefined,
-    workspace_connected: false
+
+
 })
 
 export function resetGstore() {
@@ -77,14 +49,22 @@ export function resetGstore() {
         dependencies: {},
         available_equipments: [],
         available_experiments: [],
+        connected: false
     }
     gstore.equipments = {}
     gstore.experiments = {}
     gstore.mode = "CONFIG"
     gstore.logs = gstore.logs.filter(l => l.source === "backend")
 
+}
 
-    gstore.workspace_connected = false
+export type Save = {
+
+    dependencies: typeof gstore.workspace.dependencies,
+    equipments: typeof gstore.equipments,
+    experiments: typeof gstore.experiments,
+
+
 }
 
 

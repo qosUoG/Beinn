@@ -1,7 +1,7 @@
 import { $, file, serve, type RouterTypes } from "bun"
 import { headers } from "./lib/_shared";
 import { app_state, postCli } from "./lib/app_state";
-import { copyApp, initiateWorkspace, readAllUvDependencies, runProject, shell } from "./lib/workspace";
+import { copyApp, initiateWorkspace, loadWorkspace, readAllUvDependencies, runProject, saveWorkspace, shell } from "./lib/workspace";
 import { pathExist } from "./lib/fs";
 import { mkdir } from "node:fs/promises"
 
@@ -42,7 +42,7 @@ serve({
 
     },
     routes: {
-        "/workspace/set": {
+        "/workspace/load": {
             POST: async req => {
                 const { path } = await req.json() as { path: string }
 
@@ -57,9 +57,14 @@ serve({
                     await copyApp(path)
 
                 await runProject(path)
-
-
-
+                return Response.json(await loadWorkspace(path), { headers })
+            }
+        }
+        ,
+        "/workspace/save": {
+            POST: async req => {
+                const { path, payload } = await req.json() as { path: string, payload: any }
+                await saveWorkspace(path, payload)
                 return Response.json({}, { headers })
             }
         }
@@ -95,18 +100,22 @@ serve({
         },
         "/workspace/disconnect": {
             GET: async req => {
-                if (app_state.pyproc === undefined) return Response.json({ "success": true })
+                if (app_state.pyproc === undefined) {
+                    console.log("disconnection successful")
+                    return Response.json({ "success": true }, { headers })
+                }
 
                 if (app_state.pyproc !== undefined) {
-                    console.log("disconnecting")
                     const res = await (await fetch("http://localhost:8000/workspace/forcestop")).json() as { success: boolean }
                     if (res.success) {
                         app_state.pyproc?.kill()
                         // wait for 100 ms
                         await new Promise(_ => setTimeout(_, 1000));
+                        console.log("disconnection successful")
                         return Response.json({ "success": true }, { headers })
                     }
                 }
+                console.log("disconnection failed")
                 return Response.json({ "success": false }, { headers })
             }
         }

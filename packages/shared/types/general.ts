@@ -65,6 +65,7 @@ export type Dependency = {
 } | {
     id: string
     source: DependencySource
+    add_string?: string
 
     name: string,
     fullname: string,
@@ -72,19 +73,25 @@ export type Dependency = {
     confirmed: true
 }
 
+export type ConfirmedDependency = Extract<Dependency, { "confirmed": true }>
+
 export type DependencySource = {
     type: "git",
+
     git: string,
     subdirectory: string,
     branch: string
 } | {
     type: "path",
+
     path: string,
     editable: boolean
 } | {
     type: "pip",
+
     package: string
 } | {
     type: "local",
+
     directory: string
 }
