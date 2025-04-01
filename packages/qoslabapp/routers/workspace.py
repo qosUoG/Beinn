@@ -14,4 +14,4 @@ async def workspace_status():
 @router.get("/workspace/forcestop")
 async def workspace_forcestop():
     await AppState.forceStop()
-    return {"forcestop": "success"}
+    return {"success": True}

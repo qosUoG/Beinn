@@ -3,6 +3,10 @@ import { gstore } from "$states/global.svelte";
 import type { Dependency } from "qoslab-shared";
 import { backendUrl, postRequestJsonInOut } from "./utils";
 
+export async function disconnectWorkspace() {
+    await fetch(backendUrl("workspace/disconnect"))
+}
+
 export async function setWorkspaceDirectory(path: string): Promise<void> {
     await postRequestJsonInOut(backendUrl("workspace/set"), { path: gstore.workspace.path })
 }

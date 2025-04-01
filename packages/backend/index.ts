@@ -59,6 +59,7 @@ serve({
                 await runProject(path)
 
 
+
                 return Response.json({}, { headers })
             }
         }
@@ -92,6 +93,23 @@ serve({
                 return Response.json(await readAllUvDependencies(path), { headers })
             }
         },
+        "/workspace/disconnect": {
+            GET: async req => {
+                if (app_state.pyproc === undefined) return Response.json({ "success": true })
+
+                if (app_state.pyproc !== undefined) {
+                    console.log("disconnecting")
+                    const res = await (await fetch("http://localhost:8000/workspace/forcestop")).json() as { success: boolean }
+                    if (res.success) {
+                        app_state.pyproc?.kill()
+                        // wait for 100 ms
+                        await new Promise(_ => setTimeout(_, 1000));
+                        return Response.json({ "success": true }, { headers })
+                    }
+                }
+                return Response.json({ "success": false }, { headers })
+            }
+        }
     },
     async fetch(req, server) {
 
@@ -118,6 +136,7 @@ serve({
 process.on("SIGINT", async () => {
 
     if (app_state.pyproc !== undefined) {
+
         const res = await fetch("http://localhost:8000/workspace/forcestop")
         console.log(await res.json())
         app_state.pyproc?.kill()

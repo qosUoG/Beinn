@@ -117,33 +117,19 @@ export async function runProject(path: string) {
     )
 
     async function forever() {
-
-
         interface ReadableStream<R = any> {
             [Symbol.asyncIterator](): AsyncIterableIterator<R>;
         }
 
-        for await (const line of app_state.pyproc.stdout as unknown as ReadableStream) {
+        for await (const line of app_state.pyproc!.stdout as unknown as ReadableStream) {
             const output = await new Response(line).text();
             postCli("qoslabapp", output)
         }
 
-        // const output = await new Response(app_state.pyproc.stdout).text();
-        // console.log(output)
 
-        // for await (const out of app_state.pyproc!.stdout as unknown as ReadableStream) {
-        //     console.log("printing")
-        //     console.log(new Response(out).text())
-        // }
     }
 
     forever()
-
-
-
-
-
-
 
 
     // Wait until the app is online
