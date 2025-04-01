@@ -60,6 +60,7 @@
 					confirmed: true,
 					name: temp_source.directory,
 					fullname: temp_source.directory,
+					add_string: temp_source.directory,
 				};
 				break;
 

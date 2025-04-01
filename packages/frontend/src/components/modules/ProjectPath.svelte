@@ -9,6 +9,7 @@
 		loadWorkspace,
 		saveWorkspace,
 		addDependency,
+		checkDependencyInit,
 	} from "$services/backend.svelte";
 	import {
 		connnectCliWs,
@@ -77,16 +78,34 @@
 				});
 
 				if (load.save !== undefined) {
-					// Try to establish all dependencies
-					Object.values(load.save.dependencies).forEach((d) => {
-						if (d.confirmed && d.source.type === "local") {
-							const id = getRandomId(
-								Object.keys(new_dependencies)
-							);
-							d.id = id;
-							gstore.workspace.dependencies[id] = d;
-						}
-					});
+					// Add Local dependencies
+					Promise.all(
+						Object.values(load.save.dependencies).map((d) =>
+							(async () => {
+								if (
+									!d.confirmed ||
+									d.source.type !== "local" ||
+									d.add_string === undefined
+								)
+									return;
+
+								// Check init is available
+								const { success } = await checkDependencyInit(
+									d.add_string!
+								);
+
+								if (!success) return;
+
+								// Write local to dependency
+
+								const id = getRandomId(
+									Object.keys(new_dependencies)
+								);
+								d.id = id;
+								gstore.workspace.dependencies[id] = d;
+							})()
+						)
+					);
 				}
 
 				gstore.workspace.dependencies = new_dependencies;
@@ -94,54 +113,69 @@
 				await tick();
 				if (load.save !== undefined) {
 					// Then try to install dependencies that is not being installed
-					Object.values(load.save.dependencies).forEach(async (d) => {
-						if (!d.confirmed || d.add_string === undefined) return;
-						if (
-							!Object.values(gstore.workspace.dependencies).find(
-								(gd) => {
-									// type check
-									if (!gd.confirmed) return true;
-
-									if (gd.fullname === d.fullname) return true;
-									if (gd.source.type === "local") return true;
-									if (gd.add_string === undefined)
-										return true;
-								}
-							)
-						) {
-							// Not found dependency, try to install
-							await addDependency(d.add_string);
-
-							// Read All dependencies and figure out which is the new one
-							const allDependencies =
-								await readAllUvDependencies();
-
-							const current_dependency_names = Object.values(
-								$state.snapshot(gstore.workspace.dependencies)
-							)
-								.filter((d) => d.confirmed)
-								.map((d) => d.name);
-
-							Object.values(allDependencies).forEach((d) => {
+					await Promise.all(
+						Object.values(load.save.dependencies).map((d) =>
+							(async () => {
+								if (!d.confirmed || d.add_string === undefined)
+									return;
 								if (
-									!current_dependency_names.includes(d.name)
-								) {
-									const id = getRandomId(
-										Object.keys(
-											gstore.workspace.dependencies
-										)
-									);
-									gstore.workspace.dependencies[id] = {
-										...d,
-										id,
-										add_string: d.add_string,
-									};
-								}
-							});
+									!Object.values(
+										gstore.workspace.dependencies
+									).find((gd) => {
+										// type check
+										if (!gd.confirmed) return true;
 
-							await tick();
-						}
-					});
+										if (gd.fullname === d.fullname)
+											return true;
+									})
+								) {
+									// Check if it is a local install
+
+									// Not found dependency, try to install
+									await addDependency(d.add_string);
+
+									// Read All dependencies and figure out which is the new one
+									const allDependencies =
+										await readAllUvDependencies();
+
+									const current_dependency_names =
+										Object.values(
+											$state.snapshot(
+												gstore.workspace.dependencies
+											)
+										)
+											.filter((d) => d.confirmed)
+											.map((d) => d.name);
+
+									Object.values(allDependencies).forEach(
+										(d) => {
+											if (
+												!current_dependency_names.includes(
+													d.name
+												)
+											) {
+												const id = getRandomId(
+													Object.keys(
+														gstore.workspace
+															.dependencies
+													)
+												);
+												gstore.workspace.dependencies[
+													id
+												] = {
+													...d,
+													id,
+													add_string: d.add_string,
+												};
+											}
+										}
+									);
+
+									await tick();
+								}
+							})()
+						)
+					);
 				}
 
 				// Connect to cli ws
@@ -177,80 +211,98 @@
 
 				if (load.save !== undefined) {
 					// Try to create all equipments and experiments
-					Object.values(load.save.equipments).forEach(async (e) => {
-						if (!e.created) return;
-						// First check if equipment is available in dependency
+					await Promise.all(
+						Object.values(load.save.equipments)
+							.map((e) =>
+								(async () => {
+									if (!e.created) return;
+									// First check if equipment is available in dependency
 
-						if (
-							!gstore.workspace.available_equipments.find(
-								({ modules, cls }) => {
-									return (
-										e.module_cls.cls === cls &&
-										modules.includes(e.module_cls.module)
+									if (
+										!gstore.workspace.available_equipments.find(
+											({ modules, cls }) => {
+												return (
+													e.module_cls.cls === cls &&
+													modules.includes(
+														e.module_cls.module
+													)
+												);
+											}
+										)
+									)
+										return;
+
+									gstore.equipments[e.id] = {
+										...e,
+									};
+									await tick();
+									await createEE(
+										"equipment",
+										gstore.equipments[e.id]
 									);
-								}
+									await tick();
+								})()
 							)
-						)
-							return;
+							.concat(
+								Object.values(load.save.experiments).map((e) =>
+									(async () => {
+										if (!e.created) return;
+										// First check if experiment is available in dependency
 
-						// Create the equipment
-						const id = getRandomId(
-							Object.keys(gstore.workspace.available_equipments)
-						);
-						gstore.equipments[id] = {
-							...e,
-							id,
-						};
+										if (
+											!gstore.workspace.available_experiments.find(
+												({ modules, cls }) => {
+													return (
+														e.module_cls.cls ===
+															cls &&
+														modules.includes(
+															e.module_cls.module
+														)
+													);
+												}
+											)
+										)
+											return;
 
-						await createEE("equipment", e);
-						await tick();
-					});
+										// Create the experiment
 
-					Object.values(load.save.experiments).forEach(async (e) => {
-						if (!e.created) return;
-						// First check if experiment is available in dependency
-
-						if (
-							!gstore.workspace.available_experiments.find(
-								({ modules, cls }) => {
-									return (
-										e.module_cls.cls === cls &&
-										modules.includes(e.module_cls.module)
-									);
-								}
+										gstore.experiments[e.id] = {
+											...e,
+										};
+										await tick();
+										await createEE(
+											"experiment",
+											gstore.experiments[e.id]
+										);
+										await tick();
+									})()
+								)
 							)
-						)
-							return;
-
-						// Create the experiment
-						const id = getRandomId(
-							Object.keys(gstore.workspace.available_experiments)
-						);
-						gstore.experiments[id] = {
-							...e,
-							id,
-						};
-
-						await createEE("experiment", e);
-						await tick();
-					});
+					);
 
 					await tick();
 
 					// Then try to set params
-					Object.values(gstore.equipments).forEach(async (e) => {
-						if (!e.created) return;
+					await Promise.all(
+						Object.values(gstore.equipments)
+							.map((e) =>
+								(async () => {
+									if (!e.created) return;
 
-						await setEEParams("equipment", e);
-						await tick();
-					});
+									await setEEParams("equipment", e);
+									await tick();
+								})()
+							)
+							.concat(
+								Object.values(gstore.experiments).map((e) =>
+									(async () => {
+										if (!e.created) return;
 
-					Object.values(gstore.experiments).forEach(async (e) => {
-						if (!e.created) return;
-
-						await setEEParams("experiment", e);
-						await tick();
-					});
+										await setEEParams("experiment", e);
+									})()
+								)
+							)
+					);
 				}
 
 				gstore.workspace.connected = true;
