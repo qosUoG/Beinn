@@ -278,7 +278,8 @@ class ExperimentProxy(ManagerABC):
         self._runner.stop()
 
     async def waitUntil_stopped(self):
-        await self._status.stopped.wait()
+        if hasattr(self, "_status"):
+            await self._status.stopped.wait()
 
     def pause_async(self):
         self._runner.pause()
