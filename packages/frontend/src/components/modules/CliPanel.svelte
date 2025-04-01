@@ -28,7 +28,9 @@
 	let query = $state("");
 
 	let query_list = $derived(
-		gstore.command_history.filter((c) => c.startsWith(query) && c !== query)
+		gstore.command_history.filter(
+			(c) => c.startsWith(query) && c !== query,
+		),
 	);
 
 	// Start at the end, which is out of bound
@@ -48,7 +50,7 @@
 			.sort((a, b) => a.timestamp - b.timestamp);
 	});
 
-	function handleSend() {
+	async function handleSend() {
 		// Check if cli websocket is connected
 		if (gstore.log_socket === undefined) return;
 
@@ -58,7 +60,7 @@
 				JSON.stringify({
 					type: "general",
 					command: input,
-				})
+				}),
 			);
 		} else {
 			// Targeting equipment, first check if the equipment name exist
@@ -74,7 +76,7 @@
 							type: "equipment",
 							id: equipment.id,
 							command: input.slice(equipment_name.length),
-						})
+						}),
 					);
 				}
 			}
@@ -90,6 +92,11 @@
 		gstore.command_history.push(input);
 
 		input = "";
+		query = "";
+
+		await tick();
+
+		query_index = query_list.length;
 	}
 </script>
 
@@ -98,41 +105,45 @@
 		<button
 			class={cn(
 				"icon-btn-sm  rounded border-1 border-green-500 text-slate-700",
-				display_time ? "bg-green-500" : "text-green-500"
+				display_time ? "bg-green-500" : "text-green-500",
 			)}
 			onclick={(_) => {
 				display_time = !display_time;
-			}}><Clock /></button>
+			}}><Clock /></button
+		>
 		<button
 			class={cn(
 				"wrapped  border-1 border-yellow-300 ",
 				display_backend
 					? "bg-yellow-300 text-slate-700"
-					: "text-yellow-300"
+					: "text-yellow-300",
 			)}
 			onclick={() => {
 				display_backend = !display_backend;
-			}}>backend</button>
+			}}>backend</button
+		>
 		<button
 			class={cn(
 				"wrapped  border-1 border-cyan-300 ",
 				display_qoslabapp
 					? "bg-cyan-300 text-slate-700"
-					: "text-cyan-300"
+					: "text-cyan-300",
 			)}
 			onclick={() => {
 				display_qoslabapp = !display_qoslabapp;
-			}}>qoslabapp</button>
+			}}>qoslabapp</button
+		>
 		<button
 			class={cn(
 				"wrapped  border-1 border-indigo-300 ",
 				display_equipment
 					? "bg-indigo-300 text-slate-700"
-					: "text-indigo-300"
+					: "text-indigo-300",
 			)}
 			onclick={() => {
 				display_equipment = !display_equipment;
-			}}>equipment</button>
+			}}>equipment</button
+		>
 	</div>
 	<div class="  flex-grow fcol-2 overflow-y-scroll scrollbar section">
 		{#each displaying_logs as { source, content, timestamp }}
@@ -146,7 +157,8 @@
 			<div class="frow-1 items-start">
 				{#if display_time}
 					<div
-						class="min-w-24 w-24 max-w-24 text-green-500 text-nowrap">
+						class="min-w-24 w-24 max-w-24 text-green-500 text-nowrap"
+					>
 						{month}
 						{date}
 						{hour}:{minuet}:{second}
@@ -158,13 +170,15 @@
 						"min-w-16 w-16 max-w-16 frow-1 text-nowrap",
 						source === "backend" ? "text-yellow-300" : "",
 						source === "qoslabapp" ? "text-cyan-300" : "",
-						source === "equipment" ? "text-indigo-300" : ""
-					)}>
+						source === "equipment" ? "text-indigo-300" : "",
+					)}
+				>
 					{source}
 				</div>
 
 				<div
-					class="text-slate-100 text-wrap flex-grow whitespace-pre-line">
+					class="text-slate-100 text-wrap flex-grow whitespace-pre-line break-all"
+				>
 					>> {content.replace(/\u001b\[.*?m/g, "")}
 				</div>
 			</div>
@@ -182,7 +196,7 @@
 					switch (e.key) {
 						case "Enter":
 							e.preventDefault();
-							handleSend();
+							await handleSend();
 							// handlesend shall reset everything
 							return;
 						case "ArrowUp": {
@@ -195,6 +209,7 @@
 							if (query_index < query_list.length)
 								input = query_list[query_index];
 							else input = query;
+							console.log({ query, query_list });
 							break;
 						}
 						case "ArrowDown":
@@ -220,7 +235,8 @@
 								await tick();
 							});
 					}
-				}} />
+				}}
+			/>
 		</label>
 		<button class="icon-btn-sm" onclick={handleSend}><Send /></button>
 	</div>

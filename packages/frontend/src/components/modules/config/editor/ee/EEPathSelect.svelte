@@ -21,9 +21,9 @@
 <div class="frow-2 bg-white wrapped flex-grow min-w-0 h-full">
 	<div class="editor-label">Class</div>
 	<Separator />
-	<div class="relative flex-grow -mx-2 px-2 flex items-center min-w-0">
+	<div class="relative flex-grow -mx-2 px-2 min-w-0">
 		<button
-			class="min-w-0 overflow-x-scroll text-nowrap w-full h-full text-left"
+			class="min-w-0 overflow-x-scroll text-nowrap w-full absolute top-0 left-0 text-left pl-2"
 			onclick={async (e) => {
 				open = !open;
 			}}

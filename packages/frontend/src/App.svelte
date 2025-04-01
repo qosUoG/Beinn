@@ -37,7 +37,8 @@
 			class="icon-btn-sm bg-slate-500 text-white"
 			onclick={() => {
 				show_cli = !show_cli;
-			}}><Cli /></button>
+			}}><Cli /></button
+		>
 	</div>
 
 	<div class="h-full w-full frow-4 min-h-0">

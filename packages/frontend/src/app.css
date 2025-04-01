@@ -44,7 +44,17 @@
 	}
 
 	* {
-		scrollbar-width: none;
+		scrollbar-width: auto;
+		scrollbar-width: auto;
+	}
+
+	*::-webkit-scrollbar-button {
+		display: none
+	}
+
+	*::-webkit-scrollbar {
+		width: 8px;
+		height: 8px
 	}
 
 	button * {
@@ -141,7 +151,14 @@
 		@apply font-semibold;
 	}
 
-	.scrollbar {
-		@apply [scrollbar-color:var(--color-slate-600)] [scrollbar-width:auto];
+
+
+
+}
+
+@utility scrollbar-* {
+	&::-webkit-scrollbar-thumb {
+		background: --value(--color-*);
+		@apply rounded
 	}
 }

@@ -28,7 +28,7 @@
 </script>
 
 <button
-	class="min-w-0 overflow-x-scroll text-nowrap w-full h-full"
+	class="min-w-0 overflow-x-scroll text-nowrap w-full absolute top-0 left-0 pl-2"
 	onclick={async (e) => {
 		open = !open;
 	}}
