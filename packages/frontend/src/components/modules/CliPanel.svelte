@@ -3,6 +3,7 @@
 	import Clock from "$icons/Clock.svelte";
 	import Send from "$icons/Send.svelte";
 	import { gstore } from "$states/global.svelte";
+	import { tick } from "svelte";
 
 	const month_texts = [
 		"Jan",
@@ -24,6 +25,14 @@
 	let display_qoslabapp = $state(false);
 	let display_equipment = $state(true);
 	let input = $state("");
+	let query = $state("");
+
+	let query_list = $derived(
+		gstore.command_history.filter((c) => c.startsWith(query) && c !== query)
+	);
+
+	// Start at the end, which is out of bound
+	let query_index = $state(gstore.command_history.length);
 
 	let displaying_logs = $derived.by(() => {
 		return gstore.logs
@@ -77,6 +86,10 @@
 			timestamp: Date.now(),
 			content: input,
 		});
+
+		gstore.command_history.push(input);
+
+		input = "";
 	}
 </script>
 
@@ -161,7 +174,53 @@
 	<div class=" wrapped bg-slate-200 w-full frow-2 items-center">
 		<label class="frow-2 flex-grow">
 			>>
-			<input type="text" class="flex-grow" bind:value={input} />
+			<input
+				type="text"
+				class="flex-grow"
+				bind:value={input}
+				onkeydown={async (e: KeyboardEvent) => {
+					switch (e.key) {
+						case "Enter":
+							e.preventDefault();
+							handleSend();
+							// handlesend shall reset everything
+							return;
+						case "ArrowUp": {
+							e.preventDefault();
+							const maybe_index = query_index - 1;
+							if (maybe_index >= 0)
+								// Update only if inbound
+								query_index = maybe_index;
+							await tick();
+							if (query_index < query_list.length)
+								input = query_list[query_index];
+							else input = query;
+							break;
+						}
+						case "ArrowDown":
+							e.preventDefault();
+							const maybe_index = query_index + 1;
+							if (maybe_index <= query_list.length)
+								// Update only if inbound
+								query_index = maybe_index;
+							await tick();
+							if (query_index < query_list.length)
+								input = query_list[query_index];
+							else if (input === query || input === "")
+								input = "";
+							else input = query;
+							break;
+						default:
+							// In all other cases, update query with input
+							setTimeout(async () => {
+								await tick();
+								query = input;
+								await tick();
+								query_index = query_list.length;
+								await tick();
+							});
+					}
+				}} />
 		</label>
 		<button class="icon-btn-sm" onclick={handleSend}><Send /></button>
 	</div>

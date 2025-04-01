@@ -15,6 +15,7 @@ export let gstore:
         experiments: Record<string, RuntimeExperiment>
         mode: "CONFIG" | "EXPERIMENTS",
         logs: Log[]
+        command_history: string[],
         log_socket: WebSocket | undefined
 
 
@@ -30,6 +31,7 @@ export let gstore:
         experiments: {},
         mode: "CONFIG",
         logs: [],
+        command_history: [],
         log_socket: undefined
     })
 
