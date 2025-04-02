@@ -95,3 +95,22 @@ export type DependencySource = {
 
     directory: string
 }
+
+export type Ok<T extends any> = {
+    success: true,
+    value?: T
+}
+
+export type Err<T extends Error> = {
+    success: false,
+    error: T
+}
+
+export type Result<T extends any = any, E extends Error = Error> = Ok<T> | Err<E>
+
+export function err(reason: string): Err<Error> {
+    return {
+        success: false,
+        error: Error(reason)
+    }
+}
