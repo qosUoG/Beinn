@@ -1,8 +1,8 @@
 import { checkDependencyInit } from "$services/backend.svelte";
-import type { DependencySource } from "qoslab-shared";
+import type { DependencySource, Result } from "qoslab-shared";
 import { gstore } from "./global.svelte";
 
-export async function addDependency({ id, source }: { id: string, source: DependencySource }) {
+export async function addDependency({ id, source }: { id: string, source: DependencySource }): Promise<Result> {
     // Resolve the source
     switch (source.type) {
         case "local":
@@ -11,11 +11,11 @@ export async function addDependency({ id, source }: { id: string, source: Depend
                 source.directory
             );
 
-            if (!success) return;
+            if (!success) return { success: false };
 
             // Write local to dependency
-            gstore.workspace.dependencies[dependency_editor.id!] = {
-                ...gstore.workspace.dependencies[dependency_editor.id!],
+            gstore.workspace.dependencies[id] = {
+                ...gstore.workspace.dependencies[id],
                 source: { ...source },
                 confirmed: true,
                 name: source.directory,
@@ -60,9 +60,9 @@ export async function addDependency({ id, source }: { id: string, source: Depend
 
         Object.values(allDependencies).forEach((d) => {
             if (!current_dependency_names.includes(d.name)) {
-                gstore.workspace.dependencies[dependency_editor.id!] = {
+                gstore.workspace.dependencies[id] = {
                     ...d,
-                    id: dependency_editor.id!,
+                    id: id,
                     add_string: source,
                 };
             }
