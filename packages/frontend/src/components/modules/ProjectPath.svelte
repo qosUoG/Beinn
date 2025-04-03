@@ -16,7 +16,12 @@
 		createEE,
 		getAvailableEEs,
 		setEEParams,
+		subscribeExperimentEventsWs,
 	} from "$services/qoslabapp.svelte";
+	import {
+		getExperimentEventFn,
+		type CreatedRuntimeExperiment,
+	} from "$states/experiment";
 
 	import { gstore, resetGstore } from "$states/global.svelte";
 	import { type Dependency } from "qoslab-shared";
@@ -275,6 +280,16 @@
 											gstore.experiments[e.id]
 										);
 										await tick();
+
+										// Start listening to experiment events here
+										subscribeExperimentEventsWs({
+											id: e.id,
+											onmessage: getExperimentEventFn(
+												gstore.experiments[
+													e.id
+												] as CreatedRuntimeExperiment
+											),
+										});
 									})()
 								)
 							)

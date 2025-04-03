@@ -25,7 +25,7 @@ export function getExperimentEventFn(experiment: CreatedRuntimeExperiment) {
 
     function updateEventFromWsFn(event: MessageEvent<string>) {
 
-
+        console.log("hi")
 
         let res:
             { key: "iteration_count", value: number } |
@@ -38,6 +38,8 @@ export function getExperimentEventFn(experiment: CreatedRuntimeExperiment) {
         } catch (e) {
             throw Error("Experiment Event Failed to parse. \nError:\n" + e)
         }
+
+        console.log(res)
 
         // Reset iteration time only if iteration count is different, and when the expeirment is running 
         if (res.key === "iteration_count" && res.value !== experiment.iteration_count && experiment.status !== "stopped" && experiment.status !== "completed" && experiment.status !== "paused")

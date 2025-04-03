@@ -54,7 +54,7 @@ export function resetGstore() {
     gstore.equipments = {}
     gstore.experiments = {}
     gstore.mode = "CONFIG"
-    gstore.logs = gstore.logs.filter(l => l.source === "backend")
+
 
 }
 

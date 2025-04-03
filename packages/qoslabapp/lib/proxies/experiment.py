@@ -141,17 +141,18 @@ class ExperimentRunner:
 
                     try:
                         self._experiment.loop(self._iteration_count)
+                        print("", end="", flush=True)
 
                     except ExperimentEnded:
-                        print("experiment ended")
+                        print("experiment ended", flush=True)
                         return True
 
                     if not self._should_run.is_set():
                         # Decrement to exclude the previous loop index
                         self._iteration_count -= 1
         except Exception as e:
-            print("Exception in experiment runner")
-            print(e)
+            print("Exception in experiment runner", flush=True)
+            print(e, flush=True)
             return False
 
 
