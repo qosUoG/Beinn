@@ -6,12 +6,15 @@ import { qoslabappWs } from "$services/utils";
 let chart: Chart
 let canvas: OffscreenCanvas
 let ws: WebSocket
+let _y_names: string[]
 
 // Webworker onmessage
 onmessage = function (event: MessageEvent<XYWebWorkerMessage>) {
     switch (event.data.type) {
         case "instantiate": {
             const { canvas: from_canvas, id, config: { mode, x_axis, y_axis, y_names, title }, width, height } = event.data.payload
+
+            _y_names = y_names
 
             canvas = from_canvas
 
@@ -71,6 +74,16 @@ onmessage = function (event: MessageEvent<XYWebWorkerMessage>) {
             canvas.height = height
 
             chart.resize(width, height - 1)
+            break
+        }
+
+        case "reset": {
+            let new_datasets: { data: Point[], label: string }[] = []
+            _y_names.forEach(y_name => {
+                new_datasets.push({ data: [], label: y_name })
+            })
+            chart.data.datasets = new_datasets
+            break
         }
 
 

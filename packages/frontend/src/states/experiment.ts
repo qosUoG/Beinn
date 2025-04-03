@@ -82,7 +82,8 @@ export function getExperimentEventFn(experiment: CreatedRuntimeExperiment) {
                 break
             }
             case "chart_config": {
-                experiment.chart_configs[res.value.title] = res.value
+                if (experiment.chart_configs[res.value.title] === undefined)
+                    experiment.chart_configs[res.value.title] = res.value
             }
         }
 

@@ -17,6 +17,7 @@
 	import Pause from "$icons/Pause.svelte";
 	import Stop from "$icons/Stop.svelte";
 	import Loader from "$icons/Loader.svelte";
+	import { tick } from "svelte";
 
 	let runnable_experiments = $derived(
 		Object.values(gstore.experiments).filter(
@@ -26,8 +27,8 @@
 				experiment.name.length > 0 &&
 				JSON.stringify(experiment.params) ===
 					JSON.stringify(experiment.temp_params) &&
-				experiment.params !== undefined,
-		) as CreatedRuntimeExperiment[],
+				experiment.params !== undefined
+		) as CreatedRuntimeExperiment[]
 	);
 
 	function zeropad(num: number) {
@@ -55,8 +56,7 @@
 				<div class="frow justify-between">
 					<div class="frow-1">
 						<div
-							class="bg-slate-200 frow rounded items-center w-24"
-						>
+							class="bg-slate-200 frow rounded items-center w-24">
 							<div class="icon-btn-sm">
 								<StopWatch />
 							</div>
@@ -69,8 +69,7 @@
 							</div>
 						</div>
 						<div
-							class="bg-slate-200 frow rounded items-center w-24"
-						>
+							class="bg-slate-200 frow rounded items-center w-24">
 							<div class="icon-btn-sm">
 								<Rotate />
 							</div>
@@ -106,25 +105,32 @@
 								onclick={async () => {
 									experiment.iteration_count = -1;
 									experiment.status = "starting";
+
+									// reset chart
+									// Object.values(
+									// 	experiment.chart_configs
+									// ).forEach(({ reset }) => {
+									// 	if (reset === undefined) return;
+									// 	reset();
+									// });
+									experiment.chart_configs = {};
+									await tick();
 									await startExperiment(experiment);
-								}}><Play /></button
-							>
+								}}><Play /></button>
 						{:else if experiment.status === "continuing" || experiment.status === "started" || experiment.status === "starting" || experiment.status === "continued"}
 							<button
 								class="icon-btn-sm red"
 								onclick={async () => {
 									experiment.status = "pausing";
 									await pauseExperiment(experiment);
-								}}><Pause /></button
-							>
+								}}><Pause /></button>
 						{:else if experiment.status === "paused" || experiment.status === "pausing"}
 							<button
 								class="icon-btn-sm red"
 								onclick={async () => {
 									experiment.status = "stopping";
 									await stopExperiment(experiment);
-								}}><Stop /></button
-							>
+								}}><Stop /></button>
 						{/if}
 						{#if experiment.status === "paused"}
 							<button
@@ -132,8 +138,7 @@
 								onclick={async () => {
 									experiment.status = "continuing";
 									await continueExperiment(experiment);
-								}}><Play /></button
-							>
+								}}><Play /></button>
 						{/if}
 						{#if experiment.status === "stopping" || experiment.status === "pausing"}
 							<div class="icon-btn-sm bg-slate-200">

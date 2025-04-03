@@ -8,7 +8,8 @@ export type XYChartConfig = {
     x_axis: string,
     y_axis: string,
     y_names: string[]
-    mode: XYChartMode
+    mode: XYChartMode,
+    reset?: () => void
 }
 
 
@@ -24,6 +25,8 @@ export type XYWebWorkerMessage = {
 } | {
     type: "resize",
     payload: { width: number, height: number }
+} | {
+    type: "reset"
 }
 
 

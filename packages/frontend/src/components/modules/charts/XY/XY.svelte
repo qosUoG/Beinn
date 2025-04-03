@@ -1,6 +1,7 @@
 <script lang="ts">
 	import { onMount } from "svelte";
 	import type { XYChartConfig, XYWebWorkerMessage } from "./XY_types";
+	import { gstore } from "$states/global.svelte";
 
 	let {
 		id,
@@ -44,6 +45,10 @@
 		};
 
 		worker.postMessage(message, [offscreenCanvas]);
+
+		gstore.experiments[id].chart_configs[config.title].reset = () => {
+			worker.postMessage({ type: "reset" });
+		};
 	});
 </script>
 
