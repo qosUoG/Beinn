@@ -1,7 +1,9 @@
 <script lang="ts">
 	import { onMount } from "svelte";
-	import type { XYChartConfig, XYWebWorkerMessage } from "./XY_types";
+
 	import { gstore } from "$states/global.svelte";
+	import type { XYWebWorkerMessage } from "$states/chart.svelte";
+	import type { XYChartConfig } from "qoslab-shared";
 
 	let {
 		id,
@@ -15,7 +17,7 @@
 		height: number;
 	} = $props();
 	let canvas: HTMLCanvasElement;
-	const worker = new Worker(new URL("./XY_web_worker.js", import.meta.url), {
+	const worker = new Worker(new URL("./worker.js", import.meta.url), {
 		type: "module",
 	});
 
@@ -45,10 +47,6 @@
 		};
 
 		worker.postMessage(message, [offscreenCanvas]);
-
-		gstore.experiments[id].chart_configs[config.title].reset = () => {
-			worker.postMessage({ type: "reset" });
-		};
 	});
 </script>
 

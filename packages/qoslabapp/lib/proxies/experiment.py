@@ -247,7 +247,7 @@ class ExperimentProxy(ManagerABC):
         try:
             self._runner.prepare(self._status)
         except ExperimentRunner.PreviousNotFinished:
-            self._messenger.put("error", "PreviousNotFinished")
+            raise Exception("Previous Not finished")
 
         # Manager functions are also executed in the initalize function
 

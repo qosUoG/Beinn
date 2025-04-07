@@ -1,10 +1,10 @@
 <script lang="ts">
-	import type { RuntimeExperiment } from "$states/experiment";
+	import type { Experiment } from "$states/experiment.svelte";
 
-	let { experiment }: { experiment: RuntimeExperiment } = $props();
+	let { experiment }: { experiment: Experiment } = $props();
 </script>
 
-{#if experiment.proposed_total_iterations === -1}
+{#if experiment.proposedIterationsIsInfinit()}
 	<div
 		class="wrapped text-center bg-slate-950 text-white rounded-full w-full">
 		∞

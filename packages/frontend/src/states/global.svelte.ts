@@ -1,75 +1,15 @@
 
-import type { Equipment, Directory, Dependency } from "qoslab-shared";
-import type { RuntimeExperiment } from "./experiment";
 
 
-
-export let gstore: {
-    workspace: {
-        path: string,
-        directory: Directory,
-        dependencies: Record<string, Dependency>
-        available_equipments: { modules: string[], cls: string }[]
-        available_experiments: { modules: string[], cls: string }[]
-        connected: boolean
-    }
-    equipments: Record<string, Equipment>
-    experiments: Record<string, RuntimeExperiment>
-    mode: "CONFIG" | "EXPERIMENTS",
-    logs: Log[]
-    command_history: string[],
-    log_socket: WebSocket | undefined,
+import { Workspace } from "./workspace";
 
 
-
-
-} = $state({
-    workspace: {
-        path: import.meta.env.VITE_DEFAULT_EXPERIMENT_PATH,
-        directory: { files: [], dirs: {} },
-        dependencies: {},
-        available_equipments: [],
-        available_experiments: [],
-        connected: false
-    },
-    equipments: {},
-    experiments: {},
-    mode: "CONFIG",
-    logs: [],
-    command_history: [],
-    log_socket: undefined,
-
-
-})
-
-export function resetGstore() {
-    gstore.workspace = {
-        path: gstore.workspace.path,
-        directory: { files: [], dirs: {} },
-        dependencies: {},
-        available_equipments: [],
-        available_experiments: [],
-        connected: false
-    }
-    gstore.equipments = {}
-    gstore.experiments = {}
-    gstore.mode = "CONFIG"
-
-
+export enum AppMode {
+    Configuration,
+    Runtime
 }
 
-export type Save = {
-
-    dependencies: typeof gstore.workspace.dependencies,
-    equipments: typeof gstore.equipments,
-    experiments: typeof gstore.experiments,
-
-
-}
-
-
-
-
+export type Availables = { modules: string[], cls: string }[]
 
 
 
@@ -78,3 +18,31 @@ export type Log = {
     timestamp: number,
     content: string
 }
+
+class Logs {
+    private _logs: Log[] = $state([])
+    get logs() {
+        return this._logs
+    }
+
+    push(logs: Log[]) {
+        this._logs.push(...logs)
+    }
+}
+
+class GlobalStore {
+    accessor mode: AppMode = $state(AppMode.Configuration)
+
+    readonly workspace: Workspace = $state(new Workspace())
+
+
+    readonly logs: Logs = $state(new Logs())
+    private _command_history: string[] = $state([])
+
+    get command_history() {
+        return this._command_history
+    }
+
+}
+
+export const gstore = new GlobalStore()

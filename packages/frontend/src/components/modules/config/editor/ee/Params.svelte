@@ -1,10 +1,11 @@
 <script lang="ts">
 	import { autofocus, cn } from "$components/utils.svelte";
 	import type { AllParamTypes } from "qoslab-shared";
-	import InstanceParam from "./InstanceParam.svelte";
+	import InstanceEquipmentParam from "./InstanceEquipmentParam.svelte";
 	import SelectParam from "./SelectParam.svelte";
 	import LabelField from "$components/reuseables/Fields/LabelField.svelte";
 	import DivField from "$components/reuseables/Fields/DivField.svelte";
+	import InstanceExperimentParam from "./InstanceExperimentParam.svelte";
 
 	let { params = $bindable() }: { params: Record<string, AllParamTypes> } =
 		$props();
@@ -68,7 +69,9 @@
 		</LabelField>
 	{:else if param.type === "select.str" || param.type === "select.int" || param.type === "select.float"}
 		<SelectParam {key} bind:value={param.value} options={param.options} />
-	{:else if param.type === "instance.equipment" || param.type === "instance.experiment"}
-		<InstanceParam {key} bind:instance_id={param.instance_id} />
+	{:else if param.type === "instance.equipment"}
+		<InstanceEquipmentParam {key} bind:instance_id={param.instance_id} />
+	{:else if param.type === "instance.experiment"}
+		<InstanceExperimentParam {key} bind:instance_id={param.instance_id} />
 	{/if}
 {/each}

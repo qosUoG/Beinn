@@ -1,4 +1,5 @@
 import type { ServerWebSocket, Subprocess } from "bun"
+import { applicationError } from "qoslab-shared"
 
 export let app_state: {
     pyproc: Subprocess | undefined
@@ -15,7 +16,10 @@ export let app_state: {
 }
 
 export const postCli = (source: "backend" | "qoslabapp", content: string) => {
+
+
     if (app_state.ws === undefined)
         app_state.logs.push({ source, content, timestamp: Date.now() })
     else app_state.ws.send(JSON.stringify({ logs: [{ source, content, timestamp: Date.now() }] }))
+
 }

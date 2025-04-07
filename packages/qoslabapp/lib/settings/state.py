@@ -101,7 +101,7 @@ class AppState:
         cls._experiment_proxies[id].unpause()
 
     @classmethod
-    def stopExperiment_sync(cls, id: str):
+    def stopExperiment_async(cls, id: str):
         cls._experiment_proxies[id].stop_async()
 
     @classmethod

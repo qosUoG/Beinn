@@ -4,6 +4,8 @@ import dataclasses
 from typing import Any, Literal, override
 from pydantic import BaseModel
 
+from packages.qoslabapp.lib.utils.result import ok
+
 
 class QosParam[T: BaseModel](ABC):
     @abstractmethod

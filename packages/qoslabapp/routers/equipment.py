@@ -6,6 +6,8 @@ from qoslablib.runtime import EquipmentABC
 
 from qoslablib.params import ParamModels, Params2ParamModels, ParamModels2Params
 
+from packages.qoslabapp.lib.utils.result import applicationError, ok
+
 
 from ._eeshared import getAvailableEEs, populateParam
 
@@ -22,7 +24,10 @@ class AvailableEquipmentsPayload(BaseModel):
 
 @router.post("/equipment/available_equipments")
 async def available_equipments(payload: AvailableEquipmentsPayload):
-    return getAvailableEEs(EquipmentABC, payload.prefixes)
+    try:
+        return ok(getAvailableEEs(EquipmentABC, payload.prefixes))
+    except Exception as e:
+        return applicationError(f"error in /equipment/create: {e}")
 
 
 class CreateEquipmentPayload(BaseModel):
@@ -33,7 +38,11 @@ class CreateEquipmentPayload(BaseModel):
 
 @router.post("/equipment/create")
 async def create_equipment(payload: CreateEquipmentPayload):
-    AppState.createEquipment(payload.id, payload.module, payload.cls)
+    try:
+        AppState.createEquipment(payload.id, payload.module, payload.cls)
+        return ok()
+    except Exception as e:
+        return applicationError(f"error in /equipment/create: {e}")
 
 
 class RemoveEquipmentPayload(BaseModel):
@@ -42,7 +51,11 @@ class RemoveEquipmentPayload(BaseModel):
 
 @router.post("/equipment/remove")
 async def remove_equipment(payload: RemoveEquipmentPayload):
-    AppState.removeEquipment(payload.id)
+    try:
+        AppState.removeEquipment(payload.id)
+        return ok()
+    except Exception as e:
+        return applicationError(f"error in /equipment/remove: {e}")
 
 
 class GetParamsPayload(BaseModel):
@@ -51,7 +64,10 @@ class GetParamsPayload(BaseModel):
 
 @router.post("/equipment/get_params")
 async def get_params(payload: GetParamsPayload):
-    return Params2ParamModels(AppState.getEquipmentParams(payload.id))
+    try:
+        return ok(Params2ParamModels(AppState.getEquipmentParams(payload.id)))
+    except Exception as e:
+        return applicationError(f"error in /equipment/get_params: {e}")
 
 
 class SetParamsPayload(BaseModel):
@@ -62,8 +78,11 @@ class SetParamsPayload(BaseModel):
 
 @router.post("/equipment/set_params")
 async def set_params(payload: SetParamsPayload):
-    params = ParamModels2Params(payload.params)
-    for [param_name, param] in params.items():
-        params[param_name] = populateParam(param)
+    try:
+        params = ParamModels2Params(payload.params)
+        for [param_name, param] in params.items():
+            params[param_name] = populateParam(param)
 
-    AppState.setEquipmentParams(payload.id, params)
+        AppState.setEquipmentParams(payload.id, params)
+    except Exception as e:
+        return applicationError(f"error in /equipment/set_params: {e}")

@@ -2,13 +2,15 @@
 	import Mode from "$components/modules/Mode.svelte";
 	import ProjectPath from "$components/modules/ProjectPath.svelte";
 
-	import { gstore, type Log } from "$states/global.svelte";
+	import { AppMode, gstore, type Log } from "$states/global.svelte";
 
 	import Config from "$components/modules/config/Config.svelte";
-	import Experiments from "$components/modules/experiments/Experiments.svelte";
+	import Experiments from "$components/modules/runtime/Runtime.svelte";
 	import Cli from "$icons/Cli.svelte";
 	import CliPanel from "$components/modules/CliPanel.svelte";
 	import { backendWs } from "$services/utils";
+
+	import Toast from "$components/modules/Toast.svelte";
 
 	let show_cli = $state(false);
 
@@ -17,9 +19,7 @@
 		let ws = new WebSocket(backendWs("cli"));
 		ws.onmessage = async (event: MessageEvent<string>) => {
 			const payload = JSON.parse(event.data) as { logs: Log[] };
-			console.log(payload);
-
-			gstore.logs.push(...payload.logs);
+			gstore.logs.push(payload.logs);
 		};
 		ws.onclose = () => {
 			// Recursively reconnect
@@ -30,7 +30,7 @@
 	connectWs();
 </script>
 
-<div class="fcol-4 w-full h-full p-4">
+<div class="fcol-4 w-full h-full p-4 relative">
 	<div class="frow-4 w-full items-stretch">
 		<Mode />
 		<ProjectPath />
@@ -50,13 +50,14 @@
 				</div>
 			</div>
 		{/if}
-		{#if gstore.mode === "CONFIG"}
+		{#if gstore.mode === AppMode.Configuration}
 			<Config />
-		{:else if gstore.mode === "EXPERIMENTS"}
+		{:else if gstore.mode === AppMode.Runtime}
 			<Experiments />
 		{/if}
 		{#if show_cli}
 			<CliPanel />
 		{/if}
 	</div>
+	<Toast />
 </div>

@@ -8,6 +8,8 @@ import warnings
 from qoslablib.params import AllParamTypes
 from qoslablib.runtime import EquipmentABC, ExperimentABC
 
+from ..lib.utils.result import applicationError, ok
+
 
 from ..lib.settings.state import AppState
 
@@ -60,9 +62,7 @@ def getAvailableEEs(eeABC: EEABC, names: list[str]):
             except ModuleNotFoundError:
                 pass
             except Exception as e:
-                print(f"Path {package.name} produced an exception")
-                print(e)
-                break
+                raise e
 
     warnings.filterwarnings("default")
 

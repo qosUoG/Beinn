@@ -2,27 +2,25 @@
 	import Tick from "$icons/Tick.svelte";
 
 	import EEPathSelect from "./EEPathSelect.svelte";
-	import type { ModuleCls } from "qoslab-shared";
 	import FixedField from "$components/reuseables/Fields/FixedField.svelte";
 	import { tick } from "svelte";
+	import type { EE } from "$states/ee.svelte";
 
 	let {
-		value = $bindable(),
+		ee,
 		options,
-		created,
 		onconfirm,
 	}: {
-		value: ModuleCls;
+		ee: EE;
 		options: { cls: string; modules: string[] }[];
-		created: boolean;
 		onconfirm: () => void;
 	} = $props();
 
-	let temp_module_cls = $state(value);
+	let temp_module_cls = $state(ee.module_cls);
 </script>
 
 <div class="frow-2 min-w-0">
-	{#if !created}
+	{#if !ee.created}
 		<EEPathSelect bind:value={temp_module_cls} {options} />
 
 		<button
@@ -31,24 +29,16 @@
 				if (temp_module_cls.cls === "" || temp_module_cls.module === "")
 					return;
 
-				// if (
-				// 	temp_module_cls.cls === value.cls &&
-				// 	temp_module_cls.module === value.module
-				// )
-				// 	return;
-
-				value = { ...temp_module_cls };
+				ee.module_cls = { ...temp_module_cls };
 
 				await tick();
 
 				onconfirm();
-			}}><Tick /></button
-		>
+			}}><Tick /></button>
 	{:else}
 		<FixedField
 			key="Class"
-			value={`from ${value.module} import ${value.cls}`}
-		/>
+			value={`from ${ee.module_cls.module} import ${ee.module_cls.cls}`} />
 
 		<!-- <div class="frow-1">
 			<button

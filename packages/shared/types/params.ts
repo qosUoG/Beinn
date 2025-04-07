@@ -44,13 +44,11 @@ export interface BoolParam {
 export interface InstanceEquipmentParam {
     type: "instance.equipment"
     instance_id: string
-    instance: string
 }
 
 export interface InstanceExperimentParam {
     type: "instance.experiment"
     instance_id: string
-    instance: string
 }
 
 export type AllParamTypes = (

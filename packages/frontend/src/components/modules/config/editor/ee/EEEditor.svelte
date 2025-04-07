@@ -1,12 +1,6 @@
 <script lang="ts">
 	import Trash from "$icons/Trash.svelte";
-	import {
-		createEE,
-		getEEParams,
-		removeEE,
-		setEEParams,
-		subscribeExperimentEventsWs,
-	} from "$services/qoslabapp.svelte";
+
 	import { gstore } from "$states/global.svelte";
 
 	import { tick } from "svelte";
@@ -20,102 +14,59 @@
 	import LabelField from "$components/reuseables/Fields/LabelField.svelte";
 	import { autofocus } from "$components/utils.svelte";
 	import { capitalise } from "qoslab-shared";
-	import {
-		getExperimentEventFn,
-		type CreatedRuntimeExperiment,
-	} from "$states/experiment";
+	import { toastUnreacheable } from "$components/modules/ToastController.svelte";
 
-	let target = $derived.by(() => {
-		if (eeeditor.id === undefined) return undefined;
+	const removeHandler = async () => {
+		if (!eeeditor.id) {
+			toastUnreacheable("removehandler in EEEditor.svelte");
+			return;
+		}
 
-		return gstore[`${eeeditor.mode}s`][eeeditor.id];
-	});
+		await target.remove();
+		eeeditor.id = undefined;
+	};
 
-	let params_edited = $derived.by(() => {
-		if (!target?.created) return false;
+	const createHandler = async () => {
+		if (!eeeditor.id) {
+			toastUnreacheable("createhandler in EEEditor.svelte");
+			return;
+		}
 
-		return (
-			JSON.stringify(target!.temp_params) !==
-			JSON.stringify(target!.params)
-		);
-	});
+		// Create the equipment / experiment
+		await target.create();
+	};
+
+	const saveParamsHandler = async () => {
+		if (!eeeditor.id) {
+			toastUnreacheable("saveParamsHandler in EEEditor.svelte");
+			return;
+		}
+
+		await target.saveParams();
+	};
+
+	const target = $derived(
+		gstore.workspace.getEE(eeeditor.mode, eeeditor.id!)
+	);
 </script>
 
-{#key eeeditor.id}
-	<div class="section bg-slate-200 col-span-2 min-w-0 w-full">
-		{#if eeeditor.id !== undefined && target !== undefined}
+{#if eeeditor.id !== undefined}
+	{#key eeeditor.id}
+		<div class="section bg-slate-200 col-span-2 min-w-0 w-full">
 			<div class="fcol-2 min-w-0 w-full">
 				<div class="frow justify-between items-end">
 					<div class="title bg-white wrapped">
 						Editor - {capitalise(eeeditor.mode)}
 					</div>
-					<button
-						class="icon-btn-sm red"
-						onclick={async () => {
-							if (eeeditor.id === undefined)
-								throw Error(
-									"ERROR: eeeditor.id shall not be undeifned",
-								);
-
-							await removeEE(eeeditor.mode, { id: eeeditor.id });
-							delete gstore[`${eeeditor.mode}s`][eeeditor.id];
-							eeeditor.id = undefined;
-						}}><Trash /></button
-					>
+					<button class="icon-btn-sm red" onclick={removeHandler}
+						><Trash /></button>
 				</div>
 
 				<EEPath
-					bind:value={target.module_cls}
-					options={gstore.workspace[`available_${eeeditor.mode!}s`]}
-					created={target.created}
-					onconfirm={async () => {
-						// Pleasing the type checker
-						if (target === undefined || eeeditor.id === undefined)
-							return;
-						// Create the equipment / experiment
-						await createEE(eeeditor.mode, target);
-
-						await tick();
-
-						// Fetch the params
-						const params = await getEEParams(eeeditor.mode, target);
-
-						if (eeeditor.mode === "equipment")
-							gstore.equipments[eeeditor.id] = {
-								...target,
-								created: true,
-								params: { ...params },
-								temp_params: { ...params },
-								name: "",
-							};
-						else if (eeeditor.mode === "experiment") {
-							gstore.experiments[eeeditor.id] = {
-								...target,
-								created: true,
-								params: { ...params },
-								temp_params: { ...params },
-								name: "",
-								chart_configs: {},
-								status: "initial",
-								iteration_count: -1,
-								iteration_time_start: 0,
-								total_time: 0,
-							};
-
-							await tick();
-
-							// Start listening to experiment events here
-							subscribeExperimentEventsWs({
-								id: target.id,
-								onmessage: getExperimentEventFn(
-									gstore.experiments[
-										eeeditor.id
-									] as CreatedRuntimeExperiment,
-								),
-							});
-						}
-					}}
-				/>
+					ee={target}
+					options={gstore.workspace.getEEs(eeeditor.mode)
+						.available_module_cls}
+					onconfirm={createHandler} />
 
 				{#if target.created}
 					<div class="frow justify-between mt-4 items-end">
@@ -134,35 +85,22 @@
 								e.preventDefault();
 							}}
 							bind:value={target.name}
-							onfocus={autofocus}
-						/>
+							onfocus={autofocus} />
 					</LabelField>
 
 					<div class="frow justify-between mt-4 items-end">
 						<div class="title bg-white wrapped">Parameters</div>
 						<div class="frow-1">
-							{#if params_edited}
+							{#if target.params_edited}
 								<button
 									class="icon-btn-sm red"
 									onclick={() => {
-										target.temp_params = JSON.parse(
-											JSON.stringify(target.params),
-										);
-									}}><Cancel /></button
-								>
+										target.cancelTempParams();
+									}}><Cancel /></button>
 								<button
 									class="icon-btn-sm green"
-									onclick={async () => {
-										target.params = JSON.parse(
-											JSON.stringify(target.temp_params),
-										);
-										await tick();
-										await setEEParams(
-											eeeditor.mode,
-											target,
-										);
-									}}><Disk /></button
-								>
+									onclick={saveParamsHandler}
+									><Disk /></button>
 							{:else}
 								<div class="h-6"></div>
 							{/if}
@@ -173,6 +111,6 @@
 					</div>
 				{/if}
 			</div>
-		{/if}
-	</div>
-{/key}
+		</div>
+	{/key}
+{/if}

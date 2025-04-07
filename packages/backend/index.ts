@@ -4,6 +4,7 @@ import { app_state, postCli } from "./lib/app_state";
 import { copyApp, initiateWorkspace, loadWorkspace, readAllUvDependencies, runProject, saveWorkspace, shell } from "./lib/workspace";
 import { pathExist } from "./lib/fs";
 import { mkdir } from "node:fs/promises"
+import { applicationError, isErr, type Err, type Result } from "qoslab-shared";
 
 function consoleIterator(...data: any[]) {
 
@@ -44,79 +45,129 @@ serve({
     routes: {
         "/workspace/load": {
             POST: async req => {
-                const { path } = await req.json() as { path: string }
+                try {
 
-                const path_exist = await pathExist(path)
 
-                if (!path_exist) {
-                    await mkdir(path)
-                    await initiateWorkspace(path)
+
+                    const { path } = await req.json() as { path: string }
+
+                    const path_exist = await pathExist(path)
+
+                    if (!path_exist) {
+                        await mkdir(path)
+                        await initiateWorkspace(path)
+                    }
+
+                    if (!await pathExist(path + "/app"))
+                        await copyApp(path)
+
+                    await runProject(path)
+                    return Response.json({ success: true, value: await loadWorkspace(path) }, { headers })
+
+                } catch (e) {
+                    if (isErr(e)) Response.json({ success: false, err: e }, { headers })
+
+                    return Response.json({ success: false, err: applicationError(`Error in backend /workspace/load: ${e}`) }, { headers })
                 }
 
-                if (!await pathExist(path + "/app"))
-                    await copyApp(path)
 
-                await runProject(path)
-                return Response.json(await loadWorkspace(path), { headers })
             }
         }
         ,
         "/workspace/save": {
             POST: async req => {
-                const { path, payload } = await req.json() as { path: string, payload: any }
-                await saveWorkspace(path, payload)
-                return Response.json({}, { headers })
+                try {
+                    const { path, payload } = await req.json() as { path: string, payload: any }
+                    await saveWorkspace(path, payload)
+                    return Response.json({ success: true }, { headers })
+                } catch (e) {
+                    if (isErr(e)) Response.json({ success: false, err: e }, { headers })
+
+                    return Response.json({ success: false, err: applicationError(`Error in backend /workspace/save: ${e}`) }, { headers })
+                }
             }
         }
         ,
         "/workspace/dependency/check_init": {
             POST: async req => {
-                const { path, directory } = await req.json() as { directory: string, path: string }
-                return Response.json({ success: await file(path + "/" + directory + "/__init__.py").exists() }, { headers })
+                try {
+                    const { path, directory } = await req.json() as { directory: string, path: string }
+                    return Response.json({ success: await file(path + "/" + directory + "/__init__.py").exists() }, { headers })
+                } catch (e) {
+                    if (isErr(e)) Response.json({ success: false, err: e }, { headers })
+
+                    return Response.json({ success: false, err: applicationError(`Error in backend /workspace/dependency/check_init: ${e}`) }, { headers })
+                }
             }
         },
         "/workspace/dependency/add": {
             POST: async req => {
-                const { path, source } = await req.json() as { source: string, path: string }
+                try {
+                    const { path, source } = await req.json() as { source: string, path: string }
 
-                // Could be from pip, git path or local path
-                shell(`uv add ${{ raw: source }}`, path)
-                return Response.json({}, { headers })
+                    // Could be from pip, git path or local path
+                    shell(`uv add ${{ raw: source }}`, path)
+                    return Response.json({ success: true }, { headers })
+
+                } catch (e) {
+                    if (isErr(e)) Response.json({ success: false, err: e }, { headers })
+
+                    return Response.json({ success: false, err: applicationError(`Error in backend /workspace/dependency/add: ${e}`) }, { headers })
+                }
             }
         },
         "/workspace/dependency/remove": {
             POST: async req => {
-                const { path, name } = await req.json() as { name: string, path: string }
+                try {
+                    const { path, name } = await req.json() as { name: string, path: string }
 
-                shell(`uv remove ${name}`, path)
-                return Response.json({}, { headers })
+                    shell(`uv remove ${name}`, path)
+                    return Response.json({ success: true }, { headers })
+                } catch (e) {
+                    if (isErr(e)) Response.json({ success: false, err: e }, { headers })
+
+                    return Response.json({ success: false, err: applicationError(`Error in backend /workspace/dependency/remove: ${e}`) }, { headers })
+                }
             }
         },
         "/workspace/dependency/read_all": {
             POST: async req => {
-                const { path } = await req.json() as { path: string }
-                return Response.json(await readAllUvDependencies(path), { headers })
+                try {
+                    const { path } = await req.json() as { path: string }
+                    return Response.json({ success: true, value: await readAllUvDependencies(path) }, { headers })
+
+                } catch (e) {
+                    if (isErr(e)) Response.json({ success: false, err: e }, { headers })
+
+                    return Response.json({ success: false, err: applicationError(`Error in backend /workspace/dependency/read_all: ${e}`) }, { headers })
+                }
             }
         },
         "/workspace/disconnect": {
             GET: async req => {
-                if (app_state.pyproc === undefined) {
-                    console.log("disconnection successful")
-                    return Response.json({ "success": true }, { headers })
-                }
+                try {
+                    if (app_state.pyproc === undefined) {
 
-                if (app_state.pyproc !== undefined) {
-                    const res = await (await fetch("http://localhost:8000/workspace/forcestop")).json() as { success: boolean }
-                    if (res.success) {
-                        app_state.pyproc?.kill()
-                        // wait for 100 ms
-                        await new Promise(_ => setTimeout(_, 1000));
-                        console.log("disconnection successful")
-                        return Response.json({ "success": true }, { headers })
+                        return Response.json({ success: true }, { headers })
                     }
+
+                    if (app_state.pyproc !== undefined) {
+                        const res = await (await fetch("http://localhost:8000/workspace/forcestop")).json() as { success: boolean }
+                        if (res.success) {
+                            app_state.pyproc?.kill()
+                            // wait for 100 ms
+                            await new Promise(_ => setTimeout(_, 1000));
+
+                            return Response.json({ success: true }, { headers })
+                        }
+                    }
+                    throw applicationError("Cannot disconnect python procedure")
+
+                } catch (e) {
+                    if (isErr(e)) Response.json({ success: false, err: e }, { headers })
+
+                    return Response.json({ success: false, err: applicationError(`Error in backend /workspace/disconnectl: ${e}`) }, { headers })
                 }
-                console.log("disconnection failed")
-                return Response.json({ "success": false }, { headers })
             }
         }
     },

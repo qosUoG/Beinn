@@ -4,8 +4,6 @@
 
 	import SelectField from "$components/reuseables/Fields/SelectField.svelte";
 
-	let open = $state(false);
-
 	let {
 		key,
 		instance_id = $bindable(),
@@ -15,12 +13,7 @@
 	} = $props();
 
 	let options = $derived(
-		Object.values(gstore.equipments)
-			// Split here for type check sake
-			.filter((e) => e.created)
-			// Name needs to be defiend
-			.filter((e) => e.id !== eeeditor.id && e.name && e.name.length > 0)
-			.map((e) => ({ key: e.name, value: e.id }))
+		gstore.workspace.experiments.getInstanceables(eeeditor.id!)
 	);
 </script>
 

@@ -1,6 +1,8 @@
 import { Chart, type ChartConfiguration, type Point } from "chart.js/auto";
-import type { XYWebWorkerMessage, XYChartMode } from "./XY_types";
+
 import { qoslabappWs } from "$services/utils";
+import type { XYWebWorkerMessage } from "$states/chart.svelte";
+import type { XYChartMode } from "qoslab-shared";
 
 
 let chart: Chart

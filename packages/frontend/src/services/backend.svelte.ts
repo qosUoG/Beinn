@@ -1,47 +1,35 @@
 
-import { gstore, type Save } from "$states/global.svelte";
-import type { ConfirmedDependency, Dependency } from "qoslab-shared";
-import { backendUrl, postRequestJsonInOut } from "./utils";
 
-export async function disconnectWorkspace() {
-    await fetch(backendUrl("workspace/disconnect"))
+import type { DependencyT, DependencyT_Installed, Save } from "qoslab-shared";
+import { backendUrl, getRequestJsonOut, postRequestJsonInOut } from "./utils";
+
+export async function backendDisconnectWorkspace() {
+    return await getRequestJsonOut(backendUrl("workspace/disconnect"))
 }
 
-export async function loadWorkspace(): Promise<{ save: undefined | Save }> {
+export async function backendLoadWorkspace(payload: { path: string }): Promise<Save | undefined> {
     // This shall return a state template
-    return await postRequestJsonInOut(backendUrl("workspace/load"), { path: gstore.workspace.path })
-
-
+    return await postRequestJsonInOut(backendUrl("workspace/load"), payload)
 }
 
-export async function addDependency(source: string): Promise<void> {
-    await postRequestJsonInOut(backendUrl("workspace/dependency/add"), { source, path: gstore.workspace.path })
-
+export async function backendInstallDependency(payload: { install_string: string, path: string }): Promise<DependencyT_Installed> {
+    return await postRequestJsonInOut(backendUrl("workspace/dependency/install"), payload)
 }
 
-export async function removeDependency(name: string): Promise<void> {
-    return await postRequestJsonInOut(backendUrl("workspace/dependency/remove"), { name, path: gstore.workspace.path })
+export async function backendRemoveDependency(payload: { name: string, path: string }) {
+    await postRequestJsonInOut(backendUrl("workspace/dependency/remove"), payload)
 }
 
-export async function readAllUvDependencies(): Promise<ConfirmedDependency[]> {
-    return (await postRequestJsonInOut(backendUrl("workspace/dependency/read_all"), { path: gstore.workspace.path }) as { dependencies: ConfirmedDependency[] }).dependencies
+export async function backendReadAllUvDependencies(payload: { path: string }): Promise<DependencyT[]> {
+    return await postRequestJsonInOut(backendUrl("workspace/dependency/read_all"), payload)
 }
 
-// export async function readUvDependency(name: string): Promise<Dependency> {
-//     return (await postRequestJsonInOut(backendUrl("workspace/dependency/read"), { name, path: gstore.workspace.path }) as { dependency: Dependency }).dependency
-// }
 
-export async function checkDependencyInit(directory: string): Promise<{ success: boolean }> {
-    return await postRequestJsonInOut(backendUrl("workspace/dependency/check_init"), { directory, path: gstore.workspace.path })
+export async function backendCheckDependencyInit(payload: { directory: string, path: string }) {
+    await postRequestJsonInOut(backendUrl("workspace/dependency/check_init"), payload)
 }
 
-export async function saveWorkspace() {
-    const save: Save = {
-        dependencies: gstore.workspace.dependencies,
-        equipments: gstore.equipments,
-        experiments: gstore.experiments,
-
-    }
-    await postRequestJsonInOut(backendUrl("workspace/save"), { path: gstore.workspace.path, payload: save })
+export async function backendSaveWorkspace(payload: { path: string, save: Save }) {
+    await postRequestJsonInOut(backendUrl("workspace/save"), payload)
 }
 

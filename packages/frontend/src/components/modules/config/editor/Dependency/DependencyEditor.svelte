@@ -1,172 +1,144 @@
 <script lang="ts">
 	import Trash from "$icons/Trash.svelte";
 	import { gstore } from "$states/global.svelte";
-	import type { Dependency, DependencySource } from "qoslab-shared";
+	import type { DependencySource, Err } from "qoslab-shared";
 
 	import { dependency_editor } from "./DependencyEditorController.svelte";
 
 	import { autofocus } from "$components/utils.svelte";
 	import Download from "$icons/Download.svelte";
-	import {
-		addDependency,
-		checkDependencyInit,
-		readAllUvDependencies,
-		removeDependency,
-	} from "$services/backend.svelte";
 
 	import LabelField from "$components/reuseables/Fields/LabelField.svelte";
 	import FixedField from "$components/reuseables/Fields/FixedField.svelte";
 	import SelectField from "$components/reuseables/Fields/SelectField.svelte";
 	import SelfToggle from "$components/reuseables/SelfToggle.svelte";
-	import { getAvailableEEs } from "$services/qoslabapp.svelte";
 
-	const dependency: Dependency | undefined = $derived.by(() => {
-		if (dependency_editor.id === undefined) return undefined;
+	import {
+		toastError,
+		toastUnreacheable,
+		toastUserError,
+	} from "$components/modules/ToastController.svelte";
+	import { tick } from "svelte";
 
-		return gstore.workspace.dependencies[dependency_editor.id];
+	const dependency = $derived(
+		gstore.workspace.dependencies.dependencies[dependency_editor.id!]
+	);
+
+	let temp_type: "local" | "path" | "git" | "pip" = $state("pip");
+
+	$effect(() => {
+		switch (temp_type) {
+			case "pip":
+				dependency.source = { type: "pip", package: "" };
+				break;
+			case "git":
+				dependency.source = {
+					type: "git",
+					git: "",
+					subdirectory: "",
+					branch: "",
+				};
+				break;
+			case "local":
+				dependency.source = {
+					type: "local",
+					directory: "",
+				};
+				break;
+			case "path":
+				dependency.source = {
+					type: "path",
+					path: "",
+					editable: false,
+				};
+				break;
+		}
 	});
-
-	let temp_source: DependencySource = $state({ type: "pip", package: "" });
 
 	const type_options = ["local", "path", "git", "pip"];
 
-	async function handleRemoveDependency() {
-		if (dependency?.confirmed && dependency.source?.type !== "local")
-			// TODO remove dependency in python project
-			await removeDependency(dependency.name!);
+	async function handleRemove() {
+		if (!dependency) {
+			toastUnreacheable("dependency shall not be undefined");
+			return;
+		}
 
-		delete gstore.workspace.dependencies[dependency_editor.id!];
-
-		dependency_editor.id = undefined;
+		try {
+			await dependency.uninstall();
+			dependency_editor.id = undefined;
+		} catch (e) {
+			toastError(e as Err);
+		}
 	}
 
 	async function handleAddDependency() {
-		let source = "";
-
-		// Resolve the source
-		switch (temp_source.type) {
-			case "local":
-				// Check init is available
-				const { success } = await checkDependencyInit(
-					temp_source.directory
-				);
-
-				if (!success) return;
-
-				// Write local to dependency
-				gstore.workspace.dependencies[dependency_editor.id!] = {
-					...gstore.workspace.dependencies[dependency_editor.id!],
-					source: { ...temp_source },
-					confirmed: true,
-					name: temp_source.directory,
-					fullname: temp_source.directory,
-					add_string: temp_source.directory,
-				};
-				break;
-
-			case "git":
-				if (temp_source.git === "") return;
-				source = temp_source.git;
-				if (temp_source.branch) source += `@${temp_source.branch}`;
-				if (temp_source.subdirectory)
-					source += `#${temp_source.subdirectory}`;
-				break;
-
-			case "path":
-				if (temp_source.path === "") return;
-				source = temp_source.path;
-				if (temp_source.editable) source += " --editable";
-				break;
-			case "pip":
-				if (temp_source.package === "") return;
-				source = temp_source.package;
-				break;
+		if (!dependency) {
+			toastUnreacheable("dependency shall not be undefined");
+			return;
 		}
 
-		// Add dependency with uv id not local
-		if (temp_source.type !== "local") {
-			await addDependency(source);
-
-			temp_source = { type: "pip", package: "" };
-
-			const current_dependency_names = Object.values(
-				$state.snapshot(gstore.workspace.dependencies)
-			)
-				.filter((d) => d.confirmed)
-				.map((d) => d.name);
-
-			// Read All dependencies and figure out which is the new one
-			const allDependencies = await readAllUvDependencies();
-
-			Object.values(allDependencies).forEach((d) => {
-				if (!current_dependency_names.includes(d.name)) {
-					gstore.workspace.dependencies[dependency_editor.id!] = {
-						...d,
-						id: dependency_editor.id!,
-						add_string: source,
-					};
-				}
-			});
+		try {
+			await dependency.install();
+			await tick();
+			await Promise.all([
+				gstore.workspace.experiments.refreshAvailables(),
+				gstore.workspace.equipments.refreshAvailables(),
+			]);
+		} catch (e) {
+			toastError(e as Err);
 		}
-
-		// Refresh available equipments and experiments
-		gstore.workspace.available_equipments =
-			await getAvailableEEs("equipment");
-		gstore.workspace.available_experiments =
-			await getAvailableEEs("experiment");
 	}
 </script>
 
-{#key dependency_editor.id}
-	<div class="section bg-slate-200 col-span-2">
-		{#if dependency !== undefined}
+{#if dependency_editor.id}
+	{#key dependency_editor.id}
+		<div class="section bg-slate-200 col-span-2">
 			<div class="fcol-2">
 				<div class="frow justify-between items-end">
 					<div class="title bg-white wrapped">
 						Editor - Dependency
 					</div>
-					<button
-						class="icon-btn-sm red"
-						onclick={handleRemoveDependency}><Trash /></button>
+					<button class="icon-btn-sm red" onclick={handleRemove}
+						><Trash /></button>
 				</div>
 
-				{#if !dependency.confirmed}
+				{#if !dependency.installed}
 					<div class="frow-2">
 						<SelectField
 							key="Type"
-							bind:value={temp_source.type}
+							bind:value={temp_type}
 							options={type_options} />
-						{#if temp_source.type === "path"}
+						{#if dependency.source.type === "path"}
 							<SelfToggle
 								key="editable"
-								bind:value={temp_source.editable} />
+								bind:value={dependency.source.editable} />
 						{/if}
 						<button
 							class="icon-btn-sm green"
 							onclick={handleAddDependency}><Download /></button>
 					</div>
 
-					{#if temp_source.type === "pip"}
+					{#if dependency.source.type === "pip"}
 						<LabelField key="Package Name">
 							<input
 								type="text"
 								class="flex-grow"
-								bind:value={temp_source.package}
+								bind:value={dependency.source.package}
 								onfocus={autofocus} />
 						</LabelField>
-					{:else if temp_source.type === "git"}
+					{:else if dependency.source.type === "git"}
 						<LabelField key="Url">
 							<input
 								type="text"
 								class="flex-grow"
-								bind:value={temp_source.git}
+								bind:value={dependency.source.git}
 								onfocus={autofocus} />
 						</LabelField>
 						<LabelField key="Branch">
 							<input
 								type="text"
 								class="flex-grow"
-								bind:value={temp_source.branch}
+								bind:value={dependency.source.branch}
 								onfocus={autofocus} />
 						</LabelField>
 
@@ -174,23 +146,23 @@
 							<input
 								type="text"
 								class="flex-grow"
-								bind:value={temp_source.subdirectory}
+								bind:value={dependency.source.subdirectory}
 								onfocus={autofocus} />
 						</LabelField>
-					{:else if temp_source.type === "path"}
+					{:else if dependency.source.type === "path"}
 						<LabelField key="Path">
 							<input
 								type="text"
 								class="flex-grow"
-								bind:value={temp_source.path}
+								bind:value={dependency.source.path}
 								onfocus={autofocus} />
 						</LabelField>
-					{:else if temp_source.type === "local"}
+					{:else if dependency.source.type === "local"}
 						<LabelField key="Directory">
 							<input
 								type="text"
 								class="flex-grow"
-								bind:value={temp_source.directory}
+								bind:value={dependency.source.directory}
 								onfocus={autofocus} />
 						</LabelField>
 					{/if}
@@ -210,6 +182,6 @@
 					<FixedField key="Local Directory" value={dependency.name} />
 				{/if}
 			</div>
-		{/if}
-	</div>
-{/key}
+		</div>
+	{/key}
+{/if}
