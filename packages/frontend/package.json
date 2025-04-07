@@ -13,17 +13,17 @@
 		"@sveltejs/vite-plugin-svelte": "^5.0.3",
 		"@tsconfig/svelte": "^5.0.4",
 		"@types/bun": "^1.2.8",
-		"svelte": "^5.25.6",
+		"svelte": "^5.25.7",
 		"svelte-check": "^4.1.5",
 		"typescript": "~5.7.3",
-		"vite": "^6.2.4"
+		"vite": "^6.2.5"
 	},
 	"dependencies": {
-		"@tailwindcss/vite": "^4.0.17",
+		"@tailwindcss/vite": "^4.1.3",
 		"chart.js": "^4.4.8",
 		"clsx": "^2.1.1",
 		"qoslab-shared": "workspace:*",
-		"tailwind-merge": "^3.1.0",
-		"tailwindcss": "^4.0.17"
+		"tailwind-merge": "^3.2.0",
+		"tailwindcss": "^4.1.3"
 	}
 }
