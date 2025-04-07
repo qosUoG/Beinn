@@ -6,7 +6,7 @@ from qoslablib.runtime import EquipmentABC
 
 from qoslablib.params import ParamModels, Params2ParamModels, ParamModels2Params
 
-from packages.qoslabapp.lib.utils.result import applicationError, ok
+from ..lib.utils.result import applicationError, ok
 
 
 from ._eeshared import getAvailableEEs, populateParam

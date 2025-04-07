@@ -12,13 +12,14 @@
 
 	const addHandler = async () => {
 		const new_dependency =
-			await gstore.workspace.dependencies.instantiate();
+			await gstore.workspace.dependencies?.instantiate();
 
 		await tick();
-
-		editor.mode = "dependency";
-		eeeditor.id = undefined;
-		dependency_editor.id = new_dependency.id;
+		if (new_dependency) {
+			editor.mode = "dependency";
+			eeeditor.id = undefined;
+			dependency_editor.id = new_dependency.id;
+		}
 	};
 </script>
 
@@ -36,7 +37,7 @@
 			</div>
 		</div>
 
-		{#each Object.values(gstore.workspace.dependencies.dependencies) as dependency}
+		{#each Object.values(gstore.workspace.dependencies?.dependencies ?? {}) as dependency}
 			<button
 				class={cn(
 					"section text-start bg-white frow justify-between items-center ",

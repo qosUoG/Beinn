@@ -67,7 +67,8 @@ serve({
                 } catch (e) {
                     if (isErr(e)) Response.json({ success: false, err: e }, { headers })
 
-                    return Response.json({ success: false, err: applicationError(`Error in backend /workspace/load: ${e}`) }, { headers })
+
+                    return Response.json({ success: false, err: applicationError(`Error in backend /workspace/load: ${JSON.stringify(e)}`) }, { headers })
                 }
 
 
@@ -83,7 +84,7 @@ serve({
                 } catch (e) {
                     if (isErr(e)) Response.json({ success: false, err: e }, { headers })
 
-                    return Response.json({ success: false, err: applicationError(`Error in backend /workspace/save: ${e}`) }, { headers })
+                    return Response.json({ success: false, err: applicationError(`Error in backend /workspace/save: ${JSON.stringify(e)}`) }, { headers })
                 }
             }
         }
@@ -96,7 +97,7 @@ serve({
                 } catch (e) {
                     if (isErr(e)) Response.json({ success: false, err: e }, { headers })
 
-                    return Response.json({ success: false, err: applicationError(`Error in backend /workspace/dependency/check_init: ${e}`) }, { headers })
+                    return Response.json({ success: false, err: applicationError(`Error in backend /workspace/dependency/check_init: ${JSON.stringify(e)}`) }, { headers })
                 }
             }
         },
@@ -112,7 +113,7 @@ serve({
                 } catch (e) {
                     if (isErr(e)) Response.json({ success: false, err: e }, { headers })
 
-                    return Response.json({ success: false, err: applicationError(`Error in backend /workspace/dependency/add: ${e}`) }, { headers })
+                    return Response.json({ success: false, err: applicationError(`Error in backend /workspace/dependency/add: ${JSON.stringify(e)}`) }, { headers })
                 }
             }
         },
@@ -126,7 +127,7 @@ serve({
                 } catch (e) {
                     if (isErr(e)) Response.json({ success: false, err: e }, { headers })
 
-                    return Response.json({ success: false, err: applicationError(`Error in backend /workspace/dependency/remove: ${e}`) }, { headers })
+                    return Response.json({ success: false, err: applicationError(`Error in backend /workspace/dependency/remove: ${JSON.stringify(e)}`) }, { headers })
                 }
             }
         },
@@ -139,7 +140,7 @@ serve({
                 } catch (e) {
                     if (isErr(e)) Response.json({ success: false, err: e }, { headers })
 
-                    return Response.json({ success: false, err: applicationError(`Error in backend /workspace/dependency/read_all: ${e}`) }, { headers })
+                    return Response.json({ success: false, err: applicationError(`Error in backend /workspace/dependency/read_all: ${JSON.stringify(e)}`) }, { headers })
                 }
             }
         },
@@ -166,7 +167,7 @@ serve({
                 } catch (e) {
                     if (isErr(e)) Response.json({ success: false, err: e }, { headers })
 
-                    return Response.json({ success: false, err: applicationError(`Error in backend /workspace/disconnectl: ${e}`) }, { headers })
+                    return Response.json({ success: false, err: applicationError(`Error in backend /workspace/disconnectl: ${JSON.stringify(e)}`) }, { headers })
                 }
             }
         }

@@ -22,7 +22,7 @@ export type XYWebWorkerMessage = {
 
 
 export class Chart<T = ChartConfigs> {
-    accessor config: T
+    config: T
     worker: Worker | undefined
     constructor(config: T) {
         this.config = config
@@ -34,16 +34,14 @@ export class Chart<T = ChartConfigs> {
 }
 
 export class Charts {
-    private _charts: Record<string, Chart> = $state({})
-    get charts() {
-        return this._charts
-    }
+    charts: Record<string, Chart> = $state({})
+
 
     instantiate(config: ChartConfigs) {
-        if (this._charts[config.title] === undefined)
-            this._charts[config.title] = new Chart(config)
+        if (this.charts[config.title] === undefined)
+            this.charts[config.title] = new Chart(config)
         else
-            this._charts[config.title].reset()
+            this.charts[config.title].reset()
     }
 
 

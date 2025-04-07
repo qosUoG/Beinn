@@ -15,49 +15,45 @@ import { applicationError, sourceEqual, userError, type EEType } from "qoslab-sh
 
 
 export class Workspace {
-    path: string = $state("")
+    path: string = $state(import.meta.env.VITE_DEFAULT_EXPERIMENT_PATH)
 
-    private log_socket: WebSocket | undefined = $state()
-    private _connected: boolean = $state(false)
+    log_socket: WebSocket | undefined = $state()
+    connected: boolean = $state(false)
 
-    private _dependencies: Dependencies | undefined = $state(undefined)
-    get dependencies() {
-        if (!this._dependencies)
-            throw toastUnreacheable("dependencies shall not be undefined")
+    dependencies: Dependencies | undefined = $state(undefined)
+    // get dependencies() {
+    //     if (!this.dependencies)
+    //         throw toastUnreacheable("dependencies shall not be undefined")
 
-        return this._dependencies
-    }
+    //     return this.dependencies
+    // }
 
 
-    private _equipments: Equipments = $state(new Equipments())
-    get equipments() {
-        return this._equipments
-    }
-    private _experiments: Experiments = $state(new Experiments())
-    get experiments() {
-        return this._experiments
-    }
+    equipments: Equipments = $state(new Equipments())
+
+    experiments: Experiments = $state(new Experiments())
+
 
     save = async () => {
         await backendSaveWorkspace({
             path: this.path,
             save: {
-                dependencies: this.dependencies.toSave(),
-                equipments: this._equipments.toSave(),
-                experiments: this._experiments.toSave(),
+                dependencies: this.dependencies ? this.dependencies.toSave() : undefined,
+                equipments: this.equipments.toSave(),
+                experiments: this.experiments.toSave(),
             }
         })
     }
 
     reset = () => {
-        this._dependencies = undefined
-        this._equipments = new Equipments()
-        this._experiments = new Experiments()
+        this.dependencies = undefined
+        this.equipments = new Equipments()
+        this.experiments = new Experiments()
     }
 
 
     disconnect = async () => {
-        this._connected = false
+        this.connected = false
         await tick();
         // shutdown the workspace
         try {
@@ -65,14 +61,12 @@ export class Workspace {
             this.reset()
             await tick();
         } catch (e) {
-            this._connected = true;
+            this.connected = true;
             throw e
         }
     }
 
-    get connected() {
-        return this._connected
-    }
+
 
     connect = async () => {
         // 0. Check that the path is valid
@@ -112,45 +106,46 @@ export class Workspace {
 
         // If there is no save, just load the dependencies and update availables is enough.
         if (!save) {
-            this._dependencies = new Dependencies(this.path, uv_dependencies)
-            await Promise.all([this._equipments.refreshAvailables(), this._experiments.refreshAvailables()])
+            this.dependencies = new Dependencies(uv_dependencies)
+            await Promise.all([this.equipments.refreshAvailables(), this.experiments.refreshAvailables()])
             return
         }
 
         // Otherwise, we would need to loop through the save and add one by one
-        this._dependencies = new Dependencies(this.path)
+        this.dependencies = new Dependencies()
 
-        for (const save_d of save.dependencies) {
-            // Just in case for the nested $state to update
-            await tick()
+        if (save.dependencies)
+            for (const save_d of save.dependencies) {
+                // Just in case for the nested $state to update
+                await tick()
 
-            // First check if the source is present in pyproject.toml already
-            if (uv_dependencies.find(({ source }) => sourceEqual(save_d.source, source))) {
-                // Just add the dependency
-                this._dependencies.instantiateTemplate(save_d)
-                continue
+                // First check if the source is present in pyproject.toml already
+                if (uv_dependencies.find(({ source }) => sourceEqual(save_d.source, source))) {
+                    // Just add the dependency
+                    this.dependencies.instantiateTemplate(save_d)
+                    continue
+                }
+
+                // The source is not present in pyproject.toml
+                // Check if the dependency is installed. If not, just copy as is
+                if (!save_d.installed) {
+                    this.dependencies.instantiateTemplate(save_d)
+                    continue
+                }
+
+                // The dependency should be installed, but not. Try to install.
+                // First assigne the source
+                const new_d = await this.dependencies.instantiate()
+                new_d.source = save_d.source
+                await tick()
+
+                // Then try to install
+                try { await new_d.install() }
+                catch (e) { /* If it failed, we silence the error, and only show that as not installed */ }
             }
-
-            // The source is not present in pyproject.toml
-            // Check if the dependency is installed. If not, just copy as is
-            if (!save_d.installed) {
-                this._dependencies.instantiateTemplate(save_d)
-                continue
-            }
-
-            // The dependency should be installed, but not. Try to install.
-            // First assigne the source
-            const new_d = await this._dependencies.instantiate()
-            new_d.source = save_d.source
-            await tick()
-
-            // Then try to install
-            try { await new_d.install() }
-            catch (e) { /* If it failed, we silence the error, and only show that as not installed */ }
-        }
 
         await tick()
-        await Promise.all([this._equipments.refreshAvailables(), this._experiments.refreshAvailables()])
+        await Promise.all([this.equipments.refreshAvailables(), this.experiments.refreshAvailables()])
         await tick();
 
         // Instantiate all equipments and experiments
@@ -216,7 +211,7 @@ export class Workspace {
             await tick()
         }
 
-        this._connected = true;
+        this.connected = true;
 
         await tick();
     }

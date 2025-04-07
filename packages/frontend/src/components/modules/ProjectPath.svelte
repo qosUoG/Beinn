@@ -2,7 +2,7 @@
 	import Loader from "$icons/Loader.svelte";
 
 	import { gstore } from "$states/global.svelte";
-	import {} from "$states/workspace";
+	import {} from "$states/workspace.svelte";
 
 	import { tick } from "svelte";
 	import { toastError } from "./ToastController.svelte";

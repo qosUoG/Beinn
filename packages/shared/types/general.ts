@@ -77,7 +77,7 @@ export type EET = {
 
 
 export type Save = {
-    dependencies: DependencyT[],
+    dependencies: DependencyT[] | undefined,
     experiments: EET[],
     equipments: EET[],
 }
