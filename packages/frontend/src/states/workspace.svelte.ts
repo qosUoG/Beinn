@@ -80,8 +80,6 @@ export class Workspace {
         // 1. set the project directory and get the save
         const save = await backendLoadWorkspace({ path: this.path });
 
-        console.log(save)
-
         // 2. Connect to cli ws
         this.log_socket = qoslabappGetCliWs<string>({
             onmessage: (message) => {
@@ -166,8 +164,6 @@ export class Workspace {
         ])
 
 
-        console.log(this._equipments.available_module_cls)
-        console.log(this._experiments.available_module_cls)
 
         // Write the module_cls to the equipment and experiments
         for (let i = 0; i < save.equipments.length; i++) {

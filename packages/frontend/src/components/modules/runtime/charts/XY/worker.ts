@@ -53,7 +53,7 @@ onmessage = function (event: MessageEvent<XYWebWorkerMessage>) {
                 config.data.datasets.push({ data: [], label: y_name })
             })
 
-            chart = new Chart(canvas, config)
+            chart = new Chart(canvas as unknown as HTMLCanvasElement, config)
 
 
             // Establish websocket to get data
