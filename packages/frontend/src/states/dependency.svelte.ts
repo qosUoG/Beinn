@@ -7,16 +7,24 @@ import { gstore } from "./global.svelte";
 
 class Dependency {
 
-    id: string = $state("")
+    readonly id: string = $state("")
 
     source: DependencySource = $state({ type: "pip", package: "" })
 
-    name: string = $state("")
+    private _name: string = $state("")
+    get name() {
+        return this._name
+    }
+    private _fullname: string = $state("")
+    get fullname() {
+        return this._fullname
+    }
 
-    fullname: string = $state("")
-
-    install_string: string = $state("")
-    installed: boolean = $state(false)
+    private install_string: string = $state("")
+    private _installed: boolean = $state(false)
+    get installed() {
+        return this._installed
+    }
 
 
 
@@ -30,29 +38,29 @@ class Dependency {
         if (!template) return
 
         this.source = template.source
-        this.installed = template.installed
+        this._installed = template.installed
 
         if (!template.installed) return
 
-        this.name = template.name
-        this.fullname = template.fullname
+        this._name = template.name
+        this._fullname = template.fullname
     }
 
     toSave() {
         return {
-            installed: this.installed,
+            installed: this._installed,
             source: this.source,
 
             install_string: this.install_string,
-            name: this.name,
-            fullname: this.fullname
+            name: this._name,
+            fullname: this._fullname
         }
     }
 
     async uninstall() {
         // Only circumstances communicating with backend
-        if (this.installed && this.source.type !== "local")
-            await backendRemoveDependency({ name: this.name, path: gstore.workspace.path });
+        if (this._installed && this.source.type !== "local")
+            await backendRemoveDependency({ name: this._name, path: gstore.workspace.path });
 
         setTimeout(() => {
             delete gstore.workspace.dependencies?.dependencies[this.id]
@@ -70,8 +78,8 @@ class Dependency {
                 { path: gstore.workspace.path, directory: this.source.directory }
             );
 
-            this.installed = true
-            this.name = this.fullname = this.install_string = this.source.directory
+            this._installed = true
+            this._name = this._fullname = this.install_string = this.source.directory
 
             return
         }
@@ -103,16 +111,16 @@ class Dependency {
 
         const res = await backendInstallDependency({ path: gstore.workspace.path, install_string });
 
-        this.fullname = res.fullname
-        this.name = res.name
-        this.installed = true
+        this._fullname = res.fullname
+        this._name = res.name
+        this._installed = true
     }
 
 }
 
 export class Dependencies {
 
-    dependencies: Record<string, Dependency> = $state({})
+    readonly dependencies: Record<string, Dependency> = $state({})
 
 
 
@@ -143,12 +151,7 @@ export class Dependencies {
         const id = getRandomId(Object.keys(this.dependencies))
         const new_dependency = new Dependency(id,)
         this.dependencies[id] = new_dependency
-
-
-
-
-
-        return this.dependencies[id]
+        return new_dependency
 
     }
 
@@ -156,12 +159,7 @@ export class Dependencies {
         const id = getRandomId(Object.keys(this.dependencies))
         const new_dependency = new Dependency(id, template)
         this.dependencies[id] = new_dependency
-
-        $effect(() => {
-            const shall_delete = new_dependency.shall_delete
-            if (shall_delete)
-                delete this.dependencies[id]
-        })
+        return new_dependency
     }
 
     reset() {

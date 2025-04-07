@@ -65,7 +65,8 @@ serve({
                     return Response.json({ success: true, value: await loadWorkspace(path) }, { headers })
 
                 } catch (e) {
-                    if (isErr(e)) Response.json({ success: false, err: e }, { headers })
+
+                    if (isErr(e)) return Response.json({ success: false, err: e }, { headers })
 
 
                     return Response.json({ success: false, err: applicationError(`Error in backend /workspace/load: ${JSON.stringify(e)}`) }, { headers })
@@ -78,11 +79,11 @@ serve({
         "/workspace/save": {
             POST: async req => {
                 try {
-                    const { path, payload } = await req.json() as { path: string, payload: any }
-                    await saveWorkspace(path, payload)
+                    const { path, save } = await req.json() as { path: string, save: any }
+                    await saveWorkspace(path, save)
                     return Response.json({ success: true }, { headers })
                 } catch (e) {
-                    if (isErr(e)) Response.json({ success: false, err: e }, { headers })
+                    if (isErr(e)) return Response.json({ success: false, err: e }, { headers })
 
                     return Response.json({ success: false, err: applicationError(`Error in backend /workspace/save: ${JSON.stringify(e)}`) }, { headers })
                 }
@@ -95,7 +96,7 @@ serve({
                     const { path, directory } = await req.json() as { directory: string, path: string }
                     return Response.json({ success: await file(path + "/" + directory + "/__init__.py").exists() }, { headers })
                 } catch (e) {
-                    if (isErr(e)) Response.json({ success: false, err: e }, { headers })
+                    if (isErr(e)) return Response.json({ success: false, err: e }, { headers })
 
                     return Response.json({ success: false, err: applicationError(`Error in backend /workspace/dependency/check_init: ${JSON.stringify(e)}`) }, { headers })
                 }
@@ -111,7 +112,7 @@ serve({
                     return Response.json({ success: true }, { headers })
 
                 } catch (e) {
-                    if (isErr(e)) Response.json({ success: false, err: e }, { headers })
+                    if (isErr(e)) return Response.json({ success: false, err: e }, { headers })
 
                     return Response.json({ success: false, err: applicationError(`Error in backend /workspace/dependency/add: ${JSON.stringify(e)}`) }, { headers })
                 }
@@ -125,7 +126,7 @@ serve({
                     shell(`uv remove ${name}`, path)
                     return Response.json({ success: true }, { headers })
                 } catch (e) {
-                    if (isErr(e)) Response.json({ success: false, err: e }, { headers })
+                    if (isErr(e)) return Response.json({ success: false, err: e }, { headers })
 
                     return Response.json({ success: false, err: applicationError(`Error in backend /workspace/dependency/remove: ${JSON.stringify(e)}`) }, { headers })
                 }
@@ -138,7 +139,7 @@ serve({
                     return Response.json({ success: true, value: await readAllUvDependencies(path) }, { headers })
 
                 } catch (e) {
-                    if (isErr(e)) Response.json({ success: false, err: e }, { headers })
+                    if (isErr(e)) return Response.json({ success: false, err: e }, { headers })
 
                     return Response.json({ success: false, err: applicationError(`Error in backend /workspace/dependency/read_all: ${JSON.stringify(e)}`) }, { headers })
                 }
@@ -165,7 +166,7 @@ serve({
                     throw applicationError("Cannot disconnect python procedure")
 
                 } catch (e) {
-                    if (isErr(e)) Response.json({ success: false, err: e }, { headers })
+                    if (isErr(e)) return Response.json({ success: false, err: e }, { headers })
 
                     return Response.json({ success: false, err: applicationError(`Error in backend /workspace/disconnectl: ${JSON.stringify(e)}`) }, { headers })
                 }

@@ -50,7 +50,7 @@ export class Equipments {
 
 
     async refreshAvailables() {
-        this._available_module_cls = await qoslabappGetAvailableEEs("equipment", { prefixes: gstore.workspace.dependencies.prefixes })
+        this._available_module_cls = await qoslabappGetAvailableEEs("equipment", { prefixes: gstore.workspace.dependencies?.prefixes ?? [] })
     }
 
     get available_module_cls() {

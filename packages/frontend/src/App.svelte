@@ -2,7 +2,7 @@
 	import Mode from "$components/modules/Mode.svelte";
 	import ProjectPath from "$components/modules/ProjectPath.svelte";
 
-	import { AppMode, gstore, type Log } from "$states/global.svelte";
+	import { gstore, type Log } from "$states/global.svelte";
 
 	import Config from "$components/modules/config/Config.svelte";
 	import Experiments from "$components/modules/runtime/Runtime.svelte";
@@ -50,9 +50,9 @@
 				</div>
 			</div>
 		{/if}
-		{#if gstore.mode === AppMode.Configuration}
+		{#if gstore.mode === "Configuration"}
 			<Config />
-		{:else if gstore.mode === AppMode.Runtime}
+		{:else if gstore.mode === "Runtime"}
 			<Experiments />
 		{/if}
 		{#if show_cli}

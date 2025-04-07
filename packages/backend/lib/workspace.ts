@@ -1,7 +1,7 @@
 import { $, fetch, file, randomUUIDv7, spawn, spawnSync, write, type SpawnOptions } from "bun"
 import { app_state, postCli } from "./app_state"
 import { parse, stringify } from "smol-toml"
-import { applicationError, isErr, retryOnError, type DependencyT, type Result } from "qoslab-shared";
+import { applicationError, isErr, retryOnError, type DependencyT, type Result, type Save } from "qoslab-shared";
 import { pathExist } from "./fs";
 import { mkdir } from "node:fs/promises";
 
@@ -179,10 +179,10 @@ export async function loadWorkspace(path: string) {
     }
 }
 
-export async function saveWorkspace(path: string, payload: any) {
+export async function saveWorkspace(path: string, save: Save) {
     try {
         const save_file = file(path + "/.qoslabapp_state")
-        await save_file.write(JSON.stringify(payload))
+        await save_file.write(JSON.stringify(save))
     } catch (e) {
         if (isErr(e)) throw e
         throw applicationError(`Error in backend saveWorkspace: ${e}`)

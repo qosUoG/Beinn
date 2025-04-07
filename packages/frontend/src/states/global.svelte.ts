@@ -1,10 +1,8 @@
 import { Workspace } from "./workspace.svelte";
 
 
-export enum AppMode {
-    Configuration,
-    Runtime
-}
+export type AppMode = "Configuration" | "Runtime"
+
 
 export type Availables = { modules: string[], cls: string }[]
 
@@ -17,19 +15,17 @@ export type Log = {
 }
 
 class Logs {
-    logs: Log[] = $state([])
-
-
+    readonly logs: Log[] = $state([])
     push(logs: Log[]) {
         this.logs.push(...logs)
     }
 }
 
 class GlobalStore {
-    mode: AppMode = $state(AppMode.Configuration)
-    workspace: Workspace = $state(new Workspace())
-    logs: Logs = $state(new Logs())
-    command_history: string[] = $state([])
+    mode: AppMode = $state("Configuration")
+    readonly workspace: Workspace = $state(new Workspace())
+    readonly logs: Logs = $state(new Logs())
+    readonly command_history: string[] = $state([])
 }
 
 export const gstore = $state(new GlobalStore())

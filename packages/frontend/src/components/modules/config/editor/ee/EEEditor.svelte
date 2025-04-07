@@ -62,7 +62,7 @@
 	);
 </script>
 
-{#if eeeditor.id !== undefined}
+{#if eeeditor.id !== undefined && target}
 	{#key eeeditor.id}
 		<div class="section bg-slate-200 col-span-2 min-w-0 w-full">
 			<div class="fcol-2 min-w-0 w-full">

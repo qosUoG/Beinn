@@ -144,7 +144,7 @@ export abstract class EE {
 
 
         await tick()
-        console.log(this)
+
     }
 
     async saveParams() {

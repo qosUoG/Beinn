@@ -15,45 +15,50 @@ import { applicationError, sourceEqual, userError, type EEType } from "qoslab-sh
 
 
 export class Workspace {
-    path: string = $state(import.meta.env.VITE_DEFAULT_EXPERIMENT_PATH)
+    readonly path: string = $state(import.meta.env.VITE_DEFAULT_EXPERIMENT_PATH)
 
-    log_socket: WebSocket | undefined = $state()
-    connected: boolean = $state(false)
+    private log_socket: WebSocket | undefined = $state()
+    private _connected: boolean = $state(false)
+    get connected() {
+        return this._connected
+    }
 
-    dependencies: Dependencies | undefined = $state(undefined)
-    // get dependencies() {
-    //     if (!this.dependencies)
-    //         throw toastUnreacheable("dependencies shall not be undefined")
-
-    //     return this.dependencies
-    // }
+    private _dependencies: Dependencies | undefined = $state(undefined)
+    get dependencies() {
+        return this._dependencies
+    }
 
 
-    equipments: Equipments = $state(new Equipments())
-
-    experiments: Experiments = $state(new Experiments())
+    private _equipments: Equipments = $state(new Equipments())
+    get equipments() {
+        return this._equipments
+    }
+    private _experiments: Experiments = $state(new Experiments())
+    get experiments() {
+        return this._experiments
+    }
 
 
     save = async () => {
         await backendSaveWorkspace({
             path: this.path,
             save: {
-                dependencies: this.dependencies ? this.dependencies.toSave() : undefined,
-                equipments: this.equipments.toSave(),
-                experiments: this.experiments.toSave(),
+                dependencies: this._dependencies ? this._dependencies.toSave() : undefined,
+                equipments: this._equipments.toSave(),
+                experiments: this._experiments.toSave(),
             }
         })
     }
 
     reset = () => {
-        this.dependencies = undefined
-        this.equipments = new Equipments()
-        this.experiments = new Experiments()
+        this._dependencies = undefined
+        this._equipments = new Equipments()
+        this._experiments = new Experiments()
     }
 
 
     disconnect = async () => {
-        this.connected = false
+        this._connected = false
         await tick();
         // shutdown the workspace
         try {
@@ -61,7 +66,7 @@ export class Workspace {
             this.reset()
             await tick();
         } catch (e) {
-            this.connected = true;
+            this._connected = true;
             throw e
         }
     }
@@ -74,6 +79,8 @@ export class Workspace {
 
         // 1. set the project directory and get the save
         const save = await backendLoadWorkspace({ path: this.path });
+
+        console.log(save)
 
         // 2. Connect to cli ws
         this.log_socket = qoslabappGetCliWs<string>({
@@ -107,14 +114,14 @@ export class Workspace {
         // If there is no save, just load the dependencies and update availables is enough.
         if (!save) {
 
-            this.dependencies = new Dependencies(uv_dependencies)
-            await Promise.all([this.equipments.refreshAvailables(), this.experiments.refreshAvailables()])
-            this.connected = true;
+            this._dependencies = new Dependencies(uv_dependencies)
+            await Promise.all([this._equipments.refreshAvailables(), this._experiments.refreshAvailables()])
+            this._connected = true;
             return
         }
 
         // Otherwise, we would need to loop through the save and add one by one
-        this.dependencies = new Dependencies()
+        this._dependencies = new Dependencies()
 
         if (save.dependencies)
             for (const save_d of save.dependencies) {
@@ -124,20 +131,20 @@ export class Workspace {
                 // First check if the source is present in pyproject.toml already
                 if (uv_dependencies.find(({ source }) => sourceEqual(save_d.source, source))) {
                     // Just add the dependency
-                    this.dependencies.instantiateTemplate(save_d)
+                    this._dependencies.instantiateTemplate(save_d)
                     continue
                 }
 
                 // The source is not present in pyproject.toml
                 // Check if the dependency is installed. If not, just copy as is
                 if (!save_d.installed) {
-                    this.dependencies.instantiateTemplate(save_d)
+                    this._dependencies.instantiateTemplate(save_d)
                     continue
                 }
 
                 // The dependency should be installed, but not. Try to install.
                 // First assigne the source
-                const new_d = await this.dependencies.instantiate()
+                const new_d = await this._dependencies.instantiate()
                 new_d.source = save_d.source
                 await tick()
 
@@ -147,20 +154,24 @@ export class Workspace {
             }
 
         await tick()
-        await Promise.all([this.equipments.refreshAvailables(), this.experiments.refreshAvailables()])
+        await Promise.all([this._equipments.refreshAvailables(), this._experiments.refreshAvailables()])
         await tick();
 
 
 
         // Instantiate all equipments and experiments
         const [new_equipments, new_experiments] = await Promise.all([
-            Promise.all(save.equipments.map((e) => this.equipments.instantiate(e))),
-            Promise.all(save.experiments.map((e) => this.experiments.instantiate(e)))
+            Promise.all(save.equipments.map((e) => this._equipments.instantiate(e))),
+            Promise.all(save.experiments.map((e) => this._experiments.instantiate(e)))
         ])
 
 
+        console.log(this._equipments.available_module_cls)
+        console.log(this._experiments.available_module_cls)
+
         // Write the module_cls to the equipment and experiments
-        for (let i = 0; i < save.equipments.length, i++;) {
+        for (let i = 0; i < save.equipments.length; i++) {
+
             new_equipments[i].module_cls = save.equipments[i].module_cls
             await tick()
 
@@ -172,7 +183,7 @@ export class Workspace {
 
         }
 
-        for (let i = 0; i < save.experiments.length, i++;) {
+        for (let i = 0; i < save.experiments.length; i++) {
             new_experiments[i].module_cls = save.experiments[i].module_cls
             await tick()
             // If not created, this is enough
@@ -184,7 +195,7 @@ export class Workspace {
         await tick()
 
         // First set the params to temp_params, and try to save it, then write the temp_params 
-        for (let i = 0; i < save.equipments.length, i++;) {
+        for (let i = 0; i < save.equipments.length; i++) {
             new_equipments[i].temp_params = save.equipments[i].params
             await tick()
 
@@ -200,7 +211,7 @@ export class Workspace {
 
         }
 
-        for (let i = 0; i < save.experiments.length, i++;) {
+        for (let i = 0; i < save.experiments.length; i++) {
             new_experiments[i].temp_params = save.experiments[i].params
             await tick()
 
@@ -215,7 +226,7 @@ export class Workspace {
             await tick()
         }
 
-        this.connected = true;
+        this._connected = true;
 
         await tick();
     }
@@ -237,7 +248,7 @@ export class Workspace {
             // Targeting equipment, first check if the equipment name exist
             const equipment_name = input.split(".")[0];
 
-            for (const equipment of Object.values(this.equipments)) {
+            for (const equipment of Object.values(this._equipments)) {
                 if (!equipment.created) continue
 
                 if (equipment.name === equipment_name) {
@@ -278,18 +289,18 @@ export class Workspace {
     }
 
     getEEs(eetype: EEType) {
-        if (eetype === "equipment") return this.equipments
-        return this.experiments
+        if (eetype === "equipment") return this._equipments
+        return this._experiments
     }
 
     getEEsList(eetype: EEType) {
-        if (eetype === "equipment") return this.equipments.equipments
-        return this.experiments.experiments
+        if (eetype === "equipment") return this._equipments.equipments
+        return this._experiments.experiments
     }
 
     getEE(eetype: EEType, id: string) {
-        if (eetype === "equipment") return this.equipments.equipments[id]
-        return this.experiments.experiments[id]
+        if (eetype === "equipment") return this._equipments.equipments[id]
+        return this._experiments.experiments[id]
     }
 
 

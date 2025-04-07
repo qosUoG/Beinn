@@ -1,4 +1,4 @@
-import { applicationError, type Result } from "qoslab-shared"
+import { applicationError, isErr, type Result } from "qoslab-shared"
 
 export const postRequestJsonInOut = async (url: string, payload: Record<any, any>, headers: HeadersInit = {
     "Content-type": "application/json"
@@ -14,18 +14,23 @@ export const postRequestJsonInOut = async (url: string, payload: Record<any, any
         if (!res.ok) throw applicationError(`Failed to POST at ${url} with payload ${JSON.stringify(payload)}`)
 
 
-    } catch (error) {
+    } catch (e) {
+
+        if (isErr(e)) throw e
         throw applicationError(`fetch threw error at ${url} with payload ${JSON.stringify(payload)}`)
     }
 
     let txt
     try {
         txt = await res.text()
+
         const obj = JSON.parse(txt) as Result
         if (!obj.success) throw obj.err
         return obj.value
     }
-    catch (error) {
+    catch (e) {
+
+        if (isErr(e)) throw e
         throw applicationError(`json parsing threw error at ${url} with payload ${JSON.stringify(payload)}, returning ${txt}`)
     }
 
@@ -38,7 +43,8 @@ export const getRequestJsonOut = async (url: string) => {
         res = await fetch(url, { method: "GET" })
         if (!res.ok) throw applicationError(`Failed to GET at ${url}`)
 
-    } catch (error) {
+    } catch (e) {
+        if (isErr(e)) throw e
         throw applicationError(`fetch threw error at ${url}`)
     }
 
@@ -49,7 +55,8 @@ export const getRequestJsonOut = async (url: string) => {
         if (!obj.success) throw obj.err
         return obj.value
     }
-    catch (error) {
+    catch (e) {
+        if (isErr(e)) throw e
         throw applicationError(`json parsing threw error at ${url}, returning ${txt}`)
     }
 }

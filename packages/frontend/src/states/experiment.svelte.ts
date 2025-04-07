@@ -7,6 +7,7 @@ import { EE } from "./ee.svelte"
 import { qoslabappContinueExperiment, qoslabappGetAvailableEEs, qoslabappGetExperimentEventsWs, qoslabappPauseExperiment, qoslabappStartExperiment, qoslabappStopExperiment } from "$services/qoslabapp.svelte"
 import { getRandomId } from "$lib/utils"
 import { Charts } from "./chart.svelte"
+import { toastApplicationError } from "$components/modules/ToastController.svelte"
 
 
 export class Experiment extends EE {
@@ -34,7 +35,8 @@ export class Experiment extends EE {
                 try {
                     res = JSON.parse(event.data)
                 } catch (e) {
-                    throw Error("Experiment Event Failed to parse. \nError:\n" + e)
+                    toastApplicationError(`Experiment ${this.id} failed to parse ecent with data ${event.data} Error: ${e}`)
+                    return
                 }
 
                 switch (res.key) {
@@ -205,17 +207,14 @@ export class Experiments {
 
 
     refreshAvailables = async () => {
-        this._available_module_cls = await qoslabappGetAvailableEEs("experiment", { prefixes: gstore.workspace.dependencies.prefixes })
+        this._available_module_cls = await qoslabappGetAvailableEEs("experiment", { prefixes: gstore.workspace.dependencies?.prefixes ?? [] })
     }
 
     get available_module_cls() {
         return this._available_module_cls
     }
 
-    runnables = $derived(
-        Object.values(this.experiments.experiments).filter(e => e.isRunnable())
 
-    );
 
     getInstanceables(id: string) {
         return Object.values(this._experiments)

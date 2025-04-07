@@ -21,38 +21,39 @@
 	import { tick } from "svelte";
 
 	const dependency = $derived(
-		gstore.workspace.dependencies.dependencies[dependency_editor.id!]
+		gstore.workspace.dependencies?.dependencies[dependency_editor.id!]
 	);
 
 	let temp_type: "local" | "path" | "git" | "pip" = $state("pip");
 
 	$effect(() => {
-		switch (temp_type) {
-			case "pip":
-				dependency.source = { type: "pip", package: "" };
-				break;
-			case "git":
-				dependency.source = {
-					type: "git",
-					git: "",
-					subdirectory: "",
-					branch: "",
-				};
-				break;
-			case "local":
-				dependency.source = {
-					type: "local",
-					directory: "",
-				};
-				break;
-			case "path":
-				dependency.source = {
-					type: "path",
-					path: "",
-					editable: false,
-				};
-				break;
-		}
+		if (dependency)
+			switch (temp_type) {
+				case "pip":
+					dependency.source = { type: "pip", package: "" };
+					break;
+				case "git":
+					dependency.source = {
+						type: "git",
+						git: "",
+						subdirectory: "",
+						branch: "",
+					};
+					break;
+				case "local":
+					dependency.source = {
+						type: "local",
+						directory: "",
+					};
+					break;
+				case "path":
+					dependency.source = {
+						type: "path",
+						path: "",
+						editable: false,
+					};
+					break;
+			}
 	});
 
 	const type_options = ["local", "path", "git", "pip"];
@@ -90,7 +91,7 @@
 	}
 </script>
 
-{#if dependency_editor.id}
+{#if dependency_editor.id && dependency}
 	{#key dependency_editor.id}
 		<div class="section bg-slate-200 col-span-2">
 			<div class="fcol-2">
