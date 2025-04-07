@@ -22,8 +22,9 @@ export class Equipments {
     toSave: () => EET[] = () => {
         return Object.values(this._equipments).map(e => e.toSave())
     }
+    cleanup: (() => void) | undefined = undefined
 
-    async instantiate(payload?: { id?: string, name?: string }) {
+    instantiate(payload?: { id?: string, name?: string }) {
         let id: string | undefined, name: string | undefined
         if (payload) {
             id = payload.id
@@ -36,13 +37,6 @@ export class Equipments {
         this._equipments[id] = new_equipment
 
 
-        await tick()
-        $effect(() => {
-            const shall_delete = new_equipment.shall_delete
-
-            if (shall_delete)
-                delete this._equipments[id]
-        })
 
         return new_equipment
     }

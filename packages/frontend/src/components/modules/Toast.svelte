@@ -5,12 +5,12 @@
 
 {#each Object.entries(content) as [id, text]}
 	<div
-		class="absolute wrapped bg-white z-1000 left-1/2 -translate-x-1/2 bottom-8 w-128 frow items-center">
-		<div class="flex-grow text-center wrapped">
+		class="absolute wrapped bg-white z-1000 left-1/2 -translate-x-1/2 bottom-8 w-128 frow items-start">
+		<div class="flex-grow text-left wrapped break-all mr-4">
 			{text}
 		</div>
 		<button
-			class="icon-btn-sm"
+			class="icon-btn-sm absolute top-2 right-2 h-fit"
 			onclick={() => {
 				delete content[id];
 			}}><Cross /></button>

@@ -107,7 +107,7 @@ export async function readAllUvDependencies(path: string) {
 
         }
         // return the list of dependencies
-        return { dependencies: res }
+        return res
 
     } catch (e) {
         if (isErr(e)) throw e
@@ -169,9 +169,9 @@ export async function loadWorkspace(path: string) {
 
     try {
         const save_file = file(path + "/.qoslabapp_state")
-        if (!(await save_file.exists())) return { save: undefined }
+        if (!(await save_file.exists())) return undefined
 
-        return { save: JSON.parse(await save_file.text()) }
+        return JSON.parse(await save_file.text())
 
     } catch (e) {
         if (isErr(e)) throw e

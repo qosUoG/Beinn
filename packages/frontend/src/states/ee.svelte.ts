@@ -1,6 +1,7 @@
-import { qoslabappCreateEE, qoslabappRemoveEE, qoslabappSetEEParams } from "$services/qoslabapp.svelte"
+import { qoslabappCreateEE, qoslabappGetEEParams, qoslabappRemoveEE, qoslabappSetEEParams } from "$services/qoslabapp.svelte"
 import { applicationError, userError, type AllParamTypes, type EET, type EEType, type ModuleCls } from "qoslab-shared"
 import { gstore } from "./global.svelte"
+import { tick } from "svelte"
 
 export abstract class EE {
     private _id: string
@@ -35,13 +36,13 @@ export abstract class EE {
 
     // The following may exist even created = false,
     // This is because the EE may be in save but failed to setup when loading workspace
-    name: string
+    name: string = $state("")
     protected params: Record<string, AllParamTypes> = $state({})
 
 
     private _temp_params: Record<string, AllParamTypes> = $state({})
     get temp_params() {
-        return this.params
+        return this._temp_params
     }
     set temp_params(params: Record<string, AllParamTypes>) {
         this.write_params(params, this._temp_params)
@@ -130,14 +131,20 @@ export abstract class EE {
 
     async create() {
         // Create theeetypein qoslabapp and fetch initial params
-        const res = await qoslabappCreateEE(this.eetype, {
+        await qoslabappCreateEE(this.eetype, {
             id: this._id,
             module_cls: this._module_cls
         });
 
+        const res = await qoslabappGetEEParams(this.eetype, { id: this._id })
+
         this.params = JSON.parse(JSON.stringify(res))
         this._temp_params = JSON.parse(JSON.stringify(res))
         this._created = true
+
+
+        await tick()
+        console.log(this)
     }
 
     async saveParams() {
@@ -147,7 +154,11 @@ export abstract class EE {
 
     async remove() {
         const res = await qoslabappRemoveEE(this.eetype, { id: this._id });
-        this._shall_delete = true
+        setTimeout(() => {
+            if (this.eetype === "equipment")
+                delete gstore.workspace.equipments.equipments[this._id]
+            else delete gstore.workspace.experiments.experiments[this._id]
+        })
     }
 
     toSave() {
@@ -162,12 +173,12 @@ export abstract class EE {
     }
 
     params_edited = $derived(this._created
-        ? JSON.stringify(this.temp_params) !==
+        ? JSON.stringify(this._temp_params) !==
         JSON.stringify(this.params)
         : false)
 
     cancelTempParams() {
-        this.temp_params = JSON.parse(
+        this._temp_params = JSON.parse(
             JSON.stringify(this.params)
         );
     }

@@ -8,8 +8,8 @@ export async function qoslabappGetAvailableEEs(eetype: EEType, payload: { prefix
     return await postRequestJsonInOut(qoslabappUrl(`${eetype}/available_${eetype}s`), payload)
 }
 
-export async function qoslabappCreateEE(eetype: EEType, payload: { id: string, module_cls: { module: string, cls: string } }): Promise<Record<string, AllParamTypes>> {
-    return await postRequestJsonInOut(qoslabappUrl(`${eetype}/create`), { id: payload.id, ...payload.module_cls })
+export async function qoslabappCreateEE(eetype: EEType, payload: { id: string, module_cls: { module: string, cls: string } }) {
+    await postRequestJsonInOut(qoslabappUrl(`${eetype}/create`), { id: payload.id, ...payload.module_cls })
 }
 
 export async function qoslabappGetEEParams(eetype: EEType, payload: { id: string }): Promise<Record<string, AllParamTypes>> {

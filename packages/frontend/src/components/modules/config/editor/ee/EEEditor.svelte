@@ -13,17 +13,23 @@
 	import FixedField from "$components/reuseables/Fields/FixedField.svelte";
 	import LabelField from "$components/reuseables/Fields/LabelField.svelte";
 	import { autofocus } from "$components/utils.svelte";
-	import { capitalise } from "qoslab-shared";
-	import { toastUnreacheable } from "$components/modules/ToastController.svelte";
+	import { capitalise, type Err } from "qoslab-shared";
+	import {
+		toastError,
+		toastUnreacheable,
+	} from "$components/modules/ToastController.svelte";
 
 	const removeHandler = async () => {
 		if (!eeeditor.id) {
 			toastUnreacheable("removehandler in EEEditor.svelte");
 			return;
 		}
-
-		await target.remove();
-		eeeditor.id = undefined;
+		try {
+			await target.remove();
+			eeeditor.id = undefined;
+		} catch (e) {
+			toastError(e as Err);
+		}
 	};
 
 	const createHandler = async () => {
@@ -31,9 +37,12 @@
 			toastUnreacheable("createhandler in EEEditor.svelte");
 			return;
 		}
-
-		// Create the equipment / experiment
-		await target.create();
+		try {
+			// Create the equipment / experiment
+			await target.create();
+		} catch (e) {
+			toastError(e as Err);
+		}
 	};
 
 	const saveParamsHandler = async () => {
@@ -41,8 +50,11 @@
 			toastUnreacheable("saveParamsHandler in EEEditor.svelte");
 			return;
 		}
-
-		await target.saveParams();
+		try {
+			await target.saveParams();
+		} catch (e) {
+			toastError(e as Err);
+		}
 	};
 
 	const target = $derived(

@@ -84,5 +84,6 @@ async def set_params(payload: SetParamsPayload):
             params[param_name] = populateParam(param)
 
         AppState.setEquipmentParams(payload.id, params)
+        return ok()
     except Exception as e:
         return applicationError(f"error in /equipment/set_params: {e}")

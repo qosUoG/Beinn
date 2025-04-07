@@ -175,7 +175,7 @@ export class Experiments {
 
     private _available_module_cls: Availables = $state([])
 
-    async instantiate(payload?: { id?: string, name?: string }) {
+    instantiate(payload?: { id?: string, name?: string }) {
         let id: string | undefined, name: string | undefined
         if (payload) {
             id = payload.id
@@ -186,13 +186,8 @@ export class Experiments {
         const new_experiment = new Experiment(id, name)
         this._experiments[id] = new_experiment
 
-        await tick()
-        $effect(() => {
-            const shall_delete = new_experiment.shall_delete
 
-            if (shall_delete)
-                delete this._experiments[id]
-        })
+
 
         return new_experiment
     }

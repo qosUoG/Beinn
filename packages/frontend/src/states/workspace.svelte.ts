@@ -106,8 +106,10 @@ export class Workspace {
 
         // If there is no save, just load the dependencies and update availables is enough.
         if (!save) {
+
             this.dependencies = new Dependencies(uv_dependencies)
             await Promise.all([this.equipments.refreshAvailables(), this.experiments.refreshAvailables()])
+            this.connected = true;
             return
         }
 
@@ -147,6 +149,8 @@ export class Workspace {
         await tick()
         await Promise.all([this.equipments.refreshAvailables(), this.experiments.refreshAvailables()])
         await tick();
+
+
 
         // Instantiate all equipments and experiments
         const [new_equipments, new_experiments] = await Promise.all([

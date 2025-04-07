@@ -117,13 +117,15 @@ export class Dependencies {
 
         const ids: string[] = []
 
-        if (dependencies)
+        if (dependencies) {
+
             dependencies.forEach((d) => {
                 // Check if exist in save
                 const id = getRandomId(ids);
                 ids.push(id)
                 this.dependencies[id] = new Dependency(id, d)
             });
+        }
     }
 
     get prefixes() {
