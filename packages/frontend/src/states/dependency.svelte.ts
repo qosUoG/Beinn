@@ -19,7 +19,7 @@ class Dependency {
     installed: boolean = $state(false)
 
 
-    shall_delete: boolean = $state(false)
+
 
 
     constructor(id: string, template?: DependencyT) {
@@ -38,7 +38,7 @@ class Dependency {
         this.fullname = template.fullname
     }
 
-    toSave: () => DependencyT = () => {
+    toSave() {
         return {
             installed: this.installed,
             source: this.source,
@@ -49,17 +49,20 @@ class Dependency {
         }
     }
 
-    uninstall = async () => {
+    async uninstall() {
         // Only circumstances communicating with backend
         if (this.installed && this.source.type !== "local")
             await backendRemoveDependency({ name: this.name, path: gstore.workspace.path });
 
-        this.shall_delete = true
+        setTimeout(() => {
+            delete gstore.workspace.dependencies?.dependencies[this.id]
+        })
+
     }
 
 
 
-    install = async () => {
+    async install() {
 
         if (this.source.type === "local") {
             // Check init is available
@@ -132,28 +135,24 @@ export class Dependencies {
         return Object.values(this.dependencies).filter(d => d.installed).map(d => d.name)
     }
 
-    toSave: () => DependencyT[] = () => {
+    toSave() {
         return Object.values(this.dependencies).map(d => d.toSave())
     }
 
-    instantiate = async () => {
+    instantiate() {
         const id = getRandomId(Object.keys(this.dependencies))
         const new_dependency = new Dependency(id,)
         this.dependencies[id] = new_dependency
 
-        await tick()
 
-        $effect(() => {
-            const shall_delete = new_dependency.shall_delete
-            if (shall_delete)
-                delete this.dependencies[id]
-        })
+
+
 
         return this.dependencies[id]
 
     }
 
-    instantiateTemplate = (template: DependencyT) => {
+    instantiateTemplate(template: DependencyT) {
         const id = getRandomId(Object.keys(this.dependencies))
         const new_dependency = new Dependency(id, template)
         this.dependencies[id] = new_dependency
@@ -165,7 +164,7 @@ export class Dependencies {
         })
     }
 
-    reset = () => {
+    reset() {
         for (const prop of Object.getOwnPropertyNames(this.dependencies))
             delete this.dependencies[prop];
     }
