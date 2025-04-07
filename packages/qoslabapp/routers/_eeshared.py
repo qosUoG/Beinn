@@ -72,7 +72,8 @@ def getAvailableEEs(eeABC: EEABC, names: list[str]):
 def populateParam(param: AllParamTypes):
     match param.type:
         case "instance.equipment":
-            param.instance = AppState.getEquipment(param.instance_id)
+            if param.instance_id is not None:
+                param.instance = AppState.getEquipment(param.instance_id)
 
         case "instance.experiment":
             raise Exception("Playlist is not being implemented yet")
