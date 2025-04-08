@@ -1,5 +1,5 @@
 {
-	"name": "qoslab-backend",
+	"name": "qoslab-backend-bun",
 	"module": "index.ts",
 	"type": "module",
 	"dependencies": {
