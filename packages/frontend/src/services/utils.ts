@@ -17,7 +17,7 @@ export const postRequestJsonInOut = async (url: string, payload: Record<any, any
     } catch (e) {
 
         if (isErr(e)) throw e
-        throw applicationError(`fetch threw error at ${url} with payload ${JSON.stringify(payload)}`)
+        throw applicationError(`fetch threw error at ${url} with payload ${JSON.stringify(payload)}, error: ${JSON.stringify(e)}`)
     }
 
     let txt
@@ -31,7 +31,7 @@ export const postRequestJsonInOut = async (url: string, payload: Record<any, any
     catch (e) {
 
         if (isErr(e)) throw e
-        throw applicationError(`json parsing threw error at ${url} with payload ${JSON.stringify(payload)}, returning ${txt}`)
+        throw applicationError(`json parsing threw error at ${url} with payload ${JSON.stringify(payload)}, returning ${txt}, error: ${JSON.stringify(e)}`)
     }
 
 }
@@ -45,7 +45,7 @@ export const getRequestJsonOut = async (url: string) => {
 
     } catch (e) {
         if (isErr(e)) throw e
-        throw applicationError(`fetch threw error at ${url}`)
+        throw applicationError(`fetch threw error at ${url}, error: ${JSON.stringify(e)}`)
     }
 
     let txt
@@ -57,7 +57,7 @@ export const getRequestJsonOut = async (url: string) => {
     }
     catch (e) {
         if (isErr(e)) throw e
-        throw applicationError(`json parsing threw error at ${url}, returning ${txt}`)
+        throw applicationError(`json parsing threw error at ${url}, returning ${txt}, error: ${JSON.stringify(e)}`)
     }
 }
 

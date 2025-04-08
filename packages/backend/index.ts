@@ -5,6 +5,9 @@ import { copyApp, initiateWorkspace, loadWorkspace, readAllUvDependencies, runPr
 import { pathExist } from "./lib/fs";
 import { mkdir } from "node:fs/promises"
 import { applicationError, isErr, type Err, type Result } from "qoslab-shared";
+import open from 'open';
+
+
 
 function consoleIterator(...data: any[]) {
 
@@ -42,7 +45,11 @@ serve({
         }
 
     },
+
     routes: {
+        "/": new Response(await Bun.file("./static/index.html").bytes()),
+        "/vite.svg": new Response(await Bun.file("./static/vite.svg").bytes()),
+
         "/workspace/load": {
             POST: async req => {
                 try {
@@ -179,12 +186,22 @@ serve({
         if (req.method === 'OPTIONS')
             return new Response('', { headers });
 
+        const pathname = new URL(req.url).pathname
+
 
 
         // Upgrade to websocket
-        if (new URL(req.url).pathname === "/cli" && server.upgrade(req)) {
+        if (pathname === "/cli" && server.upgrade(req)) {
 
             return undefined as unknown as Response; // do not return a Response
+        }
+
+
+
+        if (pathname.startsWith("/assets")) {
+            const file = Bun.file("./static" + pathname)
+
+            return new Response(await file.bytes(), { headers: { "Content-Type": file.type } })
         }
 
 
@@ -193,7 +210,7 @@ serve({
 
 });
 
-
+await open('http://localhost:4000');
 
 process.on("SIGINT", async () => {
 
