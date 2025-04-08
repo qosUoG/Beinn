@@ -7,15 +7,15 @@ import tailwindcss from '@tailwindcss/vite'
 export default defineConfig({
   plugins: [svelte(), tailwindcss()],
   build: {
-    outDir: "../backend/static",
+    outDir: "../backend-deno/dist",
     emptyOutDir: true,
-    rollupOptions: {
-      output: {
-        assetFileNames: "assets/frontend.[ext]",
-        chunkFileNames: "assets/frontend.jss",
-        entryFileNames: "assets/frontend.jss",
-      }
-    }
+    // rollupOptions: {
+    //   output: {
+    //     assetFileNames: "assets/frontend.[ext]",
+    //     chunkFileNames: "assets/frontend.jss",
+    //     entryFileNames: "assets/frontend.jss",
+    //   }
+    // }
   },
   resolve: {
     alias: {
