@@ -1,0 +1,8 @@
+{
+	"name": "@qoslab/shared",
+	"version": "0.1.0",
+	"exports": "./deno.ts",
+	"fmt": {
+		"semiColons": false
+	}
+}
