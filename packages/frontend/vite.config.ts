@@ -9,6 +9,13 @@ export default defineConfig({
   build: {
     outDir: "../backend/static",
     emptyOutDir: true,
+    rollupOptions: {
+      output: {
+        assetFileNames: "assets/frontend.[ext]",
+        chunkFileNames: "assets/frontend.jss",
+        entryFileNames: "assets/frontend.jss",
+      }
+    }
   },
   resolve: {
     alias: {

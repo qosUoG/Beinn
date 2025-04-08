@@ -7,17 +7,23 @@ import { mkdir } from "node:fs/promises"
 import { applicationError, isErr, type Err, type Result } from "qoslab-shared";
 import open from 'open';
 
+import { embeddedFiles } from "bun"
 
+// function consoleIterator(...data: any[]) {
 
-function consoleIterator(...data: any[]) {
+//     postCli("backend", typeof data[0] === "string" ? data[0] : JSON.stringify(data[0]))
+// }
 
-    postCli("backend", typeof data[0] === "string" ? data[0] : JSON.stringify(data[0]))
-}
+// console.log = consoleIterator
 
-console.log = consoleIterator
+console.log({ embeddedFiles })
 
+const index_html = embeddedFiles.find((f) => f.name.startsWith("index") && f.name.endsWith(".html"))
 
+const frontend_jss = embeddedFiles.find((f) => f.name.startsWith("frontend") && f.name.endsWith(".jss"))
+const frontend_css = embeddedFiles.find((f) => f.name === "static/assets/frontend.css")
 
+const worker_jss = embeddedFiles.find((f) => f.name.startsWith("worker") && f.name.endsWith(".jss"))
 
 serve({
     port: 4000,
@@ -47,8 +53,11 @@ serve({
     },
 
     routes: {
-        "/": new Response(await Bun.file("./static/index.html").bytes()),
-        "/vite.svg": new Response(await Bun.file("./static/vite.svg").bytes()),
+        "/": new Response(index_html),
+        "/assets/frontend.jss": new Response(frontend_jss, { headers: { "Content-Type": "application/javascript" } }),
+        "/assets/frontend.css": new Response(frontend_css),
+        "/assets/worker-DJyNAymy.js": new Response(worker_jss, { headers: { "Content-Type": "application/javascript" } }),
+        // "/vite.svg": new Response(embeddedFiles.find((f) => f.name === "vite.svg")),
 
         "/workspace/load": {
             POST: async req => {
@@ -198,11 +207,11 @@ serve({
 
 
 
-        if (pathname.startsWith("/assets")) {
-            const file = Bun.file("./static" + pathname)
+        // if (pathname.startsWith("/assets")) {
+        //     const file = Bun.file("./static" + pathname)
 
-            return new Response(await file.bytes(), { headers: { "Content-Type": file.type } })
-        }
+        //     return new Response(await file.bytes(), { headers: { "Content-Type": file.type } })
+        // }
 
 
         return new Response('Not Found', { headers, status: 404 });
@@ -210,7 +219,7 @@ serve({
 
 });
 
-await open('http://localhost:4000');
+open('http://localhost:4000');
 
 process.on("SIGINT", async () => {
 
