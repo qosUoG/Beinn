@@ -82,7 +82,6 @@ class ExperimentABC(ABC):
         # self.sigen.frequency = mv
         raise NotImplementedError
 
-    @abstractmethod
     def stop(self):
         # This function should do any clean up if needed
         # However, this function is not a must to be implemented
