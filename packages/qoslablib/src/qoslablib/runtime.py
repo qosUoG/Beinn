@@ -2,8 +2,6 @@ from abc import ABC, abstractmethod
 
 from dataclasses import dataclass
 
-import functools
-
 
 from .extensions.saver import SqlSaverManagerABC
 from .extensions.chart import ChartManagerABC
@@ -29,15 +27,6 @@ class ManagerABC(SqlSaverManagerABC, ChartManagerABC, ExperimentManagerABC):
 class ExperimentABC(ABC):
     # Instance shall initiate params in __init__() function
     params: params.Params
-
-    class LoopCount:
-        @classmethod
-        def INFINITE(cls):
-            return -1
-
-        @classmethod
-        def FINITE(cls, loop: int):
-            return loop
 
     def __init__(self):
         raise Exception("__init__() of ExperimentABC shall not be called")

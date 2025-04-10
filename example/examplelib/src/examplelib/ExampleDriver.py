@@ -1,7 +1,6 @@
-from dataclasses import dataclass
 import math
 from random import random
-from typing import ClassVar, TypedDict
+from typing import TypedDict
 from qoslablib import runtime as r, params as p
 
 """
@@ -17,7 +16,6 @@ For class attribute, one must wrap the type with ClassVar like "equipment_pi",
 """
 
 
-@dataclass
 class ExampleEquipment(r.EquipmentABC):
     class ParamsType(TypedDict):
         strparam: p.StrParam
@@ -28,13 +26,10 @@ class ExampleEquipment(r.EquipmentABC):
         selectintparam: p.SelectIntParam
         selectfloatparam: p.SelectFloatParam
 
-    params: ParamsType
-
-    # These ClassVars are class attributes instead of instance attributes
-    # One would need to acquire it by ExampleEquipment.equipment_pi, instead
-    # of through the equipment instance
-    equipment_pi: ClassVar[float] = math.pi
-    equipment_model: ClassVar[str] = "QOS007"
+    # These are class attributes instead of instance attributes
+    # While you may acquire it through the instance, it maybe easily mixed up
+    equipment_pi: float = math.pi
+    equipment_model: str = "QOS007"
 
     def __init__(self):
         # Default params list
