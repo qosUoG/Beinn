@@ -3,6 +3,7 @@ from dataclasses import dataclass
 
 from typing import Literal, override
 from pydantic import BaseModel
+from .runtime import EquipmentProxy
 
 
 class QosParam[T: BaseModel](ABC):
@@ -229,7 +230,7 @@ class BoolParam:
 class InstanceEquipmentParam[T]:
     type: Literal["instance.equipment"]
     instance_id: str | None
-    instance: T | None
+    instance: EquipmentProxy[T] | None
 
     class PydanticBaseModel(BaseModel):
         type: Literal["instance.equipment"]

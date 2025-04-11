@@ -1,4 +1,3 @@
-import ast
 import importlib
 from types import ModuleType
 from fastapi import WebSocket
@@ -7,7 +6,7 @@ from qoslablib.params import Params
 from ..proxies.sql_saver import SqlWorker
 
 from ..proxies.experiment import ExperimentProxy
-from ..proxies.equipment import EquipmentProxy
+from qoslablib.runtime import EquipmentABC, EquipmentProxy
 
 
 class AppState:
@@ -30,7 +29,7 @@ class AppState:
     Equipments 
     """
 
-    _equipment_proxies: dict[str, EquipmentProxy] = {}
+    _equipment_proxies: dict[str, EquipmentProxy[EquipmentABC]] = {}
     _equipment_imported_modules: list[ModuleType] = []
 
     @classmethod
@@ -44,11 +43,13 @@ class AppState:
 
     @classmethod
     def getEquipmentParams(cls, id: str):
-        return cls._equipment_proxies[id].params
+        with cls._equipment_proxies[id].lock() as equipment:
+            return equipment.params
 
     @classmethod
     def setEquipmentParams(cls, id: str, params: Params):
-        cls._equipment_proxies[id].params = params
+        with cls._equipment_proxies[id].lock() as equipment:
+            equipment.params = params
 
     @classmethod
     def removeEquipment(cls, id: str):

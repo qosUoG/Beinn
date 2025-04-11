@@ -8,8 +8,6 @@ import warnings
 from qoslablib.params import AllParamTypes
 from qoslablib.runtime import EquipmentABC, ExperimentABC
 
-from ..lib.utils.result import applicationError, ok
-
 
 from ..lib.settings.state import AppState
 

@@ -8,6 +8,9 @@ from .extensions.chart import ChartManagerABC
 
 from . import params
 
+from threading import Lock
+from contextlib import contextmanager
+
 
 @dataclass
 class ExperimentManagerABC(ABC):
@@ -106,3 +109,17 @@ class EquipmentABC(ABC):
     #         # Same as experiment, refer to experiment for example,
     #         # refer to params page for documentation of specifying params
     #     }
+
+
+class EquipmentProxy[T: EquipmentABC]:
+    def __init__(self, eCls: type[T]):
+        self._lock = Lock()
+        self._equipment = eCls()
+
+    @contextmanager
+    def lock(self):
+        try:
+            with self._lock:
+                yield self._equipment
+        finally:
+            pass
