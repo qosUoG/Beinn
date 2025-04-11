@@ -18,7 +18,7 @@ async def cli(ws: WebSocket):
                 print(e, flush=True)
 
             if data["type"] == "equipment":
-                code = f"AppState._equipments['{data['id']}']{data['command']}"
+                code = f"AppState._equipment_proxies['{data['id']}']{data['command']}"
                 await ws.send_json(AppState.interpret(code))
             else:
                 await ws.send_json(AppState.interpret(data["command"]))
