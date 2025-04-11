@@ -1,12 +1,12 @@
 from abc import ABC, abstractmethod
 
 from dataclasses import dataclass
+from typing import Iterator
 
 
 from .extensions.saver import SqlSaverManagerABC
 from .extensions.chart import ChartManagerABC
 
-from . import params
 
 from threading import Lock
 from contextlib import contextmanager
@@ -26,12 +26,13 @@ class ManagerABC(SqlSaverManagerABC, ChartManagerABC, ExperimentManagerABC):
     pass
 
 
-@dataclass
 class ExperimentABC(ABC):
     # Instance shall initiate params in __init__() function
-    params: params.Params
 
     def __init__(self):
+        from . import params
+
+        self.params: params.Params
         raise Exception("__init__() of ExperimentABC shall not be called")
 
     # The __init__ of the exact experiment should look sth like this
@@ -91,12 +92,13 @@ class ExperimentABC(ABC):
         pass
 
 
-@dataclass
 class EquipmentABC(ABC):
     # Instance shall initiate params in __init__() function
-    params: params.Params
 
     def __init__(self):
+        from . import params
+
+        self.params: params.Params
         raise Exception("__init__() of ExperimentABC shall not be called")
 
     # # All equipment subclass shall call __init__ function FIRST in their __init__ functions
@@ -117,7 +119,7 @@ class EquipmentProxy[T: EquipmentABC]:
         self._equipment = eCls()
 
     @contextmanager
-    def lock(self):
+    def lock(self) -> Iterator[T]:
         try:
             with self._lock:
                 yield self._equipment
