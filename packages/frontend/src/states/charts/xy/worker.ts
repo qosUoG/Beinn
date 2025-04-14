@@ -124,7 +124,7 @@ function establish_web_socket() {
     _ws.onmessage = getWsOnmessageHandler(_config.y_names.length, _config.mode)
 
     _ws.onclose = (event) => {
-        if (event.code !== 2000)
+        if (event.code !== 4000)
             establish_web_socket()
     }
 }
