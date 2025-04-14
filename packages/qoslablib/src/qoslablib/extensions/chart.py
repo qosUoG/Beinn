@@ -45,14 +45,14 @@ class ChartManagerABC(ABC):
         raise NotImplementedError
 
 
-type XYPlotMode = Literal["append"] | Literal["overwrite"]
+type XYMode = Literal["append"] | Literal["overwrite"]
 
 
 @dataclass
-class XYPlotConfig(ChartConfigABC):
+class XYConfig(ChartConfigABC):
     title: str
-    type: Literal["XYPlot"]
-    mode: XYPlotMode
+    type: Literal["xy"]
+    mode: XYMode
     x_axis: str
     y_axis: str
     y_names: list[str]
@@ -61,10 +61,10 @@ class XYPlotConfig(ChartConfigABC):
         return dataclasses.asdict(self)
 
 
-class XYPlot(ChartABC):
+class XY(ChartABC):
     class KW(TypedDict):
         title: str
-        mode: XYPlotMode
+        mode: XYMode
         x_axis: str
         y_axis: str
         y_names: list[str]
@@ -79,9 +79,9 @@ class XYPlot(ChartABC):
         self.y_axis = kwargs["y_axis"]
         self.y_names = kwargs["y_names"]
         self.mode = kwargs["mode"]
-        self.config = XYPlotConfig(
+        self.config = XYConfig(
             title=self.title,
-            type="XYPlot",
+            type="xy",
             x_axis=self.x_axis,
             y_axis=self.y_axis,
             y_names=self.y_names,

@@ -8,7 +8,7 @@ from click import ParamType
 from qoslablib import params as p, exceptions as e, runtime as r
 import time
 
-from qoslablib.extensions.chart import XYPlot
+from qoslablib.extensions.chart import XY
 from qoslablib.extensions.saver import XYFloatSqlSaver
 from examplelib.ExampleDriver import ExampleEquipment
 
@@ -58,9 +58,9 @@ class ExampleExperiment(r.ExperimentABC):
         # self.inputs = numpy.arange(self.params["intparam"].value)
 
         # # # After the params, instantiate charts and sql savers as needed
-        self.xyplot: XYPlot = manager.createChart(
-            XYPlot,
-            XYPlot.kwargs(
+        self.xyplot: XY = manager.createChart(
+            XY,
+            XY.kwargs(
                 title="Example XY Plot",
                 x_axis="index",
                 y_axis="C",
@@ -69,9 +69,9 @@ class ExampleExperiment(r.ExperimentABC):
             ),
         )
 
-        # self.xyplot2: XYPlot = manager.createChart(
-        #     XYPlot,
-        #     XYPlot.kwargs(
+        # self.xyplot2: XY = manager.createChart(
+        #     XY,
+        #     XY.kwargs(
         #         title="Another XY Plot",
         #         x_name="indexxxx",
         #         y_names=["temperature"],
