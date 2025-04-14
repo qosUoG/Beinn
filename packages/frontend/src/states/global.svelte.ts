@@ -18,7 +18,7 @@ export type Log = {
 class Logs {
     readonly logs: Log[] = $state([])
     async push(logs: Log[]) {
-        if (this.logs.length + logs.length > 10000)
+        if (this.logs.length + logs.length > 5000)
             this.logs.splice(0, logs.length)
         await tick()
         this.logs.push(...logs)
