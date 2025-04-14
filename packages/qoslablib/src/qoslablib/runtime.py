@@ -118,6 +118,10 @@ class EquipmentProxy[T: EquipmentABC]:
         self._lock = Lock()
         self._equipment = eCls()
 
+    @property
+    def params(self):
+        return self._equipment.params
+
     @contextmanager
     def lock(self) -> Iterator[T]:
         try:
