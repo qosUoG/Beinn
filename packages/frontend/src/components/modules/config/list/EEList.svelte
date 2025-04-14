@@ -19,7 +19,7 @@
 	const capitalised = capitalise(eetype);
 
 	const addHandler = async () => {
-		const new_ee = await gstore.workspace.getEEs(eetype).instantiate();
+		const new_ee = gstore.workspace.getEEs(eetype).instantiate();
 		await tick();
 
 		eeeditor.id = new_ee.id;

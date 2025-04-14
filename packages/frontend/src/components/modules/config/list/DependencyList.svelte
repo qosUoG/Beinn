@@ -46,15 +46,11 @@
 						: ""
 				)}
 				onclick={async () => {
-					console.log("hi");
 					editor.mode = "dependency";
 					dependency_editor.id = dependency.id;
 					eeeditor.id = undefined;
-					console.log("hi");
+
 					await tick();
-					console.log(editor.mode);
-					console.log(dependency_editor.id);
-					console.log(eeeditor.id);
 				}}
 				id={`equipment-${dependency.id}`}>
 				{#if dependency.installed}

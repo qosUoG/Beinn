@@ -24,6 +24,7 @@
 		"clsx": "^2.1.1",
 		"qoslab-shared": "workspace:*",
 		"tailwind-merge": "^3.2.0",
-		"tailwindcss": "^4.1.3"
+		"tailwindcss": "^4.1.3",
+		"worker-timers": "^8.0.20"
 	}
 }

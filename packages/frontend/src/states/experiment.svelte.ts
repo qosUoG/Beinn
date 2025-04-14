@@ -8,6 +8,7 @@ import { qoslabappContinueExperiment, qoslabappGetAvailableEEs, qoslabappGetExpe
 import { getRandomId } from "$lib/utils"
 import { Charts } from "./chart.svelte"
 import { toastApplicationError } from "$components/modules/ToastController.svelte"
+import { setInterval, clearInterval } from "worker-timers"
 
 
 export class Experiment extends EE {
@@ -71,7 +72,8 @@ export class Experiment extends EE {
                             case "paused":
                             case "completed":
                             case "stopped":
-                                clearInterval(this.timer)
+                                if (this.timer)
+                                    clearInterval(this.timer)
                                 break
 
                         }
@@ -120,7 +122,7 @@ export class Experiment extends EE {
     }
 
     private event_ws: WebSocket | undefined = $state()
-    private timer: Timer | undefined = $state()
+    private timer: number | undefined = $state()
 
     async start() {
         this._iteration_count = -1;
@@ -188,9 +190,6 @@ export class Experiments {
         if (!id) id = getRandomId(Object.keys(this._experiments))
         const new_experiment = new Experiment(id, name)
         this._experiments[id] = new_experiment
-
-
-
 
         return new_experiment
     }

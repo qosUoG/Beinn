@@ -142,7 +142,7 @@ export class Workspace {
 
                 // The dependency should be installed, but not. Try to install.
                 // First assigne the source
-                const new_d = await this._dependencies.instantiate()
+                const new_d = this._dependencies.instantiate()
                 new_d.source = save_d.source
                 await tick()
 
@@ -158,10 +158,11 @@ export class Workspace {
 
 
         // Instantiate all equipments and experiments
-        const [new_equipments, new_experiments] = await Promise.all([
-            Promise.all(save.equipments.map((e) => this._equipments.instantiate(e))),
-            Promise.all(save.experiments.map((e) => this._experiments.instantiate(e)))
-        ])
+        const new_equipments = save.equipments.map((e) => this._equipments.instantiate(e))
+        const new_experiments = save.experiments.map((e) => this._experiments.instantiate(e))
+
+        await tick()
+
 
 
 
@@ -209,7 +210,10 @@ export class Workspace {
 
         for (let i = 0; i < save.experiments.length; i++) {
             new_experiments[i].temp_params = save.experiments[i].params
+
             await tick()
+
+
 
             // Set the params
             await new_experiments[i].saveParams()

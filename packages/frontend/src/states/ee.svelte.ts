@@ -91,25 +91,21 @@ export abstract class EE {
                 case "instance.equipment":
                     if (param.type !== target_params[name].type) continue
 
-                    // Check if theeetypeexists. Add if it is
-                    if (this.eetype === "equipment") {
-                        if (gstore.workspace.equipments.equipments[param.instance_id] !== undefined)
-                            target_params[name].instance_id = param.instance_id
-                    }
-                    else if (this.eetype === "experiment") {
-                        if (gstore.workspace.experiments.experiments[param.instance_id] !== undefined)
-                            target_params[name].instance_id = param.instance_id
-                    }
+                    // Check if the equipment exists. Add if it is
+                    if (gstore.workspace.equipments.equipments[param.instance_id] !== undefined)
+                        target_params[name].instance_id = param.instance_id
 
                     continue
                 case "instance.experiment":
                     if (param.type !== target_params[name].type) continue
 
                     if (this.eetype === "equipment")
-                        throw userError(`Equipment ${this._id}, param ${name}: Equipment shall only haveeetypeinstance params`)
+                        throw userError(`Equipment ${this._id}, param ${name}: Equipment shall only have instance.equipment params`)
 
                     // Only for expeirment
-                    target_params[name].instance_id = param.instance_id
+                    if (gstore.workspace.experiments.experiments[param.instance_id] !== undefined)
+                        target_params[name].instance_id = param.instance_id
+
 
 
             }
@@ -148,6 +144,7 @@ export abstract class EE {
     }
 
     async saveParams() {
+
         await qoslabappSetEEParams(this.eetype, { id: this._id, params: this._temp_params })
         this.params = JSON.parse(JSON.stringify(this._temp_params))
     }
