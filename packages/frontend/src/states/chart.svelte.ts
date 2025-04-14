@@ -25,10 +25,6 @@ export type ChartWebWorkerMessage =
         payload: { width: number, height: number }
     } | {
         type: "reset"
-    } | {
-        type: "connect_ws"
-    } | {
-        type: "disconnect_ws"
     }
 
 
@@ -64,9 +60,7 @@ export class ChartClass<T extends ChartConfigs = ChartConfigs> {
         this.worker.postMessage({ type: "resize", payload } satisfies ChartWebWorkerMessage)
     }
 
-    connect_ws() {
-        this.worker.postMessage({ type: "connect_ws" } satisfies ChartWebWorkerMessage)
-    }
+
 
     reset() {
         this.worker.postMessage({ type: "reset" } satisfies ChartWebWorkerMessage)

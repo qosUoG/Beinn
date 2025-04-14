@@ -1,7 +1,7 @@
 <script lang="ts">
 	import ExperimentList from "$components/modules/runtime/ExperimentList.svelte";
 	import { gstore } from "$states/global.svelte";
-	import ChartWrapper from "./ChartWrapper.svelte";
+	import Chart from "./Chart.svelte";
 
 	let relative_parent: HTMLDivElement;
 </script>
@@ -13,7 +13,7 @@
 		bind:this={relative_parent}>
 		{#each Object.values(gstore.workspace.experiments.experiments) as { charts, id }}
 			{#each Object.values(charts.charts) as chart}
-				<ChartWrapper bind:chart {relative_parent} />
+				<Chart bind:chart {relative_parent} />
 			{/each}
 		{/each}
 	</div>

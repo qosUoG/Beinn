@@ -46,7 +46,14 @@ function set_canvas(canvas: OffscreenCanvas, width?: number, height?: number) {
             }
         }
     }
+    _config.y_names.forEach(y_name => {
+        config.data.datasets.push({ data: [], label: y_name })
+    })
+
     _chart = new Chart(_canvas as unknown as HTMLCanvasElement, config)
+
+    if (_ws === undefined || (_ws.readyState !== WebSocket.OPEN && _ws.readyState !== WebSocket.CONNECTING))
+        establish_web_socket()
 }
 function resize(width?: number, height?: number) {
     if (width) {
@@ -69,13 +76,7 @@ function reset() {
     _chart.data.datasets = new_datasets
     return
 }
-function connect_ws() {
-    // Establish websocket to get data
-    if (_ws === undefined)
-        establish_web_socket()
-    else if (_ws.readyState !== WebSocket.OPEN && _ws.readyState !== WebSocket.CONNECTING)
-        establish_web_socket()
-}
+
 
 function establish_web_socket() {
     _ws = new WebSocket(qoslabappWs(`chart/${_id}/${_config.title}`))
@@ -119,13 +120,6 @@ onmessage = function (event: MessageEvent<ChartWebWorkerMessage>) {
             reset()
             return
         }
-        case "connect_ws": {
-            connect_ws()
-            return
-        }
-
-
-
     }
 }
 
@@ -161,7 +155,7 @@ const getWsOnmessageHandler = (y_length: number, mode: XYChartMode) => {
             }
         }
 
-        const chart_data = _chart.data
+
 
 
         switch (mode) {
@@ -202,19 +196,19 @@ const getWsOnmessageHandler = (y_length: number, mode: XYChartMode) => {
                         const chart_y_index = frame_y_index - 1
 
                         // Check if a point with same x already exist
-                        const point_index = chart_data.datasets[chart_y_index].data.findIndex(point => (point as Point).x === x);
+                        const point_index = _chart.data.datasets[chart_y_index].data.findIndex(point => (point as Point).x === x);
 
                         // -1 if not found
                         if (point_index === -1)
-                            chart_data.datasets[chart_y_index].data.push({ x, y })
+                            _chart.data.datasets[chart_y_index].data.push({ x, y })
                         else
-                            (chart_data.datasets[chart_y_index].data[point_index] as Point).y = y
+                            (_chart.data.datasets[chart_y_index].data[point_index] as Point).y = y
                     }
                 }
 
                 // sort the datasets required
                 y_set.forEach(chart_y_index => {
-                    (chart_data.datasets[chart_y_index].data as Point[]).sort((a, b) => a.x - b.x)
+                    (_chart.data.datasets[chart_y_index].data as Point[]).sort((a, b) => a.x - b.x)
                 })
 
 
@@ -238,7 +232,7 @@ const getWsOnmessageHandler = (y_length: number, mode: XYChartMode) => {
                         const y = frame[frame_y_index]
                         if (y === null) continue
 
-                        chart_data.datasets[frame_y_index - 1].data.push({ x, y })
+                        _chart.data.datasets[frame_y_index - 1].data.push({ x, y })
                     }
                 }
                 break

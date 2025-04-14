@@ -12,21 +12,16 @@
 		relative_parent: HTMLElement;
 	} = $props();
 
-	let canvas_wrapper: HTMLDivElement | undefined = $state(undefined);
-
-	let canvas: HTMLCanvasElement | undefined = $state(undefined);
+	let canvas: HTMLCanvasElement;
 
 	onMount(() => {
-		if (canvas_wrapper && canvas) {
-			const offscreenCanvas = canvas.transferControlToOffscreen();
-			chart.set_canvas({
-				canvas: offscreenCanvas,
-				width: 700,
-				height: 400,
-			});
-		}
-
-		chart.connect_ws();
+		const offscreenCanvas = canvas.transferControlToOffscreen();
+		chart.set_canvas({
+			canvas: offscreenCanvas,
+			width: 700,
+			height: 400,
+		});
+		console.log("hi");
 	});
 </script>
 
@@ -38,7 +33,6 @@
 	<div class="absolute top-0 left-0 w-full h-full p-2 pt-8">
 		<div
 			class=" relative w-full h-full"
-			bind:this={canvas_wrapper}
 			use:watchresize
 			ondivresize={({ detail }) => {
 				chart.resize(detail);
