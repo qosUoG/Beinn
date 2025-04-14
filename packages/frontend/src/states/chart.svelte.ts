@@ -1,5 +1,5 @@
 import type { ChartConfigs, XYChartConfig } from "qoslab-shared"
-
+import XY_Worker from './charts/xy/worker.js?worker'
 
 
 
@@ -41,9 +41,9 @@ export class ChartClass<T extends ChartConfigs = ChartConfigs> {
         this.experiment_id = experiment_id
 
         // Create the worker script
-        this.worker = new Worker(new URL("./charts/" + config.type + "/worker.js", import.meta.url), {
-            type: "module",
-        });
+        switch (config.type) {
+            case "xy": this.worker = new XY_Worker()
+        }
 
         this.worker.postMessage({
             type: "instantiate", payload: {
