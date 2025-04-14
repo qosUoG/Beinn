@@ -105,6 +105,7 @@ function resize(width?: number, height?: number) {
     }
 
     _chart.resize(_width, _height - 1)
+    _chart.update()
 }
 function reset() {
     let new_datasets: { data: Point[], label: string }[] = []
@@ -112,6 +113,10 @@ function reset() {
         new_datasets.push({ data: [], label: y_name })
     })
     _chart.data.datasets = new_datasets
+
+    _chart.update()
+
+    establish_web_socket()
     return
 }
 

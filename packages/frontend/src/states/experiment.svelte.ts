@@ -127,7 +127,7 @@ export class Experiment extends EE {
         this._status = "starting";
 
         // Reset the charts
-        Object.values(this.charts).forEach(cs => { cs.reset() });
+        Object.values(this._charts.charts).forEach(cs => { cs.reset() });
 
         await tick();
         await qoslabappStartExperiment({ id: this.id });
