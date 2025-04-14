@@ -76,7 +76,7 @@
 					<StopWatch />
 				</div>
 				<div class="p-1 rounded pr-2 flex-grow text-center">
-					{#if experiment.total_time >= 0 && experiment.proposed_total_iterations !== undefined}
+					{#if experiment.total_time >= 0 && experiment.status !== "initial"}
 						{@render timer(experiment.total_time)}
 					{:else}
 						-
@@ -97,18 +97,16 @@
 			</div>
 
 			<div class="wrapped bg-slate-200 min-w-12 text-center">
-				{#if experiment.iteration_count + 1 < 0 || experiment.proposed_total_iterations === undefined}
-					-
+				{#if experiment.status === "initial"}
+					- / -
 				{:else}
 					{experiment.iteration_count + 1}
-				{/if}
 
-				/ {#if experiment.proposed_total_iterations === undefined}
-					-
-				{:else if experiment.proposed_total_iterations === -1}
-					∞
-				{:else}
-					{experiment.proposed_total_iterations}
+					/ {#if experiment.proposed_total_iterations === undefined}
+						∞
+					{:else}
+						{experiment.proposed_total_iterations}
+					{/if}
 				{/if}
 			</div>
 		</div>

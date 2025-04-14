@@ -41,8 +41,11 @@ export async function qoslabappStopExperiment(payload: { id: string }) {
 }
 
 export function qoslabappGetExperimentEventsWs<T extends any>(payload: { id: string, onmessage: (this: WebSocket, event: MessageEvent<T>) => any }) {
-    const socket = new WebSocket(qoslabappWs(`experiment/${payload.id}/events`))
+    let socket = new WebSocket(qoslabappWs(`experiment/${payload.id}/events`))
     socket.onmessage = payload.onmessage
+    socket.onclose = () => {
+        socket = new WebSocket(qoslabappWs(`experiment/${payload.id}/events`))
+    }
     return socket
 
 }

@@ -1,5 +1,6 @@
 <script lang="ts" generics="T extends string | number">
 	import Select from "../Select.svelte";
+
 	import Separator from "../Separator.svelte";
 
 	let {

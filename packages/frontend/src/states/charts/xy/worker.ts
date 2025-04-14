@@ -1,92 +1,129 @@
 import { Chart, type ChartConfiguration, type Point } from "chart.js/auto";
 
 import { qoslabappWs } from "$services/utils";
-import type { XYWebWorkerMessage } from "$states/chart.svelte";
-import type { XYChartMode } from "qoslab-shared";
+import type { ChartWebWorkerMessage } from "$states/chart.svelte";
+import type { XYChartConfig, XYChartMode } from "qoslab-shared";
 
+// Worker local variables
+let _chart: Chart
+let _canvas: OffscreenCanvas
+let _width: number
+let _height: number
+let _id: string
+let _config: XYChartConfig
+let _ws: WebSocket
 
-let chart: Chart
-let canvas: OffscreenCanvas
-let ws: WebSocket
-let _y_names: string[]
-
-// Webworker onmessage
-onmessage = function (event: MessageEvent<XYWebWorkerMessage>) {
-    switch (event.data.type) {
-        case "instantiate": {
-            const { canvas: from_canvas, id, config: { mode, x_axis, y_axis, y_names, title }, width, height } = event.data.payload
-
-            _y_names = y_names
-
-            canvas = from_canvas
-
-            canvas.width = width
-            canvas.height = height
-
-            const config: ChartConfiguration = {
-                type: "line",
-                data: {
-                    // start blank
-                    datasets: []
+// Message Handlers
+function instantiate(id: string, config: XYChartConfig) {
+    _id = id
+    _config = config
+}
+function set_canvas(canvas: OffscreenCanvas, width?: number, height?: number) {
+    _canvas = canvas
+    if (width) _canvas.width = width
+    if (height) _canvas.height = height
+    const config: ChartConfiguration = {
+        type: "line",
+        data: {
+            // start blank
+            datasets: []
+        },
+        options: {
+            responsive: true,
+            maintainAspectRatio: false,
+            // resizeDelay: 500,
+            animation: false,
+            parsing: false,
+            scales: {
+                x: {
+                    type: "linear",
+                    title: { text: _config!.x_axis, display: true }
                 },
-                options: {
-                    responsive: true,
-                    maintainAspectRatio: false,
-                    // resizeDelay: 500,
-                    animation: false,
-                    parsing: false,
-                    scales: {
-                        x: {
-                            type: "linear",
-                            title: { text: x_axis, display: true }
-                        },
-                        y: {
-                            type: "linear",
-                            title: { text: y_axis, display: true }
-                        }
-                    }
+                y: {
+                    type: "linear",
+                    title: { text: _config!.y_axis, display: true }
                 }
             }
+        }
+    }
+    _chart = new Chart(_canvas as unknown as HTMLCanvasElement, config)
+}
+function resize(width?: number, height?: number) {
+    if (width) {
+        _width = width
+        _canvas.width = width
+    }
 
-            // Push empty arrays as placeholders
-            y_names.forEach(y_name => {
-                config.data.datasets.push({ data: [], label: y_name })
-            })
+    if (height) {
+        _height = height
+        _canvas.height = height
+    }
 
-            chart = new Chart(canvas as unknown as HTMLCanvasElement, config)
+    _chart.resize(_width, _height - 1)
+}
+function reset() {
+    let new_datasets: { data: Point[], label: string }[] = []
+    _config.y_names.forEach(y_name => {
+        new_datasets.push({ data: [], label: y_name })
+    })
+    _chart.data.datasets = new_datasets
+    return
+}
+function connect_ws() {
+    // Establish websocket to get data
+    if (_ws === undefined)
+        establish_web_socket()
+    else if (_ws.readyState !== WebSocket.OPEN && _ws.readyState !== WebSocket.CONNECTING)
+        establish_web_socket()
+}
+
+function establish_web_socket() {
+    _ws = new WebSocket(qoslabappWs(`chart/${_id}/${_config.title}`))
+
+    _ws.binaryType = "arraybuffer"
+
+    _ws.onmessage = getWsOnmessageHandler(_config.y_names.length, _config.mode)
+
+    _ws.onclose = (event) => {
+        if (event.code !== 2000)
+            establish_web_socket()
+    }
+}
 
 
-            // Establish websocket to get data
-            ws = new WebSocket(qoslabappWs(`chart/${id}/${title}`))
 
-            if (ws === null) throw Error("Websocket connection failed!")
 
-            ws.binaryType = "arraybuffer"
 
-            ws.onmessage = getWsOnmessageHandler(y_names.length, mode)
-            break
+
+// Webworker onmessage
+onmessage = function (event: MessageEvent<ChartWebWorkerMessage>) {
+    switch (event.data.type) {
+        case "instantiate": {
+            const { id, config } = event.data.payload
+            instantiate(id, config)
+            return
+        }
+
+        case "set_canvas": {
+            const { canvas, width, height } = event.data.payload
+            set_canvas(canvas, width, height)
+            return
         }
 
         case "resize": {
-            if (!canvas) return
-
             const { width, height } = event.data.payload
-
-            canvas.width = width
-            canvas.height = height
-
-            chart.resize(width, height - 1)
-            break
+            resize(width, height)
+            return
         }
-
         case "reset": {
-            let new_datasets: { data: Point[], label: string }[] = []
-            _y_names.forEach(y_name => {
-                new_datasets.push({ data: [], label: y_name })
-            })
-            chart.data.datasets = new_datasets
-            break
+            reset()
+            return
         }
+        case "connect_ws": {
+            connect_ws()
+            return
+        }
+
 
 
     }
@@ -124,7 +161,7 @@ const getWsOnmessageHandler = (y_length: number, mode: XYChartMode) => {
             }
         }
 
-        const chart_data = chart.data
+        const chart_data = _chart.data
 
 
         switch (mode) {
@@ -209,7 +246,7 @@ const getWsOnmessageHandler = (y_length: number, mode: XYChartMode) => {
 
         }
         // update the chart!
-        chart.update()
+        _chart.update()
     }
 
     return onmessage

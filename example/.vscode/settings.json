@@ -1,3 +1,5 @@
 {
-	"python-envs.pythonProjects": []
+	"python-envs.pythonProjects": [],
+	"deno.enablePaths": ["./packages/backend-deno"],
+	"deno.disablePaths": ["./packages/frontend"]
 }

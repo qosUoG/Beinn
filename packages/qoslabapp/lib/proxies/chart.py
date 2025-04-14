@@ -1,6 +1,6 @@
 import asyncio
 
-from threading import Event, Lock
+from threading import Lock
 from typing import Any
 
 from fastapi import WebSocket

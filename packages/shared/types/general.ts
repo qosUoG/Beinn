@@ -1,4 +1,4 @@
-import type { AllParamTypes } from "./params"
+import type { AllParamTypes } from "./params.ts"
 
 export type ModuleCls = {
     module: string,

@@ -1,7 +1,7 @@
 export type XYChartMode = "overwrite" | "append"
 
 export type XYChartConfig = {
-    type: "XYPlot"
+    type: "xy"
     title: string
     x_axis: string,
     y_axis: string,

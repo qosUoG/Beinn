@@ -24,7 +24,7 @@ async def getChartDataWs(experiment_id: str, title: str, ws: WebSocket):
                 if frames:
                     await ws.send_bytes(frames)
 
-            await ws.close()
+            await ws.close(2000)
             unsubscribe()
             return
 

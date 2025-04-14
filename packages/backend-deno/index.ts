@@ -19,7 +19,8 @@ const static_routes = {
     "/": async (_: Request) =>
         new Response((await Deno.open(import.meta.dirname + "/dist/index.html", { read: true })).readable, {
             headers: {
-                "content-type": contentType(".html")
+                "content-type": contentType(".html"),
+                ...headers
             }
         })
     ,
@@ -174,6 +175,8 @@ Deno.serve({ hostname: "localhost", port: 4000 },
                 app_state.ws = undefined
             });
 
+
+
             return response
         }
 
@@ -188,14 +191,15 @@ Deno.serve({ hostname: "localhost", port: 4000 },
         try {
             return new Response((await Deno.open(import.meta.dirname + "/dist" + url.pathname, { read: true })).readable, {
                 headers: {
-                    "content-type": contentType("." + url.pathname.split(".").at(-1)) ?? "application/octet-stream"
+                    "content-type": contentType("." + url.pathname.split(".").at(-1)) ?? "application/octet-stream",
+                    ...headers
                 }
             })
         } catch (e) {
             if (e instanceof Deno.errors.NotFound) {
-                return new Response(null, { status: 404 });
+                return new Response(null, { status: 404, headers });
             }
-            return new Response(null, { status: 500 });
+            return new Response(null, { status: 500, headers },);
         }
 
     })

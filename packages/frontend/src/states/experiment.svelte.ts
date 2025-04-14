@@ -35,7 +35,7 @@ export class Experiment extends EE {
                 try {
                     res = JSON.parse(event.data)
                 } catch (e) {
-                    toastApplicationError(`Experiment ${this.id} failed to parse ecent with data ${event.data} Error: ${e}`)
+                    toastApplicationError(`Experiment ${this.id} failed to parse event with data ${event.data} Error: ${e}`)
                     return
                 }
 
@@ -73,11 +73,12 @@ export class Experiment extends EE {
                             case "stopped":
                                 clearInterval(this.timer)
                                 break
+
                         }
                         break
 
                     case "chart_config":
-                        this._charts.instantiate(res.value)
+                        this._charts.instantiate(res.value, this.id)
                         break
                 }
             },

@@ -89,6 +89,8 @@
 			toastError(e as Err);
 		}
 	}
+
+	console.log("editor");
 </script>
 
 {#if dependency_editor.id && dependency}

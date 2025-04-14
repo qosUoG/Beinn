@@ -5,6 +5,7 @@
 	"fmt": {
 		"semiColons": false
 	},
+	"exclude": ["index.ts"],
 	"compilerOptions": {
 		"lib": ["ESNext", "DOM"],
 		"jsx": "react-jsx",
