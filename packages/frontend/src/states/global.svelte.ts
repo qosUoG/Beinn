@@ -1,3 +1,4 @@
+import { tick } from "svelte";
 import { Workspace } from "./workspace.svelte";
 
 
@@ -16,8 +17,12 @@ export type Log = {
 
 class Logs {
     readonly logs: Log[] = $state([])
-    push(logs: Log[]) {
+    async push(logs: Log[]) {
+        if (this.logs.length + logs.length > 10000)
+            this.logs.splice(0, logs.length)
+        await tick()
         this.logs.push(...logs)
+
     }
 }
 

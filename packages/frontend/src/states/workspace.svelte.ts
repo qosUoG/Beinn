@@ -227,7 +227,7 @@ export class Workspace {
         await tick();
     }
 
-    sendCommand(input: string) {
+    async sendCommand(input: string) {
         // Check if cli websocket is connected
         if (this.log_socket === undefined) throw applicationError("Websocket to qoslabapp for cli is undefined");
         let sent = false
@@ -266,14 +266,14 @@ export class Workspace {
 
         if (sent) {
             // Record the command into the log
-            gstore.logs.push([{
+            await gstore.logs.push([{
                 source: "equipment",
                 timestamp: Date.now(),
                 content: input,
             }]);
 
         } else {
-            gstore.logs.push([{
+            await gstore.logs.push([{
                 source: "equipment",
                 timestamp: Date.now(),
                 content: `Command ${input} failed to interpret`

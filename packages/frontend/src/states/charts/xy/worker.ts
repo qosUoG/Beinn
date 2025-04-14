@@ -12,16 +12,44 @@ let _height: number
 let _id: string
 let _config: XYChartConfig
 let _ws: WebSocket
+let _is_drawing_points: boolean
 
 // Message Handlers
 function instantiate(id: string, config: XYChartConfig) {
     _id = id
     _config = config
 }
+function enable_draw_points() {
+    _is_drawing_points = true
+    if (_chart.options.elements === undefined)
+        _chart.options.elements = {}
+
+    if (_chart.options.elements.point === undefined)
+        _chart.options.elements.point = {}
+
+    _chart.options.elements.point.radius = 4
+    _chart.update()
+
+}
+
+function disable_draw_points() {
+    _is_drawing_points = false
+    if (_chart.options.elements === undefined)
+        _chart.options.elements = {}
+
+    if (_chart.options.elements.point === undefined)
+        _chart.options.elements.point = {}
+
+    _chart.options.elements.point.radius = 0
+    _chart.update()
+}
+
 function set_canvas(canvas: OffscreenCanvas, width?: number, height?: number) {
     _canvas = canvas
     if (width) _canvas.width = width
     if (height) _canvas.height = height
+
+
     const config: ChartConfiguration = {
         type: "line",
         data: {
@@ -43,12 +71,22 @@ function set_canvas(canvas: OffscreenCanvas, width?: number, height?: number) {
                     type: "linear",
                     title: { text: _config!.y_axis, display: true }
                 }
+            },
+            elements: {
+                point: {
+                    radius: 0 // default to disabled in all datasets
+                }
             }
-        }
+        },
+
     }
-    _config.y_names.forEach(y_name => {
-        config.data.datasets.push({ data: [], label: y_name })
-    })
+
+    if (_chart !== undefined)
+        config.data = _chart.data
+    else
+        _config.y_names.forEach(y_name => {
+            config.data.datasets.push({ data: [], label: y_name })
+        })
 
     _chart = new Chart(_canvas as unknown as HTMLCanvasElement, config)
 
@@ -104,13 +142,11 @@ onmessage = function (event: MessageEvent<ChartWebWorkerMessage>) {
             instantiate(id, config)
             return
         }
-
         case "set_canvas": {
             const { canvas, width, height } = event.data.payload
             set_canvas(canvas, width, height)
             return
         }
-
         case "resize": {
             const { width, height } = event.data.payload
             resize(width, height)
@@ -118,6 +154,14 @@ onmessage = function (event: MessageEvent<ChartWebWorkerMessage>) {
         }
         case "reset": {
             reset()
+            return
+        }
+        case "enable_draw_points": {
+            enable_draw_points()
+            return
+        }
+        case "disable_draw_points": {
+            disable_draw_points()
             return
         }
     }

@@ -3,6 +3,8 @@
 	import { watchresize } from "$components/utils.svelte";
 	import DragResizeCard from "./DragResizeCard.svelte";
 	import type { ChartClass } from "$states/chart.svelte";
+	import DotFilled from "$icons/DotFilled.svelte";
+	import DotEmpty from "$icons/DotEmpty.svelte";
 
 	let {
 		chart = $bindable(),
@@ -21,16 +23,31 @@
 			width: 700,
 			height: 400,
 		});
-		console.log("hi");
 	});
 </script>
 
 <DragResizeCard {relative_parent}>
-	<div class="title bg-slate-200 wrapped text-center w-fit">
-		{chart.title}
+	<div class="frow justify-between z-100000">
+		<div class="title bg-slate-200 wrapped w-fit">
+			{chart.title}
+		</div>
+		<div>
+			<button
+				class="btn-sm-icon bg-gray-400 rounded text-gray-100"
+				onclick={() => {
+					if (chart.is_drawing_points) chart.disable_draw_points();
+					else chart.enable_draw_points();
+				}}>
+				{#if chart.is_drawing_points}
+					<DotFilled />
+				{:else}
+					<DotEmpty />
+				{/if}
+			</button>
+		</div>
 	</div>
 
-	<div class="absolute top-0 left-0 w-full h-full p-2 pt-8">
+	<div class="absolute top-6 left-0 w-full h-full p-2 pb-8">
 		<div
 			class=" relative w-full h-full"
 			use:watchresize

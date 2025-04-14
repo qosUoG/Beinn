@@ -25,6 +25,10 @@ export type ChartWebWorkerMessage =
         payload: { width: number, height: number }
     } | {
         type: "reset"
+    } | {
+        type: "enable_draw_points"
+    } | {
+        type: "disable_draw_points"
     }
 
 
@@ -36,6 +40,11 @@ export class ChartClass<T extends ChartConfigs = ChartConfigs> {
     }
     private experiment_id: string
     private worker: Worker
+    private _is_drawing_points = $state(false)
+    get is_drawing_points() {
+        return this._is_drawing_points
+    }
+
     constructor(config: T, experiment_id: string) {
         this.config = config
         this.experiment_id = experiment_id
@@ -60,10 +69,18 @@ export class ChartClass<T extends ChartConfigs = ChartConfigs> {
         this.worker.postMessage({ type: "resize", payload } satisfies ChartWebWorkerMessage)
     }
 
-
-
     reset() {
         this.worker.postMessage({ type: "reset" } satisfies ChartWebWorkerMessage)
+    }
+
+    enable_draw_points() {
+        this._is_drawing_points = true
+        this.worker.postMessage({ type: "enable_draw_points" } satisfies ChartWebWorkerMessage)
+    }
+
+    disable_draw_points() {
+        this._is_drawing_points = false
+        this.worker.postMessage({ type: "disable_draw_points" } satisfies ChartWebWorkerMessage)
     }
 
 

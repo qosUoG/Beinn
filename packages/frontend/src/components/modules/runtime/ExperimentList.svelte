@@ -2,8 +2,6 @@
 	import { gstore } from "$states/global.svelte";
 
 	import ExperimentListItem from "./ExperimentListItem.svelte";
-
-	$inspect(gstore.workspace.experiments.experiments);
 </script>
 
 <div class="fcol-2 w-96 section bg-slate-200 h-full min-h-0">
