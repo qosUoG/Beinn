@@ -28,6 +28,10 @@
 	}
 
 	connectWs();
+
+	window.addEventListener("beforeunload", (e) => {
+		e.preventDefault();
+	});
 </script>
 
 <div class="fcol-4 w-full h-full p-4 relative">
