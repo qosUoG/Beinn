@@ -6,22 +6,11 @@
 	import Stop from "$icons/Stop.svelte";
 	import StopWatch from "$icons/StopWatch.svelte";
 	import type { Experiment } from "$states/experiment.svelte";
-	import { tick } from "svelte";
 	import Progress from "./Progress.svelte";
-	import {
-		qoslabappContinueExperiment,
-		qoslabappPauseExperiment,
-		qoslabappStartExperiment,
-		qoslabappStopExperiment,
-	} from "$services/qoslabapp.svelte";
 	import { toastError } from "../ToastController.svelte";
 	import type { Err } from "qoslab-shared";
 
 	let { experiment = $bindable() }: { experiment: Experiment } = $props();
-
-	let iteration_time = $derived(
-		experiment.total_time - experiment.iteration_time_start
-	);
 
 	function zeropad(num: number) {
 		if (num < 10) return `0${num}`;
@@ -59,6 +48,22 @@
 			toastError(e as Err);
 		}
 	};
+
+	let total_time = $state(0);
+	let iteration_time = $state(0);
+
+	setInterval(() => {
+		if (
+			experiment.status !== "initial" &&
+			experiment.status !== "completed" &&
+			experiment.status !== "paused" &&
+			experiment.status !== "stopped" &&
+			experiment.status !== "stopping"
+		) {
+			total_time = Date.now() - experiment.total_time_start;
+			iteration_time = Date.now() - experiment.iteration_time_start;
+		}
+	}, 1000);
 </script>
 
 <div class="section bg-white fcol-2 justify-between w-full">
@@ -76,8 +81,8 @@
 					<StopWatch />
 				</div>
 				<div class="p-1 rounded pr-2 flex-grow text-center">
-					{#if experiment.total_time >= 0 && experiment.status !== "initial"}
-						{@render timer(experiment.total_time)}
+					{#if total_time >= 0 && experiment.status !== "initial"}
+						{@render timer(total_time)}
 					{:else}
 						-
 					{/if}
@@ -137,7 +142,7 @@
 </div>
 
 {#snippet timer(time: number)}
-	{@const day_object = new Date(time * 1000)}
+	{@const day_object = new Date(time)}
 	{@const hour = day_object.getHours() - 1}
 	{@const minuet = day_object.getMinutes()}
 	{@const second = day_object.getSeconds()}

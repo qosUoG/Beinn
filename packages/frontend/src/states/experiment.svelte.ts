@@ -8,7 +8,7 @@ import { qoslabappContinueExperiment, qoslabappGetAvailableEEs, qoslabappGetExpe
 import { getRandomId } from "$lib/utils"
 import { Charts } from "./chart.svelte"
 import { toastApplicationError } from "$components/modules/ToastController.svelte"
-import { setInterval, clearInterval } from "worker-timers"
+
 
 
 export class Experiment extends EE {
@@ -44,7 +44,7 @@ export class Experiment extends EE {
                     case "iteration_count":
                         // Reset iteration time only if iteration count is different, and when the experiment is running 
                         if (res.value !== this._iteration_count && this._status !== "stopped" && this._status !== "completed" && this._status !== "paused")
-                            this._iteration_time_start = this._total_time
+                            this._iteration_time_start = Date.now()
 
                         this._iteration_count = res.value
                         break
@@ -56,24 +56,19 @@ export class Experiment extends EE {
 
                         switch (res.value) {
                             case "started":
-                                this._total_time = 0
-                                this._iteration_time_start = 0
-                                this.timer = setInterval(() => {
-                                    this._total_time += 1
-                                }, 1000)
+                                const now = Date.now()
+                                this._total_time_start = now
+                                this._iteration_time_start = now
+
                                 break
                             case "continued":
                                 // reset iteration time
-                                this._iteration_time_start = this._total_time
-                                this.timer = setInterval(() => {
-                                    this._total_time += 1
-                                }, 1000)
+                                this._iteration_time_start = Date.now()
+
                                 break
                             case "paused":
                             case "completed":
                             case "stopped":
-                                if (this.timer)
-                                    clearInterval(this.timer)
                                 break
 
                         }
@@ -111,18 +106,18 @@ export class Experiment extends EE {
         return this._proposed_total_iterations === -1
     }
 
-    private _total_time: number = $state(0)
-    get total_time() {
-        return this._total_time
+    private _total_time_start: number = $state(Date.now())
+    get total_time_start() {
+        return this._total_time_start
     }
 
-    private _iteration_time_start: number = $state(0)
+    private _iteration_time_start: number = $state(Date.now())
     get iteration_time_start() {
         return this._iteration_time_start
     }
 
     private event_ws: WebSocket | undefined = $state()
-    private timer: number | undefined = $state()
+
 
     async start() {
         this._iteration_count = -1;
