@@ -121,17 +121,17 @@ class XYFloatSqlSaver(SqlSaverABC):
     def getCreateTableSql(self) -> str:
         return f"""CREATE TABLE "{self.table_name}" (
             id INTEGER PRIMARY KEY,
-            x REAL NOT NULL,
+            x_axis REAL NOT NULL,
             {",\n".join([f"{key} REAL" for key in self.y_names])}
             ) """
 
     @override
     def getSelectAllSql(self) -> str:
-        return f'''SELECT id,x,{",".join([f"{key}" for key in self.y_names])} from "{self.table_name}" ORDER BY id DESC'''
+        return f'''SELECT id,x_axis,{",".join([f"{key}" for key in self.y_names])} from "{self.table_name}" ORDER BY id DESC'''
 
     @override
     def finalize(self, raw: Iterable[Row]):
-        # Put in the keys of the data, each y_name is a {x: y}, where x and y are pair of values
+        # Put in the keys of the data, each y_name is a {x_axis: y}, where x and y are pair of values
 
         stage_1: dict[str, dict[float, float]] = {}
 
@@ -196,5 +196,5 @@ class XYFloatSqlSaver(SqlSaverABC):
     @override
     def getInsertSql(self):
         return f"""
-        INSERT INTO "{self.table_name}"(x,{",".join([f"{key}" for key in self.y_names])}) VALUES(:x,{",".join([f":{key}" for key in self.y_names])})
+        INSERT INTO "{self.table_name}"(x_axis,{",".join([f"{key}" for key in self.y_names])}) VALUES(:x_axis,{",".join([f":{key}" for key in self.y_names])})
     """

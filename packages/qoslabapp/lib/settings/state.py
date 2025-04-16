@@ -153,7 +153,7 @@ class AppState:
         except Exception as e:
             return {
                 "type": "error",
-                "result": f"{e}",
+                "result": f"code: {code}, error:{e}",
             }
 
         try:
@@ -165,5 +165,5 @@ class AppState:
         except Exception as e:
             return {
                 "type": "error",
-                "result": f"{e}",
+                "result": f"code: {code}, error:{e}",
             }
