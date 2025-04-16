@@ -235,54 +235,48 @@ export class Workspace {
         // Check if cli websocket is connected
         if (this.log_socket === undefined) throw applicationError("Websocket to qoslabapp for cli is undefined");
         let sent = false
-        if (!input.includes(".")) {
-            // Not targeting equipment, directly send command to python
+
+        // Get the inputs
+        let inputs: string[]
+        if (input.includes("."))
+            inputs = input.split(".")
+        else inputs = [input]
+
+        // Check if any input in inputs is the experiment
+        const equipment_name = inputs[0];
+
+        for (const equipment of Object.values(this._equipments.equipments)) {
+            if (!equipment.created) continue
+
+            if (equipment.name === equipment_name) {
+                // Reconstruct the command and send to python
+                this.log_socket.send(
+                    JSON.stringify({
+                        type: "equipment",
+                        id: equipment.id,
+                        command: input.slice(equipment_name.length),
+                    })
+                );
+                sent = true
+                break
+            }
+        }
+
+        if (!sent)
             this.log_socket.send(
                 JSON.stringify({
                     type: "general",
                     command: input,
                 })
             );
-            sent = true
-        } else {
-            // Targeting equipment, first check if the equipment name exist
-            const equipment_name = input.split(".")[0];
 
-            for (const equipment of Object.values(this._equipments)) {
-                if (!equipment.created) continue
+        // Record the command into the log
+        await gstore.logs.push([{
+            source: "equipment",
+            timestamp: Date.now(),
+            content: input,
+        }]);
 
-                if (equipment.name === equipment_name) {
-                    // Reconstruct the command and send to python
-                    this.log_socket.send(
-                        JSON.stringify({
-                            type: "equipment",
-                            id: equipment.id,
-                            command: input.slice(equipment_name.length),
-                        })
-                    );
-                    sent = true
-                    break
-                }
-            }
-
-
-        }
-
-        if (sent) {
-            // Record the command into the log
-            await gstore.logs.push([{
-                source: "equipment",
-                timestamp: Date.now(),
-                content: input,
-            }]);
-
-        } else {
-            await gstore.logs.push([{
-                source: "equipment",
-                timestamp: Date.now(),
-                content: `Command ${input} failed to interpret`
-            }])
-        }
         gstore.command_history.push(input);
 
 
