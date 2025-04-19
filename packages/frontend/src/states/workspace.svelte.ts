@@ -1,21 +1,34 @@
 
-import { backendDisconnectWorkspace, backendLoadWorkspace, backendReadAllUvDependencies, backendSaveWorkspace } from "$services/backend.svelte"
-
-import { gstore, type Availables } from "./global.svelte"
+import { backendDisconnectWorkspace, backendReadAllUvDependencies, backendSaveWorkspace } from "$services/backend.svelte"
+import { parse, stringify } from "smol-toml"
+import { gstore, } from "./global.svelte"
 import { tick } from "svelte"
-import { getRandomId } from "$lib/utils"
+
 import { qoslabappGetCliWs } from "$services/qoslabapp.svelte"
 
 import { Equipments } from "./equipment.svelte"
 import { Experiments } from "./experiment.svelte"
-import { Dependencies } from "./dependency.svelte"
-import { toastUnreacheable } from "$components/modules/ToastController.svelte"
-import { applicationError, sourceEqual, userError, type EEType } from "qoslab-shared"
+import { Dependencies, sourceEqual, type DependencyT } from "./dependency.svelte"
+
+import { readTextFile, readDir, writeTextFile, exists, mkdir } from "@tauri-apps/plugin-fs"
+import { retryOnError, shell } from "./utils.svelte"
+import { confirm, message } from "@tauri-apps/plugin-dialog"
+import { Child, Command } from "@tauri-apps/plugin-shell"
+import type { EET, EEType } from "./ee.svelte"
+import { applicationError } from "./err"
 
 
+export type Save = {
+    dependencies: DependencyT[] | undefined,
+    experiments: EET[],
+    equipments: EET[],
+}
 
 export class Workspace {
-    readonly path: string = $state(import.meta.env.VITE_DEFAULT_EXPERIMENT_PATH)
+    private _path: string = $state("")
+    get path() {
+        return this._path
+    }
 
     private log_socket: WebSocket | undefined = $state()
     private _connected: boolean = $state(false)
@@ -38,10 +51,12 @@ export class Workspace {
         return this._experiments
     }
 
+    private proc: Child | undefined
+
 
     save = async () => {
         await backendSaveWorkspace({
-            path: this.path,
+            path: this._path,
             save: {
                 dependencies: this._dependencies ? this._dependencies.toSave() : undefined,
                 equipments: this._equipments.toSave(),
@@ -73,12 +88,97 @@ export class Workspace {
 
 
 
-    connect = async () => {
-        // 0. Check that the path is valid
-        if (this.path === "") throw userError("project path shall not be empty")
+    connect = async (path: string) => {
+        this._path = path
 
-        // 1. set the project directory and get the save
-        const save = await backendLoadWorkspace({ path: this.path });
+        await tick()
+        const dir = await readDir(path)
+
+        // STEP 1 setup uv
+
+        // Check if the workspace has pyproject.toml
+        if (!await exists(path + "/pyproject.toml")) {
+            if (dir.length > 0) {
+                // Not empty directory without pyproject.toml
+                const confirmation = await confirm(
+                    `${path} is not empty. Are you sure to create setup workspace here?`,
+                    { title: 'Directory Not Empty', kind: 'warning' }
+                );
+
+                // Abort if user chooses not to
+                if (!confirmation) return
+            }
+
+            // Run uv init 
+            shell({ fn: "uv", cmd: "init", cwd: this._path })
+        }
+
+        // Write link-mode to suppress error
+        const parsed = parse(await readTextFile(path + "/pyproject.toml"));
+        parsed.tool = { uv: { "link-mode": "copy" } }
+        await writeTextFile(path + "/pyproject.toml", stringify(parsed))
+
+        // STEP 2: setup gitignore
+
+        // Read gitignore if exists
+        let gitignore_content: string[] = []
+        if (await exists(path + "/.gitignore"))
+            gitignore_content = (await readTextFile(path + "/.gitignore")).split("\n")
+
+        // Put beinn into list of gitignores
+        if (!gitignore_content.includes("meall"))
+            await writeTextFile(path + "/.gitignore", [...gitignore_content, "meall"].join("\n"))
+
+
+        // STEP 3: use copier to copy newest meall into the directory
+        await shell({ fn: "uvx", cmd: "copier copy git+https://github.com/qosUoG/Beinn.git ./meall -f", cwd: path })
+
+        // STEP 4: Create the data directory if not exist
+        if (await exists(path + "/data"))
+            await mkdir(path + "/data")
+
+        // STEP 5: install required dependencies
+        await shell({ fn: "uv", cmd: "add fastapi fastapi[standard] aiosqlite", cwd: path })
+        await shell({ fn: "uv", cmd: "add git+https://github.com/qosUoG/Beinn#subdirectory=packages/cnoc --branch main", cwd: path })
+
+        // In case beinnpy is already installed and stale
+        await shell({ fn: "uv", cmd: "aock --upgrade-package cnoc", cwd: path })
+
+        // STEP 5: Execute meall as a child process
+        const handler = Command.create(
+            "uv", "run uvicorn meall.main:app --host localhost --port 8000", {
+            encoding: "utf8",
+            cwd: path
+        })
+        handler.stdout.on("data", async (message) => {
+            await gstore.logs.push([
+                { source: "python", timestamp: Date.now(), content: message }
+            ])
+        })
+        handler.stderr.on("data", async (message) => {
+            await gstore.logs.push([
+                { source: "python", timestamp: Date.now(), content: message }
+            ])
+        })
+
+        this.proc = await handler.spawn()
+
+        // STEP 6: Wait until the beinn is online with 5 seconds timeout
+        await retryOnError(5000, async () => {
+            const res = await (await fetch("http://localhost:8000/workspace/status")).json();
+            if (res.status !== "online")
+                throw Error()
+        });
+
+        const res = await (await fetch("http://localhost:8000/workspace/status")).json();
+        if (res.status !== "online")
+            await message("Timeout trying to start meall. meall is not online", { title: "meall startup timeout", "kind": "error" })
+
+        // STEP 7: try to get the save
+        if (!await exists(path + "/.beinn"))
+            return
+
+        const save: Save = JSON.parse(await readTextFile(path + "/.beinn"))
 
         // 2. Connect to cli ws
         this.log_socket = qoslabappGetCliWs<string>({

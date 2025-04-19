@@ -1,12 +1,16 @@
 @import "tailwindcss";
 
 @layer base {
+	div[data-tauri-decorum-tb] {
+		@apply !pointer-events-none !h-[24px];
+	}
+
 	body {
-		@apply h-screen w-screen bg-slate-50 overflow-clip;
+		@apply h-screen w-screen bg-transparent overflow-clip;
 	}
 
 	#app {
-		@apply w-full h-full;
+		@apply w-full h-full rounded bg-slate-50;
 	}
 
 	h1,
@@ -49,12 +53,12 @@
 	}
 
 	*::-webkit-scrollbar-button {
-		display: none
+		display: none;
 	}
 
 	*::-webkit-scrollbar {
 		width: 8px;
-		height: 8px
+		height: 8px;
 	}
 
 	button * {
@@ -104,15 +108,19 @@
 	}
 
 	.icon-btn {
-		@apply rounded px-2 py-1 max-h-full w-9 h-full text-xs;
+		@apply rounded p-2 w-12 text-xs aspect-square;
 	}
 
 	.icon-btn-sm {
-		@apply rounded p-1 max-h-full w-6 h-full text-xs;
+		@apply rounded p-1 w-6 text-xs aspect-square h-6;
 	}
 
 	.icon-div {
-		@apply rounded w-4 max-h-full text-xs;
+		@apply rounded w-4 aspect-square text-xs;
+	}
+
+	.frow-8 {
+		@apply flex gap-x-8;
 	}
 
 	.frow-4 {
@@ -129,6 +137,10 @@
 
 	.frow {
 		@apply flex;
+	}
+
+	.fcol-8 {
+		@apply flex flex-col gap-y-8;
 	}
 
 	.fcol-4 {
@@ -150,15 +162,11 @@
 	.title {
 		@apply font-semibold;
 	}
-
-
-
-
 }
 
 @utility scrollbar-* {
 	&::-webkit-scrollbar-thumb {
-		background: --value(--color-*);
-		@apply rounded
+		background: --value(--color- *);
+		@apply rounded;
 	}
 }

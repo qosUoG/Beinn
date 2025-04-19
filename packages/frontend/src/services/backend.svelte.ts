@@ -1,6 +1,8 @@
 
 
-import type { DependencyT, DependencyT_Installed, Save } from "qoslab-shared";
+
+import type { DependencyT, DependencyT_Installed } from "$states/dependency.svelte";
+import type { Save } from "$states/workspace.svelte";
 import { backendUrl, getRequestJsonOut, postRequestJsonInOut } from "./utils";
 
 export async function backendDisconnectWorkspace() {

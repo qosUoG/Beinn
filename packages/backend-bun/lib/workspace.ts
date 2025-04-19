@@ -1,7 +1,7 @@
 import { $, fetch, file, randomUUIDv7, spawn, spawnSync, write, type SpawnOptions } from "bun"
 import { app_state, postCli } from "./app_state"
 import { parse, stringify } from "smol-toml"
-import { applicationError, isErr, retryOnError, type DependencyT, type Result, type Save } from "qoslab-shared";
+import { applicationError, isErr, retryOnError, type DependencyT, type Result, type Save } from "beinn-js";
 import { pathExist } from "./fs";
 import { mkdir } from "node:fs/promises";
 
@@ -52,11 +52,11 @@ export async function copyApp(path: string) {
 
         // install all dependency
         shell("uv add fastapi fastapi[standard] aiosqlite", path)
-        shell("uv add git+https://github.com/qosUoG/QosLab#subdirectory=packages/qoslablib --branch main", path)
+        shell("uv add git+https://github.com/qosUoG/Beinn#subdirectory=packages/beinnpy --branch main", path)
 
-        // In case qoslablib is already installed and stale
-        shell("uv lock --upgrade-package qoslablib", path)
-        shell("uvx copier copy git+https://github.com/qosUoG/QosLab.git ./app", path)
+        // In case beinnpy is already installed and stale
+        shell("uv lock --upgrade-package beinnpy", path)
+        shell("uvx copier copy git+https://github.com/qosUoG/Beinn.git ./app", path)
     } catch (e) {
         if (isErr(e)) throw e
         throw applicationError(`Error in backend copyApp: ${e}`)

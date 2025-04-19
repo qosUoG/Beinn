@@ -2,8 +2,7 @@
 	import Separator from "$components/reuseables/Separator.svelte";
 	import { clickoutside, cn } from "$components/utils.svelte";
 	import { getRandomId } from "$lib/utils";
-	import type { ModuleCls } from "qoslab-shared";
-	import { tick } from "svelte";
+	import type { ModuleCls } from "$states/dependency.svelte";
 
 	let {
 		options,

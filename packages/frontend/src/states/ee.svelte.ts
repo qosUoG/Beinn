@@ -1,7 +1,24 @@
 import { qoslabappCreateEE, qoslabappGetEEParams, qoslabappRemoveEE, qoslabappSetEEParams } from "$services/qoslabapp.svelte"
-import { applicationError, userError, type AllParamTypes, type EET, type EEType, type ModuleCls } from "qoslab-shared"
+import type { ModuleCls } from "./dependency.svelte"
+
 import { gstore } from "./global.svelte"
 import { tick } from "svelte"
+import type { AllParamTypes } from "./params.svelte"
+import { applicationError, userError } from "./err"
+/* EE Base Type */
+export type EEType = "equipment" | "experiment"
+
+export type EET = {
+    id: string
+    created: boolean
+    module_cls: ModuleCls
+
+    // The following may exist even created
+    // This is because the EE may be in save but failed to setup when loading workspace
+    name: string
+    params: Record<string, AllParamTypes>
+    temp_params: Record<string, AllParamTypes>
+}
 
 export abstract class EE {
     private _id: string

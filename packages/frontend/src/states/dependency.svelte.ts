@@ -1,10 +1,67 @@
 import { backendInstallDependency, backendCheckDependencyInit, backendRemoveDependency } from "$services/backend.svelte";
-import { userError, type DependencySource, type DependencyT } from "qoslab-shared";
+
 import { getRandomId } from "$lib/utils";
-import { tick } from "svelte";
+
 import { gstore } from "./global.svelte";
+import { userError } from "./err";
+
+export type ModuleCls = {
+    module: string,
+    cls: string
+}
+
+// Only types that cross boundary of backend and frontend would be here
+export type DependencySource = {
+    type: "git",
+
+    git: string,
+    subdirectory: string,
+    branch: string
+} | {
+    type: "path",
+
+    path: string,
+    editable: boolean
+} | {
+    type: "pip",
+
+    package: string
+} | {
+    type: "local",
+
+    directory: string
+}
+
+export function sourceEqual(a: DependencySource, b: DependencySource) {
+    if (a.type !== b.type) return false
+
+    switch (a.type) {
+        case "local":
+            return a.directory === (b as Extract<DependencySource, { type: "local" }>).directory
+        case "git":
+            return a.git === (b as Extract<DependencySource, { type: "git" }>).git
+        case "path":
+            return a.path === (b as Extract<DependencySource, { type: "path" }>).path
+        case "pip":
+            return a.package === (b as Extract<DependencySource, { type: "pip" }>).package
+    }
+}
+
+export type DependencyT_YetInstalled = {
+    installed: false
+    source: DependencySource
+}
+
+export type DependencyT_Installed = {
+    installed: true
+    source: DependencySource
 
 
+    name: string,
+    fullname: string,
+}
+
+export type DependencyT = DependencyT_YetInstalled | DependencyT_Installed
 class Dependency {
 
     readonly id: string = $state("")

@@ -1,5 +1,5 @@
 {
-	"name": "qoslab-frontend",
+	"name": "beinn",
 	"private": true,
 	"version": "0.0.0",
 	"type": "module",
@@ -11,6 +11,7 @@
 	},
 	"devDependencies": {
 		"@sveltejs/vite-plugin-svelte": "^5.0.3",
+		"@tauri-apps/cli": "^2.5.0",
 		"@tsconfig/svelte": "^5.0.4",
 		"@types/bun": "^1.2.9",
 		"svelte": "^5.25.8",
@@ -20,9 +21,12 @@
 	},
 	"dependencies": {
 		"@tailwindcss/vite": "^4.1.3",
+		"@tauri-apps/plugin-dialog": "~2",
+		"@tauri-apps/plugin-fs": "~2",
+		"@tauri-apps/plugin-shell": "~2",
 		"chart.js": "^4.4.8",
 		"clsx": "^2.1.1",
-		"qoslab-shared": "workspace:*",
+		"smol-toml": "^1.3.3",
 		"tailwind-merge": "^3.2.0",
 		"tailwindcss": "^4.1.3"
 	}

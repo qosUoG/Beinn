@@ -1,5 +1,5 @@
 import type { ServerWebSocket, Subprocess } from "bun"
-import { applicationError } from "qoslab-shared"
+import { applicationError } from "beinn-js"
 
 export let app_state: {
     pyproc: Subprocess | undefined

@@ -4,7 +4,7 @@ import { app_state, postCli } from "./lib/app_state";
 import { copyApp, initiateWorkspace, loadWorkspace, readAllUvDependencies, runProject, saveWorkspace, shell } from "./lib/workspace";
 import { pathExist } from "./lib/fs";
 import { mkdir } from "node:fs/promises"
-import { applicationError, isErr, type Err, type Result } from "qoslab-shared";
+import { applicationError, isErr, type Err, type Result } from "beinn-js";
 import open from 'open';
 
 import { embeddedFiles } from "bun"

@@ -1,6 +1,10 @@
-import type { EEType } from "qoslab-shared";
+import type { EEType } from "$states/ee.svelte";
 
-export let eeeditor: { mode: EEType, id?: string } = $state({
+
+export let eeeditor: {
+    mode: EEType
+    , id?: string
+} = $state({
     mode: "equipment",
     id: undefined
 })

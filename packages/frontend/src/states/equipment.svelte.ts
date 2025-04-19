@@ -1,9 +1,10 @@
-import { userError, type AllParamTypes, type EET, type ModuleCls } from "qoslab-shared";
-import { EE } from "./ee.svelte";
+
+import { EE, type EET } from "./ee.svelte";
 import { qoslabappCreateEE, qoslabappGetAvailableEEs, qoslabappRemoveEE, qoslabappSetEEParams } from "$services/qoslabapp.svelte";
 import { gstore, type Availables } from "./global.svelte";
 import { getRandomId } from "$lib/utils";
 import { tick } from "svelte";
+import type { ModuleCls } from "./dependency.svelte";
 
 export class Equipment extends EE {
     constructor(id: string, name?: string) {

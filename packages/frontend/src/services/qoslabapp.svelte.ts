@@ -1,5 +1,7 @@
+import type { EEType } from "$states/ee.svelte";
 import { gstore, type Availables } from "$states/global.svelte";
-import type { AllParamTypes, EEType } from "qoslab-shared";
+import type { AllParamTypes } from "$states/params.svelte";
+
 import { postRequestJsonInOut, qoslabappUrl, qoslabappWs } from "./utils";
 
 

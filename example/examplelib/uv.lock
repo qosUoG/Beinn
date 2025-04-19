@@ -16,11 +16,11 @@ name = "examplelib"
 version = "0.1.0"
 source = { editable = "." }
 dependencies = [
-    { name = "qoslablib" },
+    { name = "beinnpy" },
 ]
 
 [package.metadata]
-requires-dist = [{ name = "qoslablib", git = "https://github.com/qosUoG/QosLab?subdirectory=packages%2Fqoslablib&branch=main" }]
+requires-dist = [{ name = "beinnpy", git = "https://github.com/qosUoG/Beinn?subdirectory=packages%2Fbeinnpy&branch=main" }]
 
 [[package]]
 name = "pydantic"
@@ -62,9 +62,9 @@ wheels = [
 ]
 
 [[package]]
-name = "qoslablib"
+name = "beinnpy"
 version = "0.1.0"
-source = { git = "https://github.com/qosUoG/QosLab?subdirectory=packages%2Fqoslablib&branch=main#b7b7ee8722f4e8773211df605524f0eb58c8fe57" }
+source = { git = "https://github.com/qosUoG/Beinn?subdirectory=packages%2Fbeinnpy&branch=main#b7b7ee8722f4e8773211df605524f0eb58c8fe57" }
 dependencies = [
     { name = "pydantic" },
     { name = "websockets" },
