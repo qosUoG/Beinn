@@ -5,7 +5,7 @@ description = "Add your description here"
 readme = "README.md"
 authors = [{ name = "harrylaulau", email = "dev+github@harrylaulau.me" }]
 requires-python = ">=3.13"
-dependencies = ["qoslablib"]
+dependencies = ["beinnpy"]
 
 [build-system]
 requires = ["hatchling"]
@@ -15,7 +15,7 @@ build-backend = "hatchling.build"
 packages = ["src/examplelib"]
 
 [tool.uv.sources]
-qoslablib = { git = "https://github.com/qosUoG/QosLab", subdirectory = "packages/qoslablib", branch = "main" }
+beinnpy = { git = "https://github.com/qosUoG/Beinn", subdirectory = "packages/beinnpy", branch = "main" }
 
 [tool.uv]
 link-mode = "copy"

@@ -1,4 +1,5 @@
-import { applicationError, isErr, type Result } from "qoslab-shared"
+import { applicationError, isErr, type Result } from "$states/err"
+
 
 export const postRequestJsonInOut = async (url: string, payload: Record<any, any>, headers: HeadersInit = {
     "Content-type": "application/json"

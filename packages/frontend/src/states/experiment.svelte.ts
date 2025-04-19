@@ -1,13 +1,14 @@
 
 
-import { type ChartConfigs, type EET, type ModuleCls } from "qoslab-shared"
+
 import { tick } from "svelte"
 import { gstore, type Availables } from "./global.svelte"
-import { EE } from "./ee.svelte"
+import { EE, type EET } from "./ee.svelte"
 import { qoslabappContinueExperiment, qoslabappGetAvailableEEs, qoslabappGetExperimentEventsWs, qoslabappPauseExperiment, qoslabappStartExperiment, qoslabappStopExperiment } from "$services/qoslabapp.svelte"
 import { getRandomId } from "$lib/utils"
-import { Charts } from "./chart.svelte"
+import { Charts, type ChartConfigs } from "./chart.svelte"
 import { toastApplicationError } from "$components/modules/ToastController.svelte"
+import type { ModuleCls } from "./dependency.svelte"
 
 
 

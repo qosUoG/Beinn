@@ -8,7 +8,7 @@
 <div class="flex">
 	<button
 		class={cn(
-			"  rounded-r-none icon-btn",
+			"  rounded-r-none icon-btn-sm",
 			gstore.mode === "Configuration"
 				? "bg-slate-500 text-slate-50"
 				: "bg-slate-200"
@@ -18,7 +18,7 @@
 		}}><Settings /></button>
 	<button
 		class={cn(
-			" bg-slate-200 rounded-l-none icon-btn",
+			" bg-slate-200 rounded-l-none icon-btn-sm",
 			gstore.mode === "Runtime"
 				? "bg-slate-500 text-slate-50"
 				: "bg-slate-200"

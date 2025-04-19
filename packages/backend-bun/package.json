@@ -4,7 +4,7 @@
 	"type": "module",
 	"dependencies": {
 		"open": "^10.1.0",
-		"qoslab-shared": "workspace:*",
+		"beinn-js": "workspace:*",
 		"smol-toml": "^1.3.1"
 	},
 	"devDependencies": {

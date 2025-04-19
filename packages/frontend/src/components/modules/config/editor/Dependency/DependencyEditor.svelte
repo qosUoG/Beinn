@@ -1,7 +1,6 @@
 <script lang="ts">
 	import Trash from "$icons/Trash.svelte";
 	import { gstore } from "$states/global.svelte";
-	import type { DependencySource, Err } from "qoslab-shared";
 
 	import { dependency_editor } from "./DependencyEditorController.svelte";
 
@@ -19,6 +18,7 @@
 		toastUserError,
 	} from "$components/modules/ToastController.svelte";
 	import { tick } from "svelte";
+	import type { Err } from "$states/err";
 
 	const dependency = $derived(
 		gstore.workspace.dependencies?.dependencies[dependency_editor.id!]

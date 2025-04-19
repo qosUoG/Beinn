@@ -93,11 +93,11 @@ name = "examplelib"
 version = "0.1.0"
 source = { editable = "../examplelib" }
 dependencies = [
-    { name = "qoslablib" },
+    { name = "beinnpy" },
 ]
 
 [package.metadata]
-requires-dist = [{ name = "qoslablib", git = "https://github.com/qosUoG/QosLab?subdirectory=packages%2Fqoslablib&branch=main" }]
+requires-dist = [{ name = "beinnpy", git = "https://github.com/qosUoG/Beinn?subdirectory=packages%2Fbeinnpy&branch=main" }]
 
 [[package]]
 name = "experiment"
@@ -108,7 +108,7 @@ dependencies = [
     { name = "examplelib" },
     { name = "fastapi", extra = ["standard"] },
     { name = "numpy" },
-    { name = "qoslablib" },
+    { name = "beinnpy" },
 ]
 
 [package.metadata]
@@ -117,7 +117,7 @@ requires-dist = [
     { name = "examplelib", editable = "../examplelib" },
     { name = "fastapi", extras = ["standard"], specifier = ">=0.115.11" },
     { name = "numpy", specifier = ">=2.2.3" },
-    { name = "qoslablib", git = "https://github.com/qosUoG/QosLab?subdirectory=packages%2Fqoslablib&branch=main" },
+    { name = "beinnpy", git = "https://github.com/qosUoG/Beinn?subdirectory=packages%2Fbeinnpy&branch=main" },
 ]
 
 [[package]]
@@ -397,9 +397,9 @@ wheels = [
 ]
 
 [[package]]
-name = "qoslablib"
+name = "beinnpy"
 version = "0.1.0"
-source = { git = "https://github.com/qosUoG/QosLab?subdirectory=packages%2Fqoslablib&branch=main#9204e390530440e6afeffe2994610340b8be0e69" }
+source = { git = "https://github.com/qosUoG/Beinn?subdirectory=packages%2Fbeinnpy&branch=main#9204e390530440e6afeffe2994610340b8be0e69" }
 dependencies = [
     { name = "pydantic" },
     { name = "websockets" },

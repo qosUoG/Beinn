@@ -1,11 +1,12 @@
 <script lang="ts">
 	import { autofocus, cn } from "$components/utils.svelte";
-	import type { AllParamTypes } from "qoslab-shared";
+
 	import InstanceEquipmentParam from "./InstanceEquipmentParam.svelte";
 	import SelectParam from "./SelectParam.svelte";
 	import LabelField from "$components/reuseables/Fields/LabelField.svelte";
 	import DivField from "$components/reuseables/Fields/DivField.svelte";
 	import InstanceExperimentParam from "./InstanceExperimentParam.svelte";
+	import type { AllParamTypes } from "$states/params.svelte";
 
 	let { params = $bindable() }: { params: Record<string, AllParamTypes> } =
 		$props();

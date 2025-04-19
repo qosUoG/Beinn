@@ -45,13 +45,13 @@
 			"installed": true,
 			"source": {
 				"type": "git",
-				"git": "https://github.com/qosUoG/QosLab",
-				"subdirectory": "packages/qoslablib",
+				"git": "https://github.com/qosUoG/Beinn",
+				"subdirectory": "packages/beinnpy",
 				"branch": "main"
 			},
 			"install_string": "",
-			"name": "qoslablib",
-			"fullname": "qoslablib"
+			"name": "beinnpy",
+			"fullname": "beinnpy"
 		},
 		{
 			"installed": true,

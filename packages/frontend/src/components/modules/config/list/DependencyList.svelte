@@ -9,6 +9,7 @@
 	import ExclamationMark from "$icons/ExclamationMark.svelte";
 
 	import { eeeditor } from "../editor/ee/EEEditorController.svelte";
+	import Reload from "$icons/Reload.svelte";
 
 	const addHandler = async () => {
 		const new_dependency =
@@ -24,19 +25,16 @@
 </script>
 
 <div class="section fcol-2 bg-slate-200">
-	<div class="fcol-2">
-		<div class="frow justify-between items-center">
-			<div class="title bg-white wrapped self-start">Dependencies</div>
-			<div class="frow-1">
-				<!-- <button
-					class="icon-btn-sm slate"
-					onclick={}><Reload /></button
-				> -->
-				<button class="icon-btn-sm slate" onclick={addHandler}
-					><Plus /></button>
-			</div>
+	<div class="frow justify-between items-center">
+		<div class="title bg-white wrapped">Dependencies</div>
+		<div class="frow-1">
+			<button class="icon-btn-sm slate" onclick={() => {}}
+				><Reload /></button>
+			<button class="icon-btn-sm slate" onclick={addHandler}
+				><Plus /></button>
 		</div>
-
+	</div>
+	<div class="fcol-2">
 		{#each Object.values(gstore.workspace.dependencies?.dependencies ?? {}) as dependency}
 			<button
 				class={cn(

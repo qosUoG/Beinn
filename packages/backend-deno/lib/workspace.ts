@@ -77,11 +77,11 @@ export async function copyApp(path: string) {
 
         // install all dependency
         await shell("uv add fastapi fastapi[standard] aiosqlite", path)
-        await shell("uv add git+https://github.com/qosUoG/QosLab#subdirectory=packages/qoslablib --branch main", path)
+        await shell("uv add git+https://github.com/qosUoG/Beinn#subdirectory=packages/beinnpy --branch main", path)
 
-        // In case qoslablib is already installed and stale
-        await shell("uv lock --upgrade-package qoslablib", path)
-        await shell("uvx copier copy git+https://github.com/qosUoG/QosLab.git ./app", path)
+        // In case beinnpy is already installed and stale
+        await shell("uv lock --upgrade-package beinnpy", path)
+        await shell("uvx copier copy git+https://github.com/qosUoG/Beinn.git ./app", path)
     } catch (e) {
         if (isErr(e)) throw e
         throw applicationError(`Error in backend copyApp: ${e}`)

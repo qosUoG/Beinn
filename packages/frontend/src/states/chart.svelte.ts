@@ -1,7 +1,18 @@
-import type { ChartConfigs, XYChartConfig } from "qoslab-shared"
+
 import XY_Worker from './charts/xy/worker.js?worker'
 
+export type XYChartMode = "overwrite" | "append"
 
+export type XYChartConfig = {
+    type: "xy"
+    title: string
+    x_axis: string,
+    y_axis: string,
+    y_names: string[]
+    mode: XYChartMode,
+}
+
+export type ChartConfigs = XYChartConfig
 
 export type ChartWebWorkerMessage =
     {

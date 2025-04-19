@@ -3,7 +3,6 @@
 
 	import { gstore } from "$states/global.svelte";
 
-	import { tick } from "svelte";
 	import { eeeditor } from "./EEEditorController.svelte";
 	import Params from "./Params.svelte";
 	import EEPath from "./EEPath.svelte";
@@ -13,11 +12,13 @@
 	import FixedField from "$components/reuseables/Fields/FixedField.svelte";
 	import LabelField from "$components/reuseables/Fields/LabelField.svelte";
 	import { autofocus } from "$components/utils.svelte";
-	import { capitalise, type Err } from "qoslab-shared";
+
 	import {
 		toastError,
 		toastUnreacheable,
 	} from "$components/modules/ToastController.svelte";
+	import type { Err } from "$states/err";
+	import { capitalise } from "$states/utils.svelte";
 
 	const removeHandler = async () => {
 		if (!eeeditor.id) {

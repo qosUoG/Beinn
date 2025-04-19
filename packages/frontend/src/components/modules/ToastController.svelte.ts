@@ -1,5 +1,6 @@
 import { getRandomId } from "$lib/utils"
-import type { Err } from "qoslab-shared"
+import type { Err } from "$states/err"
+
 import { tick } from "svelte"
 
 export const content: Record<string, string> = $state({})

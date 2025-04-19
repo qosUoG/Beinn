@@ -5,11 +5,11 @@ from typing import TypedDict, override
 
 from click import ParamType
 
-from qoslablib import params as p, exceptions as e, runtime as r
+from beinnpy import params as p, exceptions as e, runtime as r
 import time
 
-from qoslablib.extensions.chart import XY
-from qoslablib.extensions.saver import XYFloatSqlSaver
+from beinnpy.extensions.chart import XY
+from beinnpy.extensions.saver import XYFloatSqlSaver
 from examplelib.ExampleDriver import ExampleEquipment
 
 

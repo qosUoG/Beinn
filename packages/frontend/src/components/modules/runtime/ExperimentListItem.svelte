@@ -8,7 +8,7 @@
 	import type { Experiment } from "$states/experiment.svelte";
 	import Progress from "./Progress.svelte";
 	import { toastError } from "../ToastController.svelte";
-	import type { Err } from "qoslab-shared";
+	import type { Err } from "beinn-js";
 
 	let { experiment = $bindable() }: { experiment: Experiment } = $props();
 

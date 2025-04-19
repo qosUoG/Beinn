@@ -12,7 +12,8 @@
 
 	import { editor } from "$components/modules/config/editor/EditorController.svelte";
 	import { dependency_editor } from "$components/modules/config/editor/Dependency/DependencyEditorController.svelte";
-	import { capitalise, type EEType } from "qoslab-shared";
+	import type { EEType } from "$states/ee.svelte";
+	import { capitalise } from "$states/utils.svelte";
 
 	let { eetype }: { eetype: EEType } = $props();
 

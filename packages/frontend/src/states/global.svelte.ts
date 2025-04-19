@@ -10,7 +10,7 @@ export type Availables = { modules: string[], cls: string }[]
 
 
 export type Log = {
-    source: "backend" | "qoslabapp" | "equipment",
+    source: "beinn" | "python" | "equipment"
     timestamp: number,
     content: string
 }
@@ -19,7 +19,7 @@ class Logs {
     readonly logs: Log[] = $state([])
     async push(logs: Log[]) {
         if (this.logs.length + logs.length > 5000)
-            this.logs.splice(0, logs.length)
+            this.logs.splice(logs.length - 5000, logs.length)
         await tick()
         this.logs.push(...logs)
 
