@@ -7,7 +7,6 @@ requires-python = ">=3.13"
 dependencies = [
  "aiosqlite>=0.21.0",
  "cnoc",
- "examplelib",
  "fastapi[standard]>=0.115.11",
  "numpy>=2.2.3",
 ]

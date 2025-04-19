@@ -140,7 +140,12 @@ export class Workspace {
             await mkdir(path + "/data")
 
         // STEP 5: install required dependencies
-        await shell({ fn: "uv", cmd: "add fastapi fastapi[standard] aiosqlite", cwd: path })
+        gstore.logs.push([{ source: "beinn", content: path, timestamp: Date.now() }])
+        await shell({ fn: "uv", cmd: "sync", cwd: path })
+        await shell({ fn: "uv", cmd: "add fastapi", cwd: path })
+        await shell({ fn: "uv", cmd: "add fastapi[standard]", cwd: path })
+        await shell({ fn: "uv", cmd: "add aiosqlite", cwd: path })
+        gstore.logs.push([{ source: "beinn", content: path, timestamp: Date.now() }])
         await shell({ fn: "uv", cmd: "add git+https://github.com/qosUoG/Beinn#subdirectory=packages/cnoc --branch main", cwd: path })
 
         // In case cnoc is already installed and stale
