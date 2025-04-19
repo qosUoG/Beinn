@@ -17,12 +17,12 @@ export async function shell({ fn, cmd, cwd }: { fn: string, cmd: string, cwd: st
 
     handler.stdout.on("data", async (message) => {
         await gstore.logs.push([
-            { source: "beinn", timestamp: Date.now(), content: "stdout " + message }
+            { source: "beinn", timestamp: Date.now(), content: message }
         ])
     })
     handler.stderr.on("data", async (message) => {
         await gstore.logs.push([
-            { source: "beinn", timestamp: Date.now(), content: "stderr " + message }
+            { source: "beinn", timestamp: Date.now(), content: message }
         ])
     })
     await handler.spawn()

@@ -9,29 +9,23 @@
 	import Toast from "$components/modules/Toast.svelte";
 
 	import Titlebar from "$components/modules/Titlebar.svelte";
+	import { exit, relaunch } from "@tauri-apps/plugin-process";
 
-	// function connectWs() {
-	// 	// Connect to backend
-	// 	let ws = new WebSocket(backendWs("cli"));
-	// 	ws.onmessage = async (event: MessageEvent<string>) => {
-	// 		const payload = JSON.parse(event.data) as { logs: Log[] };
-	// 		await gstore.logs.push(payload.logs);
-	// 	};
-	// 	ws.onclose = () => {
-	// 		// Recursively reconnect
-	// 		connectWs();
-	// 	};
-	// }
+	import { getCurrentWindow } from "@tauri-apps/api/window";
+	getCurrentWindow().listen(
+		"tauri://close-requested",
+		async ({ event, payload }) => {
+			await gstore.workspace.kill();
 
-	// window.addEventListener("beforeunload", (e) => {
-	// 	e.preventDefault();
-	// });
+			await exit(0);
+		}
+	);
 </script>
 
 <div class="w-screen h-screen fcol max-h-screen max-w-screen">
 	<Titlebar />
 
-	<div class="w-full flex-grow rounded p-2 relative frow-4 min-h-0">
+	<div class="w-full flex-grow rounded relative frow-4 px-2 pt-1 min-h-0">
 		{#if gstore.mode === "Configuration"}
 			<Config />
 		{:else if gstore.mode === "Runtime"}

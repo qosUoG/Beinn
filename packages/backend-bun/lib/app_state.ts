@@ -5,7 +5,7 @@ export let app_state: {
     pyproc: Subprocess | undefined
     ws: ServerWebSocket<any> | undefined
     logs: {
-        source: "backend" | "qoslabapp",
+        source: "backend" | "meall",
         content: string,
         timestamp: number
     }[]
@@ -15,7 +15,7 @@ export let app_state: {
     logs: []
 }
 
-export const postCli = (source: "backend" | "qoslabapp", content: string) => {
+export const postCli = (source: "backend" | "meall", content: string) => {
 
 
     if (app_state.ws === undefined)

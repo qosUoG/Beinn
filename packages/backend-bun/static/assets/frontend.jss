@@ -4248,7 +4248,7 @@ class Yo {
 	}
 	sendCommand(t) {
 		if (this.log_socket === void 0)
-			throw Qe("Websocket to qoslabapp for cli is undefined");
+			throw Qe("Websocket to meall for cli is undefined");
 		let r = !1;
 		if (!t.includes("."))
 			this.log_socket.send(
@@ -7254,7 +7254,7 @@ var Bu = (e, t) => {
 		'<div class="frow-1 items-start"><!> <div> </div> <div class="text-slate-100 text-wrap flex-grow whitespace-pre-line break-all"> </div></div>'
 	),
 	Wu = z(
-		'<div class="max-w-170 min-w-170 w-170 h-full section bg-slate-700 fcol-1 z-1000"><div class="frow-1"><button><!></button> <button>backend</button> <button>qoslabapp</button> <button>equipment</button></div> <div class="  flex-grow fcol-2 overflow-y-scroll scrollbar section"></div> <div class=" wrapped bg-slate-200 w-full frow-2 items-center"><label class="frow-2 flex-grow">>> <input type="text" class="flex-grow"></label> <button class="icon-btn-sm"><!></button></div></div>'
+		'<div class="max-w-170 min-w-170 w-170 h-full section bg-slate-700 fcol-1 z-1000"><div class="frow-1"><button><!></button> <button>backend</button> <button>meall</button> <button>equipment</button></div> <div class="  flex-grow fcol-2 overflow-y-scroll scrollbar section"></div> <div class=" wrapped bg-slate-200 w-full frow-2 items-center"><label class="frow-2 flex-grow">>> <input type="text" class="flex-grow"></label> <button class="icon-btn-sm"><!></button></div></div>'
 	);
 function Yu(e, t) {
 	ce(t, !0);
@@ -7288,7 +7288,7 @@ function Yu(e, t) {
 					(j) =>
 						!!(
 							(j.source === "backend" && o(i)) ||
-							(j.source === "qoslabapp" && o(a)) ||
+							(j.source === "meall" && o(a)) ||
 							(j.source === "equipment" && o(s))
 						)
 				)
@@ -7367,7 +7367,7 @@ function Yu(e, t) {
 							Ee(
 								"min-w-16 w-16 max-w-16 frow-1 text-nowrap",
 								J() === "backend" ? "text-yellow-300" : "",
-								J() === "qoslabapp" ? "text-cyan-300" : "",
+								J() === "meall" ? "text-cyan-300" : "",
 								J() === "equipment" ? "text-indigo-300" : ""
 							)
 						),

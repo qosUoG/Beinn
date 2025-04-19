@@ -1,6 +1,6 @@
 
 import { EE, type EET } from "./ee.svelte";
-import { qoslabappCreateEE, qoslabappGetAvailableEEs, qoslabappRemoveEE, qoslabappSetEEParams } from "$services/qoslabapp.svelte";
+import { meallCreateEE, meallGetAvailableEEs, meallRemoveEE, meallSetEEParams } from "$lib/meall.svelte";
 import { gstore, type Availables } from "./global.svelte";
 import { getRandomId } from "$lib/utils";
 import { tick } from "svelte";
@@ -51,7 +51,7 @@ export class Equipments {
 
 
     async refreshAvailables() {
-        this._available_module_cls = await qoslabappGetAvailableEEs("equipment", { prefixes: gstore.workspace.dependencies?.prefixes ?? [] })
+        this._available_module_cls = await meallGetAvailableEEs("equipment", { prefixes: gstore.workspace.dependencies?.prefixes ?? [] })
     }
 
     get available_module_cls() {

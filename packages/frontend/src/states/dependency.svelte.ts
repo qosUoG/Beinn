@@ -1,9 +1,12 @@
-import { backendInstallDependency, backendCheckDependencyInit, backendRemoveDependency } from "$services/backend.svelte";
 
-import { getRandomId } from "$lib/utils";
+
+import { getRandomId, readAllUvDependencies } from "$lib/utils";
 
 import { gstore } from "./global.svelte";
-import { userError } from "./err";
+import { applicationError, userError } from "./err";
+import { parse } from "smol-toml";
+import { exists, readTextFile } from "@tauri-apps/plugin-fs";
+import { shell } from "./utils.svelte";
 
 export type ModuleCls = {
     module: string,
@@ -117,7 +120,8 @@ class Dependency {
     async uninstall() {
         // Only circumstances communicating with backend
         if (this._installed && this.source.type !== "local")
-            await backendRemoveDependency({ name: this._name, path: gstore.workspace.path });
+            await shell({ fn: "uv", cmd: "remove " + this._name, cwd: gstore.workspace.path })
+
 
         setTimeout(() => {
             delete gstore.workspace.dependencies?.dependencies[this.id]
@@ -131,9 +135,9 @@ class Dependency {
 
         if (this.source.type === "local") {
             // Check init is available
-            await backendCheckDependencyInit(
-                { path: gstore.workspace.path, directory: this.source.directory }
-            );
+            if (!await exists(
+                gstore.workspace.path + "/" + this.source.directory + "/__init__.py"
+            )) throw userError(`Cannot add local dependency ${gstore.workspace.path + "/" + this.source.directory} as __init__.py cannot be found`)
 
             this._installed = true
             this._name = this._fullname = this.install_string = this.source.directory
@@ -166,11 +170,24 @@ class Dependency {
         }
 
 
-        const res = await backendInstallDependency({ path: gstore.workspace.path, install_string });
 
-        this._fullname = res.fullname
-        this._name = res.name
-        this._installed = true
+        await shell({ fn: "uv", cmd: "add " + install_string, cwd: gstore.workspace.path })
+
+        // Read All dependencies and figure out which is the new one
+        const current_dependency_names = Object.values(
+            gstore.workspace.dependencies!.dependencies
+        )
+            .filter((d) => d.installed)
+            .map((d) => d.name);
+
+        for (const d of await readAllUvDependencies()) {
+            if (!current_dependency_names.includes(d.name)) {
+                this._fullname = d.fullname
+                this._name = d.name
+                this._installed = true
+                break
+            }
+        }
     }
 
 }
@@ -203,6 +220,8 @@ export class Dependencies {
     toSave() {
         return Object.values(this.dependencies).map(d => d.toSave())
     }
+
+
 
     instantiate() {
         const id = getRandomId(Object.keys(this.dependencies))

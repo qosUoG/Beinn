@@ -143,7 +143,7 @@ export async function readAllUvDependencies(path: string) {
 
 async function forever(joined: ReadableStream) {
     for await (const line of joined) {
-        postCli("qoslabapp", new TextDecoder().decode(line))
+        postCli("meall", new TextDecoder().decode(line))
     }
 
 }
@@ -200,7 +200,7 @@ export async function runProject(path: string) {
 
 export async function loadWorkspace(path: string) {
     try {
-        return JSON.parse(await Deno.readTextFile(path + "/.qoslabapp_state"))
+        return JSON.parse(await Deno.readTextFile(path + "/.meall_state"))
     } catch (e) {
         if (e instanceof Deno.errors.NotFound) return undefined
         if (isErr(e)) throw e
@@ -210,7 +210,7 @@ export async function loadWorkspace(path: string) {
 
 export async function saveWorkspace(path: string, save: Save) {
     try {
-        await Deno.writeTextFile(path + "/.qoslabapp_state", JSON.stringify(save))
+        await Deno.writeTextFile(path + "/.meall_state", JSON.stringify(save))
     } catch (e) {
         if (isErr(e)) throw e
         throw applicationError(`Error in backend saveWorkspace: ${e}`)

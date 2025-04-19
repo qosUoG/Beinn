@@ -1,5 +1,5 @@
 from fastapi import APIRouter
-
+import os
 from ..lib.settings.state import AppState
 
 
@@ -15,3 +15,7 @@ async def workspace_status():
 async def workspace_forcestop():
     await AppState.forceStop()
     return {"success": True}
+
+@router.get("workspace/pid")
+async def workspace_pid():
+    return {"pid": os.getpid()}

@@ -5,7 +5,7 @@ export const app_state: {
     pyproc: Deno.ChildProcess | undefined
     ws: WebSocket | undefined
     logs: {
-        source: "backend" | "qoslabapp",
+        source: "backend" | "meall",
         content: string,
         timestamp: number
     }[]
@@ -15,7 +15,7 @@ export const app_state: {
     logs: []
 }
 
-export const postCli = (source: "backend" | "qoslabapp", content: string) => {
+export const postCli = (source: "backend" | "meall", content: string) => {
 
 
     if (app_state.ws === undefined)

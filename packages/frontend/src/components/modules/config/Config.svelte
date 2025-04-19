@@ -6,7 +6,7 @@
 </script>
 
 <div class="w-full overflow-x-scroll scrollbar-slate-400">
-	<div class="grid grid-cols-5 min-h-0 min-w-[1300px] gap-4 h-full w-full">
+	<div class="grid grid-cols-5 min-h-0 min-w-[1300px] gap-2 h-full w-full">
 		<DependencyList />
 		<EquipmentList />
 		<ExperimentList />

@@ -1,4 +1,4 @@
-import { qoslabappCreateEE, qoslabappGetEEParams, qoslabappRemoveEE, qoslabappSetEEParams } from "$services/qoslabapp.svelte"
+import { meallCreateEE, meallGetEEParams, meallRemoveEE, meallSetEEParams } from "$lib/meall.svelte"
 import type { ModuleCls } from "./dependency.svelte"
 
 import { gstore } from "./global.svelte"
@@ -143,13 +143,13 @@ export abstract class EE {
     }
 
     async create() {
-        // Create theeetypein qoslabapp and fetch initial params
-        await qoslabappCreateEE(this.eetype, {
+        // Create theeetypein meall and fetch initial params
+        await meallCreateEE(this.eetype, {
             id: this._id,
             module_cls: this._module_cls
         });
 
-        const res = await qoslabappGetEEParams(this.eetype, { id: this._id })
+        const res = await meallGetEEParams(this.eetype, { id: this._id })
 
         this.params = JSON.parse(JSON.stringify(res))
         this._temp_params = JSON.parse(JSON.stringify(res))
@@ -162,12 +162,12 @@ export abstract class EE {
 
     async saveParams() {
 
-        await qoslabappSetEEParams(this.eetype, { id: this._id, params: this._temp_params })
+        await meallSetEEParams(this.eetype, { id: this._id, params: this._temp_params })
         this.params = JSON.parse(JSON.stringify(this._temp_params))
     }
 
     async remove() {
-        const res = await qoslabappRemoveEE(this.eetype, { id: this._id });
+        const res = await meallRemoveEE(this.eetype, { id: this._id });
         setTimeout(() => {
             if (this.eetype === "equipment")
                 delete gstore.workspace.equipments.equipments[this._id]

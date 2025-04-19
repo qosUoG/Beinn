@@ -4,7 +4,7 @@
 import { tick } from "svelte"
 import { gstore, type Availables } from "./global.svelte"
 import { EE, type EET } from "./ee.svelte"
-import { qoslabappContinueExperiment, qoslabappGetAvailableEEs, qoslabappGetExperimentEventsWs, qoslabappPauseExperiment, qoslabappStartExperiment, qoslabappStopExperiment } from "$services/qoslabapp.svelte"
+import { meallContinueExperiment, meallGetAvailableEEs, meallGetExperimentEventsWs, meallPauseExperiment, meallStartExperiment, meallStopExperiment } from "$lib/meall.svelte"
 import { getRandomId } from "$lib/utils"
 import { Charts, type ChartConfigs } from "./chart.svelte"
 import { toastApplicationError } from "$components/modules/ToastController.svelte"
@@ -21,11 +21,11 @@ export class Experiment extends EE {
 
     // Override
     async create() {
-        // Create the experiment in qoslabapp and fetch initial params
+        // Create the experiment in meall and fetch initial params
         await super.create()
 
         // Start listening to experiment events here
-        this.event_ws = qoslabappGetExperimentEventsWs({
+        this.event_ws = meallGetExperimentEventsWs({
             id: this.id,
             onmessage: (event: MessageEvent<string>) => {
                 let res:
@@ -128,20 +128,20 @@ export class Experiment extends EE {
         Object.values(this._charts.charts).forEach(cs => { cs.reset() });
 
         await tick();
-        await qoslabappStartExperiment({ id: this.id });
+        await meallStartExperiment({ id: this.id });
     }
 
     async pause() {
         this._status = "pausing";
-        await qoslabappPauseExperiment({ id: this.id });
+        await meallPauseExperiment({ id: this.id });
     }
     async stop() {
         this._status = "stopping";
-        await qoslabappStopExperiment({ id: this.id });
+        await meallStopExperiment({ id: this.id });
     }
     async continue() {
         this._status = "continuing";
-        await qoslabappContinueExperiment({ id: this.id });
+        await meallContinueExperiment({ id: this.id });
 
     }
 
@@ -203,7 +203,7 @@ export class Experiments {
 
 
     refreshAvailables = async () => {
-        this._available_module_cls = await qoslabappGetAvailableEEs("experiment", { prefixes: gstore.workspace.dependencies?.prefixes ?? [] })
+        this._available_module_cls = await meallGetAvailableEEs("experiment", { prefixes: gstore.workspace.dependencies?.prefixes ?? [] })
     }
 
     get available_module_cls() {

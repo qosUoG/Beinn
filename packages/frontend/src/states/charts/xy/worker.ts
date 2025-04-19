@@ -1,7 +1,8 @@
 import { Chart, type ChartConfiguration, type Point } from "chart.js/auto";
 
-import { qoslabappWs } from "$services/utils";
+
 import type { ChartWebWorkerMessage, XYChartConfig, XYChartMode } from "$states/chart.svelte";
+import { meallWs } from "$lib/meall.svelte";
 
 
 // Worker local variables
@@ -220,7 +221,7 @@ function reset() {
 }
 function establish_web_socket() {
     _online = true
-    _ws = new WebSocket(qoslabappWs(`chart/${_id}/${_config.title}`))
+    _ws = new WebSocket(meallWs(`chart/${_id}/${_config.title}`))
 
     _ws.binaryType = "arraybuffer"
 

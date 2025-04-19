@@ -1,10 +1,10 @@
 
-import { backendDisconnectWorkspace, backendReadAllUvDependencies, backendSaveWorkspace } from "$services/backend.svelte"
+
 import { parse, stringify } from "smol-toml"
 import { gstore, } from "./global.svelte"
 import { tick } from "svelte"
 
-import { qoslabappGetCliWs } from "$services/qoslabapp.svelte"
+import { meallGetCliWs, meallWaitUntilOnline } from "$lib/meall.svelte"
 
 import { Equipments } from "./equipment.svelte"
 import { Experiments } from "./experiment.svelte"
@@ -16,7 +16,9 @@ import { confirm, message } from "@tauri-apps/plugin-dialog"
 import { Child, Command } from "@tauri-apps/plugin-shell"
 import type { EET, EEType } from "./ee.svelte"
 import { applicationError } from "./err"
-
+import { fetch } from '@tauri-apps/plugin-http';
+import { readAllUvDependencies } from "$lib/utils"
+import { platform } from '@tauri-apps/plugin-os';
 
 export type Save = {
     dependencies: DependencyT[] | undefined,
@@ -55,14 +57,14 @@ export class Workspace {
 
 
     save = async () => {
-        await backendSaveWorkspace({
-            path: this._path,
-            save: {
-                dependencies: this._dependencies ? this._dependencies.toSave() : undefined,
-                equipments: this._equipments.toSave(),
-                experiments: this._experiments.toSave(),
-            }
-        })
+        const save: Save = {
+            dependencies: this._dependencies ? this._dependencies.toSave() : undefined,
+            equipments: this._equipments.toSave(),
+            experiments: this._experiments.toSave(),
+        }
+
+        await writeTextFile(this._path + "/.beinn", JSON.stringify(save))
+
     }
 
     reset = () => {
@@ -72,12 +74,13 @@ export class Workspace {
     }
 
 
-    disconnect = async () => {
+    async disconnect() {
         this._connected = false
         await tick();
         // shutdown the workspace
         try {
-            await backendDisconnectWorkspace()
+            // TODO handle close force cleanup
+            fetch("")
             this.reset()
             await tick();
         } catch (e) {
@@ -86,149 +89,156 @@ export class Workspace {
         }
     }
 
+    async kill() {
+
+        if (!this.proc) return
+
+        const currentPlatform = platform();
+        if (currentPlatform === "windows")
+            await shell({ fn: "taskkill", cmd: `/PID ${this.proc.pid} /F`, cwd: this._path })
+        else if (currentPlatform === "linux" || currentPlatform === "macos")
+            await shell({ fn: "kill", cmd: `-s SIGINT ${this.proc.pid}`, cwd: this._path })
+
+    }
+
 
 
     connect = async (path: string) => {
+        // PART A - Assign the path
         this._path = path
-
         await tick()
-        const dir = await readDir(path)
 
+        // PART B - Instantiate the workspace directory
+        {
+            // STEP 1 setup uv
+            // Check if the workspace has pyproject.toml
+            if (!await exists(path + "/pyproject.toml")) {
+                if ((await readDir(path)).length > 0) {
+                    // Not empty directory without pyproject.toml
+                    const confirmation = await confirm(
+                        `${path} is not empty. Are you sure to create setup workspace here?`,
+                        { title: 'Directory Not Empty', kind: 'warning' }
+                    );
 
+                    // Abort if user chooses not to
+                    if (!confirmation) return
+                }
 
-        // STEP 1 setup uv
-
-        // Check if the workspace has pyproject.toml
-        if (!await exists(path + "/pyproject.toml")) {
-            if (dir.length > 0) {
-                // Not empty directory without pyproject.toml
-                const confirmation = await confirm(
-                    `${path} is not empty. Are you sure to create setup workspace here?`,
-                    { title: 'Directory Not Empty', kind: 'warning' }
-                );
-
-                // Abort if user chooses not to
-                if (!confirmation) return
+                // Run uv init 
+                shell({ fn: "uv", cmd: "init", cwd: this._path })
             }
 
-            // Run uv init 
-            shell({ fn: "uv", cmd: "init", cwd: this._path })
+            // Write link-mode to suppress error
+            const parsed = parse(await readTextFile(path + "/pyproject.toml"));
+            parsed.tool = { uv: { "link-mode": "copy" } }
+            await writeTextFile(path + "/pyproject.toml", stringify(parsed))
+        }
+        {
+            // STEP 2: setup gitignore
+
+            // Read gitignore if exists
+            let gitignore_content: string[] = []
+            if (await exists(path + "/.gitignore"))
+                gitignore_content = (await readTextFile(path + "/.gitignore")).split("\n")
+
+            // Put beinn into list of gitignores
+            if (!gitignore_content.includes("meall"))
+                await writeTextFile(path + "/.gitignore", [...gitignore_content, "meall"].join("\n"))
+
+        }
+        {
+            // STEP 3: use copier to copy newest meall into the directory
+            await shell({ fn: "uvx", cmd: "copier copy git+https://github.com/qosUoG/Beinn.git ./meall -f", cwd: path })
+        }
+        {
+            // STEP 4: Create the data directory if not exist
+            if (!await exists(path + "/data"))
+                await mkdir(path + "/data")
+        }
+        {
+            // STEP 5: install and update required dependencies
+
+            await shell({ fn: "uv", cmd: "add git+https://github.com/qosUoG/Beinn#subdirectory=packages/cnoc --branch main", cwd: path })
+
+            await shell({ fn: "uv", cmd: "sync", cwd: path })
+            await shell({ fn: "uv", cmd: "add fastapi", cwd: path })
+            await shell({ fn: "uv", cmd: "add fastapi[standard]", cwd: path })
+            await shell({ fn: "uv", cmd: "add aiosqlite", cwd: path })
+
+            // In case cnoc is already installed and stale
+            await shell({ fn: "uv", cmd: "lock --upgrade-package cnoc", cwd: path })
+        }
+        {
+            // STEP 6: Execute meall as a child process
+            const handler = Command.create(
+                "uv", "run uvicorn meall.main:app --host localhost --port 8000".split(" "), {
+                encoding: "utf8",
+                cwd: path
+            })
+            handler.stdout.on("data", async (message) => {
+                await gstore.logs.push([
+                    { source: "python", timestamp: Date.now(), content: message }
+                ])
+            })
+            handler.stderr.on("data", async (message) => {
+                await gstore.logs.push([
+                    { source: "python", timestamp: Date.now(), content: message }
+                ])
+            })
+
+            this.proc = await handler.spawn()
         }
 
-        // Write link-mode to suppress error
-        const parsed = parse(await readTextFile(path + "/pyproject.toml"));
-        parsed.tool = { uv: { "link-mode": "copy" } }
-        await writeTextFile(path + "/pyproject.toml", stringify(parsed))
+        {
+            // STEP 7: Wait until the beinn is online with 5 seconds timeout
+            await meallWaitUntilOnline()
+        }
+        {
+            // TODO STEP 8: Connect to cli ws
+            this.log_socket = meallGetCliWs<string>({
+                onmessage: (message) => {
+                    const res = JSON.parse(message.data) as
+                        | {
+                            type: "exec";
+                            result: null;
+                        }
+                        | { type: "eval"; result: string }
+                        | {
+                            type: "error";
+                            result: string;
+                        };
 
-        // STEP 2: setup gitignore
+                    if (res.type !== "exec")
+                        gstore.logs.push([{
+                            source: "equipment",
+                            timestamp: Date.now(),
+                            content: res.result,
+                        }]);
+                },
+            });
+        }
 
-        // Read gitignore if exists
-        let gitignore_content: string[] = []
-        if (await exists(path + "/.gitignore"))
-            gitignore_content = (await readTextFile(path + "/.gitignore")).split("\n")
 
-        // Put beinn into list of gitignores
-        if (!gitignore_content.includes("meall"))
-            await writeTextFile(path + "/.gitignore", [...gitignore_content, "meall"].join("\n"))
+        // STEP 9: Instantiate the dependencies
+        const uv_dependencies = await readAllUvDependencies()
 
 
-        // STEP 3: use copier to copy newest meall into the directory
-        await shell({ fn: "uvx", cmd: "copier copy git+https://github.com/qosUoG/Beinn.git ./meall -f", cwd: path })
+        {
+            // STEP 10: If there is no save, load the dependencies and return!
+            if (!await exists(path + "/.beinn")) {
+                this._dependencies = new Dependencies(uv_dependencies)
+                await Promise.all([this._equipments.refreshAvailables(), this._experiments.refreshAvailables()])
+                this._connected = true;
+                return
+            }
+        }
 
-        // STEP 4: Create the data directory if not exist
-        if (!await exists(path + "/data"))
-            await mkdir(path + "/data")
-
-        // STEP 5: install required dependencies
-        gstore.logs.push([{ source: "beinn", content: path, timestamp: Date.now() }])
-        await shell({ fn: "uv", cmd: "sync", cwd: path })
-        await shell({ fn: "uv", cmd: "add fastapi", cwd: path })
-        await shell({ fn: "uv", cmd: "add fastapi[standard]", cwd: path })
-        await shell({ fn: "uv", cmd: "add aiosqlite", cwd: path })
-        gstore.logs.push([{ source: "beinn", content: path, timestamp: Date.now() }])
-        await shell({ fn: "uv", cmd: "add git+https://github.com/qosUoG/Beinn#subdirectory=packages/cnoc --branch main", cwd: path })
-
-        // In case cnoc is already installed and stale
-        await shell({ fn: "uv", cmd: "lock --upgrade-package cnoc", cwd: path })
-
-        // STEP 5: Execute meall as a child process
-        const handler = Command.create(
-            "uv", "run uvicorn meall.main:app --host localhost --port 8000".split(" "), {
-            encoding: "utf8",
-            cwd: path
-        })
-        handler.stdout.on("data", async (message) => {
-            await gstore.logs.push([
-                { source: "python", timestamp: Date.now(), content: message }
-            ])
-        })
-        handler.stderr.on("data", async (message) => {
-            await gstore.logs.push([
-                { source: "python", timestamp: Date.now(), content: message }
-            ])
-        })
-
-        this.proc = await handler.spawn()
-
-        // STEP 6: Wait until the beinn is online with 5 seconds timeout
-        await retryOnError(5000, async () => {
-            const res = await (await fetch("http://localhost:8000/workspace/status")).json();
-            if (res.status !== "online")
-                throw Error()
-        });
-
-        const res = await (await fetch("http://localhost:8000/workspace/status")).json();
-        if (res.status !== "online")
-            await message("Timeout trying to start meall. meall is not online", { title: "meall startup timeout", "kind": "error" })
-
-        // STEP 7: try to get the save
-        if (!await exists(path + "/.beinn"))
-            return
-
+        // PART C: Load the save 
         const save: Save = JSON.parse(await readTextFile(path + "/.beinn"))
 
-        // 2. Connect to cli ws
-        this.log_socket = qoslabappGetCliWs<string>({
-            onmessage: (message) => {
-                const res = JSON.parse(message.data) as
-                    | {
-                        type: "exec";
-                        result: null;
-                    }
-                    | { type: "eval"; result: string }
-                    | {
-                        type: "error";
-                        result: string;
-                    };
-
-                if (res.type !== "exec")
-                    gstore.logs.push([{
-                        source: "equipment",
-                        timestamp: Date.now(),
-                        content: res.result,
-                    }]);
-            },
-        });
-
-
-        // 3. Instantiate the dependencies
-
-        // First prepare the dependencies already installed in qoslabapp
-        const uv_dependencies = await backendReadAllUvDependencies({ path: gstore.workspace.path })
-
-        // If there is no save, just load the dependencies and update availables is enough.
-        if (!save) {
-
-            this._dependencies = new Dependencies(uv_dependencies)
-            await Promise.all([this._equipments.refreshAvailables(), this._experiments.refreshAvailables()])
-            this._connected = true;
-            return
-        }
-
-        // Otherwise, we would need to loop through the save and add one by one
         this._dependencies = new Dependencies()
 
-        if (save.dependencies)
+        if (save.dependencies) {
             for (const save_d of save.dependencies) {
                 // Just in case for the nested $state to update
                 await tick()
@@ -248,7 +258,7 @@ export class Workspace {
                 }
 
                 // The dependency should be installed, but not. Try to install.
-                // First assigne the source
+                // First assign the source
                 const new_d = this._dependencies.instantiate()
                 new_d.source = save_d.source
                 await tick()
@@ -257,6 +267,20 @@ export class Workspace {
                 try { await new_d.install() }
                 catch (e) { /* If it failed, we silence the error, and only show that as not installed */ }
             }
+
+            // add uv dependencies that is installed but not present in save
+            for (const uv_d of uv_dependencies) {
+                // Just in case for the nested $state to update
+                await tick()
+
+                // First check if the source is present in pyproject.toml already
+                if (!save.dependencies.find(({ source }) => sourceEqual(uv_d.source, source))) {
+                    // Just add the dependency
+                    this._dependencies.instantiateTemplate(uv_d)
+                    continue
+                }
+            }
+        }
 
         await tick()
         await Promise.all([this._equipments.refreshAvailables(), this._experiments.refreshAvailables()])
@@ -340,7 +364,7 @@ export class Workspace {
 
     async sendCommand(input: string) {
         // Check if cli websocket is connected
-        if (this.log_socket === undefined) throw applicationError("Websocket to qoslabapp for cli is undefined");
+        if (this.log_socket === undefined) throw applicationError("Websocket to meall for cli is undefined");
         let sent = false
 
         // Get the inputs

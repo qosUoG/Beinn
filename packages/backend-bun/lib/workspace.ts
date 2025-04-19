@@ -138,7 +138,7 @@ export async function runProject(path: string) {
 
             for await (const line of app_state.pyproc!.stdout as unknown as ReadableStream) {
                 const output = await new Response(line).text();
-                postCli("qoslabapp", output)
+                postCli("meall", output)
             }
 
 
@@ -168,7 +168,7 @@ export async function runProject(path: string) {
 export async function loadWorkspace(path: string) {
 
     try {
-        const save_file = file(path + "/.qoslabapp_state")
+        const save_file = file(path + "/.meall_state")
         if (!(await save_file.exists())) return undefined
 
         return JSON.parse(await save_file.text())
@@ -181,7 +181,7 @@ export async function loadWorkspace(path: string) {
 
 export async function saveWorkspace(path: string, save: Save) {
     try {
-        const save_file = file(path + "/.qoslabapp_state")
+        const save_file = file(path + "/.meall_state")
         await save_file.write(JSON.stringify(save))
     } catch (e) {
         if (isErr(e)) throw e
