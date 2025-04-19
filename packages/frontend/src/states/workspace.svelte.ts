@@ -4,7 +4,7 @@ import { parse, stringify } from "smol-toml"
 import { gstore, } from "./global.svelte"
 import { tick } from "svelte"
 
-import { meallGetCliWs, meallWaitUntilOnline } from "$lib/meall.svelte"
+import { meallGetCliWs, meallGetPid, meallWaitUntilOnline } from "$lib/meall.svelte"
 
 import { Equipments } from "./equipment.svelte"
 import { Experiments } from "./experiment.svelte"
@@ -53,7 +53,8 @@ export class Workspace {
         return this._experiments
     }
 
-    private proc: Child | undefined
+    private uvproc: Child | undefined
+    private meall_pid: number | undefined
 
 
     save = async () => {
@@ -91,13 +92,19 @@ export class Workspace {
 
     async kill() {
 
-        if (!this.proc) return
+        if (!this.uvproc) return
 
         const currentPlatform = platform();
-        if (currentPlatform === "windows")
-            await shell({ fn: "taskkill", cmd: `/PID ${this.proc.pid} /F`, cwd: this._path })
-        else if (currentPlatform === "linux" || currentPlatform === "macos")
-            await shell({ fn: "kill", cmd: `-s SIGINT ${this.proc.pid}`, cwd: this._path })
+        if (currentPlatform === "windows") {
+            await shell({ fn: "taskkill", cmd: `/PID ${this.uvproc.pid} /F`, cwd: this._path })
+            await shell({ fn: "taskkill", cmd: `/PID ${this.meall_pid} /F`, cwd: this._path })
+        }
+        else if (currentPlatform === "linux" || currentPlatform === "macos") {
+            await shell({ fn: "kill", cmd: `-s SIGINT ${this.uvproc.pid}`, cwd: this._path })
+            await shell({ fn: "kill", cmd: `-s SIGINT ${this.meall_pid}`, cwd: this._path })
+        }
+
+
 
     }
 
@@ -186,12 +193,16 @@ export class Workspace {
                 ])
             })
 
-            this.proc = await handler.spawn()
+            this.uvproc = await handler.spawn()
         }
 
         {
             // STEP 7: Wait until the beinn is online with 5 seconds timeout
             await meallWaitUntilOnline()
+        }
+        {
+            this.meall_pid = (await meallGetPid()).pid
+            console.log(this.meall_pid)
         }
         {
             // TODO STEP 8: Connect to cli ws

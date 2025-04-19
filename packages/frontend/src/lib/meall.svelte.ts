@@ -46,6 +46,10 @@ export async function meallStopExperiment(payload: { id: string }) {
     await postRequestJsonInOut(meallUrl("experiment/stop"), payload)
 }
 
+export async function meallGetPid(): Promise<{ pid: number }> {
+    return await postRequestJsonInOut(meallUrl("workspace/pid"), {})
+}
+
 export function meallGetExperimentEventsWs<T extends any>(payload: { id: string, onmessage: (this: WebSocket, event: MessageEvent<T>) => any }) {
     let socket = new WebSocket(meallWs(`experiment/${payload.id}/events`))
     socket.onmessage = payload.onmessage
