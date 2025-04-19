@@ -94,6 +94,8 @@ export class Workspace {
         await tick()
         const dir = await readDir(path)
 
+
+
         // STEP 1 setup uv
 
         // Check if the workspace has pyproject.toml
@@ -134,7 +136,7 @@ export class Workspace {
         await shell({ fn: "uvx", cmd: "copier copy git+https://github.com/qosUoG/Beinn.git ./meall -f", cwd: path })
 
         // STEP 4: Create the data directory if not exist
-        if (await exists(path + "/data"))
+        if (!await exists(path + "/data"))
             await mkdir(path + "/data")
 
         // STEP 5: install required dependencies
@@ -142,7 +144,7 @@ export class Workspace {
         await shell({ fn: "uv", cmd: "add git+https://github.com/qosUoG/Beinn#subdirectory=packages/cnoc --branch main", cwd: path })
 
         // In case beinnpy is already installed and stale
-        await shell({ fn: "uv", cmd: "aock --upgrade-package cnoc", cwd: path })
+        await shell({ fn: "uv", cmd: "lock --upgrade-package cnoc", cwd: path })
 
         // STEP 5: Execute meall as a child process
         const handler = Command.create(

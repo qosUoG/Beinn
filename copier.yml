@@ -1,4 +1,4 @@
-_subdirectory: packages/beinn-pyapp
+_subdirectory: packages/meall
 _templates_suffix: ""
 _exclude:
     - "pyproject.toml"

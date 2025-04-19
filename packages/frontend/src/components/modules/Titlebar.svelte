@@ -28,12 +28,12 @@
 	}
 </script>
 
-<div class="frow h-[32px] px-24 py-1 justify-center" data-tauri-drag-region>
-	<div class="frow-8 max-w-full">
+<div class="h-[32px]" data-tauri-decorum-tb>
+	<div class="frow-4 w-full px-24 py-1 justify-center" data-tauri-drag-region>
 		<Mode />
 		<div class="frow-1">
 			<div class=" wrapped bg-slate-200 title">Workspace</div>
-			<div class="wrapped rounded bg-slate-200 w-96 min-w-12">
+			<div class="wrapped rounded bg-slate-200 w-96 min-w-12 h-[24px]">
 				<div class="text-nowrap w-full overflow-x-scroll">
 					{gstore.workspace.path}
 				</div>

@@ -7,6 +7,21 @@
 		"core:default",
 		"shell:default",
 		"fs:default",
+
+		{ "identifier": "fs:allow-write", "allow": [{ "path": "**/*" }] },
+		{
+			"identifier": "fs:allow-write-text-file",
+			"allow": [{ "path": "**/*" }]
+		},
+		{ "identifier": "fs:allow-read", "allow": [{ "path": "**/*" }] },
+		{
+			"identifier": "fs:allow-read-text-file",
+			"allow": [{ "path": "**/*" }]
+		},
+		{ "identifier": "fs:allow-read-dir", "allow": [{ "path": "**/*" }] },
+		{ "identifier": "fs:allow-mkdir", "allow": [{ "path": "**/*" }] },
+		{ "identifier": "fs:allow-exists", "allow": [{ "path": "**/*" }] },
+
 		"dialog:default",
 		"core:window:allow-close",
 		"core:window:allow-center",

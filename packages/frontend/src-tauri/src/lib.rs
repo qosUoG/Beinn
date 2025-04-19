@@ -5,8 +5,9 @@ use tauri_plugin_decorum::WebviewWindowExt; // adds helper methods to WebviewWin
 pub fn run() {
     tauri::Builder::default()
         .plugin(tauri_plugin_decorum::init())
-        .plugin(tauri_plugin_dialog::init())
         .plugin(tauri_plugin_fs::init())
+        .plugin(tauri_plugin_persisted_scope::init())
+        .plugin(tauri_plugin_dialog::init())
         .plugin(tauri_plugin_shell::init())
         .setup(|app| {
             /* DECORUM, custom title bar */

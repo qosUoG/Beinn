@@ -1,10 +1,6 @@
 @import "tailwindcss";
 
 @layer base {
-	div[data-tauri-decorum-tb] {
-		@apply !pointer-events-none !h-[24px];
-	}
-
 	body {
 		@apply h-screen w-screen bg-transparent overflow-clip;
 	}

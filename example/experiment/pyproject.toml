@@ -4,18 +4,8 @@ version = "0.1.0"
 description = "Add your description here"
 readme = "README.md"
 requires-python = ">=3.13"
-dependencies = [
-    "aiosqlite>=0.21.0",
-    "examplelib",
-    "fastapi[standard]>=0.115.11",
-    "numpy>=2.2.3",
-    "beinnpy",
-]
+dependencies = [ "aiosqlite>=0.21.0", "examplelib", "fastapi[standard]>=0.115.11", "numpy>=2.2.3", "beinnpy" ]
 
 [tool]
 [tool.uv]
 link-mode = "copy"
-
-[tool.uv.sources]
-examplelib = { path = "../examplelib", editable = true }
-beinnpy = { git = "https://github.com/qosUoG/Beinn", subdirectory = "packages/beinnpy", branch = "main" }

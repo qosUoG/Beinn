@@ -6,7 +6,7 @@ import { gstore } from "./global.svelte";
 export async function shell({ fn, cmd, cwd }: { fn: string, cmd: string, cwd: string }) {
 
     const handler = Command.create(
-        fn, cmd, {
+        fn, cmd.split(" "), {
         encoding: "utf8",
         cwd
     })

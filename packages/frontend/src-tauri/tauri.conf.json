@@ -1,5 +1,5 @@
 {
-	"$schema": "../../../node_modules/@tauri-apps/cli/config.schema.json",
+	"$schema": "../node_modules/@tauri-apps/cli/config.schema.json",
 	"productName": "beinn",
 	"version": "0.1.0",
 	"identifier": "com.tauri.dev",
@@ -12,12 +12,12 @@
 	"app": {
 		"windows": [
 			{
-				"fullscreen": false,
+				"fullscreen": true,
 				"resizable": true,
 				"title": "Beinn",
 				"label": "main",
-				"width": 600,
-				"height": 400,
+				"width": 1920,
+				"height": 1080,
 				"titleBarStyle": "Overlay",
 				"hiddenTitle": true,
 				"decorations": true
@@ -38,5 +38,10 @@
 			"icons/icon.icns",
 			"icons/icon.ico"
 		]
+	},
+	"plugins": {
+		"fs": {
+			"requireLiteralLeadingDot": false
+		}
 	}
 }
