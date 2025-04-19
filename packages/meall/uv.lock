@@ -348,7 +348,7 @@ dependencies = [
     { name = "aiosqlite" },
     { name = "fastapi" },
     { name = "pydantic" },
-    { name = "beinnpy" },
+    { name = "cnoc" },
 ]
 
 [package.dev-dependencies]
@@ -361,16 +361,16 @@ requires-dist = [
     { name = "aiosqlite", specifier = ">=0.21.0" },
     { name = "fastapi", specifier = ">=0.115.8" },
     { name = "pydantic", specifier = ">=2.11.2" },
-    { name = "beinnpy", editable = "../beinnpy" },
+    { name = "cnoc", editable = "../cnoc" },
 ]
 
 [package.metadata.requires-dev]
 dev = [{ name = "fastapi", extras = ["standard"], specifier = ">=0.115.8" }]
 
 [[package]]
-name = "beinnpy"
+name = "cnoc"
 version = "0.1.0"
-source = { editable = "../beinnpy" }
+source = { editable = "../cnoc" }
 dependencies = [
     { name = "pydantic" },
     { name = "websockets" },

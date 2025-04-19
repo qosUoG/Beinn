@@ -10,14 +10,14 @@ from typing import Any, override
 
 from fastapi import WebSocket
 
-from beinnpy.exceptions import ExperimentEnded
-from beinnpy.extensions.chart import ChartABC
+from cnoc.exceptions import ExperimentEnded
+from cnoc.extensions.chart import ChartABC
 
-from beinnpy.extensions.saver import SqlSaverABC
-from beinnpy.params import ExperimentParamsToBackup, Params
-from beinnpy.runtime import ExperimentABC
+from cnoc.extensions.saver import SqlSaverABC
+from cnoc.params import ExperimentParamsToBackup, Params
+from cnoc.runtime import ExperimentABC
 
-from beinnpy.runtime import ManagerABC
+from cnoc.runtime import ManagerABC
 
 from .chart import ChartProxy
 from .sql_saver import SqlSaverProxy

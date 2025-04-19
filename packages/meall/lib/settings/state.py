@@ -1,12 +1,12 @@
 import importlib
 from types import ModuleType
 from fastapi import WebSocket
-from beinnpy.params import Params
+from cnoc.params import Params
 
 from ..proxies.sql_saver import SqlWorker
 
 from ..proxies.experiment import ExperimentProxy
-from beinnpy.runtime import EquipmentABC, EquipmentProxy
+from cnoc.runtime import EquipmentABC, EquipmentProxy
 
 
 class AppState:

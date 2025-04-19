@@ -1,7 +1,7 @@
 import math
 from random import random
 from typing import TypedDict
-from beinnpy import runtime as r, params as p
+from cnoc import runtime as r, params as p
 
 """
 @dataclass decorator allow us to type hint the type of the class,

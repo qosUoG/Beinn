@@ -4,9 +4,9 @@ from fastapi import APIRouter, WebSocket, WebSocketDisconnect
 from pydantic import BaseModel
 
 
-from beinnpy.runtime import ExperimentABC
+from cnoc.runtime import ExperimentABC
 
-from beinnpy.params import ParamModels, ParamModels2Params, Params2ParamModels
+from cnoc.params import ParamModels, ParamModels2Params, Params2ParamModels
 
 from ..lib.utils.result import applicationError, ok
 

@@ -2,9 +2,9 @@ from fastapi import APIRouter
 from pydantic import BaseModel
 
 
-from beinnpy.runtime import EquipmentABC
+from cnoc.runtime import EquipmentABC
 
-from beinnpy.params import ParamModels, Params2ParamModels, ParamModels2Params
+from cnoc.params import ParamModels, Params2ParamModels, ParamModels2Params
 
 from ..lib.utils.result import applicationError, ok
 

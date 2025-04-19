@@ -5,8 +5,8 @@ import pkgutil
 from typing import Literal, TypedDict
 import warnings
 
-from beinnpy.params import AllParamTypes
-from beinnpy.runtime import EquipmentABC, ExperimentABC
+from cnoc.params import AllParamTypes
+from cnoc.runtime import EquipmentABC, ExperimentABC
 
 
 from ..lib.settings.state import AppState

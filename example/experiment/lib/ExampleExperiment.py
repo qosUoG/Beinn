@@ -5,11 +5,11 @@ from typing import TypedDict, override
 
 from click import ParamType
 
-from beinnpy import params as p, exceptions as e, runtime as r
+from cnoc import params as p, exceptions as e, runtime as r
 import time
 
-from beinnpy.extensions.chart import XY
-from beinnpy.extensions.saver import XYFloatSqlSaver
+from cnoc.extensions.chart import XY
+from cnoc.extensions.saver import XYFloatSqlSaver
 from examplelib.ExampleDriver import ExampleEquipment
 
 

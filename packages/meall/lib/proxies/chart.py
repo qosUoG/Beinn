@@ -5,7 +5,7 @@ from typing import Any
 
 from fastapi import WebSocket
 
-from beinnpy.extensions.chart import ChartABC
+from cnoc.extensions.chart import ChartABC
 
 from ..settings.foundation import ExperimentStatus
 

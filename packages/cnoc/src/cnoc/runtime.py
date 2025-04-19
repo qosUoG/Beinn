@@ -46,7 +46,7 @@ class ExperimentABC(ABC):
     #     # Instead, this list is passed to the webapp to start with. The complete list
     #     # with updated values will be passed during "initialization" phase (initialization function)
     #     self.params = {
-    #         "power": beinnpy.params.int_param(-3)
+    #         "power": cnoc.params.int_param(-3)
     #         "other param": ...
     #     }
 

@@ -46,12 +46,12 @@
 			"source": {
 				"type": "git",
 				"git": "https://github.com/qosUoG/Beinn",
-				"subdirectory": "packages/beinnpy",
+				"subdirectory": "packages/cnoc",
 				"branch": "main"
 			},
 			"install_string": "",
-			"name": "beinnpy",
-			"fullname": "beinnpy"
+			"name": "cnoc",
+			"fullname": "cnoc"
 		},
 		{
 			"installed": true,

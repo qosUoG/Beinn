@@ -6,7 +6,7 @@ from threading import Lock
 from typing import Any, TypedDict
 
 
-from beinnpy.extensions.saver import SqlSaverABC
+from cnoc.extensions.saver import SqlSaverABC
 
 from ..settings.foundation import ExperimentStatus
 
