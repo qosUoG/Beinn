@@ -143,12 +143,12 @@ export class Workspace {
         await shell({ fn: "uv", cmd: "add fastapi fastapi[standard] aiosqlite", cwd: path })
         await shell({ fn: "uv", cmd: "add git+https://github.com/qosUoG/Beinn#subdirectory=packages/cnoc --branch main", cwd: path })
 
-        // In case beinnpy is already installed and stale
+        // In case cnoc is already installed and stale
         await shell({ fn: "uv", cmd: "lock --upgrade-package cnoc", cwd: path })
 
         // STEP 5: Execute meall as a child process
         const handler = Command.create(
-            "uv", "run uvicorn meall.main:app --host localhost --port 8000", {
+            "uv", "run uvicorn meall.main:app --host localhost --port 8000".split(" "), {
             encoding: "utf8",
             cwd: path
         })

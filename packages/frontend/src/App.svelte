@@ -28,10 +28,10 @@
 	// });
 </script>
 
-<div class="w-screen h-screen fcol">
+<div class="w-screen h-screen fcol max-h-screen max-w-screen">
 	<Titlebar />
 
-	<div class="w-full flex-grow rounded p-2 relative frow-4">
+	<div class="w-full flex-grow rounded p-2 relative frow-4 min-h-0">
 		{#if gstore.mode === "Configuration"}
 			<Config />
 		{:else if gstore.mode === "Runtime"}
