@@ -84,15 +84,6 @@ class _SaverABC(ABC):
         raise NotImplementedError
 
 
-class SaverManagerABC(ABC):
-    # The holder shall manage the database connection, and provide a method that would be consumed by the SaverABC method
-
-    @abstractmethod
-    def createSaver[T: _SaverABC](cls, sql_saverT: type[T], kwargs: Any) -> T:
-        """Returns a handle to the chart class, which shall have a save function to be called in loop"""
-        raise NotImplementedError
-
-
 @dataclass
 class XYFloatSaverConfig(_SaverConfigABC):
     _type: Literal["saver:xyfloat"]

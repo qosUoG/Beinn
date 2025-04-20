@@ -18,4 +18,3 @@ link-mode = "copy"
 
 [tool.uv.sources]
 cnoc = { git = "https://github.com/qosUoG/Beinn", subdirectory = "packages/cnoc", branch = "main" }
-examplelib = { path = "../examplelib", editable = true }

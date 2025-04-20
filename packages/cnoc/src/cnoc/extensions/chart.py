@@ -5,8 +5,6 @@ To save data of experiment, please refer to the saver extension.
 
 To see examples, refer to example/experiment directory.
 
-    * ChartManagerABC - Base class of chart manager. Provide method to create chart instance.
-
     * XYConfig - Chart config of the XY line plot
     * XY - A xy line chart
 """
@@ -45,14 +43,6 @@ class _ChartABC(ABC):
     @abstractmethod
     def plot(self, frame: Any) -> None:
         # This method plots a frame
-        raise NotImplementedError
-
-
-class ChartManagerABC(ABC):
-    @abstractmethod
-    def createChart(cls, chartT: type[_ChartABC], kwargs: Any) -> _ChartABC:
-        """Returns a handle to the chart class, which shall have a plot function to be called in loop"""
-        # This method returns a plot object
         raise NotImplementedError
 
 

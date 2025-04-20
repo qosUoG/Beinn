@@ -5,31 +5,11 @@ example/examplelib.
 
     * Experiment - Base class of all experiment scripts
         Users shall define experiment scripts by using ExperimentABC as the base class.
-    * ExperimentmanagerABC - Base class of manager received as parameter in initialize method
-        contains the suggetTotalIterations method for the user to suggest the total number
-        of iterations and display in frontend.
 
-        The manager class implements all *managerABC of the framework. To look at the final
-        ManagerABC, refer to runtime.py module.
 """
 
 from abc import ABC, abstractmethod
-from .runtime import ManagerABC
-
-
-class ExperimentManagerABC(ABC):
-    """
-    ManagerABC of Experiment
-
-    Methods
-    -------
-    suggestTotalIterations(total_iterations: int)
-        suggest a total number of iterations loop is going to take
-    """
-
-    @abstractmethod
-    def suggestTotalIterations(self, total_iterations: int):
-        raise NotImplementedError
+from .managers import ManagerABC
 
 
 class ExperimentABC(ABC):
