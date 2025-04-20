@@ -1,4 +1,15 @@
-"""Module initiates a websocket to send data at each frame."""
+"""Charts to plot data in real time
+
+Note that the data presented by the chart are not saved after the experiment.
+To save data of experiment, please refer to the saver extension.
+
+To see examples, refer to example/experiment directory.
+
+    * ChartManagerABC - Base class of chart manager. Provide method to create chart instance.
+
+    * XYConfig - Chart config of the XY line plot
+    * XY - A xy line chart
+"""
 
 from abc import ABC, abstractmethod
 import array
@@ -10,7 +21,7 @@ from typing import Any, Literal, TypedDict, Unpack, override
 
 
 @dataclass
-class ChartConfigABC(ABC):
+class _ChartConfigABC(ABC):
     title: str
     type: str
     mode: str
@@ -21,9 +32,9 @@ class ChartConfigABC(ABC):
 
 
 @dataclass
-class ChartABC(ABC):
+class _ChartABC(ABC):
     _plot_fn: Callable[[bytes], None]
-    config: ChartConfigABC
+    config: _ChartConfigABC
 
     @classmethod
     @abstractmethod
@@ -38,20 +49,43 @@ class ChartABC(ABC):
 
 
 class ChartManagerABC(ABC):
-    @classmethod
     @abstractmethod
-    def createChart(cls, chartT: type[ChartABC], kwargs: Any) -> ChartABC:
+    def createChart(cls, chartT: type[_ChartABC], kwargs: Any) -> _ChartABC:
+        """Returns a handle to the chart class, which shall have a plot function to be called in loop"""
         # This method returns a plot object
         raise NotImplementedError
 
 
+"""Mode of XY chart
+
+append: append data in order
+
+overwrite: overwrites the y value of the specified x value
+"""
 type XYMode = Literal["append"] | Literal["overwrite"]
 
 
 @dataclass
-class XYConfig(ChartConfigABC):
+class XYConfig(_ChartConfigABC):
+    """
+    Config of XY line chart
+
+    Attributes
+    ----------
+    title : str
+        title of the chart
+    mode : XYMode
+        mode of the chart
+    x_axis : str
+        label of x axis
+    y_axis : str
+        label of y axis
+    y_names : list[str]
+        names of the list of data
+    """
+
     title: str
-    type: Literal["xy"]
+    _type: Literal["chart:xy"]
     mode: XYMode
     x_axis: str
     y_axis: str
@@ -61,7 +95,7 @@ class XYConfig(ChartConfigABC):
         return dataclasses.asdict(self)
 
 
-class XY(ChartABC):
+class XY(_ChartABC):
     class KW(TypedDict):
         title: str
         mode: XYMode
@@ -81,7 +115,7 @@ class XY(ChartABC):
         self.mode = kwargs["mode"]
         self.config = XYConfig(
             title=self.title,
-            type="xy",
+            _type="chart:xy",
             x_axis=self.x_axis,
             y_axis=self.y_axis,
             y_names=self.y_names,
@@ -97,11 +131,19 @@ class XY(ChartABC):
 
     @override
     def plot(self, frame: dict[str, float]):
-        # there should always be an x value
+        """
+        Plots a data point
+
+        Parameters
+        ----------
+        frame: dict[str, float]
+            chart:x : value of x MUST BE PRESENT
+            <y_name> : <value> value of y, MUST have at least one
+        """
         try:
             real_frame = array.array("d")
             # 0: value of x
-            real_frame.append(frame["x"])
+            real_frame.append(frame["chart:x"])
             for y_name in self.y_names:
                 if y_name in frame:
                     # If have value, takes two 8 byte floats.

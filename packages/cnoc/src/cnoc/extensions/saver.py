@@ -1,17 +1,33 @@
+"""Savers to save data to disk
+
+To see examples, refer to example/experiment directory.
+
+    * SaverManagerABC - Base class of saver manager. Provide method to create saver instance.
+
+    * XYFloatSaverConfig - Config of XYFloatSaver
+    * XYFloatSaver - Saver for saving xy values of float
+"""
+
 from abc import ABC, abstractmethod
 from dataclasses import dataclass
-
 import dataclasses
-
 from typing import Any, Callable, Iterable, Literal, TypedDict, Unpack, override
-
 from aiosqlite import Row
 
 
 @dataclass
-class SqlSaverConfigABC(ABC):
+class _SaverConfigABC(ABC):
+    """
+    Config of XY line chart
+
+    Attributes
+    ----------
+    title : str
+        title of the saver
+    """
+
     title: str
-    type: str
+    _type: str
 
     @abstractmethod
     def toDict(self) -> dict[str, Any]:
@@ -19,9 +35,9 @@ class SqlSaverConfigABC(ABC):
 
 
 @dataclass
-class SqlSaverABC(ABC):
+class _SaverABC(ABC):
     _save_fn: Callable[[dict[str, float]], None]
-    config: SqlSaverConfigABC
+    config: _SaverConfigABC
 
     @abstractmethod
     def __init__(
@@ -44,40 +60,42 @@ class SqlSaverABC(ABC):
         # This method saves one frame of data
         raise NotImplementedError
 
+    @property
     @abstractmethod
-    def getCreateTableSql(self, table_name: str) -> str:
+    def _create_table_sql(self, table_name: str) -> str:
         # This function returns the string used for the sql creating table
         raise NotImplementedError
 
+    @property
     @abstractmethod
-    def getInsertSql(self, table_name: str) -> str:
+    def _insert_sql(self, table_name: str) -> str:
         # This function returns the string used for the sql creating table
         raise NotImplementedError
 
+    @property
     @abstractmethod
-    def getSelectAllSql(self) -> str:
+    def _select_all_sql(self) -> str:
         # this function returns the sql that fetchs all data for finalize function
         raise NotImplementedError
 
     @abstractmethod
-    def finalize(self, raw: Any) -> Any:
+    def _finalize(self, raw: Any) -> Any:
         # this function returns the actual final dataset
         raise NotImplementedError
 
 
-class SqlSaverManagerABC(ABC):
-    # The holder shall manage the database connection, and provide a method that would be consumed bu the SaverABC method
+class SaverManagerABC(ABC):
+    # The holder shall manage the database connection, and provide a method that would be consumed by the SaverABC method
 
-    @classmethod
     @abstractmethod
-    def createSqlSaver[T: SqlSaverABC](cls, sql_saverT: type[T], kwargs: Any) -> T:
-        # This method returns a plot object
+    def createSaver[T: _SaverABC](cls, sql_saverT: type[T], kwargs: Any) -> T:
+        """Returns a handle to the chart class, which shall have a save function to be called in loop"""
         raise NotImplementedError
 
 
 @dataclass
-class XYFloatSqlSaverConfig(SqlSaverConfigABC):
-    type: Literal["XYFloatSqlSaver"]
+class XYFloatSaverConfig(_SaverConfigABC):
+    _type: Literal["saver:xyfloat"]
     title: str
     timestamp: int
     y_names: list[str]
@@ -86,7 +104,7 @@ class XYFloatSqlSaverConfig(SqlSaverConfigABC):
         return dataclasses.asdict(self)
 
 
-class XYFloatSqlSaver(SqlSaverABC):
+class XYFloatSaver(_SaverABC):
     class KW(TypedDict):
         title: str
         y_names: list[str]
@@ -103,8 +121,8 @@ class XYFloatSqlSaver(SqlSaverABC):
         self.table_name = f"{self.title} %ts{timestamp}ts%"
         self.y_names = kwargs["y_names"]
 
-        self.config = XYFloatSqlSaverConfig(
-            type="XYFloatSqlSaver",
+        self.config = XYFloatSaverConfig(
+            _type="saver:xyfloat",
             title=self.title,
             timestamp=self.timestamp,
             y_names=self.y_names,
@@ -117,21 +135,23 @@ class XYFloatSqlSaver(SqlSaverABC):
     def kwargs(cls, **kwargs: Unpack[KW]):
         return kwargs
 
+    @property
     @override
-    def getCreateTableSql(self) -> str:
+    def _create_table_sql(self) -> str:
         return f"""CREATE TABLE "{self.table_name}" (
             id INTEGER PRIMARY KEY,
-            x_axis REAL NOT NULL,
+            "saver:x" REAL NOT NULL,
             {",\n".join([f"{key} REAL" for key in self.y_names])}
             ) """
 
+    @property
     @override
-    def getSelectAllSql(self) -> str:
-        return f'''SELECT id,x_axis,{",".join([f"{key}" for key in self.y_names])} from "{self.table_name}" ORDER BY id DESC'''
+    def _select_all_sql(self) -> str:
+        return f'''SELECT id,"saver:x",{",".join([f"{key}" for key in self.y_names])} from "{self.table_name}" ORDER BY id DESC'''
 
     @override
-    def finalize(self, raw: Iterable[Row]):
-        # Put in the keys of the data, each y_name is a {x_axis: y}, where x and y are pair of values
+    def _finalize(self, raw: Iterable[Row]):
+        # Put in the keys of the data, each y_name is a {"saver:x": y}, where x and y are pair of values
 
         stage_1: dict[str, dict[float, float]] = {}
 
@@ -140,7 +160,6 @@ class XYFloatSqlSaver(SqlSaverABC):
 
         # The raw is traversed backward, from later in time to earlier in time.
         for row in raw:
-            # id = row[0]
             x = row[1]
             # Then the index in the tuple shall match the index of y_name in y_names
             for i, y_name in enumerate(self.y_names):
@@ -193,8 +212,9 @@ class XYFloatSqlSaver(SqlSaverABC):
         # Execute the functions
         self._save_fn(frame)
 
+    @property
     @override
-    def getInsertSql(self):
+    def _insert_sql(self):
         return f"""
-        INSERT INTO "{self.table_name}"(x_axis,{",".join([f"{key}" for key in self.y_names])}) VALUES(:x_axis,{",".join([f":{key}" for key in self.y_names])})
+        INSERT INTO "{self.table_name}"("saver:x",{",".join([f"{key}" for key in self.y_names])}) VALUES(:"saver:x",{",".join([f":{key}" for key in self.y_names])})
     """

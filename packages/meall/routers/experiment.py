@@ -1,17 +1,10 @@
 import asyncio
 from fastapi import APIRouter, WebSocket, WebSocketDisconnect
-
 from pydantic import BaseModel
-
-
-from cnoc.runtime import ExperimentABC
-
-from cnoc.params import ParamModels, ParamModels2Params, Params2ParamModels
-
-from ..lib.utils.result import applicationError, ok
-
+from cnoc.experiment import ExperimentABC
+from ..lib.utils.params import ParamModels, ParamModels2Params, Params2ParamModels
+from ..lib.utils.result import error, ok
 from ._eeshared import getAvailableEEs, populateParam
-
 from ..lib.settings.state import AppState
 
 
@@ -27,7 +20,7 @@ async def available_experiments(payload: AvailableExperimentsPayload):
     try:
         return ok(getAvailableEEs(ExperimentABC, payload.prefixes))
     except Exception as e:
-        return applicationError(f"error in /experiment/available_experiments: {e}")
+        return error(f"error in /experiment/available_experiments: {e}")
 
 
 class CreateExperimentPayload(BaseModel):
@@ -42,7 +35,7 @@ async def create_experiment(payload: CreateExperimentPayload):
         AppState.createExperiment(payload.id, payload.module, payload.cls)
         return ok()
     except Exception as e:
-        return applicationError(f"error in /experiment/create: {e}")
+        return error(f"error in /experiment/create: {e}")
 
 
 class RemoveExperimentPayload(BaseModel):
@@ -55,7 +48,7 @@ async def remove_experiment(payload: RemoveExperimentPayload):
         AppState.removeExperiment(payload.id)
         return ok()
     except Exception as e:
-        return applicationError(f"error in /experiment/remove: {e}")
+        return error(f"error in /experiment/remove: {e}")
 
 
 class GetParamsPayload(BaseModel):
@@ -67,7 +60,7 @@ async def get_params(payload: GetParamsPayload):
     try:
         return ok(Params2ParamModels(AppState.getExperimentParams(payload.id)))
     except Exception as e:
-        return applicationError(f"error in/experiment/get_params: {e}")
+        return error(f"error in/experiment/get_params: {e}")
 
 
 class SetParamsPayload(BaseModel):
@@ -86,10 +79,53 @@ async def set_params(payload: SetParamsPayload):
         AppState.setExperimentParams(payload.id, params)
         return ok()
     except Exception as e:
-        return applicationError(f"error in /experiment/set_params: {e}")
+        return error(f"error in /experiment/set_params: {e}")
 
 
-# Websockets implemented with non async as the underlying event used is Threading ones
+class controlExperimentPayload(BaseModel):
+    id: str
+
+
+@router.post("/experiment/start")
+async def start_experiment(payload: controlExperimentPayload):
+    try:
+        # Run the experiments
+        AppState.startExperiment(payload.id)
+        return ok()
+    except Exception as e:
+        return error(f"error in /experiment/start: {e}")
+
+
+@router.post("/experiment/pause")
+async def pause_experiment(payload: controlExperimentPayload):
+    # Run the experiments
+    try:
+        AppState.pauseExperiment_sync(payload.id)
+        return ok()
+    except Exception as e:
+        return error(f"error in /experiment/pause: {e}")
+
+
+@router.post("/experiment/continue")
+async def continue_experiment(payload: controlExperimentPayload):
+    # Run the experiments
+    try:
+        AppState.continueExperiment(payload.id)
+        return ok()
+    except Exception as e:
+        return error(f"error in /experiment/continue: {e}")
+
+
+@router.post("/experiment/stop")
+async def stop_experiment(payload: controlExperimentPayload):
+    # Run the experiments
+    try:
+        AppState.stopExperiment_async(payload.id)
+        return ok()
+    except Exception as e:
+        return error(f"error in /experiment/stop: {e}")
+
+
 @router.websocket("/experiment/{experiment_id}/events")
 async def subscribeExperimentEvents(ws: WebSocket, experiment_id: str):
     await ws.accept()
@@ -104,47 +140,3 @@ async def subscribeExperimentEvents(ws: WebSocket, experiment_id: str):
     except asyncio.QueueShutDown:
         await ws.close()
         unsubscribe()
-
-
-class controlExperimentPayload(BaseModel):
-    id: str
-
-
-@router.post("/experiment/start")
-async def start_experiment(payload: controlExperimentPayload):
-    try:
-        # Run the experiments
-        AppState.startExperiment(payload.id)
-        return ok()
-    except Exception as e:
-        return applicationError(f"error in /experiment/start: {e}")
-
-
-@router.post("/experiment/pause")
-async def pause_experiment(payload: controlExperimentPayload):
-    # Run the experiments
-    try:
-        AppState.pauseExperiment_sync(payload.id)
-        return ok()
-    except Exception as e:
-        return applicationError(f"error in /experiment/pause: {e}")
-
-
-@router.post("/experiment/continue")
-async def continue_experiment(payload: controlExperimentPayload):
-    # Run the experiments
-    try:
-        AppState.continueExperiment(payload.id)
-        return ok()
-    except Exception as e:
-        return applicationError(f"error in /experiment/continue: {e}")
-
-
-@router.post("/experiment/stop")
-async def stop_experiment(payload: controlExperimentPayload):
-    # Run the experiments
-    try:
-        AppState.stopExperiment_async(payload.id)
-        return ok()
-    except Exception as e:
-        return applicationError(f"error in /experiment/stop: {e}")

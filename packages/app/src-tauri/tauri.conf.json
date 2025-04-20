@@ -1,0 +1,47 @@
+{
+	"$schema": "../node_modules/@tauri-apps/cli/config.schema.json",
+	"productName": "beinn",
+	"version": "0.1.0",
+	"identifier": "com.tauri.dev",
+	"build": {
+		"frontendDist": "../dist",
+		"devUrl": "http://localhost:5173",
+		"beforeDevCommand": "bun run dev",
+		"beforeBuildCommand": "bun run build"
+	},
+	"app": {
+		"windows": [
+			{
+				"fullscreen": true,
+				"resizable": true,
+				"title": "Beinn",
+				"label": "main",
+				"width": 1920,
+				"height": 1080,
+				"titleBarStyle": "Overlay",
+				"hiddenTitle": true,
+				"decorations": true
+			}
+		],
+		"security": {
+			"csp": null
+		},
+		"withGlobalTauri": true
+	},
+	"bundle": {
+		"active": true,
+		"targets": "all",
+		"icon": [
+			"icons/32x32.png",
+			"icons/128x128.png",
+			"icons/128x128@2x.png",
+			"icons/icon.icns",
+			"icons/icon.ico"
+		]
+	},
+	"plugins": {
+		"fs": {
+			"requireLiteralLeadingDot": false
+		}
+	}
+}

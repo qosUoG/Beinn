@@ -1,12 +1,37 @@
+"""
+Class of all parameter types
+
+This module contains all types of parameter supported by the framework.
+
+For examples of defining the type and the instance of params in equipment or
+experiment, please refer to the example directory.
+
+    * _QosParam - private base class for all param type for typesafety
+
+    * SelectStrParam - multiselect param type with value of str type
+    * SelectIntParam - multiselect param type with value of int type
+    * SelectFloatParam - multiselect param type with value of float type
+
+    * StrParam - param type with value of str type
+    * IntParam - param type with value of int type
+    * FloatParam - param type with value of float type
+    * BoolParam - param type with value of bool type
+
+    * InstanceEquipmentParam - param type with value implementing EquipmentProxy type
+    * InstanceExperimentParam - param type with value inheriting ExperimentABC type
+
+"""
+
 from abc import ABC, abstractmethod
 from dataclasses import dataclass
-
+from pickle import FALSE
 from typing import Literal, override
+from cnoc.experiment import ExperimentABC
 from pydantic import BaseModel
-from .runtime import EquipmentProxy
+from .equipment import EquipmentABC, EquipmentProxy
 
 
-class QosParam[T: BaseModel](ABC):
+class _QosParam[T: BaseModel](ABC):
     @abstractmethod
     def toBaseModel(self) -> T:
         # This function should return a BaseModel
@@ -18,13 +43,24 @@ class QosParam[T: BaseModel](ABC):
 
 
 @dataclass
-class SelectStrParam(QosParam):
-    type: Literal["select.str"]
+class SelectStrParam(_QosParam):
+    """
+    Singleselect param with value of type str
+
+    Attributes
+    ----------
+    options : list[str]
+        list of selectable options
+    value : str
+        the selected option
+    """
+
+    _type: Literal["select.str"]
     options: list[str]
     value: str
 
     class PydanticBaseModel(BaseModel):
-        type: Literal["select.str"]
+        _type: Literal["select.str"]
         options: list[str]
         value: str
 
@@ -32,7 +68,17 @@ class SelectStrParam(QosParam):
             return SelectStrParam(options=self.options, value=self.value)
 
     def __init__(self, options: list[str], value: str | None = None):
-        self.type = "select.str"
+        """
+        Parameters
+        ----------
+        options : list[str]
+            available options to select
+
+        value : str , optional
+            default value of the param. If none is given, the first option
+            would be used
+        """
+        self._type = "select.str"
         self.options = options
         if value is None:
             self.value = options[0]
@@ -42,7 +88,7 @@ class SelectStrParam(QosParam):
     @override
     def toBaseModel(self) -> PydanticBaseModel:
         return self.PydanticBaseModel(
-            type=self.type, options=self.options, value=self.value
+            type=self._type, options=self.options, value=self.value
         )
 
     @override
@@ -51,13 +97,15 @@ class SelectStrParam(QosParam):
 
 
 @dataclass
-class SelectIntParam(QosParam):
-    type: Literal["select.int"]
+class SelectIntParam(_QosParam):
+    """Singleselect of int type. Detail refer to SelectStrParam class"""
+
+    _type: Literal["select.int"]
     options: list[int]
     value: int
 
     class PydanticBaseModel(BaseModel):
-        type: Literal["select.int"]
+        _type: Literal["select.int"]
         options: list[int]
         value: int
 
@@ -65,7 +113,7 @@ class SelectIntParam(QosParam):
             return SelectIntParam(options=self.options, value=self.value)
 
     def __init__(self, options: list[int], value: int | None = None):
-        self.type = "select.int"
+        self._type = "select.int"
         self.options = options
         if value is None:
             self.value = options[0]
@@ -75,7 +123,7 @@ class SelectIntParam(QosParam):
     @override
     def toBaseModel(self) -> PydanticBaseModel:
         return self.PydanticBaseModel(
-            type=self.type, options=self.options, value=self.value
+            type=self._type, options=self.options, value=self.value
         )
 
     @override
@@ -84,13 +132,15 @@ class SelectIntParam(QosParam):
 
 
 @dataclass
-class SelectFloatParam:
-    type: Literal["select.float"]
+class SelectFloatParam(_QosParam):
+    """Singleselect of float type. Detail refer to SelectStrParam class"""
+
+    _type: Literal["select.float"]
     options: list[float]
     value: int
 
     class PydanticBaseModel(BaseModel):
-        type: Literal["select.float"]
+        _type: Literal["select.float"]
         options: list[float]
         value: float
 
@@ -98,7 +148,7 @@ class SelectFloatParam:
             return SelectFloatParam(options=self.options, value=self.value)
 
     def __init__(self, options: list[float], value: float | None = None):
-        self.type = "select.float"
+        self._type = "select.float"
         self.options = options
         if value is None:
             self.value = options[0]
@@ -108,7 +158,7 @@ class SelectFloatParam:
     @override
     def toBaseModel(self) -> PydanticBaseModel:
         return self.PydanticBaseModel(
-            type=self.type, options=self.options, value=self.value
+            type=self._type, options=self.options, value=self.value
         )
 
     @override
@@ -117,13 +167,24 @@ class SelectFloatParam:
 
 
 @dataclass
-class IntParam:
-    type: Literal["int"]
+class IntParam(_QosParam):
+    """
+    param with value of type int
+
+    Attributes
+    ----------
+    value : int
+        the underlying value
+    suffix : str
+        suffix of the parameter displayed on frontend
+    """
+
+    _type: Literal["int"]
     suffix: str
     value: int
 
     class PydanticBaseModel(BaseModel):
-        type: Literal["int"]
+        _type: Literal["int"]
         suffix: str
         value: int
 
@@ -131,14 +192,24 @@ class IntParam:
             return IntParam(default=self.value, suffix=self.suffix)
 
     def __init__(self, default: int = 0, suffix: str = ""):
-        self.type = "int"
+        """
+        Parameters
+        ----------
+        default : int , optional
+            default value of the param. If none is given, it would be assiged
+            as 0
+
+        suffix: str , optional
+            suffix shown as hint on the frontend
+        """
+        self._type = "int"
         self.suffix = suffix
         self.value = default
 
     @override
     def toBaseModel(self) -> PydanticBaseModel:
         return self.PydanticBaseModel(
-            type=self.type, suffix=self.suffix, value=self.value
+            type=self._type, suffix=self.suffix, value=self.value
         )
 
     @override
@@ -147,28 +218,33 @@ class IntParam:
 
 
 @dataclass
-class FloatParam:
-    type: Literal["float"]
+class FloatParam(_QosParam):
+    """IntParam but of float type. Detail refer to IntParam class
+
+    Default value if none is given is 0.0
+    """
+
+    _type: Literal["float"]
     suffix: str
     value: float
 
     class PydanticBaseModel(BaseModel):
-        type: Literal["float"]
+        _type: Literal["float"]
         suffix: str
         value: float
 
         def toParam(self):
             return FloatParam(default=self.value, suffix=self.suffix)
 
-    def __init__(self, default: float = 0, suffix: str = ""):
-        self.type = "float"
+    def __init__(self, default: float = 0.0, suffix: str = ""):
+        self._type = "float"
         self.suffix = suffix
         self.value = default
 
     @override
     def toBaseModel(self) -> PydanticBaseModel:
         return self.PydanticBaseModel(
-            type=self.type, suffix=self.suffix, value=self.value
+            type=self._type, suffix=self.suffix, value=self.value
         )
 
     @override
@@ -177,24 +253,31 @@ class FloatParam:
 
 
 @dataclass
-class StrParam:
-    type: Literal["str"]
+class StrParam(_QosParam):
+    """StrParam but of str type. Detail refer to IntParam class
+
+    Do note that suffix is not provided in this param type
+
+    Default value if not given is ""
+    """
+
+    _type: Literal["str"]
     value: str
 
     class PydanticBaseModel(BaseModel):
-        type: Literal["str"]
+        _type: Literal["str"]
         value: str
 
         def toParam(self):
             return StrParam(default=self.value)
 
     def __init__(self, default: str = ""):
-        self.type = "str"
+        self._type = "str"
         self.value = default
 
     @override
     def toBaseModel(self) -> PydanticBaseModel:
-        return self.PydanticBaseModel(type=self.type, value=self.value)
+        return self.PydanticBaseModel(type=self._type, value=self.value)
 
     @override
     def getValue(self):
@@ -202,24 +285,31 @@ class StrParam:
 
 
 @dataclass
-class BoolParam:
-    type: Literal["bool"]
+class BoolParam(_QosParam):
+    """StrParam but of str type. Detail refer to IntParam class
+
+    Do note that suffix is not provided in this param type
+
+    Default value if not given is False
+    """
+
+    _type: Literal["bool"]
     value: bool
 
     class PydanticBaseModel(BaseModel):
-        type: Literal["bool"]
+        _type: Literal["bool"]
         value: bool
 
         def toParam(self):
             return BoolParam(default=self.value)
 
-    def __init__(self, default: bool = 0):
-        self.type = "bool"
+    def __init__(self, default: bool = FALSE):
+        self._type = "bool"
         self.value = default
 
     @override
     def toBaseModel(self) -> PydanticBaseModel:
-        return self.PydanticBaseModel(type=self.type, value=self.value)
+        return self.PydanticBaseModel(type=self._type, value=self.value)
 
     @override
     def getValue(self):
@@ -227,57 +317,82 @@ class BoolParam:
 
 
 @dataclass
-class InstanceEquipmentParam[T]:
-    type: Literal["instance.equipment"]
-    instance_id: str | None
+class InstanceEquipmentParam[T: EquipmentABC](_QosParam):
+    """
+    param type with instance implementing EquipmentProxy type
+
+    Examples of utilizing the param please refer to examples
+
+    Attributes
+    ----------
+    instance : EquipmentProxy[T]
+        The wrapper class of the driver that implements the protocol
+    """
+
+    _type: Literal["instance.equipment"]
+    _instance_id: str | None
     instance: EquipmentProxy[T] | None
 
     class PydanticBaseModel(BaseModel):
-        type: Literal["instance.equipment"]
-        instance_id: str | None
+        _type: Literal["instance.equipment"]
+        _instance_id: str | None
 
         def toParam(self):
-            return InstanceEquipmentParam(instance_id=self.instance_id)
+            return InstanceEquipmentParam(_instance_id=self._instance_id)
 
-    def __init__(self, instance_id=None):
-        self.type = "instance.equipment"
-        self.instance_id = instance_id
+    def __init__(self):
+        self._type = "instance.equipment"
+        self._instance_id = None
         self.instance = None
 
     @override
     def toBaseModel(self) -> PydanticBaseModel:
-        return self.PydanticBaseModel(type=self.type, instance_id=self.instance_id)
+        return self.PydanticBaseModel(type=self._type, _instance_id=self._instance_id)
 
     @override
     def getValue(self):
-        return f"{self.instance_id}"
+        return f"{self._instance_id}"
 
 
 @dataclass
-class InstanceExperimentParam[T]:
-    type: Literal["instance.experiment"]
-    instance_id: str | None
+class InstanceExperimentParam[T: ExperimentABC](_QosParam):
+    """
+    param type with instance inheriting ExperimentABC type
+
+    NOTE THAT this param type is not being supported yet. This
+    will be intended for playlist feature.
+
+    Examples of utilizing the param please refer to examples
+
+    Attributes
+    ----------
+    instance : [T : ExperimentABC]
+        The wrapper class of the experiment that implements the protocol
+    """
+
+    _type: Literal["instance.experiment"]
+    _instance_id: str | None
     instance: T | None
 
     class PydanticBaseModel(BaseModel):
-        type: Literal["instance.experiment"]
-        instance_id: str | None
+        _type: Literal["instance.experiment"]
+        _instance_id: str | None
 
         def toParam(self):
-            return InstanceExperimentParam(instance_id=self.instance_id)
+            return InstanceExperimentParam(_instance_id=self._instance_id)
 
-    def __init__(self, instance_id=None):
-        self.type = "instance.experiment"
-        self.instance_id = instance_id
+    def __init__(self):
+        self._type = "instance.experiment"
+        self._instance_id = None
         self.instance = None
 
     @override
     def toBaseModel(self) -> PydanticBaseModel:
-        return self.PydanticBaseModel(type=self.type, instance_id=self.instance_id)
+        return self.PydanticBaseModel(type=self._type, _instance_id=self._instance_id)
 
     @override
     def getValue(self):
-        return f"{self.instance_id}"
+        return f"{self._instance_id}"
 
 
 type AllParamTypes = (
@@ -309,47 +424,6 @@ type AllParamModelTypes = (
 type Params = dict[str, AllParamTypes]
 
 
-def Params2ParamModels(params: Params):
-    res: ParamModels = {}
-    for [name, param] in params.items():
-        res[name] = param.toBaseModel()
-
-    return res
-
-
-type ParamModels = dict[str, AllParamModelTypes]
-
-
-def ParamModels2Params(param_models: ParamModels):
-    res: Params = {}
-    for [name, param_model] in param_models.items():
-        res[name] = param_model.toParam()
-
-    return res
-
-
-def ExperimentParamsToBackup(experiment_id: str, params: Params):
-    res: dict[str, dict[str, str]] = {"experiment_id": experiment_id}
-
-    def parseParams(id: str, _params: Params | None):
-        if id in res:
-            return
-
-        res[id] = {}
-
-        for [name, param] in _params.items():
-            res[experiment_id][name] = param.getValue()
-
-        # If the param is an instance, recursively parse the params as well
-        if param.type == "instance.equipment" or param.type == "instance.experiment":
-            if param.instance is not None:
-                parseParams(param.instance_id, param.instance.params)
-
-    parseParams(experiment_id, params)
-
-    return res
-
-
 # class CompositeParam:
-#     type: Literal["composite"]
+#     _type: Literal["composite"]
 #     children: Params

@@ -1,13 +1,12 @@
 import asyncio
-
 from threading import Lock
+import threading
+from types import CoroutineType
 from typing import Any
 
 from fastapi import WebSocket
 
-from cnoc.extensions.chart import ChartABC
-
-from ..settings.foundation import ExperimentStatus
+from cnoc.extensions.chart import _ChartABC
 
 
 class _Subscriber:
@@ -34,9 +33,7 @@ class _Subscriber:
 
 
 class ChartProxy:
-    def __init__(
-        self, *, status: ExperimentStatus, chartT: type[ChartABC], kwargs: Any
-    ):
+    def __init__(self, *, chartT: type[_ChartABC], kwargs: Any):
         # underlying chart instance
         self._chart = chartT(self._plot_fn, **kwargs)
         self._subscribers: dict[WebSocket, _Subscriber] = {}
@@ -46,7 +43,7 @@ class ChartProxy:
 
         self._tick_lock = Lock()
 
-        self._experiment_stopped = status.stopped
+        self._experiment_stopped = threading.Event()
 
     """Public Interface towards ExperimentProxy"""
 
@@ -56,13 +53,18 @@ class ChartProxy:
     def getChart(self):
         return self._chart
 
-    async def forceStop(self):
+    # Hook when experiment ended
+    def experimentCompleted(self):
+        self._experiment_stopped.set()
+
+    async def kill(self):
         # Close all ws connetions
         # Chart is not gracefully shut down as data is ephemeral anyways
+        coros: list[CoroutineType[Any, Any, None]] = []
         for ws in self._subscribers.keys():
-            await ws.close(code=1001)
+            coros.append(ws.close(code=4000))
 
-        self._subscribers.clear()
+        return asyncio.gather(coros)
 
     """Public Interface for frontend WebSocket control"""
 

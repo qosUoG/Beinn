@@ -1,12 +1,15 @@
+import asyncio
 import importlib
-from types import ModuleType
+from types import CoroutineType, ModuleType
+from typing import Any
 from fastapi import WebSocket
 from cnoc.params import Params
 
-from ..proxies.sql_saver import SqlWorker
+from ..proxies.saver import SqlWorker
 
 from ..proxies.experiment import ExperimentProxy
-from cnoc.runtime import EquipmentABC, EquipmentProxy
+from cnoc.equipment import EquipmentABC
+from ..proxies.equipment import EquipmentProxy
 
 
 class AppState:
@@ -123,20 +126,15 @@ class AppState:
         SqlWorker.start()
 
     @classmethod
-    async def forceStop(cls):
+    async def kill(cls):
         """This function is meant to be stopping gracefully. Timeout should be handled outside of this function"""
 
         # First stop async for each function
+        coros: list[CoroutineType[Any, Any, Any]] = []
         for experiment_proxy in cls._experiment_proxies.values():
-            experiment_proxy.stop_async()
+            coros.append(experiment_proxy.kill())
 
-        # Then wait until each experiment is actually stopped and do cleanup
-        for experiment_proxy in cls._experiment_proxies.values():
-            await experiment_proxy.forceStop()
-            await experiment_proxy.waitUntil_stopped()
-
-        # Stop all workers
-        await SqlWorker.stop()
+        await asyncio.gather(coros, SqlWorker.stop())
 
     """CLI"""
 

@@ -1,0 +1,1 @@
+export let editor: { mode: "ee" | "dependency" | undefined } = $state({ mode: undefined })

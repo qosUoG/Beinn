@@ -2,14 +2,10 @@ from typing import Any
 import traceback
 
 
-def userError(error: str):
-    return {"success": False, "err": {"type": "USER", "error": error}}
-
-
-def applicationError(e: Exception):
+def error(e: Exception):
     return {
         "success": False,
-        "err": {"type": "APPLICATION", "error": traceback.print_exc(e)},
+        "error": traceback.print_exc(e),
     }
 
 

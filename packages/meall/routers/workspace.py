@@ -11,10 +11,11 @@ async def workspace_status():
     return {"status": "online"}
 
 
-@router.get("/workspace/forcestop")
+@router.get("/workspace/kill")
 async def workspace_forcestop():
-    await AppState.forceStop()
+    await AppState.kill()
     return {"success": True}
+
 
 @router.get("/workspace/pid")
 async def workspace_pid():

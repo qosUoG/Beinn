@@ -2,11 +2,11 @@ from fastapi import APIRouter
 from pydantic import BaseModel
 
 
-from cnoc.runtime import EquipmentABC
+from cnoc.equipment import EquipmentABC
 
-from cnoc.params import ParamModels, Params2ParamModels, ParamModels2Params
+from ..lib.utils.params import ParamModels, Params2ParamModels, ParamModels2Params
 
-from ..lib.utils.result import applicationError, ok
+from ..lib.utils.result import error, ok
 
 
 from ._eeshared import getAvailableEEs, populateParam
@@ -27,7 +27,7 @@ async def available_equipments(payload: AvailableEquipmentsPayload):
     try:
         return ok(getAvailableEEs(EquipmentABC, payload.prefixes))
     except Exception as e:
-        return applicationError(f"error in /equipment/create: {e}")
+        return error(f"error in /equipment/create: {e}")
 
 
 class CreateEquipmentPayload(BaseModel):
@@ -42,7 +42,7 @@ async def create_equipment(payload: CreateEquipmentPayload):
         AppState.createEquipment(payload.id, payload.module, payload.cls)
         return ok()
     except Exception as e:
-        return applicationError(f"error in /equipment/create: {e}")
+        return error(f"error in /equipment/create: {e}")
 
 
 class RemoveEquipmentPayload(BaseModel):
@@ -55,7 +55,7 @@ async def remove_equipment(payload: RemoveEquipmentPayload):
         AppState.removeEquipment(payload.id)
         return ok()
     except Exception as e:
-        return applicationError(f"error in /equipment/remove: {e}")
+        return error(f"error in /equipment/remove: {e}")
 
 
 class GetParamsPayload(BaseModel):
@@ -67,7 +67,7 @@ async def get_params(payload: GetParamsPayload):
     try:
         return ok(Params2ParamModels(AppState.getEquipmentParams(payload.id)))
     except Exception as e:
-        return applicationError(f"error in /equipment/get_params: {e}")
+        return error(f"error in /equipment/get_params: {e}")
 
 
 class SetParamsPayload(BaseModel):
@@ -86,4 +86,4 @@ async def set_params(payload: SetParamsPayload):
         AppState.setEquipmentParams(payload.id, params)
         return ok()
     except Exception as e:
-        return applicationError(f"error in /equipment/set_params: {e}")
+        return error(f"error in /equipment/set_params: {e}")

@@ -1,0 +1,20 @@
+{
+	"files": [],
+	"references": [
+		{ "path": "./tsconfig.app.json" },
+		{ "path": "./tsconfig.node.json" }
+	],
+	"compilerOptions": {
+		"baseUrl": "src",
+		"paths": {
+			"$icons/*": ["icons/*"],
+			"$workers/*": ["workers/*"],
+			"$websockets/*": ["websockets/*"],
+			"$components/*": ["components/*"],
+			"$states/*": ["states/*"],
+			"$lib/*": ["lib/*"],
+			"$services/*": ["services/*"],
+			"$pages/*": ["pages/*"]
+		}
+	}
+}

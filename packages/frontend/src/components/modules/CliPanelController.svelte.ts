@@ -1,1 +1,0 @@
-export let cli_panel = $state({ show: false });
