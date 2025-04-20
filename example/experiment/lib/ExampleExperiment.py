@@ -5,7 +5,7 @@ from typing import TypedDict, override
 
 from click import ParamType
 
-from cnoc import params as p, exceptions as e, runtime as r
+from cnoc import managers as r, params as p, exceptions as e
 import time
 
 from cnoc.extensions.chart import XY

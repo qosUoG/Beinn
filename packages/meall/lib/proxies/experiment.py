@@ -17,7 +17,7 @@ from cnoc.extensions.saver import _SaverABC
 from ..utils.params import Params, experimentParams2Backup
 from cnoc.experiment import ExperimentABC
 
-from cnoc.runtime import ManagerABC
+from cnoc.managers import ManagerABC
 
 from .chart import ChartProxy
 from .saver import SaverProxy

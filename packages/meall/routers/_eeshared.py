@@ -6,7 +6,7 @@ from typing import Literal, TypedDict
 import warnings
 
 from cnoc.params import AllParamTypes
-from cnoc.runtime import EquipmentABC, ExperimentABC
+from cnoc.managers import EquipmentABC, ExperimentABC
 
 
 from ..lib.settings.state import AppState
