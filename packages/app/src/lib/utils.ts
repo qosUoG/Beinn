@@ -168,7 +168,13 @@ export async function beginProcedure(name: string) {
             await appendLog("SUCCESS\n")
             return res
         } catch (e) {
-            await appendLog("FAILED\nerror: \n" + ((e as Error).stack ?? "\t" + (e as Error).toString()))
+            if (e && typeof (e) === "object" && "stack" in e)
+                await appendLog("FAILED\nerror: \n" + ((e).stack))
+            else if (e && typeof (e) === "object" && "toString" in e)
+                await appendLog("FAILED\nerror: \n" + ("\t" + e.toString()))
+            else await appendLog("FAILED\nerror: \n" + e)
+
+
             throw "ERROR HANDLED"
         }
     }
@@ -186,5 +192,10 @@ export async function beginProcedure(name: string) {
 
         await appendLog(`FAILED ${name}\n`)
     }
-    return { step, completed, cancelled, failed, appendLog }
+
+    async function nestedAppendLog(message: string) {
+        await appendLog("\t" + message)
+    }
+
+    return { step, completed, cancelled, failed, appendLog: nestedAppendLog }
 }
