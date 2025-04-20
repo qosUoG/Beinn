@@ -64,7 +64,7 @@ class ChartProxy:
         for ws in self._subscribers.keys():
             coros.append(ws.close(code=4000))
 
-        return asyncio.gather(coros)
+        return asyncio.gather(*coros)
 
     """Public Interface for frontend WebSocket control"""
 

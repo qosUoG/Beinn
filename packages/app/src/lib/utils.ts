@@ -82,7 +82,7 @@ export const postRequestJsonInOut_throwable = async (url: string, payload: Recor
         obj = JSON.parse(txt)
     }
     catch (e) {
-        throw `failed to parse ${txt} to json`
+        throw Error(`failed to parse ${txt} to json`)
     }
 
     if (!obj.success) throw obj.err
@@ -100,7 +100,7 @@ export const getRequestJsonOut_throwable = async (url: string) => {
         obj = JSON.parse(txt)
     }
     catch (e) {
-        throw `failed to parse ${txt} to json`
+        throw Error(`failed to parse ${txt} to json`)
     }
 
     if (!obj.success) throw obj.err
@@ -174,8 +174,7 @@ export async function beginProcedure(name: string) {
                 await appendLog("FAILED\nerror: \n" + ("\t" + e.toString()))
             else await appendLog("FAILED\nerror: \n" + e)
 
-
-            throw "ERROR HANDLED"
+            return undefined
         }
     }
 
@@ -186,11 +185,8 @@ export async function beginProcedure(name: string) {
 
         await appendLog(`${reason}\nCANCELLED ${name}\n`)
     }
-    async function failed(e: unknown) {
-        if (e !== "ERROR HANDLED")
-            await appendLog("\nunexpected error: \n" + ((e as Error).stack ?? "\t" + (e as Error).toString()))
-
-        await appendLog(`FAILED ${name}\n`)
+    async function failed(reason: string) {
+        await appendLog(`FAILED ${reason}\n`)
     }
 
     async function nestedAppendLog(message: string) {

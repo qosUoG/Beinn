@@ -233,6 +233,7 @@ export class Workspace {
                 return await readAllUvDependencies()
             }
         )
+        if (!uv_dependencies) return
 
         const save = await step("Load workspace save .beinn if exist",
             async () => {
@@ -313,12 +314,18 @@ export class Workspace {
                 return await Promise.all(save.equipments.map((e) => this._equipments.instantiate(e)))
             }
         )
+        if (!new_equipments) return
+
+
+
 
         const new_experiments = await step("Instantiate all experiment according to save",
             async () => {
                 return await Promise.all(save.experiments.map((e) => this._experiments.instantiate(e)))
             }
         )
+
+        if (!new_experiments) return
 
         await tick()
 
@@ -327,25 +334,25 @@ export class Workspace {
                 // Write the module_cls to the equipment and experiments
                 for (let i = 0; i < save.equipments.length; i++) {
 
-                    new_equipments[i].module_cls_throwable = save.equipments[i].module_cls
+                    new_equipments[i]!.module_cls_throwable = save.equipments[i].module_cls
                     await tick()
 
                     // If not created, this is enough
                     if (!save.equipments[i].created) continue
 
                     // If it is created, try to create it
-                    await new_equipments[i].create()
+                    await new_equipments[i]!.create()
 
                 }
 
                 for (let i = 0; i < save.experiments.length; i++) {
-                    new_experiments[i].module_cls_throwable = save.experiments[i].module_cls
+                    new_experiments[i]!.module_cls_throwable = save.experiments[i].module_cls
                     await tick()
                     // If not created, this is enough
                     if (!save.experiments[i].created) continue
 
                     // If it is created, try to create it
-                    await new_experiments[i].create()
+                    await new_experiments[i]!.create()
                 }
 
                 await tick()
@@ -355,35 +362,35 @@ export class Workspace {
             async () => {
                 // First set the params to temp_params, and try to save it, then write the temp_params 
                 for (let i = 0; i < save.equipments.length; i++) {
-                    new_equipments[i].temp_params_throwable = save.equipments[i].params
+                    new_equipments[i]!.temp_params_throwable = save.equipments[i].params
                     await tick()
 
                     // Set the params
-                    await new_equipments[i].saveParams()
+                    await new_equipments[i]!.saveParams()
 
                     await tick()
 
                     // Then overwrite the temp_params
-                    new_equipments[i].temp_params_throwable = save.equipments[i].temp_params
+                    new_equipments[i]!.temp_params_throwable = save.equipments[i].temp_params
 
                     await tick()
 
                 }
 
                 for (let i = 0; i < save.experiments.length; i++) {
-                    new_experiments[i].temp_params_throwable = save.experiments[i].params
+                    new_experiments[i]!.temp_params_throwable = save.experiments[i].params
 
                     await tick()
 
 
 
                     // Set the params
-                    await new_experiments[i].saveParams()
+                    await new_experiments[i]!.saveParams()
 
                     await tick()
 
                     // Then overwrite the temp_params
-                    new_experiments[i].temp_params_throwable = save.experiments[i].temp_params
+                    new_experiments[i]!.temp_params_throwable = save.experiments[i].temp_params
 
                     await tick()
                 }

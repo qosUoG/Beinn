@@ -134,7 +134,7 @@ class AppState:
         for experiment_proxy in cls._experiment_proxies.values():
             coros.append(experiment_proxy.kill())
 
-        await asyncio.gather(coros, SqlWorker.stop())
+        await asyncio.gather(*coros, SqlWorker.stop())
 
     """CLI"""
 

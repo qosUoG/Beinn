@@ -216,7 +216,7 @@ class ExperimentProxy:
             for chart in self._charts.values():
                 coros.append(chart.kill())
 
-            await asyncio.gather(coros)
+            await asyncio.gather(*coros)
             self._cancelled.set()
 
     """Public Interface of self"""

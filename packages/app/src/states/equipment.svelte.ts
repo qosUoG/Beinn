@@ -47,6 +47,8 @@ export class Equipments {
                 return new_equipment
             })
 
+
+
         await step("Refresh available equipment list",
             async () => {
                 await this.refreshAvailables_throwable();
