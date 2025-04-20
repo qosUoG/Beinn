@@ -6,7 +6,8 @@ from typing import Literal, TypedDict
 import warnings
 
 from cnoc.params import AllParamTypes
-from cnoc.managers import EquipmentABC, ExperimentABC
+from cnoc.equipment import EquipmentABC
+from cnoc.experiment import ExperimentABC
 
 
 from ..lib.settings.state import AppState
@@ -68,10 +69,10 @@ def getAvailableEEs(eeABC: EEABC, names: list[str]):
 
 
 def populateParam(param: AllParamTypes):
-    match param.type:
+    match param._type:
         case "instance.equipment":
-            if param.instance_id is not None:
-                param.instance = AppState.getEquipment(param.instance_id)
+            if param._instance_id is not None:
+                param.instance = AppState.getEquipment(param._instance_id)
 
         case "instance.experiment":
             raise Exception("Playlist is not being implemented yet")
