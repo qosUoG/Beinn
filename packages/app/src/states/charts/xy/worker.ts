@@ -233,7 +233,7 @@ function reset() {
         const config = getChartConfig()
         _chart = new Chart(_canvas as unknown as HTMLCanvasElement, config)
 
-        console.log({ _datasets, c: _chart.data, _decimation })
+
 
 
         establish_web_socket()
