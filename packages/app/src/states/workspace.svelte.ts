@@ -94,6 +94,7 @@ export class Workspace {
         const { step, completed, cancelled, unhandled, failed } = await beginProcedure("CLOSE WORKSPACE")
 
         try {
+            if (!this.uvproc && !this._connected) return true
             if (!this.uvproc) { await failed("unreacheable code, this.uvproc is undefined") }
 
             const has_running_experiment = await step(`Check if experiment running`,
@@ -146,6 +147,8 @@ export class Workspace {
                         await shell({ fn: "kill", cmd: `-s SIGKILL ${this.meall_pid}` })
                         await shell({ fn: "kill", cmd: `-s SIGKILL ${this.uvproc!.pid}` })
                     }
+                    this.meall_pid = undefined
+                    this.uvproc = undefined
                 })
 
             this._connected = false
@@ -164,6 +167,12 @@ export class Workspace {
                 await shell({ fn: "kill", cmd: `-s SIGKILL ${this.meall_pid}` })
                 await shell({ fn: "kill", cmd: `-s SIGKILL ${this.uvproc!.pid}` })
             }
+            this.meall_pid = undefined
+            this.uvproc = undefined
+
+            this._connected = false
+
+            await this.reset()
             return true
         }
     }
