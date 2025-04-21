@@ -29,33 +29,38 @@ export class Equipments {
 
     async instantiate(payload?: { id?: string, name?: string }) {
 
-        const { step, completed } = await beginProcedure("INSTANTIATE EQUIPMENT")
+        const { step, completed, unhandled } = await beginProcedure("INSTANTIATE EQUIPMENT")
 
-        const new_equipment = await step("Instantiate equipment",
-            () => {
-                let id: string | undefined, name: string | undefined
-                if (payload) {
-                    id = payload.id
-                    name = payload.name
-                }
+        try {
+            const new_equipment = await step("Instantiate equipment",
+                () => {
+                    let id: string | undefined, name: string | undefined
+                    if (payload) {
+                        id = payload.id
+                        name = payload.name
+                    }
 
-                if (!id) id = getRandomId(Object.keys(this._equipments))
+                    if (!id) id = getRandomId(Object.keys(this._equipments))
 
-                const new_equipment = new Equipment(id, name)
-                this._equipments[id] = new_equipment
+                    const new_equipment = new Equipment(id, name)
+                    this._equipments[id] = new_equipment
 
-                return new_equipment
-            })
+                    return new_equipment
+                })
 
 
 
-        await step("Refresh available equipment list",
-            async () => {
-                await this.refreshAvailables_throwable();
-            })
+            await step("Refresh available equipment list",
+                async () => {
+                    await this.refreshAvailables_throwable();
+                })
 
-        await completed()
-        return new_equipment
+            await completed()
+            return new_equipment
+        }
+        catch (e) {
+            await unhandled(e)
+        }
     }
 
     moduleClsValid(module_cls: ModuleCls) {

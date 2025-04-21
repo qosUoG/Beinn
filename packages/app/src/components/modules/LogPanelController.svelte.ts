@@ -16,20 +16,15 @@ export function clearLogs() {
  * Returns a function that allows appending message to the log entry
  */
 export async function pushLog(type: "beinn" | "meall", message: string) {
+
     const new_log = { type, timestamp: Date.now(), message }
     log_entries.push(new_log)
 
     await tick()
 
     // Drop old log if total log exceed 1000 entries
-    if (log_entries.length > 1000) log_entries.splice(0, log_entries.length - 1000)
+    if (log_entries.length > 5000) log_entries.splice(0, log_entries.length - 1000)
 
-    async function append(message: string) {
-        new_log.message += message
-        await tick()
-    }
-
-    return append
 }
 
 export const log_panel = $state({

@@ -5,16 +5,18 @@ from typing import TypedDict, override
 
 from click import ParamType
 
-from cnoc import managers as r, params as p, exceptions as e
+from cnoc import params as p
+from cnoc.experiment import ExperimentABC
+from conc.managers import ManagerABC
 import time
 
 from cnoc.extensions.chart import XY
-from cnoc.extensions.saver import XYFloatSqlSaver
+from cnoc.extensions.saver import XYFloatSaver
 from examplelib.ExampleDriver import ExampleEquipment
 
 
 @dataclass
-class ExampleExperiment(r.ExperimentABC):
+class ExampleExperiment(ExperimentABC):
     class ParamsType(TypedDict):
         strparam: p.StrParam
         floatparam: p.FloatParam
@@ -45,7 +47,7 @@ class ExampleExperiment(r.ExperimentABC):
         # This should be all of the __init__ code. For instantiation of params from the final params list, or turning on equipment, initializing equipment etc, define in the initialization method
 
     @override
-    def initialize(self, manager: r.ManagerABC) -> int:
+    def initialize(self, manager: ManagerABC) -> int:
         # import pprint
 
         # pprint.pprint(self.params)
@@ -78,9 +80,9 @@ class ExampleExperiment(r.ExperimentABC):
         #     ),
         # )
 
-        self.saver: XYFloatSqlSaver = manager.createSqlSaver(
-            XYFloatSqlSaver,
-            XYFloatSqlSaver.kwargs(title="ExampleSqlSaver", y_names=["temperature"]),
+        self.saver: XYFloatSaver = manager.createSqlSaver(
+            XYFloatSaver,
+            XYFloatSaver.kwargs(title="ExampleSqlSaver", y_names=["temperature"]),
         )
 
         print("initialized experiment")

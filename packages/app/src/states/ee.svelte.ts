@@ -149,60 +149,76 @@ export abstract class EE {
     }
 
     async create() {
-        const { step, completed } = await beginProcedure(`CREATE ${capitalise(this.eetype)}`)
-        // Create theeetypein meall and fetch initial params
-        await step(`Create ${this.eetype} in meall`,
-            async () => {
-                await meallCreateEE_throwable(this.eetype, {
-                    id: this._id,
-                    module_cls: this._module_cls
-                });
+        const { step, completed, unhandled } = await beginProcedure(`CREATE ${capitalise(this.eetype)}`)
 
-            })
+        try {
+            // Create the eetype in meall and fetch initial params
+            await step(`Create ${this.eetype} in meall`,
+                async () => {
+                    await meallCreateEE_throwable(this.eetype, {
+                        id: this._id,
+                        module_cls: this._module_cls
+                    });
 
-        await step("Get Default Param",
-            async () => {
-                const res = await meallGetEEParams_throwable(this.eetype, { id: this._id })
+                })
 
-                this.params = JSON.parse(JSON.stringify(res))
-                this._temp_params = JSON.parse(JSON.stringify(res))
-                this._created = true
+            await step("Get Default Param",
+                async () => {
+                    const res = await meallGetEEParams_throwable(this.eetype, { id: this._id })
+
+                    this.params = JSON.parse(JSON.stringify(res))
+                    this._temp_params = JSON.parse(JSON.stringify(res))
+                    this._created = true
 
 
-                await tick()
-            })
+                    await tick()
+                })
 
-        await completed()
+            await completed()
+        }
+        catch (e) {
+            await unhandled(e)
+        }
 
     }
 
     async saveParams() {
-        const { step, completed } = await beginProcedure(`SET PARAM`)
+        const { step, completed, unhandled } = await beginProcedure(`SET PARAM`)
 
-        await step("Save params in meall",
-            async () => {
-                await meallSetEEParams_throwable(this.eetype, { id: this._id, params: this._temp_params })
-                this.params = JSON.parse(JSON.stringify(this._temp_params))
-            }
-        )
+        try {
+            await step("Save params in meall",
+                async () => {
+                    await meallSetEEParams_throwable(this.eetype, { id: this._id, params: this._temp_params })
+                    this.params = JSON.parse(JSON.stringify(this._temp_params))
+                }
+            )
 
-        await completed()
+            await completed()
+        }
+        catch (e) {
+            await unhandled(e)
+        }
     }
 
     async remove() {
-        const { step, completed } = await beginProcedure(`REMOVE ${this.eetype}`)
+        const { step, completed, unhandled } = await beginProcedure(`REMOVE ${this.eetype}`)
 
-        await step(`Remove ${this.eetype} in meall`,
-            async () => {
-                await meallRemoveEE_throwable(this.eetype, { id: this._id });
-                setTimeout(() => {
-                    if (this.eetype === "equipment")
-                        delete workspace.equipments.equipments[this._id]
-                    else delete workspace.experiments.experiments[this._id]
+        try {
+            await step(`Remove ${this.eetype} in meall`,
+                async () => {
+                    await meallRemoveEE_throwable(this.eetype, { id: this._id });
+                    setTimeout(() => {
+                        if (this.eetype === "equipment")
+                            delete workspace.equipments.equipments[this._id]
+                        else delete workspace.experiments.experiments[this._id]
+                    })
                 })
-            })
 
-        await completed()
+            await completed()
+        }
+        catch (e) {
+            await unhandled(e)
+        }
     }
 
     toSave() {

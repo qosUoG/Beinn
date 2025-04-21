@@ -1,22 +1,24 @@
 from fastapi import APIRouter
 import os
+
+from ..lib.utils.result import ok
 from ..lib.settings.state import AppState
 
 
 router = APIRouter()
 
 
-@router.get("/workspace/status")
+@router.get("/workspace/online")
 async def workspace_status():
-    return {"status": "online"}
+    return ok()
 
 
 @router.get("/workspace/kill")
 async def workspace_forcestop():
     await AppState.kill()
-    return {"success": True}
+    return ok()
 
 
 @router.get("/workspace/pid")
 async def workspace_pid():
-    return {"pid": os.getpid()}
+    return ok(os.getpid())

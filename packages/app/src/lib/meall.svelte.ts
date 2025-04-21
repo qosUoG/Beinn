@@ -46,7 +46,7 @@ export async function meallStopExperiment_throwable(payload: { id: string }) {
     await postRequestJsonInOut_throwable(meallUrl("experiment/stop"), payload)
 }
 
-export async function meallGetPid_throwable(): Promise<{ pid: number }> {
+export async function meallGetPid_throwable(): Promise<number> {
     return await getRequestJsonOut_throwable(meallUrl("workspace/pid"));
 
 }
@@ -74,13 +74,12 @@ export function meallGetCliWs<T extends any>(payload: { onmessage: (this: WebSoc
 }
 
 export async function meallWaitUntilOnline(timeout: number = 5000) {
+    let success = false
     await retryOnError(timeout, async () => {
-        const res = await (await fetch(meallUrl("workspace/status"))).json();
-        if (res.status !== "online")
-            throw Error()
+        await getRequestJsonOut_throwable(meallUrl("workspace/online"));
+        success = true
     });
 
-    const res = await (await fetch(meallUrl("workspace/status"))).json();
-    if (res.status !== "online")
+    if (!success)
         await message("Timeout trying to start meall. meall is not online", { title: "meall startup timeout", "kind": "error" })
 }

@@ -85,7 +85,12 @@ export const postRequestJsonInOut_throwable = async (url: string, payload: Recor
         throw Error(`failed to parse ${txt} to json`)
     }
 
-    if (!obj.success) throw obj.err
+    if (!obj.success) {
+        if (obj.err)
+            throw obj.err
+
+        throw Error(`failed to get obj.err from ${JSON.stringify(obj)}`)
+    }
 
     return obj.value
 }
@@ -103,12 +108,17 @@ export const getRequestJsonOut_throwable = async (url: string) => {
         throw Error(`failed to parse ${txt} to json`)
     }
 
-    if (!obj.success) throw obj.err
+    if (!obj.success) {
+        if (obj.err)
+            throw obj.err
+
+        throw Error(`failed to get obj.err from ${JSON.stringify(obj)}`)
+    }
 
     return obj.value
 }
 
-export async function shell({ fn, cmd, cwd, appendLog }: { fn: string, cmd: string, cwd?: string, appendLog?: (message: string) => Promise<void> }) {
+export async function shell({ fn, cmd, cwd }: { fn: string, cmd: string, cwd?: string }) {
 
     const handler = Command.create(
         fn, cmd.split(" "), {
@@ -120,37 +130,35 @@ export async function shell({ fn, cmd, cwd, appendLog }: { fn: string, cmd: stri
         handler.on("error", resolve)
     })
 
-    if (appendLog)
-        await appendLog(`SHELL cwd:${cwd}\n${fn} ${cmd}\n`)
-    else
-        appendLog = await pushLog('beinn', `SHELL cwd:${cwd}\n${fn} ${cmd}\n`)
+    await pushLog('beinn', `SHELL\n        cwd:${cwd}\n        ${fn} ${cmd}\n`)
 
 
 
-    handler.stdout.on("data", async (message) => { await appendLog(message) })
-    handler.stderr.on("data", async (message) => { await appendLog(message) })
+    handler.stdout.on("data", async (message) => { await pushLog("beinn", "        " + message) })
+    handler.stderr.on("data", async (message) => { await pushLog("beinn", "        " + message) })
 
     await handler.spawn()
     await p
 }
 
 
-export async function timeoutLoop(timeout_ms: number, fn: () => Promise<boolean> | void) {
+export async function timeoutLoop(timeout_ms: number, fn: () => Promise<boolean>) {
     const timenow = Date.now();
-    while (Date.now() - timenow <= timeout_ms && await fn()) { }
+    while ((Date.now() - timenow <= timeout_ms) && await fn()) { }
+
 }
 
-export async function retryOnError(timeout_ms: number, fn: () => Promise<void> | void) {
+export async function retryOnError(timeout_ms: number, fn: () => Promise<void>) {
     await timeoutLoop(
         timeout_ms,
         async () => {
             try {
                 // Fetch experiment and equipment
                 await fn();
+                return false
             } catch (error) {
                 return true
             }
-            return false
         }
     )
 }
@@ -159,39 +167,50 @@ export function capitalise(input: string) { return input[0].toUpperCase() + Stri
 
 export const sleep = (ms: number) => new Promise(r => setTimeout(r, ms));
 
-export async function beginProcedure(name: string) {
-    const appendLog = await pushLog("beinn", name + "\n")
-    async function step<T = void>(name: string, fn: () => (Promise<T> | T)) {
+export async function beginProcedure(proc_name: string) {
+    await pushLog("beinn", `PROCEDURE ${proc_name} --- BEGIN` + "\n")
+    async function step<T = void>(step_name: string, fn: () => (Promise<T> | T)) {
         try {
-            await appendLog(`STEP: ${name} --- `)
+            await pushLog("beinn", `${proc_name} --- STEP: ${step_name}\n`)
             const res = await fn()
-            await appendLog("SUCCESS\n")
+            await pushLog("beinn", `${proc_name} --- STEP: ${step_name} --- SUCCESS\n`)
             return res
         } catch (e) {
             if (e && typeof (e) === "object" && "stack" in e)
-                await appendLog("FAILED\nerror: \n" + ((e).stack))
+                await pushLog("beinn", `${proc_name} --- STEP: ${step_name} --- FAILED\n    error:\n` + ((e).stack) + "\n")
             else if (e && typeof (e) === "object" && "toString" in e)
-                await appendLog("FAILED\nerror: \n" + ("\t" + e.toString()))
-            else await appendLog("FAILED\nerror: \n" + e)
+                await pushLog("beinn", `${proc_name} --- STEP: ${step_name} --- FAILED\n    error:\n    ` + e.toString() + "\n")
+            else
+                await pushLog("beinn", `${proc_name} --- STEP: ${step_name} --- FAILED\n    error:\n    ` + e + "\n")
 
-            return undefined
+            throw `ERROR HANDLED:${step_name}`
         }
     }
 
     async function completed() {
-        await appendLog(`COMPLETED ${name}\n`)
+        await pushLog("beinn", `PROCEDURE ${proc_name} --- COMPLETED` + "\n")
     }
     async function cancelled(reason: string) {
 
-        await appendLog(`${reason}\nCANCELLED ${name}\n`)
+        await pushLog("beinn", `PROCEDURE ${proc_name} --- CANCELLED\n    reason:\n    ${reason}` + "\n")
     }
     async function failed(reason: string) {
-        await appendLog(`FAILED ${reason}\n`)
+        await pushLog("beinn", `PROCEDURE ${proc_name} --- FAILED\n    reason:\n    ${reason}` + "\n")
+    }
+    async function unhandled(e: unknown) {
+        if (typeof e === "string" && e.startsWith("ERROR HANDLED"))
+            await pushLog("beinn", `${proc_name} --- FAILED at STEP ${e.split(":")[1]}` + "\n")
+
+
+        else if (e && typeof (e) === "object" && "stack" in e)
+            await pushLog("beinn", `${proc_name} --- FAILED\n    error:\n` + ((e).stack) + "\n")
+        else if (e && typeof (e) === "object" && "toString" in e)
+            await pushLog("beinn", `${proc_name} --- FAILED\n    error:\n    ` + e.toString() + "\n")
+        else
+            await pushLog("beinn", `${proc_name} --- FAILED\n    error:\n    ` + e + "\n")
     }
 
-    async function nestedAppendLog(message: string) {
-        await appendLog("\t" + message)
-    }
 
-    return { step, completed, cancelled, failed, appendLog: nestedAppendLog }
+
+    return { step, completed, cancelled, failed, unhandled }
 }

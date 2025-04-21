@@ -121,50 +121,70 @@ export class Experiment extends EE {
 
 
     async start() {
-        const { step, completed } = await beginProcedure("START EXPERIMENT")
-        await step("Start experiment in meall",
-            async () => {
-                this._iteration_count = -1;
-                this._status = "starting";
+        const { step, completed, unhandled } = await beginProcedure("START EXPERIMENT")
+        try {
+            await step("Start experiment in meall",
+                async () => {
+                    this._iteration_count = -1;
+                    this._status = "starting";
 
-                // Reset the charts
-                Object.values(this._charts.charts).forEach(cs => { cs.reset() });
+                    // Reset the charts
+                    Object.values(this._charts.charts).forEach(cs => { cs.reset() });
 
-                await tick();
-                await meallStartExperiment_throwable({ id: this.id });
-            })
-        await completed()
+                    await tick();
+                    await meallStartExperiment_throwable({ id: this.id });
+                })
+            await completed()
+        }
+        catch (e) {
+            await unhandled(e)
+        }
 
     }
 
     async pause() {
-        const { step, completed } = await beginProcedure("PAUSE EXPERIMENT")
-        await step("Pause experiment in meall",
-            async () => {
-                this._status = "pausing";
-                await meallPauseExperiment_throwable({ id: this.id });
-            })
-        await completed()
+        const { step, completed, unhandled } = await beginProcedure("PAUSE EXPERIMENT")
+        try {
+            await step("Pause experiment in meall",
+                async () => {
+                    this._status = "pausing";
+                    await meallPauseExperiment_throwable({ id: this.id });
+                })
+            await completed()
+        }
+        catch (e) {
+            await unhandled(e)
+        }
 
     }
     async stop() {
-        const { step, completed } = await beginProcedure("STOP EXPERIMENT")
-        await step("Stop experiment in meall",
-            async () => {
-                this._status = "stopping";
-                await meallStopExperiment_throwable({ id: this.id });
-            })
-        await completed()
+        const { step, completed, unhandled } = await beginProcedure("STOP EXPERIMENT")
+        try {
+            await step("Stop experiment in meall",
+                async () => {
+                    this._status = "stopping";
+                    await meallStopExperiment_throwable({ id: this.id });
+                })
+            await completed()
+        }
+        catch (e) {
+            await unhandled(e)
+        }
 
     }
     async continue() {
-        const { step, completed } = await beginProcedure("CONTINUE EXPERIMENT")
-        await step("Continue experiment in meall",
-            async () => {
-                this._status = "continuing";
-                await meallContinueExperiment_throwable({ id: this.id });
-            })
-        await completed()
+        const { step, completed, unhandled } = await beginProcedure("CONTINUE EXPERIMENT")
+        try {
+            await step("Continue experiment in meall",
+                async () => {
+                    this._status = "continuing";
+                    await meallContinueExperiment_throwable({ id: this.id });
+                })
+            await completed()
+        }
+        catch (e) {
+            await unhandled(e)
+        }
 
     }
 
@@ -200,31 +220,37 @@ export class Experiments {
     private _available_module_cls: Availables = $state([])
 
     async instantiate(payload?: { id?: string, name?: string }) {
-        const { step, completed } = await beginProcedure("INSTANTIATE EXPERIMENT")
+        const { step, completed, unhandled } = await beginProcedure("INSTANTIATE EXPERIMENT")
 
-        const new_experiment = await step("Instantiate experiment",
-            () => {
-                let id: string | undefined, name: string | undefined
-                if (payload) {
-                    id = payload.id
-                    name = payload.name
-                }
+        try {
 
-                if (!id) id = getRandomId(Object.keys(this._experiments))
+            const new_experiment = await step("Instantiate experiment",
+                () => {
+                    let id: string | undefined, name: string | undefined
+                    if (payload) {
+                        id = payload.id
+                        name = payload.name
+                    }
 
-                const new_experiment = new Experiment(id, name)
-                this._experiments[id] = new_experiment
+                    if (!id) id = getRandomId(Object.keys(this._experiments))
 
-                return new_experiment
-            })
+                    const new_experiment = new Experiment(id, name)
+                    this._experiments[id] = new_experiment
 
-        await step("Refresh available experiment list",
-            async () => {
-                await this.refreshAvailables_throwable();
-            })
+                    return new_experiment
+                })
 
-        await completed()
-        return new_experiment
+            await step("Refresh available experiment list",
+                async () => {
+                    await this.refreshAvailables_throwable();
+                })
+
+            await completed()
+            return new_experiment
+        }
+        catch (e) {
+            await unhandled(e)
+        }
     }
 
     moduleClsValid(module_cls: ModuleCls) {

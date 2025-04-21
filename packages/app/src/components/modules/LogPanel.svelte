@@ -33,7 +33,7 @@
 						"icon-btn-sm  rounded border-1 border-green-500 text-slate-700",
 						log_panel.show_time ? "bg-green-500" : "text-green-500"
 					)}
-					onclick={(_) => {
+					onclick={() => {
 						log_panel.show_time = !log_panel.show_time;
 					}}><Clock /></button>
 				<button
@@ -58,7 +58,8 @@
 					}}>python</button>
 			</div>
 		</div>
-		<div class="  flex-grow fcol-2 overflow-y-scroll scrollbar section">
+		<div
+			class="  flex-grow fcol overflow-y-scroll scrollbar section font-mono font-stretch-extra-condensed tracking-tighter">
 			{#each log_panel.displayingLogs as { type, timestamp, message }}
 				{@const dateobj = new Date(timestamp)}
 				{@const month = month_texts[dateobj.getMonth()]}
@@ -85,8 +86,8 @@
 					</div>
 
 					<div
-						class="text-slate-100 text-wrap flex-grow whitespace-pre-line break-all">
-						>> {message.replace(/\u001b\[.*?m/g, "")}
+						class="text-slate-100 text-wrap flex-grow whitespace-break-spaces break-all">
+						>>> {message.replace(/\u001b\[.*?m/g, "")}
 					</div>
 				</div>
 			{/each}

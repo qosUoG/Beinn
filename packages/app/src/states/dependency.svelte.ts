@@ -115,120 +115,134 @@ class Dependency {
     }
 
     async uninstall() {
-        const { step, completed, appendLog } = await beginProcedure("REMOVE DEPENDENCY")
+        const { step, completed, unhandled } = await beginProcedure("REMOVE DEPENDENCY")
 
-        await step("Execute command in shell",
-            async () => {
-                // Only circumstances communicating with backend
-                if (this._installed && this.source.type !== "local")
-                    await shell({ fn: "uv", cmd: "remove " + this._name, cwd: workspace.path, appendLog })
+        try {
+            await step("Execute command in shell",
+                async () => {
+                    // Only circumstances communicating with backend
+                    if (this._installed && this.source.type !== "local")
+                        await shell({ fn: "uv", cmd: "remove " + this._name, cwd: workspace.path })
 
 
-                setTimeout(() => {
-                    delete workspace.dependencies?.dependencies[this.id]
+                    setTimeout(() => {
+                        delete workspace.dependencies?.dependencies[this.id]
+                    })
                 })
-            })
 
-        await completed()
+            await completed()
+        }
+        catch (e) {
+            await unhandled(e)
+        }
 
     }
 
     async install() {
 
-        const { step, completed, failed, appendLog } = await beginProcedure("INSTALL DEPENDENCY")
+        const { step, completed, failed, unhandled } = await beginProcedure("INSTALL DEPENDENCY")
 
-        if (this.source.type === "local") {
-            await step("Add local directory to dependency list",
+        try {
+
+
+
+            if (this.source.type === "local") {
+                await step("Add local directory to dependency list",
+                    async () => {
+                        if (this.source.type !== "local") {
+                            await failed("unreacheable code")
+                            return
+                        }
+
+                        // Check init is available
+                        if (!await exists(
+                            workspace.path + "/" + this.source.directory + "/__init__.py"
+                        )) {
+                            await failed(`__init__.py cannot be found at ${workspace.path + "/" + this.source.directory}`)
+                            return
+                        }
+
+
+                        this._installed = true
+                        this._name = "local:" + this.source.directory
+                        this._fullname = "local:" + this.source.directory
+                        this.install_string = this.source.directory
+
+                        await workspace.refreshAvailables_throwable()
+
+                        await completed()
+
+                    })
+
+                return
+            }
+
+            const install_string = await step("Resolve dependency installation command",
                 async () => {
-                    if (this.source.type !== "local") {
-                        await failed("unreacheable code")
-                        return
+                    let install_string
+                    switch (this.source.type) {
+                        case "git":
+                            if (this.source.git === "") await failed("git url shall not be empty")
+
+                            install_string = this.source.git;
+
+                            if (this.source.branch) install_string += `@${this.source.branch}`;
+                            if (this.source.subdirectory)
+                                install_string += `#${this.source.subdirectory}`;
+
+                            break;
+
+                        case "path":
+                            if (this.source.path === "") await failed("path shall not be empty")
+                            install_string = this.source.path;
+                            if (this.source.editable) install_string += " --editable";
+                            break;
+                        case "pip":
+                            if (this.source.package === "") await failed("package shall not be empty")
+                            install_string = this.source.package;
+                            break;
                     }
-
-                    // Check init is available
-                    if (!await exists(
-                        workspace.path + "/" + this.source.directory + "/__init__.py"
-                    )) {
-                        await failed(`__init__.py cannot be found at ${workspace.path + "/" + this.source.directory}`)
-                        return
-                    }
-
-
-                    this._installed = true
-                    this._name = "local:" + this.source.directory
-                    this._fullname = "local:" + this.source.directory
-                    this.install_string = this.source.directory
-
-                    await workspace.refreshAvailables_throwable()
-
-                    await completed()
-
+                    return install_string
                 })
 
-            return
-        }
-
-        const install_string = await step("Resolve dependency installation command",
-            async () => {
-                let install_string
-                switch (this.source.type) {
-                    case "git":
-                        if (this.source.git === "") await failed("git url shall not be empty")
-
-                        install_string = this.source.git;
-
-                        if (this.source.branch) install_string += `@${this.source.branch}`;
-                        if (this.source.subdirectory)
-                            install_string += `#${this.source.subdirectory}`;
-
-                        break;
-
-                    case "path":
-                        if (this.source.path === "") await failed("path shall not be empty")
-                        install_string = this.source.path;
-                        if (this.source.editable) install_string += " --editable";
-                        break;
-                    case "pip":
-                        if (this.source.package === "") await failed("package shall not be empty")
-                        install_string = this.source.package;
-                        break;
-                }
-                return install_string
-            })
-
-        if (!install_string) return
+            if (!install_string) return
 
 
-        await step("Install Dependency",
-            async () => {
-                await shell({ fn: "uv", cmd: "add " + install_string, cwd: workspace.path, appendLog })
-            })
+            await step("Install Dependency",
+                async () => {
+                    await shell({ fn: "uv", cmd: "add " + install_string, cwd: workspace.path })
+                })
 
-        // Read All dependencies and figure out which is the new one
-        await step("Update Dependency List",
-            async () => {
+            // Read All dependencies and figure out which is the new one
+            await step("Update Dependency List",
+                async () => {
 
-                const current_dependency_names = Object.values(
-                    workspace.dependencies!.dependencies
-                )
-                    .filter((d) => d.installed)
-                    .map((d) => d.name);
+                    const current_dependency_names = Object.values(
+                        workspace.dependencies!.dependencies
+                    )
+                        .filter((d) => d.installed)
+                        .map((d) => d.name);
 
-                for (const d of await readAllUvDependencies()) {
-                    if (!current_dependency_names.includes(d.name)) {
-                        this._fullname = d.fullname
-                        this._name = d.name
-                        this._installed = true
-                        break
+                    for (const d of await readAllUvDependencies()) {
+                        if (!current_dependency_names.includes(d.name)) {
+                            this._fullname = d.fullname
+                            this._name = d.name
+                            this._installed = true
+                            break
+                        }
                     }
-                }
-            })
+                })
 
-        await tick()
-        await workspace.refreshAvailables_throwable()
+            await tick()
+            await workspace.refreshAvailables_throwable()
 
-        await completed()
+            await completed()
+        }
+        catch (e) {
+            await unhandled(e)
+        }
     }
+
 
 }
 
