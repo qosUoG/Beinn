@@ -11,14 +11,12 @@ class SaverProxy:
         self,
         *,
         timestamp: int,
-        sql_saverT: type[_SaverABC],
+        saverT: type[_SaverABC],
         kwargs: Any,
     ):
         self._timestamp = timestamp
-        # sql_saver instance for consumer of sql_saver
-        self._saver = sql_saverT(
-            timestamp=self._timestamp, save_fn=self._save_fn, **kwargs
-        )
+        # saver instance for consumer of saver
+        self._saver = saverT(timestamp=self._timestamp, save_fn=self._save_fn, **kwargs)
 
         self._frames_lock = Lock()
         self._frames: list[Any] = []
