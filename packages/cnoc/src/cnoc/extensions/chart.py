@@ -21,7 +21,7 @@ from typing import Any, Literal, TypedDict, Unpack, override
 @dataclass
 class _ChartConfigABC(ABC):
     title: str
-    type: str
+    _type: str
     mode: str
 
     @abstractmethod

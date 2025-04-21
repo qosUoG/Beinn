@@ -23,13 +23,13 @@ def ParamModels2Params(param_models: ParamModels):
 def experimentParams2Backup(experiment_id: str, params: Params):
     res: dict[str, dict[str, str]] = {"experiment_id": experiment_id}
 
-    def parseParams(id: str, _params: Params):
+    def parseParams(id: str, params: Params):
         if id in res:
             return
 
         res[id] = {}
 
-        for [name, param] in _params.items():
+        for [name, param] in params.items():
             res[experiment_id][name] = param.getValue()
 
             # If the param is an instance, recursively parse the params as well

@@ -32,7 +32,6 @@
 
 {#if eeeditor.id !== undefined && target}
 	{#key eeeditor.id}
-		{console.log(workspace.getEEs("experiment").available_module_cls)}
 		<div class="section bg-slate-200 col-span-2 min-w-0 w-full">
 			<div class="fcol-2 min-w-0 w-full">
 				<div class="frow justify-between items-end">

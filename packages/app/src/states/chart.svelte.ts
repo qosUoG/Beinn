@@ -4,7 +4,7 @@ import XY_Worker from './charts/xy/worker.js?worker'
 export type XYChartMode = "overwrite" | "append"
 
 export type XYChartConfig = {
-    type: "xy"
+    type: "chart:xy"
     title: string
     x_axis: string,
     y_axis: string,
@@ -62,7 +62,7 @@ export class ChartClass<T extends ChartConfigs = ChartConfigs> {
 
         // Create the worker script
         switch (config.type) {
-            case "xy": this.worker = new XY_Worker()
+            case "chart:xy": this.worker = new XY_Worker()
         }
 
         this.worker.postMessage({

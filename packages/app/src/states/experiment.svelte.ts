@@ -270,7 +270,7 @@ export class Experiments {
 
 
     async refreshAvailables_throwable() {
-        console.log(workspace.dependencies?.prefixes)
+
         this._available_module_cls = await meallGetAvailableEEs_throwable("experiment", { prefixes: workspace.dependencies?.prefixes ?? [] })
     }
 

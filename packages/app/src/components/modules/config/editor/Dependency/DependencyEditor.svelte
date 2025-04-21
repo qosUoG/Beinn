@@ -60,7 +60,6 @@
 		await dependency.install();
 
 		await tick();
-		console.log(dependency.installed);
 	}
 </script>
 

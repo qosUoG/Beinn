@@ -299,7 +299,7 @@ class InstanceEquipmentParam[T: EquipmentABC](_QosParam):
         instance_id: str | None
 
         def toParam(self):
-            return InstanceEquipmentParam(self.instance_id)
+            return InstanceEquipmentParam[T](self.instance_id)
 
     def __init__(self, instance_id: str | None = None):
         self._type: Literal["instance.equipment"] = "instance.equipment"
@@ -335,7 +335,7 @@ class InstanceExperimentParam[T: ExperimentABC](_QosParam):
         instance_id: str | None
 
         def toParam(self):
-            return InstanceExperimentParam(self.instance_id)
+            return InstanceExperimentParam[T](self.instance_id)
 
     def __init__(self, instance_id: str | None = None):
         self._type: Literal["instance.experiment"] = "instance.experiment"
@@ -360,8 +360,8 @@ type AllParamTypes = (
     | StrParam
     | BoolParam
     # | CompositeParam
-    | InstanceEquipmentParam
-    | InstanceExperimentParam
+    | InstanceEquipmentParam[EquipmentABC]
+    | InstanceExperimentParam[ExperimentABC]
 )
 
 type AllParamModelTypes = (
