@@ -235,7 +235,7 @@ class Dependency {
             await workspace.refreshAvailables_throwable()
 
             await completed()
-            console.log({ inside: this.installed })
+
         }
         catch (e) {
             await unhandled(e)

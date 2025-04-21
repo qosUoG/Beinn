@@ -17,7 +17,6 @@
 
 {#each Object.entries(params) as [key, param]}
 	{#if param.type === "int" || param.type === "float"}
-		{console.log({ key, param })}
 		<LabelField {key}>
 			<input
 				type="number"

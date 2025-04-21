@@ -76,6 +76,7 @@ export class Equipments {
 
 
     async refreshAvailables_throwable() {
+
         this._available_module_cls = await meallGetAvailableEEs_throwable("equipment", { prefixes: workspace.dependencies?.prefixes ?? [] })
     }
 

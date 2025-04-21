@@ -141,7 +141,6 @@
 						</LabelField>
 					{/if}
 				{:else if dependency.source.type === "pip"}
-					{console.log(dependency)}
 					<!-- All Following has as confirmed dependency -->
 					<FixedField key="Package" value={dependency.fullname} />
 				{:else if dependency.source.type === "git"}
@@ -154,7 +153,6 @@
 				{:else if dependency.source.type === "path"}
 					<FixedField key="Path" value={dependency.source.path} />
 				{:else if dependency.source.type === "local"}
-					{console.log(dependency.source.type)}
 					<FixedField key="Local Directory" value={dependency.name} />
 				{/if}
 			</div>

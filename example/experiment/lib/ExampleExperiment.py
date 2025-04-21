@@ -7,7 +7,7 @@ from click import ParamType
 
 from cnoc import params as p
 from cnoc.experiment import ExperimentABC
-from conc.managers import ManagerABC
+from cnoc.managers import ManagerABC
 import time
 
 from cnoc.extensions.chart import XY

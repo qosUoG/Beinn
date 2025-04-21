@@ -58,10 +58,8 @@ def getAvailableEEs(eeABC: EEABC, names: list[str]):
                     else:
                         ees[clsT]["modules"].append(package.name)
 
-            except ModuleNotFoundError:
+            except Exception:
                 pass
-            except Exception as e:
-                raise e
 
     warnings.filterwarnings("default")
 
