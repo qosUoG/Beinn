@@ -51,7 +51,7 @@ export abstract class EE {
                 throw `${this._id}: module ${module_cls.module} and class ${module_cls.cls} invalid.`
         }
 
-        this._module_cls = module_cls
+        this._module_cls = { ...module_cls }
     }
 
     private eetype: EEType

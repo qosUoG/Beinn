@@ -60,7 +60,7 @@ wheels = [
 [[package]]
 name = "cnoc"
 version = "0.1.0"
-source = { git = "https://github.com/qosUoG/Beinn?subdirectory=packages%2Fcnoc&branch=main#a75f0dbcc3c0512e056ed1c607e10998742d3d12" }
+source = { git = "https://github.com/qosUoG/Beinn?subdirectory=packages%2Fcnoc&branch=main#b70314f27b0a4e66d9a0d9b288d7dc57c74abadb" }
 dependencies = [
     { name = "pydantic" },
     { name = "websockets" },
@@ -100,11 +100,13 @@ wheels = [
 [[package]]
 name = "examplelib"
 version = "0.1.0"
-source = { registry = "https://pypi.org/simple" }
-sdist = { url = "https://files.pythonhosted.org/packages/25/ae/341fa9c821a0d753bbc62c405e53a94f86a969142a4b6d1996ce22beb75b/examplelib-0.1.0.tar.gz", hash = "sha256:0e9d6ef9787ed98379436386965b6f00dc5e9d4725aeeb364ac581f535bd1d2a", size = 1460 }
-wheels = [
-    { url = "https://files.pythonhosted.org/packages/5a/83/2a04f0d676ee61b864fc8b852fd8688b14bb35147569a96ed94ea8d42917/examplelib-0.1.0-py3-none-any.whl", hash = "sha256:10840e21f4f5c032bbc0df9b018e2092e935e05f936822e8e37041a7d52b7e20", size = 1676 },
+source = { editable = "../examplelib" }
+dependencies = [
+    { name = "cnoc" },
 ]
+
+[package.metadata]
+requires-dist = [{ name = "cnoc", git = "https://github.com/qosUoG/Beinn?subdirectory=packages%2Fcnoc&branch=main" }]
 
 [[package]]
 name = "experiment"
@@ -122,7 +124,7 @@ dependencies = [
 requires-dist = [
     { name = "aiosqlite", specifier = ">=0.21.0" },
     { name = "cnoc", git = "https://github.com/qosUoG/Beinn?subdirectory=packages%2Fcnoc&branch=main" },
-    { name = "examplelib" },
+    { name = "examplelib", editable = "../examplelib" },
     { name = "fastapi", extras = ["standard"], specifier = ">=0.115.11" },
     { name = "numpy", specifier = ">=2.2.3" },
 ]

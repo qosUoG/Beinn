@@ -6,8 +6,8 @@ import { tick } from "svelte"
 
 import { meallGetCliWs, meallGetPid_throwable, meallWaitUntilOnline } from "$lib/meall.svelte"
 
-import { Equipments } from "./equipment.svelte"
-import { Experiments } from "./experiment.svelte"
+import { Equipment, Equipments } from "./equipment.svelte"
+import { Experiment, Experiments } from "./experiment.svelte"
 import { Dependencies, sourceEqual, type DependencyT } from "./dependency.svelte"
 
 import { readTextFile, readDir, writeTextFile, exists, mkdir } from "@tauri-apps/plugin-fs"
@@ -150,7 +150,10 @@ export class Workspace {
             await step("Upsert 'link-mode: copy' to pyproject.toml",
                 async () => {
                     const parsed = parse(await readTextFile(path + "/pyproject.toml"));
-                    parsed.tool = { uv: { "link-mode": "copy" } }
+                    if (parsed.tool === undefined) parsed.tool = {}
+                    if (parsed.tool.uv === undefined) parsed.tool.uv = {}
+                    if (parsed.tool.uv["link-mode"] === undefined) parsed.tool.uv["link-mode"] = "copy"
+
                     await writeTextFile(path + "/pyproject.toml", stringify(parsed))
                 }
             )
@@ -242,18 +245,19 @@ export class Workspace {
                         },
                     });
                 })
-            console.log("hi")
+
             const uv_dependencies = await step("Fetch workspace dependencies from pyproject.toml",
                 async () => {
                     return await readAllUvDependencies()
                 }
             )
-            if (!uv_dependencies) return
-            console.log("hi")
+
+
             const save = await step("Load workspace save .beinn if exist",
                 async () => {
                     if (!await exists(path + "/.beinn")) {
                         this._dependencies = new Dependencies(uv_dependencies)
+                        await tick()
                         await this.refreshAvailables_throwable()
                         this._connected = true;
                         return
@@ -269,6 +273,8 @@ export class Workspace {
 
             this._dependencies = new Dependencies()
 
+            await tick()
+
             await step("Load save's dependencies into workspace",
                 async () => {
                     if (!save.dependencies) return
@@ -280,27 +286,36 @@ export class Workspace {
                         // First check if the source is present in pyproject.toml already
                         if (uv_dependencies.find(({ source }) => sourceEqual(save_d.source, source))) {
                             // Just add the dependency
-                            this._dependencies!.instantiateTemplate(save_d)
+                            this._dependencies.instantiateTemplate(save_d)
+
                             continue
                         }
 
                         // The source is not present in pyproject.toml
                         // Check if the dependency is installed. If not, just copy as is
                         if (!save_d.installed) {
-                            this._dependencies!.instantiateTemplate(save_d)
+                            this._dependencies.instantiateTemplate(save_d)
+
                             continue
                         }
 
                         // The dependency should be installed, but not. Try to install.
                         // First assign the source
-                        const new_d = this._dependencies!.instantiate()
+                        const new_d = this._dependencies.instantiate()
                         new_d.source = save_d.source
                         await tick()
 
                         // Then try to install
                         try { await new_d.install() }
                         catch (e) { /* If it failed, we silence the error, and only show that as not installed */ }
+
+                        await tick()
+
+
+
                     }
+
+
 
                     // add uv dependencies that is installed but not present in save
                     for (const uv_d of uv_dependencies) {
@@ -310,12 +325,21 @@ export class Workspace {
                         // First check if the source is present in pyproject.toml already
                         if (!save.dependencies.find(({ source }) => sourceEqual(uv_d.source, source))) {
                             // Just add the dependency
-                            this._dependencies!.instantiateTemplate(uv_d)
-                            continue
+                            this._dependencies.instantiateTemplate(uv_d)
+
+
                         }
 
                     }
+
+                    await tick()
+
+
                 })
+
+            await tick()
+
+
 
             await step("Refresh list of available equipment and experiment",
                 async () => {
@@ -326,48 +350,51 @@ export class Workspace {
 
             const new_equipments = await step("Instantiate all equipment according to save",
                 async () => {
-                    return await Promise.all(save.equipments.map((e) => this._equipments.instantiate(e)))
+                    await tick()
+                    const res: Equipment[] = []
+                    for (const e of save.equipments)
+                        res.push(await this._equipments.instantiate_throwable(step, e))
+                    return res
                 }
             )
-            if (!new_equipments) return
-
-
-
 
             const new_experiments = await step("Instantiate all experiment according to save",
                 async () => {
-                    return await Promise.all(save.experiments.map((e) => this._experiments.instantiate(e)))
+                    await tick()
+                    const res: Experiment[] = []
+                    for (const e of save.experiments)
+                        res.push(await this._experiments.instantiate_throwable(step, e))
+                    return res
                 }
             )
 
-            if (!new_experiments) return
 
-            await tick()
 
             await step("Load Module and Class of Equipment and Experiment according to save",
                 async () => {
+                    await tick()
                     // Write the module_cls to the equipment and experiments
                     for (let i = 0; i < save.equipments.length; i++) {
 
-                        new_equipments[i]!.module_cls_throwable = save.equipments[i].module_cls
+                        new_equipments[i].module_cls_throwable = save.equipments[i].module_cls
                         await tick()
 
                         // If not created, this is enough
                         if (!save.equipments[i].created) continue
 
                         // If it is created, try to create it
-                        await new_equipments[i]!.create()
+                        await new_equipments[i].create()
 
                     }
 
                     for (let i = 0; i < save.experiments.length; i++) {
-                        new_experiments[i]!.module_cls_throwable = save.experiments[i].module_cls
+                        new_experiments[i].module_cls_throwable = save.experiments[i].module_cls
                         await tick()
                         // If not created, this is enough
                         if (!save.experiments[i].created) continue
 
                         // If it is created, try to create it
-                        await new_experiments[i]!.create()
+                        await new_experiments[i].create()
                     }
 
                     await tick()
@@ -377,35 +404,35 @@ export class Workspace {
                 async () => {
                     // First set the params to temp_params, and try to save it, then write the temp_params 
                     for (let i = 0; i < save.equipments.length; i++) {
-                        new_equipments[i]!.temp_params_throwable = save.equipments[i].params
+                        new_equipments[i].temp_params_throwable = save.equipments[i].params
                         await tick()
 
                         // Set the params
-                        await new_equipments[i]!.saveParams()
+                        await new_equipments[i].saveParams()
 
                         await tick()
 
                         // Then overwrite the temp_params
-                        new_equipments[i]!.temp_params_throwable = save.equipments[i].temp_params
+                        new_equipments[i].temp_params_throwable = save.equipments[i].temp_params
 
                         await tick()
 
                     }
 
                     for (let i = 0; i < save.experiments.length; i++) {
-                        new_experiments[i]!.temp_params_throwable = save.experiments[i].params
+                        new_experiments[i].temp_params_throwable = save.experiments[i].params
 
                         await tick()
 
 
 
                         // Set the params
-                        await new_experiments[i]!.saveParams()
+                        await new_experiments[i].saveParams()
 
                         await tick()
 
                         // Then overwrite the temp_params
-                        new_experiments[i]!.temp_params_throwable = save.experiments[i].temp_params
+                        new_experiments[i].temp_params_throwable = save.experiments[i].temp_params
 
                         await tick()
                     }

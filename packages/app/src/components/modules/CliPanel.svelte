@@ -84,11 +84,12 @@
 					"icon-btn-sm  rounded border-1 border-green-500 text-slate-700",
 					cli_panel.show_time ? "bg-green-500" : "text-green-500"
 				)}
-				onclick={(_) => {
+				onclick={() => {
 					cli_panel.show_time = !cli_panel.show_time;
 				}}><Clock /></button>
 		</div>
-		<div class="  flex-grow fcol-2 overflow-y-scroll scrollbar section">
+		<div
+			class="  flex-grow fcol-2 overflow-y-scroll scrollbar section font-mono font-stretch-extra-condensed tracking-tighter">
 			{#each cli_panel.cli_entries as { timestamp, message }}
 				{@const dateobj = new Date(timestamp)}
 				{@const month = month_texts[dateobj.getMonth()]}
@@ -107,15 +108,16 @@
 				</div>
 
 				<div
-					class="text-slate-100 text-wrap flex-grow whitespace-pre-line break-all">
-					>> {message.replace(/\u001b\[.*?m/g, "")}
+					class="text-slate-100 text-wrap flex-grow whitespace-break-spaces break-all">
+					>>> {message.replace(/\u001b\[.*?m/g, "")}
 				</div>
 			{/each}
 		</div>
 
-		<div class=" wrapped bg-slate-200 w-full frow-2 items-center">
+		<div
+			class=" wrapped bg-slate-200 w-full frow-2 items-center font-mono font-stretch-extra-condensed tracking-tighter">
 			<label class="frow-2 flex-grow">
-				>>
+				>>>
 				<input
 					type="text"
 					class="flex-grow"

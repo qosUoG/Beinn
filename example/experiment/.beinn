@@ -1,1 +1,69 @@
-{"dependencies":[{"installed":true,"source":{"type":"pip","package":"aiosqlite"},"install_string":"","name":"aiosqlite","fullname":"aiosqlite>=0.21.0"},{"installed":true,"source":{"type":"path","path":"../examplelib","editable":true},"install_string":"","name":"cnoc","fullname":"cnoc"},{"installed":true,"source":{"type":"pip","package":"fastapi"},"install_string":"","name":"fastapi","fullname":"fastapi[standard]>=0.115.11"},{"installed":true,"source":{"type":"pip","package":"numpy"},"install_string":"","name":"numpy","fullname":"numpy>=2.2.3"},{"installed":true,"source":{"type":"git","git":"https://github.com/qosUoG/Beinn","subdirectory":"packages/cnoc","branch":"main"},"install_string":"","name":"cnoc","fullname":"cnoc"},{"installed":true,"source":{"type":"local","directory":"lib"},"install_string":"lib","name":"lib","fullname":"lib"},{"installed":true,"source":{"type":"pip","package":"examplelib"},"install_string":"","name":"examplelib","fullname":"examplelib"}],"equipments":[{"id":"3298d299-fbf4-4090-8153-ce827ff2e3ce","created":true,"module_cls":{"module":"lib.ExampleExperiment","cls":"ExampleEquipment"},"name":"equipment1","params":{"strparam":{"type":"str","value":"1"},"floatparam":{"type":"float","suffix":"W","value":1},"intparam":{"type":"int","suffix":"","value":1},"boolparam":{"type":"bool","value":true},"select_strparam":{"type":"select.str","options":["option1","option2","option3"],"value":"option1"},"select_intparam":{"type":"select.int","options":[1,2,3],"value":1},"select_floatparam":{"type":"select.float","options":[1.1,2.2,3.3],"value":1.1}},"temp_params":{"strparam":{"type":"str","value":"1"},"floatparam":{"type":"float","suffix":"W","value":1},"intparam":{"type":"int","suffix":"","value":1},"boolparam":{"type":"bool","value":true},"select_strparam":{"type":"select.str","options":["option1","option2","option3"],"value":"option1"},"select_intparam":{"type":"select.int","options":[1,2,3],"value":1},"select_floatparam":{"type":"select.float","options":[1.1,2.2,3.3],"value":1.1}}},{"id":"1a57054f-9977-4495-8694-9a2db23b90e3","created":true,"module_cls":{"module":"examplelib.ExampleDriver","cls":"ExampleEquipment"},"name":"equipment2","params":{"strparam":{"type":"str","value":"2"},"floatparam":{"type":"float","suffix":"W","value":2},"intparam":{"type":"int","suffix":"","value":2},"boolparam":{"type":"bool","value":false},"select_strparam":{"type":"select.str","options":["option1","option2","option3"],"value":"option2"},"select_intparam":{"type":"select.int","options":[1,2,3],"value":2},"select_floatparam":{"type":"select.float","options":[1.1,2.2,3.3],"value":2.2}},"temp_params":{"strparam":{"type":"str","value":"2"},"floatparam":{"type":"float","suffix":"W","value":2},"intparam":{"type":"int","suffix":"","value":2},"boolparam":{"type":"bool","value":false},"select_strparam":{"type":"select.str","options":["option1","option2","option3"],"value":"option2"},"select_intparam":{"type":"select.int","options":[1,2,3],"value":2},"select_floatparam":{"type":"select.float","options":[1.1,2.2,3.3],"value":2.2}}}],"experiments":[{"id":"d4899578-21f2-4bdd-aad5-d54142080017","created":true,"module_cls":{"module":"lib.ExampleExperiment","cls":"ExampleExperiment"},"name":"test2","params":{"strparam":{"type":"str","value":"2"},"floatparam":{"type":"float","suffix":"W","value":2},"intparam":{"type":"int","suffix":"","value":2},"boolparam":{"type":"bool","value":false},"select_strparam":{"type":"select.str","options":["option1","option2","option3"],"value":"option2"},"select_intparam":{"type":"select.int","options":[1,2,3],"value":2},"select_floatparam":{"type":"select.float","options":[1.1,2.2,3.3],"value":2.2},"instance_equipmentparam":{"type":"instance.equipment","instance_id":"1a57054f-9977-4495-8694-9a2db23b90e3"}},"temp_params":{"strparam":{"type":"str","value":"2"},"floatparam":{"type":"float","suffix":"W","value":2},"intparam":{"type":"int","suffix":"","value":2},"boolparam":{"type":"bool","value":false},"select_strparam":{"type":"select.str","options":["option1","option2","option3"],"value":"option2"},"select_intparam":{"type":"select.int","options":[1,2,3],"value":2},"select_floatparam":{"type":"select.float","options":[1.1,2.2,3.3],"value":2.2},"instance_equipmentparam":{"type":"instance.equipment","instance_id":"1a57054f-9977-4495-8694-9a2db23b90e3"}}},{"id":"42c0c100-999e-4153-a1a5-d95140f4a75b","created":true,"module_cls":{"module":"lib.ExampleExperiment","cls":"ExampleExperiment"},"name":"test1","params":{"strparam":{"type":"str","value":"1"},"floatparam":{"type":"float","suffix":"W","value":1},"intparam":{"type":"int","suffix":"","value":1},"boolparam":{"type":"bool","value":true},"select_strparam":{"type":"select.str","options":["option1","option2","option3"],"value":"option1"},"select_intparam":{"type":"select.int","options":[1,2,3],"value":1},"select_floatparam":{"type":"select.float","options":[1.1,2.2,3.3],"value":1.1},"instance_equipmentparam":{"type":"instance.equipment","instance_id":"3298d299-fbf4-4090-8153-ce827ff2e3ce"}},"temp_params":{"strparam":{"type":"str","value":"1"},"floatparam":{"type":"float","suffix":"W","value":1},"intparam":{"type":"int","suffix":"","value":1},"boolparam":{"type":"bool","value":true},"select_strparam":{"type":"select.str","options":["option1","option2","option3"],"value":"option1"},"select_intparam":{"type":"select.int","options":[1,2,3],"value":1},"select_floatparam":{"type":"select.float","options":[1.1,2.2,3.3],"value":1.1},"instance_equipmentparam":{"type":"instance.equipment","instance_id":"3298d299-fbf4-4090-8153-ce827ff2e3ce"}}}]}
+{
+	"dependencies": [
+		{
+			"installed": true,
+			"source": {
+				"type": "pip",
+				"package": "aiosqlite"
+			},
+			"install_string": "",
+			"name": "aiosqlite",
+			"fullname": "aiosqlite>=0.21.0"
+		},
+		{
+			"installed": true,
+			"source": {
+				"type": "git",
+				"git": "https://github.com/qosUoG/Beinn",
+				"subdirectory": "packages/cnoc",
+				"branch": "main"
+			},
+			"install_string": "",
+			"name": "cnoc",
+			"fullname": "cnoc"
+		},
+		{
+			"installed": true,
+			"source": {
+				"type": "pip",
+				"package": "fastapi"
+			},
+			"install_string": "",
+			"name": "fastapi",
+			"fullname": "fastapi[standard]>=0.115.11"
+		},
+		{
+			"installed": true,
+			"source": {
+				"type": "pip",
+				"package": "numpy"
+			},
+			"install_string": "",
+			"name": "numpy",
+			"fullname": "numpy>=2.2.3"
+		},
+		{
+			"installed": true,
+			"source": {
+				"type": "path",
+				"path": "../examplelib",
+				"editable": true
+			},
+			"install_string": "",
+			"name": "examplelib",
+			"fullname": "examplelib"
+		},
+		{
+			"installed": true,
+			"source": {
+				"type": "local",
+				"directory": "lib"
+			},
+			"install_string": "lib",
+			"name": "lib",
+			"fullname": "lib"
+		}
+	],
+	"equipments": [],
+	"experiments": []
+}

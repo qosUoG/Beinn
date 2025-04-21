@@ -20,7 +20,7 @@
 	let temp_type: "local" | "path" | "git" | "pip" = $state("pip");
 
 	$effect(() => {
-		if (dependency)
+		if (dependency && !dependency.installed)
 			switch (temp_type) {
 				case "pip":
 					dependency.source = { type: "pip", package: "" };
@@ -58,6 +58,9 @@
 
 	async function handleAddDependency() {
 		await dependency.install();
+
+		await tick();
+		console.log(dependency.installed);
 	}
 </script>
 
@@ -137,19 +140,21 @@
 								onfocus={autofocus} />
 						</LabelField>
 					{/if}
-				{:else if dependency.source!.type === "pip"}
+				{:else if dependency.source.type === "pip"}
+					{console.log(dependency)}
 					<!-- All Following has as confirmed dependency -->
 					<FixedField key="Package" value={dependency.fullname} />
-				{:else if dependency.source!.type === "git"}
+				{:else if dependency.source.type === "git"}
 					<FixedField key="Git Path" value={dependency.source.git} />
-					{#if dependency.source!.subdirectory}
+					{#if dependency.source.subdirectory}
 						<FixedField
 							key="Subdirectory"
 							value={dependency.source.subdirectory} />
 					{/if}
-				{:else if dependency.source!.type === "path"}
+				{:else if dependency.source.type === "path"}
 					<FixedField key="Path" value={dependency.source.path} />
-				{:else if dependency.source!.type === "local"}
+				{:else if dependency.source.type === "local"}
+					{console.log(dependency.source.type)}
 					<FixedField key="Local Directory" value={dependency.name} />
 				{/if}
 			</div>

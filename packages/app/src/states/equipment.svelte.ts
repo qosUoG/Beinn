@@ -2,7 +2,7 @@
 import { EE, type Availables, type EET } from "./ee.svelte";
 
 
-import { beginProcedure, getRandomId } from "$lib/utils";
+import { beginProcedure, getRandomId, type StepT } from "$lib/utils";
 
 import type { ModuleCls } from "./dependency.svelte";
 import { meallGetAvailableEEs_throwable } from "$lib/meall.svelte";
@@ -28,39 +28,43 @@ export class Equipments {
     cleanup: (() => void) | undefined = undefined
 
     async instantiate(payload?: { id?: string, name?: string }) {
-
         const { step, completed, unhandled } = await beginProcedure("INSTANTIATE EQUIPMENT")
-
         try {
-            const new_equipment = await step("Instantiate equipment",
-                () => {
-                    let id: string | undefined, name: string | undefined
-                    if (payload) {
-                        id = payload.id
-                        name = payload.name
-                    }
-
-                    if (!id) id = getRandomId(Object.keys(this._equipments))
-
-                    const new_equipment = new Equipment(id, name)
-                    this._equipments[id] = new_equipment
-
-                    return new_equipment
-                })
-
-
-
-            await step("Refresh available equipment list",
-                async () => {
-                    await this.refreshAvailables_throwable();
-                })
-
+            const res = this.instantiate_throwable(step, payload)
             await completed()
-            return new_equipment
-        }
-        catch (e) {
+            return res
+        } catch (e) {
             await unhandled(e)
         }
+    }
+
+    async instantiate_throwable(step: StepT, payload?: { id?: string, name?: string }) {
+        const new_equipment = await (step as unknown as StepT<Equipment>)("Instantiate equipment",
+            () => {
+                let id: string | undefined, name: string | undefined
+                if (payload) {
+                    id = payload.id
+                    name = payload.name
+                }
+
+                if (!id) id = getRandomId(Object.keys(this._equipments))
+
+                const new_equipment = new Equipment(id, name)
+                this._equipments[id] = new_equipment
+
+                return new_equipment
+            })
+
+
+
+        await step("Refresh available equipment list",
+            async () => {
+                await this.refreshAvailables_throwable();
+            })
+
+
+        return new_equipment
+
     }
 
     moduleClsValid(module_cls: ModuleCls) {

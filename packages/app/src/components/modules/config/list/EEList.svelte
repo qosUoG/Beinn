@@ -20,6 +20,7 @@
 
 	const addHandler = async () => {
 		const new_ee = await workspace.getEEs(eetype).instantiate();
+		if (!new_ee) return;
 		await tick();
 
 		eeeditor.id = new_ee.id;

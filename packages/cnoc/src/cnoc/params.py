@@ -60,7 +60,7 @@ class SelectStrParam(_QosParam):
     value: str
 
     class PydanticBaseModel(BaseModel):
-        _type: Literal["select.str"]
+        type: Literal["select.str"]
         options: list[str]
         value: str
 
@@ -105,7 +105,7 @@ class SelectIntParam(_QosParam):
     value: int
 
     class PydanticBaseModel(BaseModel):
-        _type: Literal["select.int"]
+        type: Literal["select.int"]
         options: list[int]
         value: int
 
@@ -140,7 +140,7 @@ class SelectFloatParam(_QosParam):
     value: int
 
     class PydanticBaseModel(BaseModel):
-        _type: Literal["select.float"]
+        type: Literal["select.float"]
         options: list[float]
         value: float
 
@@ -184,7 +184,7 @@ class IntParam(_QosParam):
     value: int
 
     class PydanticBaseModel(BaseModel):
-        _type: Literal["int"]
+        type: Literal["int"]
         suffix: str
         value: int
 
@@ -229,7 +229,7 @@ class FloatParam(_QosParam):
     value: float
 
     class PydanticBaseModel(BaseModel):
-        _type: Literal["float"]
+        type: Literal["float"]
         suffix: str
         value: float
 
@@ -265,7 +265,7 @@ class StrParam(_QosParam):
     value: str
 
     class PydanticBaseModel(BaseModel):
-        _type: Literal["str"]
+        type: Literal["str"]
         value: str
 
         def toParam(self):
@@ -297,7 +297,7 @@ class BoolParam(_QosParam):
     value: bool
 
     class PydanticBaseModel(BaseModel):
-        _type: Literal["bool"]
+        type: Literal["bool"]
         value: bool
 
         def toParam(self):
@@ -334,7 +334,7 @@ class InstanceEquipmentParam[T: EquipmentABC](_QosParam):
     instance: EquipmentProxy[T] | None
 
     class PydanticBaseModel(BaseModel):
-        _type: Literal["instance.equipment"]
+        type: Literal["instance.equipment"]
         _instance_id: str | None
 
         def toParam(self):
@@ -375,11 +375,11 @@ class InstanceExperimentParam[T: ExperimentABC](_QosParam):
     instance: T | None
 
     class PydanticBaseModel(BaseModel):
-        _type: Literal["instance.experiment"]
-        _instance_id: str | None
+        type: Literal["instance.experiment"]
+        instance_id: str | None
 
         def toParam(self):
-            return InstanceExperimentParam(_instance_id=self._instance_id)
+            return InstanceExperimentParam(_instance_id=self.instance_id)
 
     def __init__(self):
         self._type = "instance.experiment"
@@ -388,7 +388,7 @@ class InstanceExperimentParam[T: ExperimentABC](_QosParam):
 
     @override
     def toBaseModel(self) -> PydanticBaseModel:
-        return self.PydanticBaseModel(type=self._type, _instance_id=self._instance_id)
+        return self.PydanticBaseModel(type=self._type, instance_id=self._instance_id)
 
     @override
     def getValue(self):

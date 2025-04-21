@@ -3,7 +3,7 @@
 
 import { tick } from "svelte"
 import { EE, type Availables, type EET } from "./ee.svelte"
-import { beginProcedure, getRandomId } from "$lib/utils"
+import { beginProcedure, getRandomId, type StepT } from "$lib/utils"
 import { Charts, type ChartConfigs } from "./chart.svelte"
 import type { ModuleCls } from "./dependency.svelte"
 import { workspace } from "./workspace.svelte"
@@ -221,36 +221,40 @@ export class Experiments {
 
     async instantiate(payload?: { id?: string, name?: string }) {
         const { step, completed, unhandled } = await beginProcedure("INSTANTIATE EXPERIMENT")
-
         try {
-
-            const new_experiment = await step("Instantiate experiment",
-                () => {
-                    let id: string | undefined, name: string | undefined
-                    if (payload) {
-                        id = payload.id
-                        name = payload.name
-                    }
-
-                    if (!id) id = getRandomId(Object.keys(this._experiments))
-
-                    const new_experiment = new Experiment(id, name)
-                    this._experiments[id] = new_experiment
-
-                    return new_experiment
-                })
-
-            await step("Refresh available experiment list",
-                async () => {
-                    await this.refreshAvailables_throwable();
-                })
-
+            const res = this.instantiate_throwable(step, payload)
             await completed()
-            return new_experiment
-        }
-        catch (e) {
+            return res
+        } catch (e) {
             await unhandled(e)
         }
+    }
+
+    async instantiate_throwable(step: StepT, payload?: { id?: string, name?: string }) {
+        const new_experiment = await (step as unknown as StepT<Experiment>)("Instantiate experiment",
+            () => {
+                let id: string | undefined, name: string | undefined
+                if (payload) {
+                    id = payload.id
+                    name = payload.name
+                }
+
+                if (!id) id = getRandomId(Object.keys(this._experiments))
+
+                const new_experiment = new Experiment(id, name)
+                this._experiments[id] = new_experiment
+
+                return new_experiment
+            })
+
+        await step("Refresh available experiment list",
+            async () => {
+                await this.refreshAvailables_throwable();
+            })
+
+
+        return new_experiment
+
     }
 
     moduleClsValid(module_cls: ModuleCls) {

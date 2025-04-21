@@ -144,8 +144,6 @@ class Dependency {
 
         try {
 
-
-
             if (this.source.type === "local") {
                 await step("Add local directory to dependency list",
                     async () => {
@@ -164,8 +162,8 @@ class Dependency {
 
 
                         this._installed = true
-                        this._name = "local:" + this.source.directory
-                        this._fullname = "local:" + this.source.directory
+                        this._name = this.source.directory
+                        this._fullname = this.source.directory
                         this.install_string = this.source.directory
 
                         await workspace.refreshAvailables_throwable()
@@ -237,6 +235,7 @@ class Dependency {
             await workspace.refreshAvailables_throwable()
 
             await completed()
+            console.log({ inside: this.installed })
         }
         catch (e) {
             await unhandled(e)

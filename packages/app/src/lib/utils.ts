@@ -24,6 +24,7 @@ export async function readAllUvDependencies() {
     const uv_dependencies: DependencyT_Installed[] = []
 
     // First prepare the dependencies already installed in the workspace
+    const text = await readTextFile(workspace.path + "/pyproject.toml")
     const parsed = parse(await readTextFile(workspace.path + "/pyproject.toml"))
 
     const sources = (parsed.tool as { uv: { sources: Record<string, object> } }).uv?.sources
@@ -58,6 +59,7 @@ export async function readAllUvDependencies() {
                 installed: true,
             })
     }
+
     return uv_dependencies
 }
 
@@ -167,8 +169,11 @@ export function capitalise(input: string) { return input[0].toUpperCase() + Stri
 
 export const sleep = (ms: number) => new Promise(r => setTimeout(r, ms));
 
+export type StepT<T = void> = (step_name: string, fn: () => (Promise<T> | T)) => Promise<T>
+
 export async function beginProcedure(proc_name: string) {
     await pushLog("beinn", `PROCEDURE ${proc_name} --- BEGIN` + "\n")
+
     async function step<T = void>(step_name: string, fn: () => (Promise<T> | T)) {
         try {
             await pushLog("beinn", `${proc_name} --- STEP: ${step_name}\n`)
@@ -186,6 +191,7 @@ export async function beginProcedure(proc_name: string) {
             throw `ERROR HANDLED:${step_name}`
         }
     }
+
 
     async function completed() {
         await pushLog("beinn", `PROCEDURE ${proc_name} --- COMPLETED` + "\n")
