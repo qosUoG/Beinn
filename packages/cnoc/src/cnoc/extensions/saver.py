@@ -86,7 +86,7 @@ class _SaverABC(ABC):
 
 @dataclass
 class XYFloatSaverConfig(_SaverConfigABC):
-    _type: Literal["saver$xyfloat"]
+    _type: Literal["saver:xyfloat"]
     title: str
     timestamp: int
     y_names: list[str]
@@ -113,7 +113,7 @@ class XYFloatSaver(_SaverABC):
         self.y_names = kwargs["y_names"]
 
         self.config = XYFloatSaverConfig(
-            _type="saver$xyfloat",
+            _type="saver:xyfloat",
             title=self.title,
             timestamp=self.timestamp,
             y_names=self.y_names,
@@ -131,14 +131,14 @@ class XYFloatSaver(_SaverABC):
     def _create_table_sql(self) -> str:
         return f"""CREATE TABLE "{self.table_name}" (
             id INTEGER PRIMARY KEY,
-            "saver$x" REAL NOT NULL,
+            saver$x REAL NOT NULL,
             {",\n".join([f"{key} REAL" for key in self.y_names])}
             ) """
 
     @property
     @override
     def _select_all_sql(self) -> str:
-        return f'''SELECT id,"saver$x",{",".join([f"{key}" for key in self.y_names])} from "{self.table_name}" ORDER BY id DESC'''
+        return f'''SELECT id,saver$x,{",".join([f"{key}" for key in self.y_names])} from "{self.table_name}" ORDER BY id DESC'''
 
     @override
     def _finalize(self, raw: Iterable[Row]):
@@ -207,5 +207,5 @@ class XYFloatSaver(_SaverABC):
     @override
     def _insert_sql(self):
         return f"""
-        INSERT INTO "{self.table_name}"("saver$x",{",".join([f"{key}" for key in self.y_names])}) VALUES(:"saver\:x",{",".join([f":{key}" for key in self.y_names])})
+        INSERT INTO "{self.table_name}"(saver$x,{",".join([f"{key}" for key in self.y_names])}) VALUES(:saver$x,{",".join([f":{key}" for key in self.y_names])})
     """

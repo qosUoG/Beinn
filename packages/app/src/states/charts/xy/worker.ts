@@ -236,15 +236,15 @@ function reset() {
         console.log({ _datasets, c: _chart.data, _decimation })
 
 
-        // establish_web_socket()
+        establish_web_socket()
 
 
-        // _ws_interval = setInterval(() => {
+        _ws_interval = setInterval(() => {
 
-        //     if (_online && (_ws === undefined || (_ws.readyState !== WebSocket.OPEN && _ws.readyState !== WebSocket.CONNECTING)))
-        //         establish_web_socket()
-        //     // Runs once every 10 seconds so it does not fall asleep
-        // }, 10000)
+            if (_online && (_ws === undefined || (_ws.readyState !== WebSocket.OPEN && _ws.readyState !== WebSocket.CONNECTING)))
+                establish_web_socket()
+            // Runs once every 10 seconds so it does not fall asleep
+        }, 10000)
     })
 
 
@@ -264,7 +264,6 @@ function establish_web_socket() {
             establish_web_socket()
         else {
             _online = false
-            console.log("closed")
         }
 
     }
