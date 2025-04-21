@@ -7,6 +7,7 @@
 	import { zeropad } from "$lib/utils";
 	import Cli from "$icons/Cli.svelte";
 	import { workspace } from "$states/workspace.svelte";
+	import Refresh from "$icons/Refresh.svelte";
 
 	const month_texts = [
 		"Jan",
@@ -72,24 +73,51 @@
 				});
 		}
 	}
+
+	let isRefreshing = $state(false);
+	let cli_element: HTMLDivElement | undefined = $state(undefined);
+
+	$effect(() => {
+		cli_panel.command_history;
+		isRefreshing;
+		if (isRefreshing && cli_element) {
+			cli_element.scrollTo({
+				top: cli_element.scrollHeight,
+				left: cli_element.scrollLeft,
+				behavior: "instant",
+			});
+		}
+	});
 </script>
 
 {#if cli_panel.show}
 	<div
 		class="max-w-170 min-w-170 w-170 h-full section bg-slate-700 fcol-1 z-1000">
 		<div class="frow justify-between">
-			<div class="title bg-white wrapped icon-btn-sm"><Cli /></div>
-			<button
-				class={cn(
-					"icon-btn-sm  rounded border-1 border-green-500 text-slate-700",
-					cli_panel.show_time ? "bg-green-500" : "text-green-500"
-				)}
-				onclick={() => {
-					cli_panel.show_time = !cli_panel.show_time;
-				}}><Clock /></button>
+			<div class="title text-white wrapped icon-btn-sm"><Cli /></div>
+
+			<div class="frow-4">
+				<button
+					class={cn(
+						" border-white border-1 icon-btn-sm wrapped",
+						isRefreshing ? "bg-white" : "text-white"
+					)}
+					onclick={() => {
+						isRefreshing = !isRefreshing;
+					}}><Refresh /></button>
+				<button
+					class={cn(
+						"icon-btn-sm  rounded border-1 border-green-500 text-slate-700",
+						cli_panel.show_time ? "bg-green-500" : "text-green-500"
+					)}
+					onclick={() => {
+						cli_panel.show_time = !cli_panel.show_time;
+					}}><Clock /></button>
+			</div>
 		</div>
 		<div
-			class="  flex-grow fcol-2 overflow-y-scroll scrollbar section font-mono font-stretch-extra-condensed tracking-tighter">
+			class="  flex-grow fcol-2 overflow-y-scroll scrollbar section font-mono font-stretch-extra-condensed tracking-tighter"
+			bind:this={cli_element}>
 			{#each cli_panel.cli_entries as { timestamp, message }}
 				{@const dateobj = new Date(timestamp)}
 				{@const month = month_texts[dateobj.getMonth()]}

@@ -29,7 +29,7 @@ export async function pushLog(type: "beinn" | "meall", message: string) {
 
 export const log_panel = $state({
     show_beinn: true,
-    show_meall: false,
+    show_meall: true,
     show_time: false,
     show: false,
 
