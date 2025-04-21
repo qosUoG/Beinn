@@ -217,9 +217,41 @@ function reset() {
     // establish_web_socket()
     // return
 
+    if (_ws !== undefined)
+        _ws.close()
+
+    if (_ws_interval !== undefined)
+        clearInterval(_ws_interval)
+
+
     _datasets = _config.y_names.map(label => ({ data: [], label }))
+    _decimation = 0
+    _chart.destroy()
+
+    setTimeout(() => {
+
+        const config = getChartConfig()
+        _chart = new Chart(_canvas as unknown as HTMLCanvasElement, config)
+
+        console.log({ _datasets, c: _chart.data, _decimation })
+
+
+        // establish_web_socket()
+
+
+        // _ws_interval = setInterval(() => {
+
+        //     if (_online && (_ws === undefined || (_ws.readyState !== WebSocket.OPEN && _ws.readyState !== WebSocket.CONNECTING)))
+        //         establish_web_socket()
+        //     // Runs once every 10 seconds so it does not fall asleep
+        // }, 10000)
+    })
+
+
 }
 function establish_web_socket() {
+
+
     _online = true
     _ws = new WebSocket(meallWs(`chart/${_id}/${_config.title}`))
 
@@ -230,8 +262,11 @@ function establish_web_socket() {
     _ws.onclose = (event) => {
         if (event.code !== 4000)
             establish_web_socket()
-        else
+        else {
             _online = false
+            console.log("closed")
+        }
+
     }
 }
 

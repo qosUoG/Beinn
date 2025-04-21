@@ -111,13 +111,13 @@ class ExampleExperiment(ExperimentABC):
         value = random.random()
         self.xyplot.plot(
             {
-                "x": index,
+                "chart:x": index,
                 "temperature": value,
             }
         )
         # print("plotted")
 
-        self.saver.save({"x": index, "temperature": value})
+        self.saver.save({"saver$x": index, "temperature": value})
         # print("saved")
 
         # if index >= 9:

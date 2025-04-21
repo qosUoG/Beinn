@@ -128,8 +128,8 @@ export class Experiment extends EE {
                     this._iteration_count = -1;
                     this._status = "starting";
 
-                    // Reset the charts
-                    Object.values(this._charts.charts).forEach(cs => { cs.reset() });
+                    // // Reset the charts
+                    // Object.values(this._charts.charts).forEach(cs => { cs.reset() });
 
                     await tick();
                     await meallStartExperiment_throwable({ id: this.id });

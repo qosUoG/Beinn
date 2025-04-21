@@ -176,10 +176,6 @@ class ExperimentProxy:
         try:
             success = await asyncio.to_thread(self._runner)
 
-            if not success:
-                self._messenger.put("status", "stopped")
-                return
-
             for saver in self._savers.values():
                 data = await saver.finalize()
 
@@ -206,8 +202,14 @@ class ExperimentProxy:
 
                     with open(filename, "wb") as f:
                         pickle.dump(dataset, f)
+            for chart in self._charts.values():
+                chart.finalize()
 
+            if not success:
+                self._messenger.put("status", "stopped")
+            else:
                 self._messenger.put("status", "completed")
+                return
 
         except asyncio.CancelledError:
             coros: list[CoroutineType[Any, Any, Any]] = []

@@ -54,7 +54,7 @@ class ChartProxy:
         return self._chart
 
     # Hook when experiment ended
-    def experimentCompleted(self):
+    def finalize(self):
         self._experiment_stopped.set()
 
     async def kill(self):
