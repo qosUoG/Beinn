@@ -14,9 +14,8 @@
 	import { workspace } from "$states/workspace.svelte";
 
 	getCurrentWindow().listen("tauri://close-requested", async () => {
-		await workspace.kill();
-
-		await exit(0);
+		const should_kill = await workspace.kill();
+		if (should_kill) await exit(0);
 	});
 </script>
 

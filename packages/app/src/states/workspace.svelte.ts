@@ -4,7 +4,7 @@ import { parse, stringify } from "smol-toml"
 
 import { tick } from "svelte"
 
-import { meallGetCliWs, meallGetPid_throwable, meallWaitUntilOnline } from "$lib/meall.svelte"
+import { meallGetCliWs, meallGetPid_throwable, meallKill_throwable, meallWaitUntilOnline } from "$lib/meall.svelte"
 
 import { Equipment, Equipments } from "./equipment.svelte"
 import { Experiment, Experiments } from "./experiment.svelte"
@@ -12,10 +12,10 @@ import { Dependencies, sourceEqual, type DependencyT } from "./dependency.svelte
 
 import { readTextFile, readDir, writeTextFile, exists, mkdir } from "@tauri-apps/plugin-fs"
 
-import { confirm } from "@tauri-apps/plugin-dialog"
+import { confirm, message } from "@tauri-apps/plugin-dialog"
 import { Child, Command } from "@tauri-apps/plugin-shell"
 import type { EET, EEType } from "./ee.svelte"
-import { beginProcedure, readAllUvDependencies, shell } from "$lib/utils"
+import { beginProcedure, readAllUvDependencies, shell, sleep } from "$lib/utils"
 import { platform } from '@tauri-apps/plugin-os';
 import { pushLog } from "$components/modules/LogPanelController.svelte"
 import { pushCli } from "$components/modules/CliPanelController.svelte"
@@ -87,25 +87,75 @@ export class Workspace {
         this._experiments = new Experiments()
     }
 
-
-    // TODO REDO CLEANUP
     async kill() {
+        const { step, completed, cancelled, unhandled, failed } = await beginProcedure("CLOSE WORKSPACE")
 
-        if (!this.uvproc) return
+        try {
+            if (!this.uvproc) { await failed("unreacheable code, this.uvproc is undefined") }
+
+            const has_running_experiment = await step(`Check if experiment running`,
+                async () => {
+                    for (const e of Object.values(this._experiments.experiments))
+                        if (e.is_running)
+                            return true
+
+                    return false
+                })
 
 
-        const currentPlatform = platform();
-        if (currentPlatform === "windows") {
-            await shell({ fn: "taskkill", cmd: `/PID ${this.meall_pid} /F` })
-            await shell({ fn: "taskkill", cmd: `/PID ${this.uvproc.pid} /F` })
+            if (has_running_experiment) {
+                const should_kill = await step(`Ask if user wants to force close workspace`,
+                    async () => {
+                        return await confirm("Experiment might still be running. Are you sure to force kill the workspace?", { title: "Beinn", kind: "warning" })
+                    })
+
+                if (!should_kill) {
+                    await cancelled("User cancelled closing the workspace")
+                    return false
+                }
+
+                await step(`Stop all experiments`,
+                    async () => {
+                        this._experiments.kill()
+                    })
+            }
+
+            await step(`Stop the workspace gracefully`,
+                async () => {
+                    await Promise.any([meallKill_throwable, sleep(2000)])
+                })
+
+            await step(`Kill the workspace`,
+                async () => {
+                    const currentPlatform = platform();
+                    if (currentPlatform === "windows") {
+                        await shell({ fn: "taskkill", cmd: `/PID ${this.meall_pid} /F` })
+                        await shell({ fn: "taskkill", cmd: `/PID ${this.uvproc!.pid} /F` })
+                    }
+                    else if (currentPlatform === "linux" || currentPlatform === "macos") {
+                        await shell({ fn: "kill", cmd: `-s SIGKILL ${this.meall_pid}` })
+                        await shell({ fn: "kill", cmd: `-s SIGKILL ${this.uvproc!.pid}` })
+                    }
+                })
+
+            this._connected = false
+
+            await this.reset()
+            await completed()
+            return true
+        } catch (e) {
+            await unhandled(e)
+            const currentPlatform = platform();
+            if (currentPlatform === "windows") {
+                await shell({ fn: "taskkill", cmd: `/PID ${this.meall_pid} /F` })
+                await shell({ fn: "taskkill", cmd: `/PID ${this.uvproc!.pid} /F` })
+            }
+            else if (currentPlatform === "linux" || currentPlatform === "macos") {
+                await shell({ fn: "kill", cmd: `-s SIGKILL ${this.meall_pid}` })
+                await shell({ fn: "kill", cmd: `-s SIGKILL ${this.uvproc!.pid}` })
+            }
+            return true
         }
-        else if (currentPlatform === "linux" || currentPlatform === "macos") {
-            await shell({ fn: "kill", cmd: `-s SIGKILL ${this.meall_pid}` })
-            await shell({ fn: "kill", cmd: `-s SIGKILL ${this.uvproc.pid}` })
-        }
-
-
-
     }
 
 
@@ -447,56 +497,55 @@ export class Workspace {
 
     }
 
-    // TODO REDO CLI FEATURE
+
     async sendCommand(input: string) {
         // Check if cli websocket is connected
-        if (this.log_socket === undefined)
-            // throw applicationError("Websocket to meall for cli is undefined");
-            throw ""
-
-        let sent = false
-
-        // Get the inputs
-        let inputs: string[]
-        if (input.includes("."))
-            inputs = input.split(".")
-        else inputs = [input]
-
-        // Check if any input in inputs is the experiment
-        const equipment_name = inputs[0];
-
-        for (const equipment of Object.values(this._equipments.equipments)) {
-            if (!equipment.created) continue
-
-            if (equipment.name === equipment_name) {
-                // Reconstruct the command and send to python
-                this.log_socket.send(
-                    JSON.stringify({
-                        type: "equipment",
-                        id: equipment.id,
-                        command: input.slice(equipment_name.length),
-                    })
-                );
-                sent = true
-                break
-            }
+        if (this.log_socket === undefined) {
+            await message("Cli connection to meall is lost. Please reopen the app.", {
+                title: "Beinn", kind: "error"
+            })
+            return
         }
 
-        if (!sent)
-            this.log_socket.send(
-                JSON.stringify({
-                    type: "general",
-                    command: input,
+        const { step, completed, unhandled } = await beginProcedure("SEND COMMAND")
+        try {
+
+            const command = await step(`Check if ${input}`,
+                async () => {
+                    for (const equipment of Object.values(this._equipments.equipments)) {
+                        if (!equipment.created) continue
+
+                        if (input.match(equipment.name)) {
+                            return JSON.stringify({
+                                type: "equipment",
+                                command: input,
+                                id: equipment.id,
+                                name: equipment.name
+                            })
+                        }
+                    }
+
+
+                    return JSON.stringify({
+                        type: "general",
+                        command: input,
+                    })
                 })
-            );
 
-        // Record the command into the log
-        await pushCli(input)
-
-
-
+            await step("Check if command is equipment command",
+                async () => {
+                    this.log_socket!.send(command)
+                })
 
 
+            // Record the command into the log
+            await pushCli(input)
+
+            await completed()
+
+        } catch (e) {
+            await unhandled(e)
+        }
     }
 
     getEEs(eetype: EEType) {
@@ -513,8 +562,6 @@ export class Workspace {
         if (eetype === "equipment") return this._equipments.equipments[id]
         return this._experiments.experiments[id]
     }
-
-
 
 }
 

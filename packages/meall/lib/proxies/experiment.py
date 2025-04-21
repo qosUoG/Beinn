@@ -239,6 +239,8 @@ class ExperimentProxy:
         for saver in self._savers.values():
             await saver.kill()
 
+        self._experiment.cleanup()
+
     """Public Interface to messenger"""
 
     def subscribeMessage(self, ws: WebSocket):

@@ -81,7 +81,7 @@ class ExperimentABC(ABC):
         """
         raise NotImplementedError
 
-    def stop(self):
+    def cleanup(self):
         """
         Perform any clean up if needed
 

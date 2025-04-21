@@ -1,5 +1,8 @@
 import asyncio
+from contextlib import redirect_stderr, redirect_stdout
 import importlib
+from io import StringIO
+import sys
 from types import CoroutineType, ModuleType
 from typing import Any
 from fastapi import WebSocket
@@ -134,6 +137,9 @@ class AppState:
         for experiment_proxy in cls._experiment_proxies.values():
             coros.append(experiment_proxy.kill())
 
+        for equipment_proxy in cls._equipment_proxies.values():
+            equipment_proxy.cleanup()
+
         await asyncio.gather(*coros, SqlWorker.stop())
 
     """CLI"""
@@ -155,9 +161,15 @@ class AppState:
             }
 
         try:
+            f = StringIO()
+
+            with redirect_stdout(f):
+                with redirect_stderr(sys.stdout):
+                    exec(code, globals=globals())
+
             return {
                 "type": "exec",
-                "result": f"{exec(code, globals=globals())}",
+                "result": f.getvalue(),
             }
 
         except Exception as e:
@@ -165,3 +177,7 @@ class AppState:
                 "type": "error",
                 "result": f"code: {code}, error:{e}",
             }
+
+    @classmethod
+    def eqiupment_interpret(cls, *, id: str, name: str, code: str, type: str):
+        return cls._equipment_proxies[id].interpret(code, name)

@@ -14,7 +14,7 @@ async def workspace_status():
 
 
 @router.get("/workspace/kill")
-async def workspace_forcestop():
+async def workspace_kill():
     await AppState.kill()
     return ok()
 

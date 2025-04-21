@@ -51,6 +51,11 @@ export async function meallGetPid_throwable(): Promise<number> {
 
 }
 
+export async function meallKill_throwable(): Promise<void> {
+    await getRequestJsonOut_throwable(meallUrl("workspace/kill"));
+
+}
+
 export function meallGetExperimentEventsWs<T extends any>(payload: { id: string, onmessage: (this: WebSocket, event: MessageEvent<T>) => any }) {
     let socket = new WebSocket(meallWs(`experiment/${payload.id}/events`))
     socket.onmessage = payload.onmessage

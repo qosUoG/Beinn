@@ -42,6 +42,18 @@ class EquipmentABC(ABC):
 
         self.params: Params
 
+    def cleanup(self):
+        """
+        Perform any clean up if needed
+
+        This method would run when the workspace is closed. Users may perform
+        any clean up in this method. Please be aware the equipment might be in any state
+        when entering this function
+
+        It is optional to implement this method.
+        """
+        pass
+
 
 class EquipmentProxy[T: EquipmentABC](Protocol):
     """

@@ -8,6 +8,7 @@
 	import Logs from "$icons/Logs.svelte";
 	import { log_panel } from "./LogPanelController.svelte";
 	import { workspace } from "$states/workspace.svelte";
+	import Cancel from "$icons/Cancel.svelte";
 
 	async function folderSearchHandler() {
 		const path = await open({
@@ -22,6 +23,10 @@
 	async function saveHandler() {
 		await workspace.save();
 	}
+
+	async function closeHandler() {
+		await workspace.kill();
+	}
 </script>
 
 <div class="h-[32px]" data-tauri-decorum-tb>
@@ -34,8 +39,13 @@
 					{workspace.path}
 				</div>
 			</div>
-			<button class="icon-btn-sm slate" onclick={folderSearchHandler}
-				><FolderOpen /></button>
+			{#if !workspace.connected}
+				<button class="icon-btn-sm slate" onclick={folderSearchHandler}
+					><FolderOpen /></button>
+			{:else}
+				<button class="icon-btn-sm slate" onclick={closeHandler}
+					><Cancel /></button>
+			{/if}
 			<button class="icon-btn-sm slate" onclick={saveHandler}
 				><Disk /></button>
 		</div>

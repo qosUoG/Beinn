@@ -3,7 +3,7 @@
 
 import { tick } from "svelte"
 import { EE, type Availables, type EET } from "./ee.svelte"
-import { beginProcedure, getRandomId, type StepT } from "$lib/utils"
+import { beginProcedure, getRandomId, sleep, type StepT } from "$lib/utils"
 import { Charts, type ChartConfigs } from "./chart.svelte"
 import type { ModuleCls } from "./dependency.svelte"
 import { workspace } from "./workspace.svelte"
@@ -94,6 +94,24 @@ export class Experiment extends EE {
     get status() {
         return this._status
     }
+    get is_running() {
+        switch (this._status) {
+            case "initial":
+            case "stopped":
+            case "completed":
+                return false
+            case "starting":
+            case "started":
+            case "pausing":
+            case "paused":
+            case "continuing":
+            case "continued":
+            case "stopping":
+                return true
+        }
+
+    }
+
 
     private _iteration_count: number = $state(-1)
     get iteration_count() {
@@ -288,6 +306,15 @@ export class Experiments {
             .filter((e) => e.id !== id && e.name && e.name.length > 0)
             .map((e) => ({ key: e.name, value: e.id }))
 
+    }
+
+    async kill() {
+        const promises: Promise<any>[] = []
+        for (const e of Object.values(this._experiments)) {
+            promises.push(e.stop())
+        }
+
+        await Promise.all(promises)
     }
 
 }
