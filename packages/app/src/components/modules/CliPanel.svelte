@@ -116,7 +116,7 @@
 			</div>
 		</div>
 		<div
-			class="  flex-grow fcol-2 overflow-y-scroll scrollbar section font-mono font-stretch-extra-condensed tracking-tighter"
+			class="  flex-grow fcol overflow-y-scroll scrollbar section font-mono font-stretch-extra-condensed tracking-tighter"
 			bind:this={cli_element}>
 			{#each cli_panel.cli_entries as { timestamp, message }}
 				{@const dateobj = new Date(timestamp)}
@@ -133,11 +133,11 @@
 							{`${month} ${date} ${hour}:${minuet}:${second}`}
 						</div>
 					{/if}
-				</div>
 
-				<div
-					class="text-slate-100 text-wrap flex-grow whitespace-break-spaces break-all">
-					>>> {message.replace(/\u001b\[.*?m/g, "")}
+					<div
+						class="text-slate-100 text-wrap flex-grow whitespace-break-spaces break-all">
+						>>> {message.replace(/\u001b\[.*?m/g, "")}
+					</div>
 				</div>
 			{/each}
 		</div>

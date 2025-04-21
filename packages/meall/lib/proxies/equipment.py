@@ -1,10 +1,9 @@
-from contextlib import contextmanager, redirect_stderr
+from contextlib import contextmanager, redirect_stderr, redirect_stdout
 import sys
 from threading import Lock
 from typing import Iterator
 from cnoc.equipment import EquipmentABC, EquipmentProxy as proto
 from io import StringIO
-from contextlib import redirect_stdout
 
 
 class EquipmentProxy[T: EquipmentABC](proto):

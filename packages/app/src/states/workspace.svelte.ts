@@ -159,7 +159,7 @@ export class Workspace {
     }
 
 
-    // TODO REDO CLI FEATURE
+
     connect = async (path: string) => {
 
         const { step, completed, cancelled, unhandled } = await beginProcedure("CONNECT MEALL")
@@ -220,11 +220,11 @@ export class Workspace {
                 }
             )
 
-            await step("Copy newest version of meall to workspace",
-                async () => {
-                    await shell({ fn: "uvx", cmd: "copier copy -r main git+https://github.com/qosUoG/Beinn.git ./meall -f", cwd: path })
-                }
-            )
+            // await step("Copy newest version of meall to workspace",
+            //     async () => {
+            //         await shell({ fn: "uvx", cmd: "copier copy -r main git+https://github.com/qosUoG/Beinn.git ./meall -f", cwd: path })
+            //     }
+            // )
 
             await step("Create data directory if not exist",
                 async () => {
@@ -274,7 +274,7 @@ export class Workspace {
 
 
 
-            // TODO REDO CLI FEATURE
+
             await step("Setup websocket connection to meall for cli feature",
                 async () => {
                     this.log_socket = meallGetCliWs<string>({
@@ -282,7 +282,7 @@ export class Workspace {
                             const res = JSON.parse(message.data) as
                                 | {
                                     type: "exec";
-                                    result: null;
+                                    result: string;
                                 }
                                 | { type: "eval"; result: string }
                                 | {
@@ -290,8 +290,8 @@ export class Workspace {
                                     result: string;
                                 };
 
-                            if (res.type !== "exec")
-                                pushCli(res.result);
+                            console.log({ res })
+                            pushCli(res.result);
                         },
                     });
                 })
@@ -498,7 +498,7 @@ export class Workspace {
     }
 
 
-    async sendCommand(input: string) {
+    async SendCode(input: string) {
         // Check if cli websocket is connected
         if (this.log_socket === undefined) {
             await message("Cli connection to meall is lost. Please reopen the app.", {
@@ -507,10 +507,10 @@ export class Workspace {
             return
         }
 
-        const { step, completed, unhandled } = await beginProcedure("SEND COMMAND")
+        const { step, completed, unhandled } = await beginProcedure("SEND CODE")
         try {
 
-            const command = await step(`Check if ${input}`,
+            const code = await step(`Check if ${input} is equipment code`,
                 async () => {
                     for (const equipment of Object.values(this._equipments.equipments)) {
                         if (!equipment.created) continue
@@ -518,7 +518,7 @@ export class Workspace {
                         if (input.match(equipment.name)) {
                             return JSON.stringify({
                                 type: "equipment",
-                                command: input,
+                                code: input,
                                 id: equipment.id,
                                 name: equipment.name
                             })
@@ -528,17 +528,17 @@ export class Workspace {
 
                     return JSON.stringify({
                         type: "general",
-                        command: input,
+                        code: input,
                     })
                 })
 
-            await step("Check if command is equipment command",
+            await step("Check if code is equipment code",
                 async () => {
-                    this.log_socket!.send(command)
+                    this.log_socket!.send(code)
                 })
 
 
-            // Record the command into the log
+            // Record the code into the log
             await pushCli(input)
 
             await completed()

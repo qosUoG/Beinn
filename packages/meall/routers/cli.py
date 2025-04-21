@@ -8,7 +8,7 @@ router = APIRouter()
 
 @router.websocket("/cli")
 async def cli(ws: WebSocket):
-    # This websocket shall keep accepting commands and post back result of the commands
+    # This websocket shall keep accepting code and post back result of the code
     await ws.accept()
     try:
         while True:
@@ -18,7 +18,7 @@ async def cli(ws: WebSocket):
                 print(e, flush=True)
 
             if data["type"] == "general":
-                await ws.send_json(AppState.interpret(data["command"]))
+                await ws.send_json(AppState.interpret(data["code"]))
             else:
                 await ws.send_json(AppState.eqiupment_interpret(**data))
     except WebSocketDisconnect:
