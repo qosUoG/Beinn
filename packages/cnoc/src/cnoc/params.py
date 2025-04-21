@@ -23,7 +23,6 @@ experiment, please refer to the example directory.
 """
 
 from abc import ABC, abstractmethod
-from dataclasses import dataclass
 from pickle import FALSE
 from typing import Literal, override
 from cnoc.experiment import ExperimentABC
@@ -300,7 +299,7 @@ class InstanceEquipmentParam[T: EquipmentABC](_QosParam):
         instance_id: str | None
 
         def toParam(self):
-            return InstanceEquipmentParam(_instance_id=self.instance_id)
+            return InstanceEquipmentParam(self.instance_id)
 
     def __init__(self, instance_id: str | None = None):
         self._type: Literal["instance.equipment"] = "instance.equipment"
@@ -336,7 +335,7 @@ class InstanceExperimentParam[T: ExperimentABC](_QosParam):
         instance_id: str | None
 
         def toParam(self):
-            return InstanceExperimentParam(instance_id=self.instance_id)
+            return InstanceExperimentParam(self.instance_id)
 
     def __init__(self, instance_id: str | None = None):
         self._type: Literal["instance.experiment"] = "instance.experiment"
