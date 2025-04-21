@@ -170,11 +170,11 @@ export class Workspace {
                 }
             )
 
-            // await step("Copy newest version of meall to workspace",
-            //     async () => {
-            //         await shell({ fn: "uvx", cmd: "copier copy -r main git+https://github.com/qosUoG/Beinn.git ./meall -f", cwd: path })
-            //     }
-            // )
+            await step("Copy newest version of meall to workspace",
+                async () => {
+                    await shell({ fn: "uvx", cmd: "copier copy -r main git+https://github.com/qosUoG/Beinn.git ./meall -f", cwd: path })
+                }
+            )
 
             await step("Create data directory if not exist",
                 async () => {

@@ -21,13 +21,13 @@ class SaverProxy:
         self._frames_lock = Lock()
         self._frames: list[Any] = []
 
-        self._insert_sql = self._saver._insert_sql()
+        self._insert_sql = self._saver._insert_sql
 
         self._should_cancel = asyncio.Event()
         self._stopped = asyncio.Event()
 
         # Create the table
-        SqlWorker.putScript(self._saver._create_table_sql())
+        SqlWorker.putScript(self._saver._create_table_sql)
 
         # Create the task that continuously submit put request for registering frames
         self._task = asyncio.create_task(self._worker())
@@ -41,7 +41,7 @@ class SaverProxy:
         self._should_cancel.set()
         await self._stopped.wait()
         return self._saver._finalize(
-            await SqlWorker.putFetchall(self._saver._select_all_sql())
+            await SqlWorker.putFetchall(self._saver._select_all_sql)
         )
 
     async def kill(self):
