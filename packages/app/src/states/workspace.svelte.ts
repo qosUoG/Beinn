@@ -498,7 +498,7 @@ export class Workspace {
     }
 
 
-    async SendCode(input: string) {
+    async sendCode(input: string) {
         // Check if cli websocket is connected
         if (this.log_socket === undefined) {
             await message("Cli connection to meall is lost. Please reopen the app.", {

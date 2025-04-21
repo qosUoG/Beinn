@@ -30,7 +30,7 @@
 
 	async function sendHandler() {
 		cli_panel.command_history.unshift(input);
-		workspace.sendCommand(input);
+		workspace.sendCode(input);
 		input = "";
 		cli_panel.updateQuery("");
 	}
