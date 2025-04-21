@@ -32,7 +32,7 @@ export class Workspace {
         return this._path
     }
 
-    private log_socket: WebSocket | undefined = $state()
+    private cli_socket: WebSocket | undefined = $state()
     private _connected: boolean = $state(false)
     get connected() {
         return this._connected
@@ -76,8 +76,11 @@ export class Workspace {
                     await writeTextFile(this._path + "/.beinn", JSON.stringify(save))
                 })
             await completed()
+
+            return true
         } catch (e) {
             await unhandled(e)
+            return false
         }
     }
 
@@ -122,6 +125,13 @@ export class Workspace {
 
             await step(`Stop the workspace gracefully`,
                 async () => {
+                    // Drop all websocket form frontend
+                    if (this.cli_socket)
+                        this.cli_socket.close()
+
+                    await this._experiments.kill()
+
+
                     await Promise.any([meallKill_throwable, sleep(2000)])
                 })
 
@@ -277,7 +287,7 @@ export class Workspace {
 
             await step("Setup websocket connection to meall for cli feature",
                 async () => {
-                    this.log_socket = meallGetCliWs<string>({
+                    this.cli_socket = meallGetCliWs<string>({
                         onmessage: (message) => {
                             const res = JSON.parse(message.data) as
                                 | {
@@ -500,7 +510,7 @@ export class Workspace {
 
     async sendCode(input: string) {
         // Check if cli websocket is connected
-        if (this.log_socket === undefined) {
+        if (this.cli_socket === undefined) {
             await message("Cli connection to meall is lost. Please reopen the app.", {
                 title: "Beinn", kind: "error"
             })
@@ -534,7 +544,7 @@ export class Workspace {
 
             await step("Check if code is equipment code",
                 async () => {
-                    this.log_socket!.send(code)
+                    this.cli_socket!.send(code)
                 })
 
 

@@ -205,6 +205,17 @@ export class Experiment extends EE {
         }
 
     }
+    async kill() {
+        if (this.event_ws) {
+            this.event_ws.onclose = null
+            this.event_ws.close()
+        }
+
+        for (const chart of Object.values(this._charts.charts)) {
+            chart.kill()
+        }
+        await this.stop()
+    }
 
     isRunnable() {
         return this._created &&
@@ -311,7 +322,8 @@ export class Experiments {
     async kill() {
         const promises: Promise<any>[] = []
         for (const e of Object.values(this._experiments)) {
-            promises.push(e.stop())
+            promises.push(e.kill())
+
         }
 
         await Promise.all(promises)

@@ -305,6 +305,18 @@ onmessage = function (event: MessageEvent<ChartWebWorkerMessage>) {
             disable_draw_points()
             return
         }
+        case "kill": {
+            _online = false
+
+            _chart.destroy()
+            if (_ws !== undefined) {
+                _ws.onclose = null
+                _ws.close()
+            }
+
+            if (_ws_interval !== undefined)
+                clearInterval(_ws_interval)
+        }
     }
 }
 

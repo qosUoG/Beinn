@@ -74,7 +74,7 @@
 		}
 	}
 
-	let isRefreshing = $state(false);
+	let isRefreshing = $state(true);
 	let cli_element: HTMLDivElement | undefined = $state(undefined);
 
 	$effect(() => {
@@ -150,7 +150,8 @@
 					type="text"
 					class="flex-grow"
 					bind:value={input}
-					onkeydown={keyDownHandler} />
+					onkeydown={keyDownHandler}
+					autocorrect="off" />
 			</label>
 			<button class="icon-btn-sm" onclick={sendHandler}><Send /></button>
 		</div>

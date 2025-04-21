@@ -55,6 +55,7 @@
 					<FixedField key="id" value={target.id} />
 					<LabelField key="Name">
 						<input
+							autocorrect="off"
 							type="text"
 							class="w-full"
 							onkeydown={(e: KeyboardEvent) => {

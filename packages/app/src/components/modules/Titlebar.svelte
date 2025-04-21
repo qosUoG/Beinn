@@ -9,6 +9,14 @@
 	import { log_panel } from "./LogPanelController.svelte";
 	import { workspace } from "$states/workspace.svelte";
 	import Cancel from "$icons/Cancel.svelte";
+	import { tick } from "svelte";
+	import Loader from "$icons/Loader.svelte";
+	import Tick from "$icons/Tick.svelte";
+	import Cross from "$icons/Cross.svelte";
+
+	let workspace_loading = $state(false);
+
+	let show_save: "normal" | "success" | "fail" = $state("normal");
 
 	async function folderSearchHandler() {
 		const path = await open({
@@ -17,15 +25,29 @@
 			defaultPath: import.meta.env.VITE_DEFAULT_EXPERIMENT_PATH,
 		});
 
-		if (path) workspace.connect(path);
+		if (path) {
+			workspace_loading = true;
+			await tick();
+			await workspace.connect(path);
+			workspace_loading = false;
+		}
 	}
 
 	async function saveHandler() {
-		await workspace.save();
+		await tick();
+		const success = await workspace.save();
+		show_save = success ? "success" : "fail";
+
+		setTimeout(() => {
+			show_save = "normal";
+		}, 2000);
 	}
 
 	async function closeHandler() {
+		workspace_loading = true;
+		await tick();
 		await workspace.kill();
+		workspace_loading = false;
 	}
 </script>
 
@@ -39,15 +61,35 @@
 					{workspace.path}
 				</div>
 			</div>
-			{#if !workspace.connected}
+			{#if workspace_loading}
+				<div class="icon-btn-sm bg-slate-200">
+					<div class="animate-pulse">
+						<Loader />
+					</div>
+				</div>
+			{:else if !workspace.connected}
 				<button class="icon-btn-sm slate" onclick={folderSearchHandler}
 					><FolderOpen /></button>
 			{:else}
 				<button class="icon-btn-sm slate" onclick={closeHandler}
 					><Cancel /></button>
 			{/if}
-			<button class="icon-btn-sm slate" onclick={saveHandler}
-				><Disk /></button>
+			{#if !workspace.connected}
+				<div class="icon-btn-sm bg-slate-200 text-white">
+					<Disk />
+				</div>
+			{:else if show_save === "success"}
+				<div class="icon-btn-sm green">
+					<Tick />
+				</div>
+			{:else if show_save === "fail"}
+				<div class="icon-btn-sm red">
+					<Cross />
+				</div>
+			{:else}
+				<button class="icon-btn-sm slate" onclick={saveHandler}
+					><Disk /></button>
+			{/if}
 		</div>
 		<button
 			class="icon-btn-sm slate"

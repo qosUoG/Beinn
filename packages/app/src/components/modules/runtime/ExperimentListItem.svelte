@@ -8,6 +8,7 @@
 	import type { Experiment } from "$states/experiment.svelte";
 	import Progress from "./Progress.svelte";
 	import { zeropad } from "$lib/utils";
+	import { onMount } from "svelte";
 
 	let { experiment = $bindable() }: { experiment: Experiment } = $props();
 
@@ -30,18 +31,24 @@
 	let total_time = $state(0);
 	let iteration_time = $state(0);
 
-	setInterval(() => {
-		if (
-			experiment.status !== "initial" &&
-			experiment.status !== "completed" &&
-			experiment.status !== "paused" &&
-			experiment.status !== "stopped" &&
-			experiment.status !== "stopping"
-		) {
-			total_time = Date.now() - experiment.total_time_start;
-			iteration_time = Date.now() - experiment.iteration_time_start;
-		}
-	}, 1000);
+	$effect(() => {
+		const interval = setInterval(() => {
+			if (
+				experiment.status !== "initial" &&
+				experiment.status !== "completed" &&
+				experiment.status !== "paused" &&
+				experiment.status !== "stopped" &&
+				experiment.status !== "stopping"
+			) {
+				total_time = Date.now() - experiment.total_time_start;
+				iteration_time = Date.now() - experiment.iteration_time_start;
+			}
+		}, 1000);
+
+		return () => {
+			clearInterval(interval);
+		};
+	});
 </script>
 
 <div class="section bg-white fcol-2 justify-between w-full">

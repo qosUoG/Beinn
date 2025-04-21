@@ -94,6 +94,7 @@
 					{#if dependency.source.type === "pip"}
 						<LabelField key="Package Name">
 							<input
+								autocorrect="off"
 								type="text"
 								class="flex-grow"
 								bind:value={dependency.source.package}
@@ -102,6 +103,7 @@
 					{:else if dependency.source.type === "git"}
 						<LabelField key="Url">
 							<input
+								autocorrect="off"
 								type="text"
 								class="flex-grow"
 								bind:value={dependency.source.git}
@@ -109,6 +111,7 @@
 						</LabelField>
 						<LabelField key="Branch">
 							<input
+								autocorrect="off"
 								type="text"
 								class="flex-grow"
 								bind:value={dependency.source.branch}
@@ -117,6 +120,7 @@
 
 						<LabelField key="Subdirectory">
 							<input
+								autocorrect="off"
 								type="text"
 								class="flex-grow"
 								bind:value={dependency.source.subdirectory}
@@ -125,6 +129,7 @@
 					{:else if dependency.source.type === "path"}
 						<LabelField key="Path">
 							<input
+								autocorrect="off"
 								type="text"
 								class="flex-grow"
 								bind:value={dependency.source.path}
@@ -133,6 +138,7 @@
 					{:else if dependency.source.type === "local"}
 						<LabelField key="Directory">
 							<input
+								autocorrect="off"
 								type="text"
 								class="flex-grow"
 								bind:value={dependency.source.directory}

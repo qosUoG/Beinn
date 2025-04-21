@@ -40,6 +40,8 @@ export type ChartWebWorkerMessage =
         type: "enable_draw_points"
     } | {
         type: "disable_draw_points"
+    } | {
+        type: "kill"
     }
 
 
@@ -94,6 +96,9 @@ export class ChartClass<T extends ChartConfigs = ChartConfigs> {
     disable_draw_points() {
         this._is_drawing_points = false
         this.worker.postMessage({ type: "disable_draw_points" } satisfies ChartWebWorkerMessage)
+    }
+    kill() {
+        this.worker.postMessage({ type: "kill" } satisfies ChartWebWorkerMessage)
     }
 
 

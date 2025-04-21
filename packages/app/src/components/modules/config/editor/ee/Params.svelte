@@ -19,6 +19,7 @@
 	{#if param.type === "int" || param.type === "float"}
 		<LabelField {key}>
 			<input
+				autocorrect="off"
 				type="number"
 				class=""
 				bind:value={param.value}
@@ -66,6 +67,7 @@
 	{:else if param.type === "str"}
 		<LabelField {key}>
 			<input
+				autocorrect="off"
 				type="text"
 				class="flex-grow"
 				bind:value={param.value}

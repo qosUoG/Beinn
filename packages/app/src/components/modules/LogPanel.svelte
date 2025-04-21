@@ -22,7 +22,7 @@
 		"Dec",
 	];
 
-	let isRefreshing = $state(false);
+	let isRefreshing = $state(true);
 	let log_element: HTMLDivElement | undefined = $state(undefined);
 
 	$effect(() => {
