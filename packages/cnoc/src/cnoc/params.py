@@ -335,10 +335,10 @@ class InstanceEquipmentParam[T: EquipmentABC](_QosParam):
 
     class PydanticBaseModel(BaseModel):
         type: Literal["instance.equipment"]
-        _instance_id: str | None
+        instance_id: str | None
 
         def toParam(self):
-            return InstanceEquipmentParam(_instance_id=self._instance_id)
+            return InstanceEquipmentParam(_instance_id=self.instance_id)
 
     def __init__(self):
         self._type = "instance.equipment"
