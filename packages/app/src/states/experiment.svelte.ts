@@ -4,11 +4,12 @@
 import { tick } from "svelte"
 import { EE, type Availables, type EET } from "./ee.svelte"
 import { beginProcedure, getRandomId, sleep, type StepT } from "$lib/utils"
-import { Charts, type ChartConfigs } from "./chart.svelte"
+import { Charts } from "./chart.svelte"
 import type { ModuleCls } from "./dependency.svelte"
 import { workspace } from "./workspace.svelte"
 import { meallContinueExperiment_throwable, meallGetAvailableEEs_throwable, meallGetExperimentEventsWs, meallPauseExperiment_throwable, meallStartExperiment_throwable, meallStopExperiment_throwable } from "$lib/meall.svelte"
 import { pushLog } from "$components/modules/LogPanelController.svelte"
+import type { ChartConfigs } from "./charts/chart_types"
 
 
 

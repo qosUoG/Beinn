@@ -1,8 +1,8 @@
 import { Chart, type ChartConfiguration, type Point } from "chart.js/auto";
 
 
-import type { ChartWebWorkerMessage, XYChartConfig, XYChartMode } from "$states/chart.svelte";
-import { meallWs } from "$lib/meall.svelte";
+import type { ChartWebWorkerMessage, XYChartConfig, XYChartMode } from "../chart_types";
+import { meallWs } from "$lib/meall";
 
 
 // Worker local variables

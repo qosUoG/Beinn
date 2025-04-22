@@ -218,7 +218,7 @@ export class Workspace {
 
             await step("Upsert 'link-mode: copy' to pyproject.toml",
                 async () => {
-                    const parsed = parse(await readTextFile(path + "/pyproject.toml"));
+                    const parsed = parse(await readTextFile(path + "/pyproject.toml")) as any;
                     if (parsed.tool === undefined) parsed.tool = {}
                     if (parsed.tool.uv === undefined) parsed.tool.uv = {}
                     if (parsed.tool.uv["link-mode"] === undefined) parsed.tool.uv["link-mode"] = "copy"

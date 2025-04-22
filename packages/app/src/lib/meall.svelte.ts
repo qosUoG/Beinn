@@ -5,10 +5,9 @@ import type { AllParamTypes } from "$states/params.svelte";
 import { message } from "@tauri-apps/plugin-dialog";
 
 import { getRequestJsonOut_throwable, postRequestJsonInOut_throwable, retryOnError } from "./utils";
+import { meallUrl, meallWs } from "./meall";
 
-export const meallUrl = (path: string) => `http://localhost:8000/${path}`
 
-export const meallWs = (path: string) => `ws://localhost:8000/${path}`
 
 export async function meallGetAvailableEEs_throwable(eetype: EEType, payload: { prefixes: string[] }): Promise<Availables> {
     return await postRequestJsonInOut_throwable(meallUrl(`${eetype}/available_${eetype}s`), payload)
@@ -66,11 +65,6 @@ export function meallGetExperimentEventsWs<T extends any>(payload: { id: string,
 
 }
 
-export function meallGetChartDataWs<T extends any>(payload: { id: string, title: string, onmessage: (this: WebSocket, event: MessageEvent<T>) => any }) {
-    const socket = new WebSocket(meallWs(`chart/${payload.id}/events`))
-    socket.onmessage = payload.onmessage
-    return socket
-}
 
 export function meallGetCliWs<T extends any>(payload: { onmessage: (this: WebSocket, event: MessageEvent<T>) => any }) {
     const socket = new WebSocket(meallWs(`cli`))
