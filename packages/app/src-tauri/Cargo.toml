@@ -32,6 +32,7 @@ tauri-plugin-http = "2"
 tauri-plugin-os = "2"
 tauri-plugin-process = "2"
 tauri-plugin-store = "2"
+fix-path-env = { git = "https://github.com/tauri-apps/fix-path-env-rs", branch = "dev" }
 
 [target."cfg(target_os = \"macos\")".dependencies]
 cocoa = "0.26"
