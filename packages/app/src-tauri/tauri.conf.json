@@ -12,7 +12,7 @@
 	"app": {
 		"windows": [
 			{
-				"fullscreen": true,
+				"fullscreen": false,
 				"resizable": true,
 				"title": "Beinn",
 				"label": "main",
@@ -20,7 +20,7 @@
 				"height": 1080,
 				"titleBarStyle": "Overlay",
 				"hiddenTitle": true,
-				"decorations": true
+				"decorations": false
 			}
 		],
 		"security": {

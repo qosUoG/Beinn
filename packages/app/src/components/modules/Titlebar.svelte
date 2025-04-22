@@ -66,8 +66,8 @@
 	}
 </script>
 
-<div class="h-[32px]" data-tauri-decorum-tb>
-	<div class="frow-4 w-full px-24 py-1 justify-center" data-tauri-drag-region>
+<div class="h-[32px] frow w-full justify-center py-1">
+	<div class="frow-4 z-1000">
 		<Mode />
 		<div class="frow-1">
 			<div class=" wrapped bg-slate-200 title">Workspace</div>

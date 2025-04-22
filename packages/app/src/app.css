@@ -158,6 +158,13 @@
 	.title {
 		@apply font-semibold;
 	}
+
+	/* button.decorum-tb-btn,
+	button#decorum-tb-minimize,
+	button#decorum-tb-maximize,
+	button#decorum-tb-close {
+		@apply z-10000;
+	} */
 }
 
 @utility scrollbar-* {
