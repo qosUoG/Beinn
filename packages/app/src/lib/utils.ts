@@ -120,7 +120,7 @@ export const getRequestJsonOut_throwable = async (url: string) => {
     return obj.value
 }
 
-export async function shell({ fn, cmd, cwd }: { fn: string, cmd: string, cwd?: string }) {
+export async function shell({ fn, cmd, cwd }: { fn: string, cmd: string, cwd: string }) {
 
     const handler = Command.create(
         fn, cmd.split(" "), {

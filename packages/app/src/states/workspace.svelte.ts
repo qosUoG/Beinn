@@ -140,12 +140,12 @@ export class Workspace {
                 async () => {
                     const currentPlatform = platform();
                     if (currentPlatform === "windows") {
-                        await shell({ fn: "taskkill", cmd: `/PID ${this.meall_pid} /F` })
-                        await shell({ fn: "taskkill", cmd: `/PID ${this.uvproc!.pid} /F` })
+                        await shell({ fn: "taskkill", cmd: `/PID ${this.meall_pid} /F`, cwd: this._path })
+                        await shell({ fn: "taskkill", cmd: `/PID ${this.uvproc!.pid} /F`, cwd: this._path })
                     }
                     else if (currentPlatform === "linux" || currentPlatform === "macos") {
-                        await shell({ fn: "kill", cmd: `-s SIGKILL ${this.meall_pid}` })
-                        await shell({ fn: "kill", cmd: `-s SIGKILL ${this.uvproc!.pid}` })
+                        await shell({ fn: "kill", cmd: `-s SIGKILL ${this.meall_pid}`, cwd: this._path })
+                        await shell({ fn: "kill", cmd: `-s SIGKILL ${this.uvproc!.pid}`, cwd: this._path })
                     }
                     this.meall_pid = undefined
                     this.uvproc = undefined
@@ -160,12 +160,12 @@ export class Workspace {
             await unhandled(e)
             const currentPlatform = platform();
             if (currentPlatform === "windows") {
-                await shell({ fn: "taskkill", cmd: `/PID ${this.meall_pid} /F` })
-                await shell({ fn: "taskkill", cmd: `/PID ${this.uvproc!.pid} /F` })
+                await shell({ fn: "taskkill", cmd: `/PID ${this.meall_pid} /F`, cwd: this._path })
+                await shell({ fn: "taskkill", cmd: `/PID ${this.uvproc!.pid} /F`, cwd: this._path })
             }
             else if (currentPlatform === "linux" || currentPlatform === "macos") {
-                await shell({ fn: "kill", cmd: `-s SIGKILL ${this.meall_pid}` })
-                await shell({ fn: "kill", cmd: `-s SIGKILL ${this.uvproc!.pid}` })
+                await shell({ fn: "kill", cmd: `-s SIGKILL ${this.meall_pid}`, cwd: this._path })
+                await shell({ fn: "kill", cmd: `-s SIGKILL ${this.uvproc!.pid}`, cwd: this._path })
             }
             this.meall_pid = undefined
             this.uvproc = undefined
