@@ -9,11 +9,12 @@
 	import { log_panel } from "./LogPanelController.svelte";
 	import { workspace } from "$states/workspace.svelte";
 	import Cancel from "$icons/Cancel.svelte";
-	import { tick } from "svelte";
+	import { onMount, tick } from "svelte";
 	import Loader from "$icons/Loader.svelte";
 	import Tick from "$icons/Tick.svelte";
 	import Cross from "$icons/Cross.svelte";
-
+	import { load, type Store } from "@tauri-apps/plugin-store";
+	import { homeDir } from "@tauri-apps/api/path";
 	let workspace_loading = $state(false);
 
 	let show_save: "normal" | "success" | "fail" = $state("normal");
@@ -22,13 +23,15 @@
 		const path = await open({
 			directory: true,
 			multiple: false,
-			defaultPath: import.meta.env.VITE_DEFAULT_EXPERIMENT_PATH,
+			defaultPath: (await getSavedWorkspacePath()) ?? (await homeDir()),
 		});
 
 		if (path) {
 			workspace_loading = true;
 			await tick();
 			await workspace.connect(path);
+			await tick();
+			if (workspace.connected) await saveWorkspacePath(path);
 			workspace_loading = false;
 		}
 	}
@@ -48,6 +51,18 @@
 		await tick();
 		await workspace.kill();
 		workspace_loading = false;
+	}
+
+	let store: Store;
+
+	async function getSavedWorkspacePath() {
+		if (!store) store = await load("workspace_path.json");
+		return await store.get<string>("workspace_path");
+	}
+
+	async function saveWorkspacePath(path: string) {
+		if (!store) store = await load("workspace_path.json");
+		await store.set("workspace_path", path);
 	}
 </script>
 

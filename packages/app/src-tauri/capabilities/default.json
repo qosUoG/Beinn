@@ -112,6 +112,7 @@
       ]
     },
     "os:default",
-    "process:default"
+    "process:default",
+    "store:default"
   ]
 }
