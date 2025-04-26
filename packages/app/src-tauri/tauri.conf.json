@@ -20,7 +20,7 @@
 				"height": 1080,
 				"titleBarStyle": "Overlay",
 				"hiddenTitle": true,
-				"decorations": false
+				"decorations": true
 			}
 		],
 		"security": {
