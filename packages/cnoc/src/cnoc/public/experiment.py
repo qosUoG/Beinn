@@ -40,7 +40,7 @@ class ExperimentABC(ABC):
         self.params: Params
 
     @abstractmethod
-    def initialize(self, manager: ManagerABC) -> int:
+    def start(self, manager: ManagerABC) -> int:
         """
         Always ran once before looping the loop method of the script
 

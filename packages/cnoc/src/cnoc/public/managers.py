@@ -12,9 +12,9 @@ Managers used by initialize of experiment script
 """
 
 from abc import ABC, abstractmethod
-from typing import Any
-from .extensions.chart import _ChartABC
-from .extensions.saver import _SaverABC
+from typing import Any, Callable
+from ..extensions.chart import ChartABC
+from ..extensions.saver import _SaverABC
 
 
 class ExperimentManagerABC(ABC):
@@ -34,7 +34,7 @@ class ExperimentManagerABC(ABC):
 
 class ChartManagerABC(ABC):
     @abstractmethod
-    def createChart(cls, chartT: type[_ChartABC], kwargs: Any) -> _ChartABC:
+    def registerChart(cls, chartT: ChartABC) -> Callable[[bytes], None]:
         """Returns a handle to the chart class, which shall have a plot function to be called in loop"""
         # This method returns a plot object
         raise NotImplementedError

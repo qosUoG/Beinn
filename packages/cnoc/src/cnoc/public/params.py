@@ -25,7 +25,7 @@ experiment, please refer to the example directory.
 from abc import ABC, abstractmethod
 from pickle import FALSE
 from typing import Literal, override
-from cnoc.experiment import ExperimentABC
+from .experiment import ExperimentABC
 from pydantic import BaseModel
 from .equipment import EquipmentABC, EquipmentProxy
 
