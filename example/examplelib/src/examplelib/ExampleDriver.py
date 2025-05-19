@@ -1,7 +1,7 @@
 import math
 from random import random
 from typing import TypedDict
-from cnoc import params as p
+from cnoc.public import params as p
 
 from cnoc.equipment import EquipmentABC
 

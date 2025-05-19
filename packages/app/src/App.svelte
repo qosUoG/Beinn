@@ -22,7 +22,7 @@
 <div class="w-screen h-screen fcol max-h-screen max-w-screen">
 	<Titlebar />
 
-	<div class="w-full flex-grow rounded relative frow-4 p-2 pt-1 min-h-0">
+	<div class="w-full flex-grow rounded relative frow-4 p-2 pt-0 min-h-0">
 		{#if mode_controller.mode === "Configuration"}
 			<Config />
 		{:else if mode_controller.mode === "Runtime"}

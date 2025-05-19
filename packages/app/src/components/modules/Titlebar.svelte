@@ -66,7 +66,7 @@
 	}
 </script>
 
-<div class="h-[32px] frow w-full justify-center py-1">
+<div class="h-[40px] frow w-full justify-center py-2">
 	<div class="frow-4 z-1000">
 		<Mode />
 		<div class="frow-1">

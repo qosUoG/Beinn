@@ -5,7 +5,7 @@ from typing import TypedDict, override
 
 from click import ParamType
 
-from cnoc import params as p
+from cnoc.public import params as p
 from cnoc.experiment import ExperimentABC
 from cnoc.managers import ManagerABC
 import time
