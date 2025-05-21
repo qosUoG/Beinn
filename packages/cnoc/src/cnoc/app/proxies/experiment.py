@@ -1,30 +1,26 @@
 import asyncio
+from multiprocessing import Process
+from multiprocessing.managers import BaseManager
 import os
 import pickle
-from threading import Event
+from multiprocessing import Event
 import time
 from types import CoroutineType
-from typing import Any, Callable, TypedDict, override
+from typing import Any, Callable, TypedDict, cast, override
 
 
-from cnoc.exceptions import ExperimentEnded
+from ...public.exceptions import ExperimentEnded
 from cnoc.extensions.chart import _ChartABC
 
 from cnoc.extensions.saver import _SaverABC
 from websockets import ServerConnection
 
-from ..utils.params import Params, experimentParams2Backup
-from cnoc.experiment import ExperimentABC
-
-from cnoc.managers import ManagerABC
+from ...public.params import Params
+from ...public.experiment import ExperimentABC
+from ...public.managers import ManagerABC
 
 from .chart import ChartProxy
 from .saver import SaverProxy
-
-from ..settings.foundation import Foundation
-
-
-from ..utils.messenger import Messenger
 
 
 class _Manager(ManagerABC):
@@ -46,154 +42,255 @@ class _Manager(ManagerABC):
         return self._createSaver(saverT, kwargs)
 
 
-class ExperimentProxy:
-    class NotRemovable(Exception):
+class ExperimentProxy(ManagerABC):
+    class _ExperimentRunner:
+        def __init__(self, *, id: str, experiment_cls: type[ExperimentABC]):
+            # Experiment Instance
+            self.experiment_id = id
+            self._experiment = experiment_cls()
+
+            # Manager
+            self._manager = _Manager(
+                suggestTotalIterations=self._suggestTotalIterations,
+                createChart=self._createChart,
+                createSaver=self._createSaver,
+            )
+
+            # Extensions
+            self._charts: dict[str, ChartProxy] = {}
+            self._savers: dict[str, SaverProxy] = {}
+
+            # signals
+            self.running = Event()
+            self.not_running = Event()
+            self.should_run = Event()
+            self.should_stop = Event()
+
+            self._reset()
+
+        def _reset(self):
+            # Constant
+            self._timestamp = int(time.time() * 1000)
+
+            # Iteration vars
+            self._iteration_count = -1
+
+            # Signals
+            self.running.clear()
+            self.should_run.clear()
+            self.should_stop.clear()
+            self.not_running.clear()
+
+            # Lifecycle hooks
+            self.started_listeners: list[Callable[[], None]] = []
+            self.paused_listeners: list[Callable[[], None]] = []
+            self.stopped_listeners: list[Callable[[bool], None]] = []
+            self.loop_start_listeners: list[Callable[[int], None]] = []
+            self.loop_end_listeners: list[Callable[[int], None]] = []
+
+        def run(self):
+            try:
+                """ STEP 0 """
+                # Run setup fn
+                self._experiment.setup(self._manager)
+
+                # Execute listeners
+                for started_listener in self.started_listeners:
+                    started_listener()
+
+                while True:
+                    """ STEP 1.1 """
+                    # Wait until the running event is set in each loop
+                    self.should_run.wait()
+
+                    """ STEP 1.2 """
+                    # Stop the experiment if the stop event is set
+                    if self._should_stop.is_set():
+                        self._experiment.cleanup()
+
+                        # Execute listeners
+                        for stopped_listener in self.stopped_listeners:
+                            stopped_listener(False)
+
+                        return
+
+                    """ STEP 1.3 """
+                    # Loop the experiment once with the newest index
+                    self.running.set()
+                    self.not_running.clear()
+                    try:
+                        self._experiment.loop(self._iteration_count + 1)
+
+                    except ExperimentEnded:
+                        # flush stdout
+                        print("", end="", flush=True)
+
+                        self._iteration_count += 1
+                        # Execute listeners
+                        for loop_end_listener in self.loop_end_listeners:
+                            loop_end_listener(self._iteration_count)
+
+                        for stopped_listener in self.stopped_listeners:
+                            stopped_listener(True)
+                        return
+
+                    """ STEP 1.4 """
+                    # flush stdout
+                    print("", end="", flush=True)
+
+                    self.running.clear()
+                    self.not_running.set()
+                    if self.should_run.is_set():
+                        # Increment only if it is not paused, i.e. it will redo the iteration after unpaused
+                        self._iteration_count += 1
+                        # Execute listeners
+                        for loop_end_listener in self.loop_end_listeners:
+                            loop_end_listener(self._iteration_count)
+
+            except Exception as e:
+                print("Exception in experiment runner", flush=True)
+                print(e, flush=True)
+
+                self._experiment.cleanup()
+                # Execute listeners
+                for stopped_listener in self.stopped_listeners:
+                    stopped_listener(False)
+
+                return
+
+        # TODO
+        @override
+        def _suggestTotalIterations(self, total_iterations: int):
+            self._messenger.put("proposed_total_iterations", total_iterations)
+
+        """Chart Manager override"""
+
+        # TODO
+        @override
+        def _createChart(self, chartT: _ChartABC, kwargs: Any = {}):
+            title = kwargs["title"]
+
+            self._charts[title] = ChartProxy(
+                chartT=chartT,
+                kwargs=kwargs,
+            )
+
+            self._messenger.put("chart_config", self._charts[title].getConfig())
+            return self._charts[title]._chart
+
+        """Public Interface to Chart"""
+
+        # TODO
+        def subscribeChart(self, title: str, ws: ServerConnection):
+            return self._charts[title].subscribe(ws)
+
+        """Sql Saver Manager override"""
+
+        # TODO
+        @override
+        def _createSaver(self, saverT: type[_SaverABC], kwargs: Any = {}):
+            title = kwargs["title"]
+
+            self._savers[title] = SaverProxy(
+                timestamp=self._timestamp,
+                saverT=saverT,
+                kwargs=kwargs,
+            )
+
+            return self._savers[title]._saver
+
+    class _ExperimentProcessManager(BaseManager):
         pass
+
+    _ExperimentProcessManager.register("ExperimentRunner", _ExperimentRunner)
 
     def __init__(
         self,
         *,
         id: str,
-        experimentCls: type[ExperimentABC],
+        experiment_cls: type[ExperimentABC],
     ):
-        # Experiment Instance
+        # Experiment Process
         self.experiment_id = id
-        self._experiment = experimentCls()
+        self._process_manager = ExperimentProxy._ExperimentProcessManager()
+        self._experiment_runner = (
+            cast(
+                type[ExperimentProxy._ExperimentRunner],
+                self._process_manager.ExperimentRunner,
+            )
+        )(id=id, experiment_cls=experiment_cls)
 
         # Extensions
         self._charts: dict[str, ChartProxy] = {}
         self._savers: dict[str, SaverProxy] = {}
 
-        # Manager
-        self._manager = _Manager(
-            suggestTotalIterations=self.suggestTotalIterations,
-            createChart=self.createChart,
-            createSaver=self.createSaver,
-        )
-
-        # runner status
-        self._running = Event()
-        self._not_running = Event()
-        self._should_run = Event()
-        self._should_stop = Event()
-
-        # Lifecycle hooks
-        self._started_listeners: list[Callable[[], None]] = []
-        self._paused_listeners: list[Callable[[], None]] = []
-        self._stopped_listeners: list[Callable[[bool], None]] = []
-
-        self._loop_start_listeners: list[Callable[[int], None]] = []
-        self._loop_end_listeners: list[Callable[[int], None]] = []
+    """
+    Experiment lifecycle listeners
+    """
 
     def onStarted(self, callback: Callable[[], None]):
-        self._started_listeners.append(callback)
+        self._experiment_runner.started_listeners.append(callback)
 
     def onPaused(self, callback: Callable[[], None]):
-        self._paused_listeners.append(callback)
+        self._experiment_runner.paused_listeners.append(callback)
 
     def onStopped(self, callback: Callable[[bool], None]):
-        self._stopped_listeners.append(callback)
+        self._experiment_runner.stopped_listeners.append(callback)
 
     def onLoopStart(self, callback: Callable[[int], None]):
-        self._loop_start_listeners.append(callback)
+        self._experiment_runner.loop_start_listeners.append(callback)
 
     def onLoopEnd(self, callback: Callable[[int], None]):
-        self._loop_end_listeners.append(callback)
+        self._experiment_runner.loop_end_listeners.append(callback)
 
-    def _runner(self):
-        """
-        lifecycle of the function:
+    """
+    Experiment lifecycle control
+    
+    Note that the target state is not waited before return. 
+    i.e. pause would only change the state to pausing, instead of paused
+    To listen to -ed event, append to the lifecycle listeners
+    """
 
-        MESSAGE   started
+    async def start(self):
+        if (
+            hasattr(self, "_experiment_process")
+            and self._experiment_process.exitcode is None
+        ):
+            self._experiment_process.kill()
+            await asyncio.sleep(1000)
 
-        --- LOOP ---
-        WAIT        should_run
-        IF          should_stop
-        | RUN       experiment.stop()
-        | CLEAR     should_run              --> RETURN False
+        # run the experiment
+        self._experiment_process = Process(lambda: self._experiment_runner.run())
+        self._experiment_process.run()
 
-        SET         running
-        CLEAR       not_running
-        ()          experiment.loop()
-        | EXCEPT    ExperimentEnded         --> RETURN True
+    def pause(self):
+        self._experiment_runner.should_run.clear()
 
-        IF          !should_run
-        | RUN       iteration_count -= 1
+    def unpause(self):
+        self._experiment_runner.should_run.set()
 
-        CLEAR       running
-        SET         not_running
-        MESSAGE     iteration_count
+    def stop(self):
+        self._experiment_runner.should_stop.set()
+        # In case the experiment is paused
+        self._experiment_runner.should_run.set()
 
+    async def kill(self):
+        if (
+            hasattr(self, "_experiment_process")
+            and self._experiment_process.exitcode is None
+        ):
+            self._experiment_process.kill()
 
-        """
-        try:
-            # Post Start event to message queue
-            self._messenger.put_threadsafe("status", "started")
+        # TODO
+        for chart in self._charts.values():
+            await chart.kill()
 
-            while True:
-                # Wait until the running event is set in each loop
-                self._should_run.wait()
+        for saver in self._savers.values():
+            await saver.kill()
 
-                # Stop the _experiment is the stop event is set
-                if self._should_stop.is_set():
-                    self._experiment.stop()
-                    self._should_run.clear()
-                    return False
-
-                # Loop the _experiment once with the newest index
-
-                self._running.set()
-                self._not_running.clear()
-                self._iteration_count += 1
-
-                try:
-                    self._experiment.loop(self._iteration_count)
-                    # flush stdout
-                    print("", end="", flush=True)
-
-                except ExperimentEnded:
-                    print("experiment ended", flush=True)
-                    return True
-
-                if not self._should_run.is_set():
-                    # Decrement to exclude the previous loop index
-                    self._iteration_count -= 1
-
-                self._running.clear()
-                self._not_running.set()
-                # Post loop count event to message queue
-                self._messenger.put_threadsafe("iteration_count", self._iteration_count)
-        except Exception as e:
-            print("Exception in experiment runner", flush=True)
-            print(e, flush=True)
-            return False
-
-    def start(self):
-        if hasattr(self, "_runner_task") and not self._runner_task.done():
-            # frontend did not realize experiment is still running
-            raise Exception("Previous Not finished")
-
-        # Make sure the experiment starts in a fresh state
-        self._iteration_count = -1
-        self._running.clear()
-        self._should_run.clear()
-        self._should_stop.clear()
-        self._not_running.clear()
-
-        self._timestamp = int(time.time() * 1000)
-
-        self._experiment.initialize(self._manager)
-
-        # Event for signaling finishing cancel
-        self._cancelled = asyncio.Event()
-        self._runner_task = asyncio.create_task(self.runner_thread_holder())
-
-        self._should_run.set()
-
+    # TODO
     async def runner_thread_holder(self):
         try:
-            success = await asyncio.to_thread(self._runner)
-
             for saver in self._savers.values():
                 data = await saver.finalize()
 
@@ -239,100 +336,12 @@ class ExperimentProxy:
             await asyncio.gather(*coros)
             self._cancelled.set()
 
-    """Public Interface of self"""
-
-    async def kill(self):
-        if hasattr(self, "_runner_task"):
-            # Cancel the task
-            self._runner_task.cancel()
-            await self._cancelled.wait()
-
-        # Shutting down the queue shall close the websocket if there is one
-        self._messenger.shutdown()
-
-        for chart in self._charts.values():
-            await chart.kill()
-
-        # Still try to gracefully clean up savers as there may be important data
-        for saver in self._savers.values():
-            await saver.kill()
-
-        self._experiment.cleanup()
-
-    """Public Interface to messenger"""
-
-    def subscribeMessage(self, ws: WebSocket):
-        self._subscriber = ws
-
-        def unsubscribe():
-            del self._subscriber
-
-        return (self._getMessage, unsubscribe)
-
-    async def _getMessage(self):
-        return await self._messenger.get()
-
     """Public Interface to experiment"""
 
     @property
     def params(self):
-        return self._experiment.params
+        return self._experiment_runner._experiment.params
 
     @params.setter
     def params(self, params: Params):
-        self._experiment.params = params
-
-    """Public Interface to runner"""
-
-    def stop_async(self):
-        self._should_stop.set()
-        # Set the running event as well just in case it is being paused
-        self._should_run.set()
-
-    def pause_sync(self):
-        self._should_run.clear()
-        self._not_running.wait()
-        self._messenger.put("status", "paused")
-
-    def unpause(self):
-        self._should_run.set()
-        self._messenger.put("status", "continued")
-
-    """Experiment Manager override"""
-
-    @override
-    def suggestTotalIterations(self, total_iterations: int):
-        self._messenger.put("proposed_total_iterations", total_iterations)
-
-    """Chart Manager override"""
-
-    @override
-    def createChart(self, chartT: _ChartABC, kwargs: Any = {}):
-        title = kwargs["title"]
-
-        self._charts[title] = ChartProxy(
-            chartT=chartT,
-            kwargs=kwargs,
-        )
-
-        self._messenger.put("chart_config", self._charts[title].getConfig())
-        return self._charts[title]._chart
-
-    """Public Interface to Chart"""
-
-    def subscribeChart(self, title: str, ws: WebSocket):
-        return self._charts[title].subscribe(ws)
-
-    """Sql Saver Manager override"""
-
-    @override
-    def createSaver(self, saverT: type[_SaverABC], kwargs: Any = {}):
-        title = kwargs["title"]
-
-        self._savers[title] = SaverProxy(
-            timestamp=self._timestamp,
-            saverT=saverT,
-            kwargs=kwargs,
-        )
-
-        return self._savers[title]._saver
+        self._experiment_runner._experiment.params = params

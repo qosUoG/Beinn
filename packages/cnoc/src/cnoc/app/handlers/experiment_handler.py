@@ -4,41 +4,61 @@ from typing import Literal
 
 from ..state.foundation import Foundation
 from ..state.state import State
-from ..utils.messenger import Messenger, kv2str
+from ..utils.messenger import kv2str
 from websockets import ServerConnection
 
 
 async def experimentHandler(ws: ServerConnection, id: str):
-    messenger = Messenger(Foundation.getLoop())
     experiment = State.get(id)
 
+    if experiment is None:
+        # Send error and close the connection
+        await ws.send(kv2str("error", "experiment not found"))
+        await ws.close()
+
     async def producer():
-        # Messenger
+        # Experiment Life cycle status
         experiment.onStarted(
             lambda: Foundation.runCoroThreadsafeBlocking(
                 ws.send(kv2str("status", "started"))
             )
         )
-
-        pass
+        experiment.onPaused(
+            lambda: Foundation.runCoroThreadsafeBlocking(
+                ws.send(kv2str("status", "paused"))
+            )
+        )
+        experiment.onStopped(
+            lambda success: Foundation.runCoroThreadsafeBlocking(
+                ws.send(kv2str("status", "completed" if success else "stopped"))
+            )
+        )
+        experiment.onLoopEnd(
+            lambda iteration_count: Foundation.runCoroThreadsafeBlocking(
+                ws.send(kv2str("iteration_count", iteration_count))
+            )
+        )
 
     async def consumer():
         async for message in ws:
             req = json.loads(message)
-            action: Literal[""] = req["action"]
+            action: Literal["start", "pause", "stop", "continue"] = req["action"]
 
             match action:
                 case "start":
-                    pass
+                    await experiment.start()
+                    break
                 case "pause":
-                    pass
+                    experiment.pause()
+                    break
                 case "stop":
-                    pass
+                    experiment.stop()
+                    break
                 case "continue":
-                    pass
+                    experiment.unpause()
+                    break
 
-    producer_task = asyncio.create_task(producer())
     consumer_task = asyncio.create_task(consumer())
 
-    await producer_task
+    await producer()
     consumer_task.cancel()
