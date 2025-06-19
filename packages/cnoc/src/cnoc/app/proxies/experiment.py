@@ -1,22 +1,24 @@
+from ast import Call
 import asyncio
 import os
 import pickle
 from threading import Event
 import time
+from turtle import listen
 from types import CoroutineType
 from typing import Any, Callable, TypedDict, override
 
 
-from cnoc.exceptions import ExperimentEnded
+from cnoc.public.exceptions import ExperimentEnded
 from cnoc.extensions.chart import _ChartABC
 
 from cnoc.extensions.saver import _SaverABC
 from websockets import ServerConnection
 
-from ..utils.params import Params, experimentParams2Backup
-from cnoc.experiment import ExperimentABC
+from cnoc.public.params import Params, experimentParams2Backup
+from cnoc.public.experiment import ExperimentABC
 
-from cnoc.managers import ManagerABC
+from cnoc.public.managers import ManagerABC
 
 from .chart import ChartProxy
 from .saver import SaverProxy
@@ -24,7 +26,7 @@ from .saver import SaverProxy
 from ..settings.foundation import Foundation
 
 
-from ..utils.messenger import Messenger
+from ..utils.messenger import Messenger, kv2str
 
 
 class _Manager(ManagerABC):
@@ -84,6 +86,8 @@ class ExperimentProxy:
 
         self._loop_start_listeners: list[Callable[[int], None]] = []
         self._loop_end_listeners: list[Callable[[int], None]] = []
+        
+        
 
     def onStarted(self, callback: Callable[[], None]):
         self._started_listeners.append(callback)
@@ -99,6 +103,7 @@ class ExperimentProxy:
 
     def onLoopEnd(self, callback: Callable[[int], None]):
         self._loop_end_listeners.append(callback)
+   
 
     def _runner(self):
         """
@@ -127,42 +132,64 @@ class ExperimentProxy:
 
         """
         try:
-            # Post Start event to message queue
-            self._messenger.put_threadsafe("status", "started")
+            # Run all start event listeners
+            for listener in self._started_listeners:
+                listener()
+                
 
             while True:
                 # Wait until the running event is set in each loop
                 self._should_run.wait()
 
-                # Stop the _experiment is the stop event is set
+                # Stop the experiment is the stop event is set
                 if self._should_stop.is_set():
-                    self._experiment.stop()
+                    self._experiment.cleanup()
                     self._should_run.clear()
+                    
+                    # Run all stop listeners
+                    for listener in self._stopped_listeners:
+                        listener(False)
+                
                     return False
 
-                # Loop the _experiment once with the newest index
+                # Loop the experiment once with the newest index
 
                 self._running.set()
                 self._not_running.clear()
                 self._iteration_count += 1
 
                 try:
+                    for listener in self._loop_start_listeners:
+                        listener(self._iteration_count)
+                    
                     self._experiment.loop(self._iteration_count)
                     # flush stdout
                     print("", end="", flush=True)
+                    
+                    
 
                 except ExperimentEnded:
                     print("experiment ended", flush=True)
+                    
+                    for listener in self._loop_end_listeners:
+                        listener(self._iteration_count)
+                        
+                    # Run all stop listeners
+                    for listener in self._stopped_listeners:
+                        listener(True)
                     return True
 
                 if not self._should_run.is_set():
                     # Decrement to exclude the previous loop index
                     self._iteration_count -= 1
-
+                    
                 self._running.clear()
                 self._not_running.set()
-                # Post loop count event to message queue
-                self._messenger.put_threadsafe("iteration_count", self._iteration_count)
+                
+                for listener in self._loop_end_listeners:
+                    listener(self._iteration_count)
+
+                
         except Exception as e:
             print("Exception in experiment runner", flush=True)
             print(e, flush=True)

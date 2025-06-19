@@ -4,20 +4,29 @@ from typing import Literal
 
 from ..state.foundation import Foundation
 from ..state.state import State
-from ..utils.messenger import Messenger, kv2str
+from ..utils.messenger import kv2str
 from websockets import ServerConnection
 
 
 async def experimentHandler(ws: ServerConnection, id: str):
-    messenger = Messenger(Foundation.getLoop())
     experiment = State.get(id)
 
     async def producer():
-        # Messenger
+        
         experiment.onStarted(
             lambda: Foundation.runCoroThreadsafeBlocking(
                 ws.send(kv2str("status", "started"))
             )
+        )
+        
+        experiment.onLoopEnd(
+            lambda iteration_count: Foundation.runCoroThreadsafeBlocking(
+                ws.send(kv2str("iteration_count", iteration_count))
+            )
+        )
+        
+        experiment.onStopped(
+            lambda
         )
 
         pass
