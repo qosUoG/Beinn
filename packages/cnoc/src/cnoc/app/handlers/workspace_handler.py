@@ -7,7 +7,7 @@ import warnings
 
 # from ...public.params import ParamModels2Params
 
-from ..state.state import State
+# from ..state.state import State
 
 # from ...public.equipment import EquipmentABC
 # from ...public.experiment import ExperimentABC
