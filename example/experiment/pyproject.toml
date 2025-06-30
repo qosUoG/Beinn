@@ -17,8 +17,7 @@ dependencies = [
 link-mode = "copy"
 
 [tool.uv.sources]
-cnoc = { git = "https://github.com/qosUoG/Beinn", subdirectory = "packages/cnoc", branch = "main" }
-
+cnoc = { git = "https://github.com/qosUoG/Beinn", subdirectory = "packages/cnoc", branch = "revert_threading" }
 [tool.uv.sources.examplelib]
 path = "../examplelib"
 editable = true

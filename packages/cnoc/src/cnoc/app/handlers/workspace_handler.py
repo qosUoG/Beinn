@@ -2,10 +2,10 @@ import importlib
 import inspect
 import json
 import pkgutil
-from typing import Literal, TypedDict
+from typing import TypedDict
 import warnings
 
-from packages.meall.lib.utils.params import ParamModels2Params
+from ...public.params import ParamModels2Params
 
 from ..state.state import State
 from ...public.equipment import EquipmentABC

@@ -15,6 +15,7 @@
 	import Cross from "$icons/Cross.svelte";
 	import { load, type Store } from "@tauri-apps/plugin-store";
 	import { homeDir } from "@tauri-apps/api/path";
+	import { controller } from "../../controllers/app_controller.svelte";
 	let workspace_loading = $state(false);
 
 	let show_save: "normal" | "success" | "fail" = $state("normal");
@@ -29,9 +30,9 @@
 		if (path) {
 			workspace_loading = true;
 			await tick();
-			await workspace.connect(path);
+			await controller.connect(path);
 			await tick();
-			if (workspace.connected) await saveWorkspacePath(path);
+			// if (workspace.connected) await saveWorkspacePath(path);
 			workspace_loading = false;
 		}
 	}

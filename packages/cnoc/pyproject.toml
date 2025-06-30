@@ -5,10 +5,7 @@ description = "Add your description here"
 readme = "README.md"
 authors = [{ name = "harrylaulau", email = "dev+github@harrylaulau.me" }]
 requires-python = ">=3.13"
-dependencies = [
-    "pydantic>=2.10.6",
- "websockets>=15.0",
-]
+dependencies = ["pydantic>=2.10.6", "websockets>=15.0"]
 
 [build-system]
 requires = ["hatchling"]
@@ -19,3 +16,6 @@ packages = ["src/cnoc"]
 
 [tool.uv]
 link-mode = "copy"
+
+[project.scripts]
+lib = "cnoc.main:main"

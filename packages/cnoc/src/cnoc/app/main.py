@@ -6,12 +6,19 @@ from websockets import ServerConnection, serve
 
 
 async def handler(ws: ServerConnection):
-    if ws.request.path == "/":
+    path = ws.request.path
+
+    # Workspace
+    if path == "/":
         workspaceHandler(ws)
-    elif ws.request.path.startswith("/experiment"):
-        id = ws.request.path.split("/")[2]
+
+    # Experiment
+    elif path.startswith("/experiment"):
+        id = path.split("/")[2]
         experimentHandler(ws, id)
-    elif ws.request.path.startswith("/chart"):
+
+    # Chart
+    elif path.startswith("/chart"):
         pass
 
 
