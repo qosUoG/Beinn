@@ -22,10 +22,14 @@ async def handler(ws: ServerConnection):
     #     pass
 
 
-async def main():
+async def _main():
     async with serve(handler, "localhost", 8001) as server:
         await server.serve_forever()
 
 
+def main():
+    asyncio.run(_main())
+
+
 if __name__ == "__main__":
-    asyncio.run(main())
+    main()
