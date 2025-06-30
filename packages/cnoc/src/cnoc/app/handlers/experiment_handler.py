@@ -12,22 +12,21 @@ async def experimentHandler(ws: ServerConnection, id: str):
     experiment = State.get(id)
 
     async def producer():
-        
         experiment.onStarted(
             lambda: Foundation.runCoroThreadsafeBlocking(
                 ws.send(kv2str("status", "started"))
             )
         )
-        
+
         experiment.onLoopEnd(
             lambda iteration_count: Foundation.runCoroThreadsafeBlocking(
                 ws.send(kv2str("iteration_count", iteration_count))
             )
         )
-        
-        experiment.onStopped(
-            lambda
-        )
+
+        # experiment.onStopped(
+        #     lambda
+        # )
 
         pass
 
