@@ -16,7 +16,10 @@ async def handler(ws: ServerConnection):
         await workspaceHandler(ws)
     elif path == "/close":
         if _server is not None:
+            print("not none")
             await _server.close()
+
+        print("None")
 
     # # Experiment
     # elif path.startswith("/experiment"):
@@ -31,6 +34,7 @@ async def handler(ws: ServerConnection):
 async def _main():
     async with serve(handler, "localhost", 8001) as server:
         _server = server
+        print(_server)
         await server.serve_forever()
 
 
