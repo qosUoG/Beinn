@@ -1,6 +1,6 @@
 import asyncio
 
-from .handlers.experiment_handler import experimentHandler
+# from .handlers.experiment_handler import experimentHandler
 from .handlers.workspace_handler import workspaceHandler
 from websockets import ServerConnection, serve
 
@@ -12,14 +12,14 @@ async def handler(ws: ServerConnection):
     if path == "/":
         workspaceHandler(ws)
 
-    # Experiment
-    elif path.startswith("/experiment"):
-        id = path.split("/")[2]
-        experimentHandler(ws, id)
+    # # Experiment
+    # elif path.startswith("/experiment"):
+    #     id = path.split("/")[2]
+    #     experimentHandler(ws, id)
 
-    # Chart
-    elif path.startswith("/chart"):
-        pass
+    # # Chart
+    # elif path.startswith("/chart"):
+    #     pass
 
 
 async def main():

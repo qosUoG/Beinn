@@ -5,11 +5,12 @@ import pkgutil
 from typing import TypedDict
 import warnings
 
-from ...public.params import ParamModels2Params
+# from ...public.params import ParamModels2Params
 
 from ..state.state import State
-from ...public.equipment import EquipmentABC
-from ...public.experiment import ExperimentABC
+
+# from ...public.equipment import EquipmentABC
+# from ...public.experiment import ExperimentABC
 from websockets import ServerConnection
 
 
@@ -18,54 +19,54 @@ async def workspaceHandler(ws: ServerConnection):
         req = json.loads(message)
         command: str = req["command"]
 
-        match command:
-            case "options:equipment":
-                ws.send(json.dumps(eeOptions(EquipmentABC)))
-                break
-            case "options:experiment":
-                ws.send(json.dumps(eeOptions(ExperimentABC)))
-                break
-            case "create:equipment":
-                State.create("equipment", req["id"], req["module"], req["cls"])
-                break
-            case "create:experiment":
-                State.create("equipment", req["id"], req["module"], req["cls"])
-                break
-            case "set_params":
-                State.setParams(req["id"], ParamModels2Params(req["params"]))
-                break
+        # match command:
+        #     case "options:equipment":
+        #         ws.send(json.dumps(eeOptions(EquipmentABC)))
+        #         break
+        #     case "options:experiment":
+        #         ws.send(json.dumps(eeOptions(ExperimentABC)))
+        #         break
+        #     case "create:equipment":
+        #         State.create("equipment", req["id"], req["module"], req["cls"])
+        #         break
+        #     case "create:experiment":
+        #         State.create("equipment", req["id"], req["module"], req["cls"])
+        #         break
+        # case "set_params":
+        #     State.setParams(req["id"], ParamModels2Params(req["params"]))
+        #     break
 
 
-def eeOptions[T: type[ExperimentABC] | type[EquipmentABC]](eetype: T):
-    class ReturnType(TypedDict):
-        modules: list[str]
-        cls: str
+# def eeOptions[T: type[ExperimentABC] | type[EquipmentABC]](eetype: T):
+#     class ReturnType(TypedDict):
+#         modules: list[str]
+#         cls: str
 
-    res: dict[T, ReturnType] = {}
+#     res: dict[T, ReturnType] = {}
 
-    warnings.filterwarnings("ignore")
+#     warnings.filterwarnings("ignore")
 
-    # Check all possible paths
-    for package in pkgutil.walk_packages():
-        # Exclude these
-        if package.name.endswith("__main__"):
-            continue
+#     # Check all possible paths
+#     for package in pkgutil.walk_packages():
+#         # Exclude these
+#         if package.name.endswith("__main__"):
+#             continue
 
-        try:
-            for [cls, clsT] in inspect.getmembers(
-                importlib.import_module(package.name), inspect.isclass
-            ):
-                if not issubclass(clsT, eetype) or clsT is eetype:
-                    continue
+#         try:
+#             for [cls, clsT] in inspect.getmembers(
+#                 importlib.import_module(package.name), inspect.isclass
+#             ):
+#                 if not issubclass(clsT, eetype) or clsT is eetype:
+#                     continue
 
-                if clsT not in res:
-                    res[clsT] = {"modules": [package.name], "cls": cls}
-                else:
-                    res[clsT]["modules"].append(package.name)
+#                 if clsT not in res:
+#                     res[clsT] = {"modules": [package.name], "cls": cls}
+#                 else:
+#                     res[clsT]["modules"].append(package.name)
 
-        except Exception:
-            pass
+#         except Exception:
+#             pass
 
-    warnings.filterwarnings("default")
+#     warnings.filterwarnings("default")
 
-    return list(res.values())
+#     return list(res.values())
