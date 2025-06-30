@@ -1,7 +1,7 @@
 
 import { exists, mkdir, readDir, readTextFile, writeTextFile } from "@tauri-apps/plugin-fs"
 import { parse, stringify } from "smol-toml"
-import type { Dependency, GitSource, PathSource, Dependency_Installed } from "./dependency"
+import type { Dependency, GitSource, PathSource } from "./dependency"
 import { tick } from "svelte"
 import { confirm, message } from "@tauri-apps/plugin-dialog"
 import { beginProcedure, getRequestJsonOut_throwable, retryOnError, shell, sleep } from "$lib/utils"
@@ -32,6 +32,7 @@ class Controller {
 
         // Update the path
         this.path = path
+        await tick()
 
 
         const cont = await step("Setup uv in workspace",
@@ -106,8 +107,9 @@ class Controller {
             }
         )
 
-        // Wait for 2 seconds
-        await sleep(2000)
+        // Get dependencies
+        await this.get_dependencies()
+
 
         // Connect to the websocket
 
@@ -134,7 +136,7 @@ class Controller {
             return
         }
 
-        const uv_dependencies: Dependency_Installed[] = []
+        const uv_dependencies: Dependency[] = []
 
         // First prepare the dependencies already installed in the workspace
         const parsed = parse(await readTextFile(this.path + "/pyproject.toml"))
@@ -152,7 +154,6 @@ class Controller {
                     source: { type: "pip", package: parsed_dependency },
                     name: parsed_dependency,
                     fullname: dependency,
-                    installed: true,
 
                 })
 
@@ -161,7 +162,6 @@ class Controller {
                     name: parsed_dependency,
                     fullname: dependency,
                     source: { type: "git", ...(sources[parsed_dependency] as Omit<GitSource, "type">) },
-                    installed: true,
 
                 })
             else if ("path" in sources[parsed_dependency])
@@ -169,9 +169,10 @@ class Controller {
                     name: parsed_dependency,
                     fullname: dependency,
                     source: { type: "path", ...(sources[parsed_dependency] as Omit<PathSource, "type">) },
-                    installed: true,
                 })
         }
+
+        console.log(uv_dependencies)
 
         this.dependencies = uv_dependencies
     }

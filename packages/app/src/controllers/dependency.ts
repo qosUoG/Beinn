@@ -19,18 +19,8 @@ export type PathSource = {
 
 export type DependencySource = GitSource | PipSource | PathSource
 
-export type Dependency_NotInstalled = {
-    installed: false
+export type Dependency = {
     source: DependencySource
-}
-
-export type Dependency_Installed = {
-    installed: true
-    source: DependencySource
-
-
     name: string,
     fullname: string,
 }
-
-export type Dependency = Dependency_Installed | Dependency_NotInstalled

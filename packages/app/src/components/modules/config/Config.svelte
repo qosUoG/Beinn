@@ -6,6 +6,7 @@
 	import { cn } from "$components/utils.svelte";
 	import DependencyItem from "./DependencyItem.svelte";
 	import { workspace } from "$states/workspace.svelte";
+	import { controller } from "../../../controllers/app_controller.svelte";
 	type Page = "Dependency" | "Equipment" | "Experiment" | "CLI" | "Log";
 
 	let page: Page = $state("Dependency");
@@ -21,13 +22,13 @@
 	</div>
 
 	<div
-		class="w-84 bg-slate-800 h-full rounded-b overflow-x-scroll scrollbar-slate-400">
+		class="w-84 bg-slate-800 h-full rounded-b overflow-x-scroll scrollbar-slate-400 p-2">
 		{#if page === "Dependency"}
-			{#each Object.values(workspace.dependencies?.dependencies ?? {}) as dependency}
-				<div>
+			<div class="flex flex-col gap-2">
+				{#each controller.dependencies as dependency}
 					<DependencyItem {dependency} />
-				</div>
-			{/each}
+				{/each}
+			</div>
 		{/if}
 		<!-- 
 		<EquipmentList />
