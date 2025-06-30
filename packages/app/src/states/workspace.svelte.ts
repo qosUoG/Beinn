@@ -227,23 +227,23 @@ export class Workspace {
                 }
             )
 
-            await step("Upsert 'meall' to .gitignore",
-                async () => {
-                    let gitignore_content: string[] = []
-                    if (await exists(path + "/.gitignore"))
-                        gitignore_content = (await readTextFile(path + "/.gitignore")).split("\n")
+            // await step("Upsert 'meall' to .gitignore",
+            //     async () => {
+            //         let gitignore_content: string[] = []
+            //         if (await exists(path + "/.gitignore"))
+            //             gitignore_content = (await readTextFile(path + "/.gitignore")).split("\n")
 
-                    // Put meall into list of gitignores
-                    if (!gitignore_content.includes("meall"))
-                        await writeTextFile(path + "/.gitignore", [...gitignore_content, "meall"].join("\n"))
-                }
-            )
+            //         // Put meall into list of gitignores
+            //         if (!gitignore_content.includes("meall"))
+            //             await writeTextFile(path + "/.gitignore", [...gitignore_content, "meall"].join("\n"))
+            //     }
+            // )
 
-            await step("Copy newest version of meall to workspace",
-                async () => {
-                    await shell({ fn: "uvx", cmd: "copier copy -r main git+https://github.com/qosUoG/Beinn.git ./meall -f", cwd: path })
-                }
-            )
+            // await step("Copy newest version of meall to workspace",
+            //     async () => {
+            //         await shell({ fn: "uvx", cmd: "copier copy -r main git+https://github.com/qosUoG/Beinn.git ./meall -f", cwd: path })
+            //     }
+            // )
 
             await step("Create data directory if not exist",
                 async () => {
