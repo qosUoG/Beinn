@@ -10,7 +10,7 @@ async def handler(ws: ServerConnection):
 
     # Workspace
     if path == "/":
-        workspaceHandler(ws)
+        await workspaceHandler(ws)
 
     # # Experiment
     # elif path.startswith("/experiment"):
