@@ -8,7 +8,7 @@ import { beginProcedure, getRequestJsonOut_throwable, retryOnError, shell, sleep
 import { Child, Command } from "@tauri-apps/plugin-shell"
 import { pushLog } from "$components/modules/LogPanelController.svelte"
 
-const ws_url = "ws://localhost:8000/"
+const ws_url = "ws://localhost:8001/"
 
 class Controller {
 
@@ -16,6 +16,11 @@ class Controller {
     path: string | null = $state(null)
     dependencies: Dependency[] = $state([])
     private uvproc: Child | undefined
+
+    constructor() {
+        this.workspace_ws = new WebSocket(ws_url + "close")
+
+    }
 
 
     /* 

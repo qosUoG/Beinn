@@ -1,8 +1,11 @@
 import asyncio
 
+
 # from .handlers.experiment_handler import experimentHandler
 from .handlers.workspace_handler import workspaceHandler
-from websockets import ServerConnection, serve
+from websockets import ServerConnection, serve, Server
+
+_server: Server | None = None
 
 
 async def handler(ws: ServerConnection):
@@ -11,6 +14,9 @@ async def handler(ws: ServerConnection):
     # Workspace
     if path == "/":
         await workspaceHandler(ws)
+    elif path == "/close":
+        if _server is not None:
+            await _server.close()
 
     # # Experiment
     # elif path.startswith("/experiment"):
@@ -24,6 +30,7 @@ async def handler(ws: ServerConnection):
 
 async def _main():
     async with serve(handler, "localhost", 8001) as server:
+        _server = server
         await server.serve_forever()
 
 
