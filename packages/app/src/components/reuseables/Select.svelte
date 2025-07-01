@@ -4,10 +4,11 @@
 
 	let {
 		options,
-
+		class: clazz = "",
 		value = $bindable(),
 	}: {
 		value: T;
+		class?: string;
 		options: T[] | { key: string; value: T }[];
 	} = $props();
 
@@ -28,7 +29,7 @@
 </script>
 
 <button
-	class="w-full h-full text-center"
+	class={cn("w-full h-full text-center", clazz)}
 	onclick={async (e) => {
 		open = !open;
 	}}

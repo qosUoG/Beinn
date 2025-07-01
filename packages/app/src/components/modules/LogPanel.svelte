@@ -88,7 +88,7 @@
 			</div>
 		</div>
 		<div
-			class="  flex-grow fcol overflow-y-scroll scrollbar section font-mono font-stretch-extra-condensed tracking-tighter"
+			class="  flex-grow fcol overflow-y-scroll scrollbar-slate-400 section font-mono tracking-tighter font-light"
 			bind:this={log_element}>
 			{#each log_panel.displayingLogs as { type, timestamp, message }}
 				{@const dateobj = new Date(timestamp)}
@@ -101,14 +101,14 @@
 				<div class="frow-1 items-start">
 					{#if log_panel.show_time}
 						<div
-							class="min-w-26 w-26 max-w-24 text-green-500 text-nowrap">
+							class="min-w-26 w-26 max-w-24 text-green-500 text-nowrap text-[11.5px]">
 							{`${month} ${date} ${hour}:${minuet}:${second}`}
 						</div>
 					{/if}
 
 					<div
 						class={cn(
-							"min-w-16 w-16 max-w-16 frow-1 text-nowrap",
+							"min-w-16 w-16 max-w-16 frow-1 text-nowrap text-[11.5px]",
 							type === "beinn" ? "text-yellow-300" : "",
 							type === "meall" ? "text-cyan-300" : ""
 						)}>
@@ -116,7 +116,7 @@
 					</div>
 
 					<div
-						class="text-slate-100 text-wrap flex-grow whitespace-break-spaces break-all">
+						class="text-slate-100 text-wrap flex-grow whitespace-break-spaces break-all text-[11.5px]">
 						>>> {message.replace(/\u001b\[.*?m/g, "")}
 					</div>
 				</div>

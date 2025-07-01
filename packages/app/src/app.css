@@ -1,4 +1,5 @@
 @import "tailwindcss";
+@plugin "@iconify/tailwind4";
 
 @layer base {
 	body {
@@ -45,12 +46,11 @@
 
 	* {
 		scrollbar-width: auto;
-		scrollbar-width: auto;
 	}
 
-	*::-webkit-scrollbar-button {
+	/* *::-webkit-scrollbar-button {
 		display: none;
-	}
+	} */
 
 	*::-webkit-scrollbar {
 		width: 8px;
@@ -116,19 +116,19 @@
 	}
 
 	.frow-8 {
-		@apply flex gap-x-8;
+		@apply flex gap-8;
 	}
 
 	.frow-4 {
-		@apply flex gap-x-4;
+		@apply flex gap-4;
 	}
 
 	.frow-2 {
-		@apply flex gap-x-2;
+		@apply flex gap-2;
 	}
 
 	.frow-1 {
-		@apply flex gap-x-1;
+		@apply flex gap-1;
 	}
 
 	.frow {
@@ -136,19 +136,19 @@
 	}
 
 	.fcol-8 {
-		@apply flex flex-col gap-y-8;
+		@apply flex flex-col gap-8;
 	}
 
 	.fcol-4 {
-		@apply flex flex-col gap-y-4;
+		@apply flex flex-col gap-4;
 	}
 
 	.fcol-2 {
-		@apply flex flex-col gap-y-2;
+		@apply flex flex-col gap-2;
 	}
 
 	.fcol-1 {
-		@apply flex flex-col gap-y-1;
+		@apply flex flex-col gap-1;
 	}
 
 	.fcol {

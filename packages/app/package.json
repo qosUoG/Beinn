@@ -10,6 +10,8 @@
 		"check": "svelte-check --tsconfig ./tsconfig.app.json && tsc -p tsconfig.node.json"
 	},
 	"devDependencies": {
+		"@iconify/json": "^2.2.354",
+		"@iconify/tailwind4": "^1.0.6",
 		"@sveltejs/vite-plugin-svelte": "^5.1.0",
 		"@tauri-apps/cli": "^2.6.2",
 		"@tsconfig/svelte": "^5.0.4",

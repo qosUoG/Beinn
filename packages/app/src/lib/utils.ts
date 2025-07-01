@@ -172,7 +172,7 @@ export const sleep = (ms: number) => new Promise(r => setTimeout(r, ms));
 export type StepT<T = void> = (step_name: string, fn: () => (Promise<T> | T)) => Promise<T>
 
 export async function beginProcedure(proc_name: string) {
-    await pushLog("beinn", `PROCEDURE ${proc_name} --- BEGIN` + "\n")
+    await pushLog("beinn", `\nPROCEDURE ${proc_name} --- BEGIN` + "\n")
 
     async function step<T = void>(step_name: string, fn: () => (Promise<T> | T)) {
         try {
