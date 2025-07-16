@@ -10,7 +10,7 @@ import { pushLog } from "$components/modules/LogPanelController.svelte"
 
 const ws_url = "ws://localhost:8001/"
 
-class Controller {
+class AppController {
 
     workspace_ws: WebSocket | null = null
     connected: boolean = $state(false)
@@ -262,4 +262,4 @@ function workspaceOnMessage() {
 
 }
 
-export const controller = $state(new Controller())
+export const controller = $state(new AppController())
