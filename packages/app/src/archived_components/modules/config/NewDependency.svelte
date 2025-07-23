@@ -1,13 +1,14 @@
 <script lang="ts">
-	import type {
-		DependencySource,
-		PathSource,
-	} from "../../../controllers/dependency_controller.svelte";
-	import { controller } from "../../../controllers/app_controller.svelte";
-	import Separator from "$components/reuseables/Separator.svelte";
 	import { cn } from "$components/utils.svelte";
 	import LabelField from "$components/reuseables/Fields/LabelField.svelte";
 	import DivField from "$components/reuseables/Fields/DivField.svelte";
+	import {
+		dependencies,
+		type DependencySource,
+		type PathSource,
+	} from "$controllers/DependencyController.svelte";
+	import { workspace } from "$controllers/WorkspaceController.svelte";
+	import { beinn_log_controller } from "$controllers/LogController.svelte";
 
 	let source: DependencySource = $state({
 		type: "pip",
@@ -22,7 +23,16 @@
 			class="absolute right-0 top-0 flex items-center h-full bg-blue-600 rounded aspect-square justify-center"
 			aria-label="Add dependency"
 			onclick={async () => {
-				await controller.installDependency(source);
+				if (!workspace.path) {
+					beinn_log_controller.append(
+						"Cannot add dependency: No workspace path set."
+					);
+					return;
+				}
+				await dependencies.installDependency({
+					path: workspace.path,
+					source,
+				});
 				switch (source.type) {
 					case "pip":
 						source = { type: "pip", package: "" };

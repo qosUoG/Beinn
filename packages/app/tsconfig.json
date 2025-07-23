@@ -11,10 +11,11 @@
 			"$workers/*": ["workers/*"],
 			"$websockets/*": ["websockets/*"],
 			"$components/*": ["components/*"],
-			"$states/*": ["states/*"],
+
 			"$lib/*": ["lib/*"],
 			"$services/*": ["services/*"],
-			"$pages/*": ["pages/*"]
+			"$pages/*": ["pages/*"],
+			"$controllers/*": ["./controllers/*"]
 		}
 	}
 }

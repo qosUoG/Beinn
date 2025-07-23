@@ -1,21 +1,15 @@
 <script lang="ts">
-	import { mode_controller } from "$components/modules/ModeController.svelte";
-
-	import Config from "$components/modules/config/Config.svelte";
-	import Experiments from "$components/modules/runtime/Runtime.svelte";
-
-	import CliPanel from "$components/modules/CliPanel.svelte";
-
-	import Titlebar from "$components/modules/Titlebar.svelte";
+	import Titlebar from "$components/modules/titlebar/Titlebar.svelte";
 	import { exit } from "@tauri-apps/plugin-process";
 
 	import { getCurrentWindow } from "@tauri-apps/api/window";
-	import LogPanel from "$components/modules/LogPanel.svelte";
-	import { workspace } from "$states/workspace.svelte";
+
+	import Config from "$components/modules/config/Config.svelte";
+	import { workspace } from "$controllers/WorkspaceController.svelte";
 
 	getCurrentWindow().listen("tauri://close-requested", async () => {
-		const should_kill = await workspace.kill();
-		if (should_kill) await exit(0);
+		// const should_kill = await workspace.kill();
+		// if (should_kill) await exit(0);
 	});
 </script>
 
@@ -23,14 +17,15 @@
 	<Titlebar />
 
 	<div class="w-full flex-grow rounded relative frow-4 p-2 pt-0 min-h-0">
-		{#if mode_controller.mode === "Configuration"}
+		<Config />
+		<!-- {#if mode_controller.mode === "Configuration"}
 			<Config />
 		{:else if mode_controller.mode === "Runtime"}
 			<Experiments />
-		{/if}
+		{/if} -->
 
-		<CliPanel />
+		<!-- <CliPanel />
 
-		<LogPanel />
+		<LogPanel /> -->
 	</div>
 </div>

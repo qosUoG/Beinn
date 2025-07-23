@@ -1,17 +1,17 @@
 
 import { exists, readDir, readTextFile, writeTextFile } from "@tauri-apps/plugin-fs"
 import { parse, stringify } from "smol-toml"
-import { dependencies } from "./dependency_controller.svelte"
+import { dependencies } from "./DependencyController.svelte"
 import { tick } from "svelte"
 import { confirm } from "@tauri-apps/plugin-dialog"
 import { shell, sleep } from "$lib/utils"
 import { Child, Command } from "@tauri-apps/plugin-shell"
 
-import { beinn_log_controller, conc_log_controller } from "./log_controller.svelte"
+import { beinn_log_controller, conc_log_controller } from "./LogController.svelte"
 
 const ws_url = "ws://localhost:8001/"
 
-class AppController {
+class WorkspaceController {
 
     workspace_ws: WebSocket | null = null
     connected: boolean = $state(false)
@@ -36,7 +36,8 @@ class AppController {
         this.path = path
         await tick()
 
-        beinn_log_controller.append(`Checking if ${path} is a valid workspace...`)
+
+        beinn_log_controller.append(`Check if ${path} is a valid workspace...`)
         if (!await exists(path + "/pyproject.toml")) {
             // Check if the directory exists and is not empty
             if ((await readDir(path)).length > 0) {
@@ -68,8 +69,6 @@ class AppController {
         if (parsed.tool.uv["link-mode"] === undefined) parsed.tool.uv["link-mode"] = "copy"
         await writeTextFile(path + "/pyproject.toml", stringify(parsed))
 
-
-
         beinn_log_controller.append("Install required dependencies")
 
         let success = true
@@ -96,13 +95,6 @@ class AppController {
             beinn_log_controller.append("FAILED connect to python")
             return
         }
-
-        success = (await shell({ fn: "uv", cmd: "add aiosqlite", cwd: path, logger: beinn_log_controller })).success
-        if (!success) {
-            beinn_log_controller.append("FAILED connect to python")
-            return
-        }
-
 
         // In case cnoc is already installed and stale
         success = (await shell({ fn: "uv", cmd: "lock --upgrade-package cnoc", cwd: path, logger: beinn_log_controller })).success
@@ -159,4 +151,4 @@ function workspaceOnMessage() {
 
 }
 
-export const controller = $state(new AppController())
+export const workspace = $state(new WorkspaceController())

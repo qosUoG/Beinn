@@ -1,21 +1,18 @@
 <script lang="ts">
 	import FolderOpen from "$icons/FolderOpen.svelte";
 	import { open } from "@tauri-apps/plugin-dialog";
-	import Mode from "./Mode.svelte";
-	import Cli from "$icons/Cli.svelte";
-	import { cli_panel } from "./CliPanelController.svelte";
+
 	import Disk from "$icons/Disk.svelte";
-	import Logs from "$icons/Logs.svelte";
-	import { log_panel } from "./LogPanelController.svelte";
-	import { workspace } from "$states/workspace.svelte";
+
 	import Cancel from "$icons/Cancel.svelte";
-	import { onMount, tick } from "svelte";
+	import { tick } from "svelte";
 	import Loader from "$icons/Loader.svelte";
 	import Tick from "$icons/Tick.svelte";
 	import Cross from "$icons/Cross.svelte";
 	import { load, type Store } from "@tauri-apps/plugin-store";
 	import { homeDir } from "@tauri-apps/api/path";
-	import { controller } from "../../controllers/app_controller.svelte";
+	import { workspace } from "$controllers/WorkspaceController.svelte";
+
 	let workspace_loading = $state(false);
 
 	let show_save: "normal" | "success" | "fail" = $state("normal");
@@ -30,7 +27,7 @@
 		if (path) {
 			workspace_loading = true;
 			await tick();
-			await controller.connect(path);
+			await workspace.connect(path);
 			await tick();
 			// if (workspace.connected) await saveWorkspacePath(path);
 			workspace_loading = false;
@@ -39,8 +36,8 @@
 
 	async function saveHandler() {
 		await tick();
-		const success = await workspace.save();
-		show_save = success ? "success" : "fail";
+		// const success = await workspace.save();
+		// show_save = success ? "success" : "fail";
 
 		setTimeout(() => {
 			show_save = "normal";
@@ -50,7 +47,7 @@
 	async function closeHandler() {
 		workspace_loading = true;
 		await tick();
-		await workspace.kill();
+		// await workspace.kill();
 		workspace_loading = false;
 	}
 
@@ -69,7 +66,6 @@
 
 <div class="h-[40px] frow w-full justify-center py-2">
 	<div class="frow-4 z-1000">
-		<Mode />
 		<div class="frow-1">
 			<div class=" wrapped bg-slate-200 title">Workspace</div>
 			<div class="wrapped rounded bg-slate-200 w-96 min-w-12 h-[24px]">
@@ -107,18 +103,5 @@
 					><Disk /></button>
 			{/if}
 		</div>
-		<button
-			class="icon-btn-sm slate"
-			onclick={() => {
-				cli_panel.show = !cli_panel.show;
-				log_panel.show = false;
-			}}><Cli /></button>
-
-		<button
-			class="icon-btn-sm slate"
-			onclick={() => {
-				log_panel.show = !log_panel.show;
-				cli_panel.show = false;
-			}}><Logs /></button>
 	</div>
 </div>

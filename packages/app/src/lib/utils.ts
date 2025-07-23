@@ -4,9 +4,11 @@ import { readTextFile } from "@tauri-apps/plugin-fs"
 import { parse } from "smol-toml"
 import { fetch } from "@tauri-apps/plugin-http"
 import { Command } from "@tauri-apps/plugin-shell";
-import { pushLog } from "$components/modules/LogPanelController.svelte"
-import { workspace } from "$states/workspace.svelte"
-import type { LogController } from "controllers/log_controller.svelte";
+
+
+import type { LogController } from "$controllers/LogController.svelte";
+import { workspace } from "$controllers/WorkspaceController.svelte";
+
 
 export function zeropad(num: number) {
     if (num < 10) return `0${num}`;
@@ -177,52 +179,52 @@ export const sleep = (ms: number) => new Promise(r => setTimeout(r, ms));
 
 export type StepT<T = void> = (step_name: string, fn: () => (Promise<T> | T)) => Promise<T>
 
-export async function beginProcedure(proc_name: string) {
-    await pushLog("beinn", `\nPROCEDURE ${proc_name} --- BEGIN` + "\n")
+// export async function beginProcedure(proc_name: string) {
+//     await pushLog("beinn", `\nPROCEDURE ${proc_name} --- BEGIN` + "\n")
 
-    async function step<T = void>(step_name: string, fn: () => (Promise<T> | T)) {
-        try {
-            await pushLog("beinn", `${proc_name} --- STEP: ${step_name}\n`)
-            const res = await fn()
-            await pushLog("beinn", `${proc_name} --- STEP: ${step_name} --- SUCCESS\n`)
-            return res
-        } catch (e) {
-            if (e && typeof (e) === "object" && "stack" in e)
-                await pushLog("beinn", `${proc_name} --- STEP: ${step_name} --- FAILED\n    error:\n` + ((e).stack) + "\n")
-            else if (e && typeof (e) === "object" && "toString" in e)
-                await pushLog("beinn", `${proc_name} --- STEP: ${step_name} --- FAILED\n    error:\n    ` + e.toString() + "\n")
-            else
-                await pushLog("beinn", `${proc_name} --- STEP: ${step_name} --- FAILED\n    error:\n    ` + e + "\n")
+//     async function step<T = void>(step_name: string, fn: () => (Promise<T> | T)) {
+//         try {
+//             await pushLog("beinn", `${proc_name} --- STEP: ${step_name}\n`)
+//             const res = await fn()
+//             await pushLog("beinn", `${proc_name} --- STEP: ${step_name} --- SUCCESS\n`)
+//             return res
+//         } catch (e) {
+//             if (e && typeof (e) === "object" && "stack" in e)
+//                 await pushLog("beinn", `${proc_name} --- STEP: ${step_name} --- FAILED\n    error:\n` + ((e).stack) + "\n")
+//             else if (e && typeof (e) === "object" && "toString" in e)
+//                 await pushLog("beinn", `${proc_name} --- STEP: ${step_name} --- FAILED\n    error:\n    ` + e.toString() + "\n")
+//             else
+//                 await pushLog("beinn", `${proc_name} --- STEP: ${step_name} --- FAILED\n    error:\n    ` + e + "\n")
 
-            throw `ERROR HANDLED:${step_name}`
-        }
-    }
-
-
-    async function completed() {
-        await pushLog("beinn", `PROCEDURE ${proc_name} --- COMPLETED` + "\n")
-    }
-    async function cancelled(reason: string) {
-
-        await pushLog("beinn", `PROCEDURE ${proc_name} --- CANCELLED\n    reason:\n    ${reason}` + "\n")
-    }
-    async function failed(reason: string) {
-        await pushLog("beinn", `PROCEDURE ${proc_name} --- FAILED\n    reason:\n    ${reason}` + "\n")
-    }
-    async function unhandled(e: unknown) {
-        if (typeof e === "string" && e.startsWith("ERROR HANDLED"))
-            await pushLog("beinn", `${proc_name} --- FAILED at STEP ${e.split(":")[1]}` + "\n")
+//             throw `ERROR HANDLED:${step_name}`
+//         }
+//     }
 
 
-        else if (e && typeof (e) === "object" && "stack" in e)
-            await pushLog("beinn", `${proc_name} --- FAILED\n    error:\n` + ((e).stack) + "\n")
-        else if (e && typeof (e) === "object" && "toString" in e)
-            await pushLog("beinn", `${proc_name} --- FAILED\n    error:\n    ` + e.toString() + "\n")
-        else
-            await pushLog("beinn", `${proc_name} --- FAILED\n    error:\n    ` + e + "\n")
-    }
+//     async function completed() {
+//         await pushLog("beinn", `PROCEDURE ${proc_name} --- COMPLETED` + "\n")
+//     }
+//     async function cancelled(reason: string) {
+
+//         await pushLog("beinn", `PROCEDURE ${proc_name} --- CANCELLED\n    reason:\n    ${reason}` + "\n")
+//     }
+//     async function failed(reason: string) {
+//         await pushLog("beinn", `PROCEDURE ${proc_name} --- FAILED\n    reason:\n    ${reason}` + "\n")
+//     }
+//     async function unhandled(e: unknown) {
+//         if (typeof e === "string" && e.startsWith("ERROR HANDLED"))
+//             await pushLog("beinn", `${proc_name} --- FAILED at STEP ${e.split(":")[1]}` + "\n")
+
+
+//         else if (e && typeof (e) === "object" && "stack" in e)
+//             await pushLog("beinn", `${proc_name} --- FAILED\n    error:\n` + ((e).stack) + "\n")
+//         else if (e && typeof (e) === "object" && "toString" in e)
+//             await pushLog("beinn", `${proc_name} --- FAILED\n    error:\n    ` + e.toString() + "\n")
+//         else
+//             await pushLog("beinn", `${proc_name} --- FAILED\n    error:\n    ` + e + "\n")
+//     }
 
 
 
-    return { step, completed, cancelled, failed, unhandled }
-}
+//     return { step, completed, cancelled, failed, unhandled }
+// }

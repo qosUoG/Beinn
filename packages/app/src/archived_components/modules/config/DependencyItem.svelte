@@ -1,6 +1,9 @@
 <script lang="ts">
-	import { controller } from "../../../controllers/app_controller.svelte";
-	import type { Dependency } from "../../../controllers/dependency_controller.svelte";
+	import {
+		dependencies,
+		type Dependency,
+	} from "$controllers/DependencyController.svelte";
+	import { workspace } from "$states/workspace.svelte";
 
 	let { dependency }: { dependency: Dependency } = $props();
 </script>
@@ -15,7 +18,10 @@
 				aria-label="Remove dependency"
 				class="bg-red-600 h-full aspect-square rounded flex items-center justify-center hover:bg-red-700 transition-colors -translate-x-1/2"
 				onclick={async () => {
-					controller.uninstallDependency(dependency.name);
+					dependencies.uninstallDependency({
+						name: dependency.name,
+						path: workspace.path,
+					});
 				}}>
 				<span class="icon-[lucide--x] text-red-100"></span>
 			</button>

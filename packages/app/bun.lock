@@ -4,10 +4,11 @@
     "": {
       "name": "beinn",
       "dependencies": {
+        "@lucide/svelte": "^0.525.0",
         "@tailwindcss/vite": "^4.1.11",
-        "@tauri-apps/plugin-dialog": "~2.3.0",
-        "@tauri-apps/plugin-fs": "~2.4.0",
-        "@tauri-apps/plugin-http": "~2.5.0",
+        "@tauri-apps/plugin-dialog": "~2.3.1",
+        "@tauri-apps/plugin-fs": "~2.4.1",
+        "@tauri-apps/plugin-http": "~2.5.1",
         "@tauri-apps/plugin-os": "~2.3.0",
         "@tauri-apps/plugin-process": "~2.3.0",
         "@tauri-apps/plugin-shell": "~2.3.0",
@@ -19,16 +20,16 @@
         "tailwindcss": "^4.1.11",
       },
       "devDependencies": {
-        "@iconify/json": "^2.2.359",
+        "@iconify/json": "^2.2.362",
         "@iconify/tailwind4": "^1.0.6",
         "@sveltejs/vite-plugin-svelte": "6.1.0",
-        "@tauri-apps/cli": "^2.6.2",
+        "@tauri-apps/cli": "^2.7.1",
         "@tsconfig/svelte": "^5.0.4",
-        "@types/bun": "^1.2.18",
-        "svelte": "^5.36.2",
-        "svelte-check": "^4.2.2",
+        "@types/bun": "^1.2.19",
+        "svelte": "^5.36.13",
+        "svelte-check": "^4.3.0",
         "typescript": "~5.8.3",
-        "vite": "^7.0.4",
+        "vite": "^7.0.5",
       },
     },
   },
@@ -110,6 +111,8 @@
     "@jridgewell/trace-mapping": ["@jridgewell/trace-mapping@0.3.25", "", { "dependencies": { "@jridgewell/resolve-uri": "^3.1.0", "@jridgewell/sourcemap-codec": "^1.4.14" } }, "sha512-vNk6aEwybGtawWmy/PzwnGDOjCkLWSD2wqvjGGAgOAwCGWySYXfYoxt00IJkTF+8Lb57DwOb3Aa0o9CApepiYQ=="],
 
     "@kurkle/color": ["@kurkle/color@0.3.4", "", {}, "sha512-M5UknZPHRu3DEDWoipU6sE8PdkZ6Z/S+v4dD+Ke8IaNlpdSQah50lz1KtcFBa2vsdOnwbbnxJwVM4wty6udA5w=="],
+
+    "@lucide/svelte": ["@lucide/svelte@0.525.0", "", { "peerDependencies": { "svelte": "^5" } }, "sha512-dyUxkXzepagLUzL8jHQNdeH286nC66ClLACsg+Neu/bjkRJWPWMzkT+H0DKlE70QdkicGCfs1ZGmXCc351hmZA=="],
 
     "@rollup/rollup-android-arm-eabi": ["@rollup/rollup-android-arm-eabi@4.40.0", "", { "os": "android", "cpu": "arm" }, "sha512-+Fbls/diZ0RDerhE8kyC6hjADCXA1K4yVNlH0EYfd2XjyH0UGgzaQ8MlT0pCXAThfxv3QUAczHaL+qSv1E4/Cg=="],
 
