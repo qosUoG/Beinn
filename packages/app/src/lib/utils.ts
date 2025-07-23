@@ -6,6 +6,7 @@ import { fetch } from "@tauri-apps/plugin-http"
 import { Command } from "@tauri-apps/plugin-shell";
 import { pushLog } from "$components/modules/LogPanelController.svelte"
 import { workspace } from "$states/workspace.svelte"
+import type { LogController } from "controllers/log_controller.svelte";
 
 export function zeropad(num: number) {
     if (num < 10) return `0${num}`;
@@ -120,27 +121,32 @@ export const getRequestJsonOut_throwable = async (url: string) => {
     return obj.value
 }
 
-export async function shell({ fn, cmd, cwd }: { fn: string, cmd: string, cwd: string }) {
+export async function shell({ fn, cmd, cwd, logger }: { fn: string, cmd: string, cwd: string, logger: LogController }) {
 
-    const handler = Command.create(
-        fn, cmd.split(" "), {
-        encoding: "utf8",
-        cwd
-    })
-    const p = new Promise((resolve) => {
-        handler.on("close", resolve)
-        handler.on("error", resolve)
-    })
+    try {
 
-    await pushLog('beinn', `SHELL\n        cwd:${cwd}\n        ${fn} ${cmd}\n`)
+        const handler = Command.create(
+            fn, cmd.split(" "), {
+            encoding: "utf8",
+            cwd
+        })
+        const p = new Promise((resolve) => {
+            handler.on("close", resolve)
+            handler.on("error", resolve)
+        })
 
+        logger.append(`    ${fn} ${cmd}\n    cwd: ${cwd}`)
 
+        handler.stdout.on("data", (message) => { logger.append("        " + message) })
+        handler.stderr.on("data", (message) => { logger.append("        " + message) })
 
-    handler.stdout.on("data", async (message) => { await pushLog("beinn", "        " + message) })
-    handler.stderr.on("data", async (message) => { await pushLog("beinn", "        " + message) })
-
-    await handler.spawn()
-    await p
+        await handler.spawn()
+        await p
+        return { success: true }
+    } catch (e) {
+        logger.append(`    ERROR: ${e}`)
+        return { success: false }
+    }
 }
 
 

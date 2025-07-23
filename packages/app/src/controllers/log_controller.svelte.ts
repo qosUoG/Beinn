@@ -3,18 +3,20 @@ type LogEntry = {
     message: string
 }
 
-class LogController {
-    log_entries: LogEntry[] = $state([])
-
+export class LogController {
+    #log_entries: { value: LogEntry[] } = $state({ value: [] })
+    get log_entries() {
+        return this.#log_entries.value
+    }
 
     append(message: string) {
-        this.log_entries.push({ timestamp: Date.now(), message })
+        this.#log_entries.value.push({ timestamp: Date.now(), message })
 
-        if (this.log_entries.length > 1000) this.log_entries.shift()
+        if (this.#log_entries.value.length > 3000) this.#log_entries.value.shift()
     }
 
     clearLogs() {
-        this.log_entries = []
+        this.#log_entries.value = []
     }
 }
 
