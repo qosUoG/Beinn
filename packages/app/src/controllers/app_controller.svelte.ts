@@ -9,7 +9,6 @@ import { Child, Command } from "@tauri-apps/plugin-shell"
 
 import { beinn_log_controller, conc_log_controller } from "./log_controller.svelte"
 
-
 const ws_url = "ws://localhost:8001/"
 
 class AppController {

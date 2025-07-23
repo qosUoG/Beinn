@@ -1,6 +1,6 @@
 <script lang="ts">
 	import { controller } from "../../../controllers/app_controller.svelte";
-	import type { Dependency } from "../../../controllers/dependency";
+	import type { Dependency } from "../../../controllers/dependency_controller.svelte";
 
 	let { dependency }: { dependency: Dependency } = $props();
 </script>

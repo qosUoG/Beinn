@@ -2,7 +2,7 @@
 	import type {
 		DependencySource,
 		PathSource,
-	} from "../../../controllers/dependency";
+	} from "../../../controllers/dependency_controller.svelte";
 	import { controller } from "../../../controllers/app_controller.svelte";
 	import Separator from "$components/reuseables/Separator.svelte";
 	import { cn } from "$components/utils.svelte";
