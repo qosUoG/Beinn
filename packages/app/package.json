@@ -10,22 +10,22 @@
 		"check": "svelte-check --tsconfig ./tsconfig.app.json && tsc -p tsconfig.node.json"
 	},
 	"devDependencies": {
-		"@iconify/json": "^2.2.359",
+		"@iconify/json": "^2.2.362",
 		"@iconify/tailwind4": "^1.0.6",
 		"@sveltejs/vite-plugin-svelte": "6.1.0",
-		"@tauri-apps/cli": "^2.6.2",
+		"@tauri-apps/cli": "^2.7.1",
 		"@tsconfig/svelte": "^5.0.4",
-		"@types/bun": "^1.2.18",
-		"svelte": "^5.36.2",
-		"svelte-check": "^4.2.2",
+		"@types/bun": "^1.2.19",
+		"svelte": "^5.36.13",
+		"svelte-check": "^4.3.0",
 		"typescript": "~5.8.3",
-		"vite": "^7.0.4"
+		"vite": "^7.0.5"
 	},
 	"dependencies": {
 		"@tailwindcss/vite": "^4.1.11",
-		"@tauri-apps/plugin-dialog": "~2.3.0",
-		"@tauri-apps/plugin-fs": "~2.4.0",
-		"@tauri-apps/plugin-http": "~2.5.0",
+		"@tauri-apps/plugin-dialog": "~2.3.1",
+		"@tauri-apps/plugin-fs": "~2.4.1",
+		"@tauri-apps/plugin-http": "~2.5.1",
 		"@tauri-apps/plugin-os": "~2.3.0",
 		"@tauri-apps/plugin-process": "~2.3.0",
 		"@tauri-apps/plugin-shell": "~2.3.0",
