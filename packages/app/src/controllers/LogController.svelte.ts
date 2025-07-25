@@ -4,10 +4,18 @@ type LogEntry = {
 }
 
 export class LogController {
-    #log_entries: { value: LogEntry[] } = $state({ value: [] })
+    #log_entries: { value: LogEntry[] } = $state({
+        value: [
+
+        ]
+    })
     get log_entries() {
         return this.#log_entries.value
     }
+
+    scroll_position: number = $state(0)
+    is_refreshing: boolean = $state(false)
+    show_timetext: boolean = $state(false)
 
     append(message: string) {
         this.#log_entries.value.push({ timestamp: Date.now(), message })

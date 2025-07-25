@@ -4,6 +4,7 @@
 	import Logs from "$icons/Logs.svelte";
 	import Refresh from "$icons/Refresh.svelte";
 	import { zeropad } from "$lib/utils";
+	import type { Attachment } from "svelte/attachments";
 
 	import { log_panel } from "./LogPanelController.svelte";
 
@@ -25,9 +26,9 @@
 	let isRefreshing = $state(true);
 	let log_element: HTMLDivElement | undefined = $state(undefined);
 
-	$effect(() => {
-		log_panel.displayingLogs;
-		isRefreshing;
+	const refreshAttachment: Attachment<HTMLDivElement> = (
+		element: HTMLDivElement
+	) => {
 		if (isRefreshing && log_element) {
 			log_element.scrollTo({
 				top: log_element.scrollHeight,
@@ -35,7 +36,8 @@
 				behavior: "instant",
 			});
 		}
-	});
+		return () => {};
+	};
 </script>
 
 {#if log_panel.show}

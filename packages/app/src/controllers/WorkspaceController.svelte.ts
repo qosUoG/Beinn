@@ -63,7 +63,9 @@ class WorkspaceController {
             }
         }
 
-        const parsed = parse(await readTextFile("Upsert 'link-mode: copy' to pyproject.toml")) as any;
+        beinn_log_controller.append("Upsert 'link-mode: copy' to pyproject.toml")
+
+        const parsed = parse(await readTextFile(path + "/pyproject.toml")) as any;
         if (parsed.tool === undefined) parsed.tool = {}
         if (parsed.tool.uv === undefined) parsed.tool.uv = {}
         if (parsed.tool.uv["link-mode"] === undefined) parsed.tool.uv["link-mode"] = "copy"

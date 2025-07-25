@@ -1,13 +1,14 @@
 <script lang="ts">
 	import { cn } from "$components/utils.svelte";
 	import Dependency from "./dependency/Dependency.svelte";
+	import Logger from "./logger/Logger.svelte";
 
 	type Page = "Dependency" | "Equipment" | "Experiment" | "CLI" | "Log";
 
-	let page: Page = $state("Dependency");
+	let page: Page = $state("Log");
 </script>
 
-<div class="flex flex-col">
+<div class="flex flex-col w-128">
 	<div class="grid grid-cols-5 gap-1">
 		{@render tab("Dependency")}
 		{@render tab("Equipment")}
@@ -20,12 +21,13 @@
 		{#if page === "Dependency"}
 			<Dependency />
 		{:else if page === "Log"}
-			<div></div>
+			<Logger />
 		{/if}
 		<!-- 
 		<EquipmentList />
 		<ExperimentList />
-		<Editor /> -->
+		<Editor /> 
+	-->
 	</div>
 </div>
 
