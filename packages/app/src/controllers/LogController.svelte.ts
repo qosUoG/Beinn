@@ -30,5 +30,5 @@ export class LogController {
 
 export const beinn_log_controller = $state(new LogController())
 
-export const conc_log_controller = $state(new LogController())
+
 
