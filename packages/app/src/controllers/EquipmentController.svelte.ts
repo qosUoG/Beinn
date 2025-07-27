@@ -24,9 +24,18 @@ class EquipmentController {
         workspace_controller.registerOnOpen(() => {
             this.updateImports()
         })
-        workspace_controller.registerCommand("equipment:imports", (data: Imports) => {
-            this.imports = data
-            console.log(data)
+        workspace_controller.registerCommand("equipment:imports", (data: string[]) => {
+            // this.imports = data
+            let written: string[] = []
+            let output = ''
+            for (let d of data) {
+                d = d.split(".")[0]
+                if (written.includes(d)) continue
+                written.push(d)
+                output += `"${d}", `
+            }
+            console.log(output)
+
         })
         workspace_controller.registerCommand("equipment:create", (data: Equipment) => {
             this.#equipments[data.name] = data
