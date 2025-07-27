@@ -35,7 +35,7 @@ def eeImports[T: type[ExperimentABC] | type[EquipmentABC]](eetype: T):
             for [cls, clsT] in inspect.getmembers(
                 importlib.import_module(package.name), inspect.isclass
             ):
-                print(package.name + "\n", flush=True)
+                print(package.name + "\n")
                 if not issubclass(clsT, eetype) or clsT is eetype:
                     continue
 
