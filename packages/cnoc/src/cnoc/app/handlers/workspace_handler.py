@@ -16,6 +16,8 @@ from websockets import ServerConnection
 
 commands = {}
 
+escapes = ["abc", "argparse", "abc"]
+
 
 def eeImports[T: type[ExperimentABC] | type[EquipmentABC]](eetype: T):
     class ReturnType(TypedDict):
@@ -36,26 +38,32 @@ def eeImports[T: type[ExperimentABC] | type[EquipmentABC]](eetype: T):
             continue
         if package.name.endswith("__main__"):
             continue
+        if package.name.startswith("encoding"):
+            continue
+
+        if package.name in escapes:
+            continue
 
         try:
             for [cls, clsT] in inspect.getmembers(
                 importlib.import_module(package.name), inspect.isclass
             ):
-                print(package.name + "\n")
-                if not issubclass(clsT, eetype) or clsT is eetype:
-                    continue
+                # print(package.name)
+                # if not issubclass(clsT, eetype) or clsT is eetype:
+                #     continue
 
                 if clsT not in res:
                     res[clsT] = {"modules": [package.name], "cls": cls}
                 else:
-                    res[clsT]["modules"].append(package.name)
+                    continue
+                    # res[clsT]["modules"].append(package.name)
 
         except Exception:
             pass
 
     warnings.filterwarnings("default")
 
-    return list(res.values())
+    return list(res.keys())
 
 
 async def workspaceHandler(ws: ServerConnection):
