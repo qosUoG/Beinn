@@ -11,7 +11,7 @@ async def handler(ws: ServerConnection):
     path = ws.request.path
 
     # Workspace
-    if path == "/":
+    if path == "/workspace":
         await workspaceHandler(ws)
     elif path == "/close":
         sys.exit()
