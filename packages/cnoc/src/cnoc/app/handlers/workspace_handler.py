@@ -244,7 +244,9 @@ def eeImports[T: type[ExperimentABC] | type[EquipmentABC]](eetype: T):
             continue
         if package.name.endswith("__main__"):
             continue
-
+        if package.name.startswith("xkcd"):
+            print(f"Skipping {package.name} as it starts with xkcd")
+            continue
         try:
             for [cls, clsT] in inspect.getmembers(
                 importlib.import_module(package.name), inspect.isclass
