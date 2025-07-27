@@ -1,4 +1,4 @@
-import type { DependencyT_Installed } from "$states/dependency.svelte"
+
 
 import { readTextFile } from "@tauri-apps/plugin-fs"
 import { parse } from "smol-toml"
@@ -7,7 +7,7 @@ import { Command } from "@tauri-apps/plugin-shell";
 
 
 import type { LogController } from "$controllers/LogController.svelte";
-import { workspace } from "$controllers/WorkspaceController.svelte";
+import { workspace_controller } from "$controllers/WorkspaceController.svelte";
 
 
 export function zeropad(num: number) {
@@ -23,48 +23,48 @@ export function getRandomId(targetKeySet: string[]) {
     return res
 }
 
-export async function readAllUvDependencies() {
-    const uv_dependencies: DependencyT_Installed[] = []
+// export async function readAllUvDependencies() {
+//     const uv_dependencies: DependencyT_Installed[] = []
 
-    // First prepare the dependencies already installed in the workspace
-    const text = await readTextFile(workspace.path + "/pyproject.toml")
-    const parsed = parse(await readTextFile(workspace.path + "/pyproject.toml"))
+//     // First prepare the dependencies already installed in the workspace_controller
+//     const text = await readTextFile(workspace_controller.path + "/pyproject.toml")
+//     const parsed = parse(await readTextFile(workspace_controller.path + "/pyproject.toml"))
 
-    const sources = (parsed.tool as { uv: { sources: Record<string, object> } }).uv?.sources
-
-
-    for (const dependency of (parsed.project as { dependencies: string[] }).dependencies) {
-
-        const parsed_dependency = dependency.match(/[A-Za-z_]+[A-Za-z\-_0-9]+/g)![0]
+//     const sources = (parsed.tool as { uv: { sources: Record<string, object> } }).uv?.sources
 
 
-        if (!(parsed_dependency in sources))
-            uv_dependencies.push({
-                source: { type: "pip", package: parsed_dependency },
-                name: parsed_dependency,
-                fullname: dependency,
-                installed: true,
+//     for (const dependency of (parsed.project as { dependencies: string[] }).dependencies) {
 
-            })
-        else if ("git" in sources[parsed_dependency])
-            uv_dependencies.push({
-                name: parsed_dependency,
-                fullname: dependency,
-                source: { type: "git", ...(sources[parsed_dependency] as { git: string, subdirectory: string, branch: string }) },
-                installed: true,
+//         const parsed_dependency = dependency.match(/[A-Za-z_]+[A-Za-z\-_0-9]+/g)![0]
 
-            })
-        else if ("path" in sources[parsed_dependency])
-            uv_dependencies.push({
-                name: parsed_dependency,
-                fullname: dependency,
-                source: { type: "path", ...(sources[parsed_dependency] as { path: string, editable: boolean }) },
-                installed: true,
-            })
-    }
 
-    return uv_dependencies
-}
+//         if (!(parsed_dependency in sources))
+//             uv_dependencies.push({
+//                 source: { type: "pip", package: parsed_dependency },
+//                 name: parsed_dependency,
+//                 fullname: dependency,
+//                 installed: true,
+
+//             })
+//         else if ("git" in sources[parsed_dependency])
+//             uv_dependencies.push({
+//                 name: parsed_dependency,
+//                 fullname: dependency,
+//                 source: { type: "git", ...(sources[parsed_dependency] as { git: string, subdirectory: string, branch: string }) },
+//                 installed: true,
+
+//             })
+//         else if ("path" in sources[parsed_dependency])
+//             uv_dependencies.push({
+//                 name: parsed_dependency,
+//                 fullname: dependency,
+//                 source: { type: "path", ...(sources[parsed_dependency] as { path: string, editable: boolean }) },
+//                 installed: true,
+//             })
+//     }
+
+//     return uv_dependencies
+// }
 
 
 

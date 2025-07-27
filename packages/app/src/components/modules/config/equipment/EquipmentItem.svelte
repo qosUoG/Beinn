@@ -1,18 +1,13 @@
 <script lang="ts">
-	import {
-		dependency_controller,
-		type Dependency,
-	} from "$controllers/DependencyController.svelte";
-	import { beinn_log_controller } from "$controllers/LogController.svelte";
-	import { workspace_controller } from "$controllers/WorkspaceController.svelte";
+	import type { Equipment } from "$controllers/EquipmentController.svelte";
 
-	let { dependency }: { dependency: Dependency } = $props();
+	let { equipment }: { equipment: Equipment } = $props();
 </script>
 
 <div class="bg-slate-100 rounded p-1 flex flex-col gap-0.5">
 	<div class="flex items-center w-full justify-between">
 		<div class=" text-slate-950 font-medium wrapped px-0">
-			{dependency.name}
+			{equipment.name}
 		</div>
 		<div class="self-stretch">
 			<button

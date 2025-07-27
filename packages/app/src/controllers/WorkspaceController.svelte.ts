@@ -1,7 +1,7 @@
 
 import { exists, readDir, readTextFile, writeTextFile } from "@tauri-apps/plugin-fs"
 import { parse, stringify } from "smol-toml"
-import { dependencies } from "./DependencyController.svelte"
+import { dependency_controller } from "./DependencyController.svelte"
 import { tick } from "svelte"
 import { confirm } from "@tauri-apps/plugin-dialog"
 import { shell, sleep } from "$lib/utils"
@@ -25,7 +25,7 @@ class WorkspaceController {
 
     }
 
-
+    #commands: Record<string, (obj: any) => Promise<void> | void> = {}
     /* 
     Connect to the python workspace
     */
@@ -72,7 +72,7 @@ class WorkspaceController {
         if (parsed.tool.uv["link-mode"] === undefined) parsed.tool.uv["link-mode"] = "copy"
         await writeTextFile(path + "/pyproject.toml", stringify(parsed))
 
-        beinn_log_controller.append("Install required dependencies")
+        beinn_log_controller.append("Install required dependency_controller")
 
         let success = true
         success = (await shell({ fn: "uv", cmd: "add git+https://github.com/qosUoG/Beinn#subdirectory=packages/cnoc --branch revert_threading", cwd: path, logger: beinn_log_controller })).success
@@ -120,17 +120,22 @@ class WorkspaceController {
             return
         }
 
-        // Get dependencies
-        await dependencies.get_dependencies({ path })
+        // Get dependency_controller
+        await dependency_controller.get_dependencies({ path })
 
         await sleep(2000) // Wait for uv to start
 
 
         // Connect to the websocket
 
-        this.workspace_ws = new WebSocket(ws_url)
+        this.workspace_ws = new WebSocket(ws_url + "workspace")
 
-        this.workspace_ws.onmessage = workspaceOnMessage
+        this.workspace_ws.onmessage = async (event: MessageEvent<string>) => {
+
+            const data = JSON.parse(event.data)
+            await this.#commands[data.command]?.(data.value)
+
+        }
 
         this.workspace_ws.onopen = () => {
             this.connected = true
@@ -146,12 +151,19 @@ class WorkspaceController {
 
 
 
+    registerCommand(command: string, handler: (obj: any) => Promise<void> | void) {
+        this.#commands[command] = handler
+    }
+
+    sendCommand(command: string, data: any) {
+        if (this.workspace_ws === null || this.workspace_ws.readyState !== WebSocket.OPEN) {
+            beinn_log_controller.append(`FAILED send command ${command}: workspace is not connected`)
+            return
+        }
+        this.workspace_ws.send(JSON.stringify({ command, value: data }))
+    }
 
 
 }
 
-function workspaceOnMessage() {
-
-}
-
-export const workspace = $state(new WorkspaceController())
+export const workspace_controller = $state(new WorkspaceController())

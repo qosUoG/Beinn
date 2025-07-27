@@ -2,10 +2,10 @@
 	import { cn } from "$components/utils.svelte";
 
 	import {
-		dependencies,
+		dependency_controller,
 		type DependencySource,
 	} from "$controllers/DependencyController.svelte";
-	import { workspace } from "$controllers/WorkspaceController.svelte";
+	import { workspace_controller } from "$controllers/WorkspaceController.svelte";
 	import { beinn_log_controller } from "$controllers/LogController.svelte";
 	import { Plus } from "@lucide/svelte";
 	import InputField from "$components/fields/InputField.svelte";
@@ -24,14 +24,14 @@
 			class="absolute right-0 top-0 flex items-center h-full bg-blue-600 rounded aspect-square justify-center icon-btn-sm text-white"
 			aria-label="Add dependency"
 			onclick={async () => {
-				if (!workspace.path) {
+				if (!workspace_controller.path) {
 					beinn_log_controller.append(
 						"Cannot add dependency: No workspace path set."
 					);
 					return;
 				}
-				await dependencies.installDependency({
-					path: workspace.path,
+				await dependency_controller.installDependency({
+					path: workspace_controller.path,
 					source,
 				});
 				switch (source.type) {

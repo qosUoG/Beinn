@@ -5,7 +5,7 @@
 	import { getCurrentWindow } from "@tauri-apps/api/window";
 
 	import Config from "$components/modules/config/Config.svelte";
-	import { workspace } from "$controllers/WorkspaceController.svelte";
+	import { workspace_controller } from "$controllers/WorkspaceController.svelte";
 
 	getCurrentWindow().listen("tauri://close-requested", async () => {
 		// const should_kill = await workspace.kill();

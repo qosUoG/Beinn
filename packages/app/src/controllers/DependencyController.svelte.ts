@@ -137,4 +137,4 @@ class Dependencies {
 
 
 }
-export let dependencies = $state(new Dependencies())
+export let dependency_controller = $state(new Dependencies())

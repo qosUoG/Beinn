@@ -1,17 +1,19 @@
 <script lang="ts">
-	import FolderOpen from "$icons/FolderOpen.svelte";
 	import { open } from "@tauri-apps/plugin-dialog";
 
-	import Disk from "$icons/Disk.svelte";
-
-	import Cancel from "$icons/Cancel.svelte";
 	import { tick } from "svelte";
-	import Loader from "$icons/Loader.svelte";
-	import Tick from "$icons/Tick.svelte";
-	import Cross from "$icons/Cross.svelte";
+
 	import { load, type Store } from "@tauri-apps/plugin-store";
 	import { homeDir } from "@tauri-apps/api/path";
-	import { workspace } from "$controllers/WorkspaceController.svelte";
+	import { workspace_controller } from "$controllers/WorkspaceController.svelte";
+	import {
+		Ban,
+		Check,
+		Cross,
+		FolderOpen,
+		Loader,
+		Save,
+	} from "@lucide/svelte";
 
 	let workspace_loading = $state(false);
 
@@ -27,16 +29,16 @@
 		if (path) {
 			workspace_loading = true;
 			await tick();
-			await workspace.connect(path);
+			await workspace_controller.connect(path);
 			await tick();
-			// if (workspace.connected) await saveWorkspacePath(path);
+			// if (workspace_controller.connected) await saveWorkspacePath(path);
 			workspace_loading = false;
 		}
 	}
 
 	async function saveHandler() {
 		await tick();
-		// const success = await workspace.save();
+		// const success = await workspace_controller.save();
 		// show_save = success ? "success" : "fail";
 
 		setTimeout(() => {
@@ -47,7 +49,7 @@
 	async function closeHandler() {
 		workspace_loading = true;
 		await tick();
-		// await workspace.kill();
+		// await workspace_controller.kill();
 		workspace_loading = false;
 	}
 
@@ -70,7 +72,7 @@
 			<div class=" wrapped bg-slate-200 title">Workspace</div>
 			<div class="wrapped rounded bg-slate-200 w-96 min-w-12 h-[24px]">
 				<div class="text-nowrap w-full overflow-x-scroll">
-					{workspace.path}
+					{workspace_controller.path}
 				</div>
 			</div>
 			{#if workspace_loading}
@@ -79,20 +81,20 @@
 						<Loader />
 					</div>
 				</div>
-			{:else if !workspace.connected}
+			{:else if !workspace_controller.connected}
 				<button class="icon-btn-sm slate" onclick={folderSearchHandler}
 					><FolderOpen /></button>
 			{:else}
 				<button class="icon-btn-sm slate" onclick={closeHandler}
-					><Cancel /></button>
+					><Ban /></button>
 			{/if}
-			{#if !workspace.connected}
+			{#if !workspace_controller.connected}
 				<div class="icon-btn-sm bg-slate-200 text-white">
-					<Disk />
+					<Save />
 				</div>
 			{:else if show_save === "success"}
 				<div class="icon-btn-sm green">
-					<Tick />
+					<Check />
 				</div>
 			{:else if show_save === "fail"}
 				<div class="icon-btn-sm red">
@@ -100,7 +102,7 @@
 				</div>
 			{:else}
 				<button class="icon-btn-sm slate" onclick={saveHandler}
-					><Disk /></button>
+					><Save /></button>
 			{/if}
 		</div>
 	</div>
