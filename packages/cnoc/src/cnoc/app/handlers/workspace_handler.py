@@ -16,7 +16,7 @@ from websockets import ServerConnection
 
 commands = {}
 
-escapes = ["abc", "argparse", "abc"]
+escapes = ["abc", "argparse", "ast"]
 
 
 def eeImports[T: type[ExperimentABC] | type[EquipmentABC]](eetype: T):
@@ -33,16 +33,10 @@ def eeImports[T: type[ExperimentABC] | type[EquipmentABC]](eetype: T):
     for package in pkgutil.walk_packages():
         # Exclude these
 
-        if package.name.startswith("_"):
-            continue
-        if package.name.startswith("__"):
-            continue
-        if package.name.endswith("__main__"):
-            continue
-        if package.name.startswith("encoding"):
-            continue
+        # if package.name.startswith(tuple(escapes)):
+        #     continue
 
-        if package.name in escapes:
+        if package.name.endswith("__main__"):
             continue
 
         try:
