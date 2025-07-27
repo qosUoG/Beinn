@@ -25,6 +25,7 @@ def eeImports[T: type[ExperimentABC] | type[EquipmentABC]](eetype: T):
         cls: str
 
     res: dict[T, ReturnType] = {}
+    temp_res = []
 
     warnings.filterwarnings("ignore")
 
@@ -49,21 +50,26 @@ def eeImports[T: type[ExperimentABC] | type[EquipmentABC]](eetype: T):
                 importlib.import_module(package.name), inspect.isclass
             ):
                 # print(package.name)
+                if package.name not in temp_res:
+                    temp_res.append(package.name)
+
                 # if not issubclass(clsT, eetype) or clsT is eetype:
                 #     continue
 
-                if clsT not in res:
-                    res[clsT] = {"modules": [package.name], "cls": cls}
-                else:
-                    continue
-                    # res[clsT]["modules"].append(package.name)
+                # if clsT not in res:
+
+                # res[clsT] = {"modules": [package.name], "cls": cls}
+                # else:
+
+                # res[clsT]["modules"].append(package.name)
 
         except Exception:
             pass
 
     warnings.filterwarnings("default")
 
-    return list(res.keys())
+    # return list(res.keys())
+    return temp_res
 
 
 async def workspaceHandler(ws: ServerConnection):
