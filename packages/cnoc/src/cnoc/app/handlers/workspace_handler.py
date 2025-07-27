@@ -2,6 +2,7 @@ import importlib
 import inspect
 import json
 import pkgutil
+from struct import pack
 from typing import TypedDict
 import warnings
 
@@ -28,6 +29,11 @@ def eeImports[T: type[ExperimentABC] | type[EquipmentABC]](eetype: T):
     # Check all possible paths
     for package in pkgutil.walk_packages():
         # Exclude these
+
+        if package.name.startswith("_"):
+            continue
+        if package.name.startswith("__"):
+            continue
         if package.name.endswith("__main__"):
             continue
 
