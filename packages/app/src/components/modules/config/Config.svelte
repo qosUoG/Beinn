@@ -2,11 +2,12 @@
 	import { cn } from "$components/utils.svelte";
 	import Cli from "./cli/Cli.svelte";
 	import Dependency from "./dependency/Dependencies.svelte";
+	import Equipments from "./equipment/Equipments.svelte";
 	import Logger from "./logger/Logger.svelte";
 
 	type Page = "Dependency" | "Equipment" | "Experiment" | "Cli" | "Log";
 
-	let page: Page = $state("Cli");
+	let page: Page = $state("Equipment");
 </script>
 
 <div class="flex flex-col w-128">
@@ -21,13 +22,14 @@
 	<div class={cn(" bg-slate-800 flex-grow min-h-0 rounded-b p-2 fcol-2")}>
 		{#if page === "Dependency"}
 			<Dependency />
+		{:else if page === "Equipment"}
+			<Equipments />
 		{:else if page === "Cli"}
 			<Cli />
 		{:else if page === "Log"}
 			<Logger />
 		{/if}
 		<!-- 
-		<EquipmentList />
 		<ExperimentList />
 		<Editor /> 
 	-->

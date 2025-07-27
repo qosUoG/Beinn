@@ -35,6 +35,7 @@ def eeImports[T: type[ExperimentABC] | type[EquipmentABC]](eetype: T):
             for [cls, clsT] in inspect.getmembers(
                 importlib.import_module(package.name), inspect.isclass
             ):
+                print(package.name + "\n", flush=True)
                 if not issubclass(clsT, eetype) or clsT is eetype:
                     continue
 
@@ -57,7 +58,7 @@ async def workspaceHandler(ws: ServerConnection):
         command: str = req["command"]
         match command:
             case "equipment:imports":
-                ws.send(
+                await ws.send(
                     json.dumps(
                         {
                             "command": "equipment:imports",
@@ -67,7 +68,7 @@ async def workspaceHandler(ws: ServerConnection):
                 )
                 break
             case "experiment:imports":
-                ws.send(
+                await ws.send(
                     json.dumps(
                         {
                             "command": "experiment:imports",

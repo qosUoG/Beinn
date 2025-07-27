@@ -26,6 +26,7 @@ class WorkspaceController {
     }
 
     #commands: Record<string, (obj: any) => Promise<void> | void> = {}
+    #onopen: (() => void)[] = []
     /* 
     Connect to the python workspace
     */
@@ -138,6 +139,7 @@ class WorkspaceController {
         }
 
         this.workspace_ws.onopen = () => {
+            this.#onopen.forEach((cb) => cb())
             this.connected = true
         }
 
@@ -149,7 +151,9 @@ class WorkspaceController {
 
     }
 
-
+    registerOnOpen(cb: () => void) {
+        this.#onopen.push(cb)
+    }
 
     registerCommand(command: string, handler: (obj: any) => Promise<void> | void) {
         this.#commands[command] = handler

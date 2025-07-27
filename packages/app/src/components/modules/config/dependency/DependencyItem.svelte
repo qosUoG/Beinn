@@ -5,6 +5,7 @@
 	} from "$controllers/DependencyController.svelte";
 	import { beinn_log_controller } from "$controllers/LogController.svelte";
 	import { workspace_controller } from "$controllers/WorkspaceController.svelte";
+	import { Trash2 } from "@lucide/svelte";
 
 	let { dependency }: { dependency: Dependency } = $props();
 </script>
@@ -17,7 +18,7 @@
 		<div class="self-stretch">
 			<button
 				aria-label="Remove dependency"
-				class="bg-red-600 h-full aspect-square rounded flex items-center justify-center hover:bg-red-700 transition-colors -translate-x-1/2"
+				class="bg-red-600 icon-btn-sm text-white"
 				onclick={async () => {
 					if (!workspace_controller.path) {
 						beinn_log_controller.append(
@@ -30,7 +31,7 @@
 						path: workspace_controller.path,
 					});
 				}}>
-				<span class="icon-[lucide--x] text-red-100"></span>
+				<Trash2 />
 			</button>
 		</div>
 	</div>

@@ -6,7 +6,6 @@ export type Imports = { modules: string[], cls: string }[]
 
 export type Equipment = {
     name: string,
-
     module: string,
     cls: string,
     params: Record<string, AllParamTypes>,
@@ -22,8 +21,12 @@ class EquipmentController {
     imports: Imports = $state([])
 
     constructor() {
+        workspace_controller.registerOnOpen(() => {
+            this.updateImports()
+        })
         workspace_controller.registerCommand("equipment:imports", (data: Imports) => {
             this.imports = data
+            console.log(data)
         })
         workspace_controller.registerCommand("equipment:create", (data: Equipment) => {
             this.#equipments[data.name] = data
@@ -31,6 +34,7 @@ class EquipmentController {
         workspace_controller.registerCommand("equipment:remove", (name: string) => {
             delete this.#equipments[name]
         })
+
     }
 
     updateImports() {
