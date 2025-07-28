@@ -123,6 +123,14 @@ async def workspaceHandler(ws: ServerConnection):
                     )
                 )
 
+            case "equipment:remove":
+                Equipments.remove(req["value"]["name"])
+                await ws.send(
+                    json.dumps(
+                        {"command": "equipment:remove", "value": req["value"]["name"]}
+                    )
+                )
+
             case "experiment:create":
                 # State.create("experiment", req["id"], req["module"], req["cls"])
                 pass

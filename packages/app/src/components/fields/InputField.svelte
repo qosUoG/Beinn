@@ -27,5 +27,6 @@
 		autocapitalize="off"
 		autocomplete="off"
 		{onkeydown}
+		{onfocus}
 		{placeholder} />
 </div>

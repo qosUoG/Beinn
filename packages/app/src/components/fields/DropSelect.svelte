@@ -25,18 +25,19 @@
 		{@attach clickoutside}
 		class=" py-0.5 px-1 flex-grow w-fit border-l-1 border-slate-400 text-center relative">
 		{#if open}
-			<div class="bg-white absolute top-0 left-0 w-full rounded border">
-				<div class="overflow-scroll-y">
+			<div
+				class="bg-white absolute top-0 left-0 w-full border border-black z-1 h-fit max-h-84">
+				<div class="max-h-84 overflow-y-scroll scrollbar-slate-400">
 					{#each options as option}
 						<button
 							class={cn(
-								" wrapped w-full",
+								"  w-full py-0.5 px-1",
 								value === option ||
 									(typeof option === "object" &&
 										"value" in option &&
 										option.value === value)
-									? "bg-slate-800 text-slate-500"
-									: "hover:bg-slate-100"
+									? "bg-slate-700 text-white"
+									: "hover:bg-slate-300"
 							)}
 							onclick={() => {
 								if (typeof option !== "object") value = option;
@@ -44,7 +45,9 @@
 
 								open = false;
 							}}>
-							{label}
+							{typeof options[0] !== "object"
+								? option
+								: (option as { label: string; value: T }).value}
 						</button>
 					{:else}
 						<button
@@ -63,13 +66,11 @@
 			onclick={() => {
 				open = true;
 			}}>
-			{#if typeof options[0] !== "object"}
-				{value}
-			{:else}
-				{(options as { label: string; value: T }[]).find(
-					({ value: val }) => value === val
-				)?.label}
-			{/if}
+			{typeof options[0] !== "object"
+				? value
+				: (options as { label: string; value: T }[]).find(
+						({ value: val }) => value === val
+					)?.label}
 		</button>
 	</div>
 </div>

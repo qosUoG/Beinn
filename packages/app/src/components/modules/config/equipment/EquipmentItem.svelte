@@ -13,7 +13,7 @@
 	let { equipment = $bindable() }: { equipment: Equipment } = $props();
 </script>
 
-<div class="bg-slate-100 rounded p-1 flex flex-col gap-0.5">
+<div class="bg-slate-50 rounded p-1 flex flex-col gap-0.5">
 	<div class="flex items-center w-full justify-between">
 		<div class=" text-slate-950 font-medium wrapped px-0">
 			{equipment.name}
@@ -63,6 +63,10 @@
 					]} />
 			{:else if p.type === "select.float" || p.type === "select.int" || p.type === "select.str"}
 				<DropSelect {label} bind:value={p.value} options={p.options} />
+			{:else if p.type === "instance.equipment" || p.type === "instance.experiment"}
+				<!-- TODO -->
+			{:else if p.type === "composite"}
+				<!-- TODO -->
 			{/if}
 		{/each}
 	</div>

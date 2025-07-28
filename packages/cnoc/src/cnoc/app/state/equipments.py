@@ -20,3 +20,7 @@ class Equipments:
         )
 
         return cls._proxies[name].js
+
+    @classmethod
+    def remove(cls, name: str):
+        del cls._proxies[name]

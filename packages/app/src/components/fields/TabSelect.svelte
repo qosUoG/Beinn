@@ -24,7 +24,9 @@
 			<button
 				class={cn(
 					"   py-0.5",
-					value === item.value ? "bg-slate-300 font-semibold " : ""
+					value === item.value
+						? "bg-slate-700 text-white font-semibold "
+						: ""
 				)}
 				onclick={() => {
 					value = item.value;

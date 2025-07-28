@@ -42,22 +42,22 @@ export interface BoolParam {
 
 export interface InstanceEquipmentParam {
     type: "instance.equipment"
-    instance_id: string
+    name: string
 }
 
 export interface InstanceExperimentParam {
     type: "instance.experiment"
-    instance_id: string
+    name: string
 }
 
-export type AllParamTypes = (
+export type SimpleParamType = (
     SelectStrParam | SelectFloatParam | SelectIntParam | IntParam | FloatParam | StrParam | BoolParam |
-    //  CompositeParam |
     InstanceEquipmentParam | InstanceExperimentParam
 )
 
+export interface CompositeParam {
+    type: "composite"
+    children: Record<string, SimpleParamType>
+}
 
-// export interface CompositeParam {
-//     type: "composite"
-//     children: Record<string, AllParamTypes>
-// }
+export type AllParamTypes = SimpleParamType | CompositeParam

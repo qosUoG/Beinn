@@ -15,7 +15,7 @@
 	});
 </script>
 
-<div class="bg-slate-100 rounded p-1 pb-2 fcol">
+<div class="bg-slate-50 rounded p-1 pb-2 fcol">
 	<div class="title text-center wrapped relative mb-1">
 		New Equipment
 		<button
@@ -50,8 +50,8 @@
 									equipment_controller.temp_cls === cls &&
 										equipment_controller.temp_module ===
 											module
-										? "bg-slate-800 text-slate-500"
-										: "hover:bg-slate-100"
+										? "bg-slate-700 text-slate-500"
+										: "hover:bg-slate-300"
 								)}
 								onclick={() => {
 									equipment_controller.temp_cls = cls;

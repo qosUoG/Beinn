@@ -13,7 +13,7 @@
 	let { dependency = $bindable() }: { dependency: Dependency } = $props();
 </script>
 
-<div class="bg-slate-100 rounded p-1 flex flex-col gap-0.5">
+<div class="bg-slate-50 rounded p-1 flex flex-col gap-0.5">
 	<div class="flex items-center w-full justify-between">
 		<div class=" text-slate-950 font-medium wrapped px-0">
 			{dependency.name}
