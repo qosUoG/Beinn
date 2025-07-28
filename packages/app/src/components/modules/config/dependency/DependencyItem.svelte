@@ -4,9 +4,11 @@
 		dependency_controller,
 		type Dependency,
 	} from "$controllers/DependencyController.svelte";
+	import { equipment_controller } from "$controllers/EquipmentController.svelte";
 	import { beinn_log_controller } from "$controllers/LogController.svelte";
 	import { workspace_controller } from "$controllers/WorkspaceController.svelte";
 	import { Trash2 } from "@lucide/svelte";
+	import { tick } from "svelte";
 
 	let { dependency }: { dependency: Dependency } = $props();
 </script>
@@ -16,16 +18,20 @@
 		<div class=" text-slate-950 font-medium wrapped px-0">
 			{dependency.name}
 		</div>
-		<div class="">
+		<div class=" flex items-stretch gap-1">
 			<button
 				class={cn(
-					dependency.has_driver ? "bg-green-400" : "bg-slate-400",
-					"border wrapped border-green-600 icon-btn-sm text-green-600"
+					dependency.has_driver
+						? "bg-green-600 border-green-600 text-white"
+						: "text-slate-600 border-slate-600 line-through",
+					"border rounded px-1 box-border"
 				)}
-				onclick={() => {
+				onclick={async () => {
 					dependency.has_driver = !dependency.has_driver;
+					await tick();
+					equipment_controller.updateImports();
 				}}>
-				Has Driver
+				Driver / Script
 			</button>
 			<button
 				aria-label="Remove dependency"

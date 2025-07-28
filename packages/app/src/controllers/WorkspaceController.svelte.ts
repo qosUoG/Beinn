@@ -132,9 +132,12 @@ class WorkspaceController {
         this.workspace_ws = new WebSocket(ws_url + "workspace")
 
         this.workspace_ws.onmessage = async (event: MessageEvent<string>) => {
-
+            console.log("hi")
             const data = JSON.parse(event.data)
-            await this.#commands[data.command]?.(data.value)
+            console.log({ commands: this.#commands, data })
+            if (this.#commands[data.command] !== undefined) {
+                await this.#commands[data.command](data.value)
+            }
 
         }
 

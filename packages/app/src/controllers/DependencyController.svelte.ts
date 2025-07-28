@@ -37,6 +37,10 @@ class Dependencies {
         return this.#dependencies.value
     }
 
+    get hasDriverPackageNames() {
+        return this.dependencies.filter(d => d.has_driver).map(d => d.name)
+    }
+
     /* 
     Update list of dependencies
     */

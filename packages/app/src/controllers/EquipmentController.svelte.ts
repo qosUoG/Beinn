@@ -1,3 +1,4 @@
+import { dependency_controller } from "./DependencyController.svelte"
 import { beinn_log_controller } from "./LogController.svelte"
 import type { AllParamTypes } from "./Params.svelte"
 import { workspace_controller } from "./WorkspaceController.svelte"
@@ -22,20 +23,10 @@ class EquipmentController {
 
     constructor() {
         workspace_controller.registerOnOpen(() => {
-            this.updateImports()
+            // this.updateImports()
         })
-        workspace_controller.registerCommand("equipment:imports", (data: string[]) => {
-            // this.imports = data
-            let written: string[] = []
-            let output = ''
-            for (let d of data) {
-                d = d.split(".")[0]
-                if (written.includes(d)) continue
-                written.push(d)
-                output += `"${d}", `
-            }
-            console.log(output)
-
+        workspace_controller.registerCommand("equipment:imports", (data: Imports) => {
+            this.imports = data
         })
         workspace_controller.registerCommand("equipment:create", (data: Equipment) => {
             this.#equipments[data.name] = data
@@ -47,7 +38,7 @@ class EquipmentController {
     }
 
     updateImports() {
-        workspace_controller.sendCommand("equipment:imports", {})
+        workspace_controller.sendCommand("equipment:imports", { packages: dependency_controller.hasDriverPackageNames })
     }
 
     create(name: string, module: string, cls: string) {

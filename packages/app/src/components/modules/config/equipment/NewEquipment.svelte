@@ -2,6 +2,7 @@
 	import { Plus } from "@lucide/svelte";
 	import InputField from "$components/fields/InputField.svelte";
 	import TabSelect from "$components/fields/TabSelect.svelte";
+	import Label from "$components/fields/Label.svelte";
 
 	let cls = $state("");
 	let module = $state("");
@@ -22,6 +23,15 @@
 	<div
 		class="fcol *:border-1 *:border-slate-400 *:border-b-0 last:border-b-1 last:border-b-slate-400">
 		<InputField label="name" bind:value={name} mandatory />
-		<InputField label="import" bind:value={name} mandatory />
+		<div class="frow items-center">
+			<Label label="import" mandatory />
+			<div
+				class=" py-0.5 px-1 flex-grow w-fit border-l-1 border-slate-400 text-center relative">
+				<div class="bg-white wrapped absolute bottom-0 left-0 w-full">
+					asasd
+				</div>
+				<button> Select </button>
+			</div>
+		</div>
 	</div>
 </div>
