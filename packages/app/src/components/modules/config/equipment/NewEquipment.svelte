@@ -8,7 +8,6 @@
 	let cls = $state("");
 	let module = $state("");
 	let name = $state("");
-	console.log(equipment_controller.imports);
 </script>
 
 <div class="bg-slate-100 rounded p-1 pb-2 fcol">

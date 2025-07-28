@@ -16,7 +16,7 @@ from websockets import ServerConnection
 
 def eeImports[T: type[ExperimentABC] | type[EquipmentABC]](eetype: T, names: list[str]):
     class ReturnType(TypedDict):
-        modules: list[str]
+        module: str
         cls: str
 
     res: dict[T, ReturnType] = {}
@@ -34,9 +34,12 @@ def eeImports[T: type[ExperimentABC] | type[EquipmentABC]](eetype: T, names: lis
                     continue
 
                 if clsT not in res:
-                    res[clsT] = {"modules": [name], "cls": cls}
+                    res[clsT] = {"module": [name], "cls": cls}
                 else:
-                    res[clsT]["modules"].append(name)
+                    print(
+                        f"Duplicate class {cls} found in {name}, already imported from {res[clsT]['module']}",
+                        flush=True,
+                    )
         except ModuleNotFoundError:
             return
         except Exception as e:
