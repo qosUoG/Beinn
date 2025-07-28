@@ -10,6 +10,8 @@ from websockets import ServerConnection, serve
 async def handler(ws: ServerConnection):
     path = ws.request.path
 
+    print(f"path: {path}", flush=True)
+
     # Workspace
     if path == "/workspace":
         await workspaceHandler(ws)

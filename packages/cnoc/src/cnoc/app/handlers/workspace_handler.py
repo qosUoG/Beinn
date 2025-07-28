@@ -51,9 +51,11 @@ def eeImports[T: type[ExperimentABC] | type[EquipmentABC]](
 
 
 async def workspaceHandler(ws: ServerConnection):
+    print("in handler", flush=True)
     async for message in ws:
         req = json.loads(message)
         pprint.pprint(req)
+        print("", flush=True)
         command: str = req["command"]
         match command:
             case "equipment:imports":
