@@ -8,7 +8,7 @@ from ...public.equipment import EquipmentABC
 from io import StringIO
 
 
-class EquipmentProxy[T: EquipmentABC](T):
+class EquipmentProxy[T: EquipmentABC]:
     def __init__(self, eCls: type[T], module: str, cls: str, name: str):
         self._lock = Lock()
         self._equipment = eCls()
