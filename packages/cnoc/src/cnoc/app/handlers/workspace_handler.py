@@ -28,19 +28,19 @@ def eeImports[T: type[ExperimentABC] | type[EquipmentABC]](
     for package in pkgutil.walk_packages(packages):
         try:
             for [cls, clsT] in inspect.getmembers(
-                importlib.import_module(package), inspect.isclass
+                importlib.import_module(package.name), inspect.isclass
             ):
                 if not issubclass(clsT, eetype) or clsT is eetype:
                     continue
 
                 if clsT not in res:
-                    res[clsT] = {"modules": [package], "cls": cls}
+                    res[clsT] = {"modules": [package.name], "cls": cls}
                 else:
-                    res[clsT]["modules"].append(package)
+                    res[clsT]["modules"].append(package.name)
 
         except Exception as e:
             print(
-                f"Failed to import package {package} for {eetype.__name__}: {e}",
+                f"Failed to import package {package.name} for {eetype.__name__}: {e}",
                 flush=True,
             )
             continue
