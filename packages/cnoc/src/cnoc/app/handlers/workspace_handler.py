@@ -40,7 +40,7 @@ def eeImports[T: type[ExperimentABC] | type[EquipmentABC]](eetype: T, names: lis
 
         except Exception as e:
             print(
-                f"Failed to import package from {src} {package.name} for {eetype.__name__}: {e}",
+                f"Failed to import package {package.name} from {src} for {eetype.__name__}: {e}",
                 flush=True,
             )
 
