@@ -6,8 +6,8 @@ import pickle
 import pkgutil
 import pprint
 
-from cnoc.equipment import EquipmentABC
-from cnoc.experiment import ExperimentABC
+from cnoc.public.equipment import EquipmentABC
+from cnoc.public.experiment import ExperimentABC
 import traceback
 from io import StringIO
 from contextlib import redirect_stderr, redirect_stdout
@@ -15,38 +15,39 @@ import sys
 
 
 async def main():
-    # try:
-    #     for package in pkgutil.walk_packages():
-    #         if not package.name.startswith("lib"):
-    #             continue
-    #         for [cls, clsT] in inspect.getmembers(
-    #             importlib.import_module(package.name), inspect.isclass
-    #         ):
-    #             if (
-    #                 not issubclass(clsT, ExperimentABC)
-    #                 or clsT is ExperimentABC
-    #                 or clsT is EquipmentABC
-    #             ):
-    #                 continue
+    try:
+        for package in pkgutil.walk_packages(["examplelib", "."]):
+            for [cls, clsT] in inspect.getmembers(
+                importlib.import_module(package.name), inspect.isclass
+            ):
+                if (
+                    (
+                        not issubclass(clsT, ExperimentABC)
+                        and not issubclass(clsT, EquipmentABC)
+                    )
+                    or clsT is ExperimentABC
+                    or clsT is EquipmentABC
+                ):
+                    continue
 
-    #             print(cls)
+                print(cls)
 
-    # except Exception as e:
-    #     if package.name.startswith("lib"):
-    #         print(package.name)
-    #         print(e)
-    #         traceback.print_exception(e)
+    except Exception as e:
+        if package.name.startswith("lib"):
+            print(package.name)
+            print(e)
+            traceback.print_exception(e)
 
-    f = StringIO()
+    # f = StringIO()
 
-    with redirect_stdout(f):
-        with redirect_stderr(sys.stdout):
-            print("stderr1", file=sys.stderr)
-            print("stdout1")
-            print("stderr2", file=sys.stderr)
-            print("stdout2")
+    # with redirect_stdout(f):
+    #     with redirect_stderr(sys.stdout):
+    #         print("stderr1", file=sys.stderr)
+    #         print("stdout1")
+    #         print("stderr2", file=sys.stderr)
+    #         print("stdout2")
 
-    print(f.getvalue())
+    # print(f.getvalue())
 
 
 if __name__ == "__main__":
