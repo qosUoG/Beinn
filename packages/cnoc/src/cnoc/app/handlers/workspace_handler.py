@@ -21,60 +21,43 @@ def eeImports[T: type[ExperimentABC] | type[EquipmentABC]](eetype: T, names: lis
 
     res: dict[T, ReturnType] = {}
 
+    def examinePackage(src: str, name: str):
+        try:
+            for [cls, clsT] in inspect.getmembers(
+                importlib.import_module(name), inspect.isclass
+            ):
+                if (
+                    not issubclass(clsT, eetype)
+                    or clsT is eetype
+                    or clsT.__module__ != name
+                ):
+                    continue
+
+                if clsT not in res:
+                    res[clsT] = {"modules": [name], "cls": cls}
+                else:
+                    res[clsT]["modules"].append(name)
+
+        except Exception as e:
+            print(
+                f"Failed to import package from {src} {package.name} for {eetype.__name__}: {e}",
+                flush=True,
+            )
+
     for name in names:
         try:
             pkg = importlib.import_module(name)
         except Exception as e:
             print(
-                f"Failed to import package from name {name} for {eetype.__name__}: {e}",
+                f"Failed to import module {name} from names for {eetype.__name__}: {e}",
                 flush=True,
             )
 
         for package in pkgutil.walk_packages(pkg.__path__, pkg.__name__ + "."):
-            try:
-                for [cls, clsT] in inspect.getmembers(
-                    importlib.import_module(package.name), inspect.isclass
-                ):
-                    if (
-                        not issubclass(clsT, eetype)
-                        or clsT is eetype
-                        or clsT.__module__ != package.name
-                    ):
-                        continue
-
-                    if clsT not in res:
-                        res[clsT] = {"modules": [package.name], "cls": cls}
-                    else:
-                        res[clsT]["modules"].append(package.name)
-
-            except Exception as e:
-                print(
-                    f"Failed to import package from walk_packages {package.name} for {eetype.__name__}: {e}",
-                    flush=True,
-                )
+            examinePackage("walk_packages", package.name)
 
     for package in pkgutil.walk_packages(["."]):
-        try:
-            for [cls, clsT] in inspect.getmembers(
-                importlib.import_module(package.name), inspect.isclass
-            ):
-                if (
-                    not issubclass(clsT, eetype)
-                    or clsT is eetype
-                    or clsT.__module__ != package.name
-                ):
-                    continue
-
-                if clsT not in res:
-                    res[clsT] = {"modules": [package.name], "cls": cls}
-                else:
-                    res[clsT]["modules"].append(package.name)
-
-        except Exception as e:
-            print(
-                f"Failed to import package from . {package.name} for {eetype.__name__}: {e}",
-                flush=True,
-            )
+        examinePackage(".", package.name)
 
     return list(res.values())
 
