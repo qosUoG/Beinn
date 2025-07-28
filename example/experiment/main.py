@@ -15,8 +15,52 @@ import sys
 
 
 async def main():
+    # try:
+    #     for package in pkgutil.walk_packages(["examplelib", "."]):
+    #         for [cls, clsT] in inspect.getmembers(
+    #             importlib.import_module(package.name), inspect.isclass
+    #         ):
+    #             if (
+    #                 (
+    #                     not issubclass(clsT, ExperimentABC)
+    #                     and not issubclass(clsT, EquipmentABC)
+    #                 )
+    #                 or clsT is ExperimentABC
+    #                 or clsT is EquipmentABC
+    #             ):
+    #                 continue
+
+    #             print(cls)
+
+    # except Exception as e:
+    #     if package.name.startswith("lib"):
+    #         print(package.name)
+    #         print(e)
+    #         traceback.print_exception(e)
+
     try:
-        for package in pkgutil.walk_packages(["examplelib", "."]):
+        for names in ["examplelib"]:
+            pkg = importlib.import_module(names)
+
+            for package in pkgutil.walk_packages(pkg.__path__, pkg.__name__ + "."):
+                for [cls, clsT] in inspect.getmembers(
+                    importlib.import_module(package.name), inspect.isclass
+                ):
+                    if (
+                        (
+                            not issubclass(clsT, ExperimentABC)
+                            and not issubclass(clsT, EquipmentABC)
+                        )
+                        or clsT is ExperimentABC
+                        or clsT is EquipmentABC
+                        or clsT.__module__ != package.name
+                    ):
+                        continue
+
+                    print(cls, clsT.__module__)
+                    print(clsT.__module__, package.name)
+
+        for package in pkgutil.walk_packages(["."]):
             for [cls, clsT] in inspect.getmembers(
                 importlib.import_module(package.name), inspect.isclass
             ):
@@ -27,16 +71,14 @@ async def main():
                     )
                     or clsT is ExperimentABC
                     or clsT is EquipmentABC
+                    or clsT.__module__ != package.name
                 ):
                     continue
-
-                print(cls)
+                print(cls, clsT.__module__)
+                print(clsT.__module__, package.name)
 
     except Exception as e:
-        if package.name.startswith("lib"):
-            print(package.name)
-            print(e)
-            traceback.print_exception(e)
+        traceback.print_exception(e)
 
     # f = StringIO()
 
