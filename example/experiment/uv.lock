@@ -60,7 +60,7 @@ wheels = [
 [[package]]
 name = "cnoc"
 version = "0.1.0"
-source = { git = "https://github.com/qosUoG/Beinn?subdirectory=packages%2Fcnoc&branch=revert_threading#6c1d4636f7659af152c1dae27980b82a785fed4b" }
+source = { git = "https://github.com/qosUoG/Beinn?subdirectory=packages%2Fcnoc&branch=revert_threading#f27f0cb600bf30fd5c51885644cba1a95eed5f35" }
 dependencies = [
     { name = "pydantic" },
     { name = "websockets" },

@@ -1,12 +1,8 @@
 import importlib
-import importlib.util
 import inspect
 import json
-import pkgutil
-import pprint
-from struct import pack
 from typing import TypedDict
-import warnings
+
 
 # from ...public.params import ParamModels2Params
 
@@ -26,8 +22,6 @@ def eeImports[T: type[ExperimentABC] | type[EquipmentABC]](
 
     res: dict[T, ReturnType] = {}
 
-    warnings.filterwarnings("ignore")
-
     # Check all possible paths
     for package in packages:
         try:
@@ -42,20 +36,19 @@ def eeImports[T: type[ExperimentABC] | type[EquipmentABC]](
                 else:
                     res[clsT]["modules"].append(package)
 
-        except Exception:
-            pass
-
-    warnings.filterwarnings("default")
+        except Exception as e:
+            print(
+                f"Failed to import package {package} for {eetype.__name__}: {e}",
+            )
+            continue
 
     return list(res.keys())
 
 
 async def workspaceHandler(ws: ServerConnection):
-    print("in handler", flush=True)
     async for message in ws:
         req = json.loads(message)
-        pprint.pprint(req)
-        print("", flush=True)
+
         command: str = req["command"]
 
         match command:
