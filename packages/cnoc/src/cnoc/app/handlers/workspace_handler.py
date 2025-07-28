@@ -34,7 +34,7 @@ def eeImports[T: type[ExperimentABC] | type[EquipmentABC]](eetype: T, names: lis
                     continue
 
                 if clsT not in res:
-                    res[clsT] = {"module": [name], "cls": cls}
+                    res[clsT] = {"module": name, "cls": cls}
                 else:
                     print(
                         f"Duplicate class {cls} found in {name}, already imported from {res[clsT]['module']}",

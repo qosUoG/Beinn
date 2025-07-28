@@ -3,7 +3,7 @@ import { beinn_log_controller } from "./LogController.svelte"
 import type { AllParamTypes } from "./Params.svelte"
 import { workspace_controller } from "./WorkspaceController.svelte"
 
-export type Imports = { modules: string[], cls: string }[]
+export type Imports = { module: string, cls: string }[]
 
 export type Equipment = {
     name: string,
@@ -23,7 +23,7 @@ class EquipmentController {
 
     constructor() {
         workspace_controller.registerOnOpen(() => {
-            // this.updateImports()
+
         })
         workspace_controller.registerCommand("equipment:imports", (data: Imports) => {
             this.imports = data
