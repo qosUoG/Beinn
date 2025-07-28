@@ -24,8 +24,10 @@ def eeImports[T: type[ExperimentABC] | type[EquipmentABC]](
     res: dict[T, ReturnType] = {}
 
     # Check all possible paths
-    packages.append(".")
-    for package in pkgutil.walk_packages(packages, ".."):
+    packages.append("..")
+    for package in pkgutil.walk_packages(
+        packages,
+    ):
         print(package.name)
         try:
             for [cls, clsT] in inspect.getmembers(
