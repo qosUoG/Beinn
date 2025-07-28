@@ -37,7 +37,8 @@ def eeImports[T: type[ExperimentABC] | type[EquipmentABC]](eetype: T, names: lis
                     res[clsT] = {"modules": [name], "cls": cls}
                 else:
                     res[clsT]["modules"].append(name)
-
+        except ModuleNotFoundError:
+            return
         except Exception as e:
             print(
                 f"Failed to import package {package.name} from {src} for {eetype.__name__}: {e}",
