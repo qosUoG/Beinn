@@ -1,6 +1,7 @@
 import importlib
 import inspect
 import json
+import pkgutil
 from typing import TypedDict
 
 
@@ -23,7 +24,8 @@ def eeImports[T: type[ExperimentABC] | type[EquipmentABC]](
     res: dict[T, ReturnType] = {}
 
     # Check all possible paths
-    for package in packages:
+    packages.append(".")
+    for package in pkgutil.iter_modules(packages):
         try:
             for [cls, clsT] in inspect.getmembers(
                 importlib.import_module(package), inspect.isclass

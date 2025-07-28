@@ -10,9 +10,9 @@ from cnoc.public.managers import ManagerABC
 import time
 
 
-from cnoc.extensions.chart import XY
+# from cnoc.extensions.chart import XYFloat
 from cnoc.extensions.saver import XYFloatSaver
-# from examplelib.ExampleDriver import ExampleEquipment
+from examplelib.ExampleDriver import ExampleEquipment
 
 
 @dataclass
@@ -60,16 +60,16 @@ class ExampleExperiment(ExperimentABC):
         # self.inputs = numpy.arange(self.params["intparam"].value)
 
         # # # After the params, instantiate charts and sql savers as needed
-        self.xyplot: XY = manager.createChart(
-            XY,
-            XY.kwargs(
-                title="Example XY Plot",
-                x_axis="index",
-                y_axis="C",
-                y_names=["temperature"],
-                mode="append",
-            ),
-        )
+        # self.xyplot: XYFloat = manager.createChart(
+        #     XYFloat,
+        #     XYFloat.kwargs(
+        #         title="Example XY Plot",
+        #         x_axis="index",
+        #         y_axis="C",
+        #         y_names=["temperature"],
+        #         mode="append",
+        #     ),
+        # )
 
         # self.xyplot2: XY = manager.createChart(
         #     XY,
