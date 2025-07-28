@@ -88,17 +88,6 @@ class WorkspaceController {
             beinn_log_controller.append("FAILED connect to python")
             return
         }
-        success = (await shell({ fn: "uv", cmd: "add fastapi", cwd: path, logger: beinn_log_controller })).success
-        if (!success) {
-            beinn_log_controller.append("FAILED connect to python")
-            return
-        }
-
-        success = (await shell({ fn: "uv", cmd: "add fastapi[standard]", cwd: path, logger: beinn_log_controller })).success
-        if (!success) {
-            beinn_log_controller.append("FAILED connect to python")
-            return
-        }
 
         // In case cnoc is already installed and stale
         success = (await shell({ fn: "uv", cmd: "lock --upgrade-package cnoc", cwd: path, logger: beinn_log_controller })).success
@@ -154,7 +143,7 @@ class WorkspaceController {
         this.#onopen.push(cb)
     }
 
-    registerCommand(command: string, handler: (obj: any) => Promise<void> | void) {
+    registerCallback(command: string, handler: (obj: any) => Promise<void> | void) {
         this.#commands[command] = handler
     }
 

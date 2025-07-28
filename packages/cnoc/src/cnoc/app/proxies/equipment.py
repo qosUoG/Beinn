@@ -2,18 +2,32 @@ from contextlib import contextmanager, redirect_stderr, redirect_stdout
 import sys
 from threading import Lock
 from typing import Iterator
-from cnoc.equipment import EquipmentABC, EquipmentProxy as proto
+
+from ...public.params import param2Dict
+from ...public.equipment import EquipmentABC
 from io import StringIO
 
 
-class EquipmentProxy[T: EquipmentABC](proto):
-    def __init__(self, eCls: type[T]):
+class EquipmentProxy[T: EquipmentABC](T):
+    def __init__(self, eCls: type[T], module: str, cls: str, name: str):
         self._lock = Lock()
         self._equipment = eCls()
+        self.module = module
+        self.cls = cls
+        self.name = name
 
     @property
     def params(self):
         return self._equipment.params
+
+    @property
+    def js(self):
+        return {
+            "name": self.name,
+            "module": self.module,
+            "cls": self.cls,
+            "params": param2Dict(self.params),
+        }
 
     @contextmanager
     def lock(self) -> Iterator[T]:

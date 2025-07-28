@@ -1,6 +1,7 @@
 import asyncio
 import importlib
 import inspect
+import json
 import os
 import pickle
 import pkgutil
@@ -16,7 +17,28 @@ import sys
 
 async def main():
     # try:
-    #     for package in pkgutil.walk_packages(["examplelib", "."]):
+    #     for names in ["examplelib"]:
+    #         pkg = importlib.import_module(names)
+
+    #         for package in pkgutil.walk_packages(pkg.__path__, pkg.__name__ + "."):
+    #             for [cls, clsT] in inspect.getmembers(
+    #                 importlib.import_module(package.name), inspect.isclass
+    #             ):
+    #                 if (
+    #                     (
+    #                         not issubclass(clsT, ExperimentABC)
+    #                         and not issubclass(clsT, EquipmentABC)
+    #                     )
+    #                     or clsT is ExperimentABC
+    #                     or clsT is EquipmentABC
+    #                     or clsT.__module__ != package.name
+    #                 ):
+    #                     continue
+
+    #                 print(cls, clsT.__module__)
+    #                 print(clsT.__module__, package.name)
+
+    #     for package in pkgutil.walk_packages(["."]):
     #         for [cls, clsT] in inspect.getmembers(
     #             importlib.import_module(package.name), inspect.isclass
     #         ):
@@ -27,58 +49,14 @@ async def main():
     #                 )
     #                 or clsT is ExperimentABC
     #                 or clsT is EquipmentABC
+    #                 or clsT.__module__ != package.name
     #             ):
     #                 continue
-
-    #             print(cls)
+    #             print(cls, clsT.__module__)
+    #             print(clsT.__module__, package.name)
 
     # except Exception as e:
-    #     if package.name.startswith("lib"):
-    #         print(package.name)
-    #         print(e)
-    #         traceback.print_exception(e)
-
-    try:
-        for names in ["examplelib"]:
-            pkg = importlib.import_module(names)
-
-            for package in pkgutil.walk_packages(pkg.__path__, pkg.__name__ + "."):
-                for [cls, clsT] in inspect.getmembers(
-                    importlib.import_module(package.name), inspect.isclass
-                ):
-                    if (
-                        (
-                            not issubclass(clsT, ExperimentABC)
-                            and not issubclass(clsT, EquipmentABC)
-                        )
-                        or clsT is ExperimentABC
-                        or clsT is EquipmentABC
-                        or clsT.__module__ != package.name
-                    ):
-                        continue
-
-                    print(cls, clsT.__module__)
-                    print(clsT.__module__, package.name)
-
-        for package in pkgutil.walk_packages(["."]):
-            for [cls, clsT] in inspect.getmembers(
-                importlib.import_module(package.name), inspect.isclass
-            ):
-                if (
-                    (
-                        not issubclass(clsT, ExperimentABC)
-                        and not issubclass(clsT, EquipmentABC)
-                    )
-                    or clsT is ExperimentABC
-                    or clsT is EquipmentABC
-                    or clsT.__module__ != package.name
-                ):
-                    continue
-                print(cls, clsT.__module__)
-                print(clsT.__module__, package.name)
-
-    except Exception as e:
-        traceback.print_exception(e)
+    #     traceback.print_exception(e)
 
     # f = StringIO()
 
@@ -90,6 +68,10 @@ async def main():
     #         print("stdout2")
 
     # print(f.getvalue())
+    www = {"h": 1, "e": 2, "l": 3, "l2": 4, "o": 5}
+    wow = {"h": www, "e": 2, "l": www, "l2": 4, "o": 5}
+    print([list(item) for _, item in enumerate(wow.items())])
+    print({k: json.dumps(v) for k, v in wow.items()})
 
 
 if __name__ == "__main__":

@@ -21,19 +21,33 @@ class EquipmentController {
     }
     imports: Imports = $state([])
 
+    temp_module: string = $state("")
+    temp_cls: string = $state("")
+    temp_name: string = $state("")
+
     constructor() {
         workspace_controller.registerOnOpen(() => {
 
         })
-        workspace_controller.registerCommand("equipment:imports", (data: Imports) => {
-            this.imports = data
+        workspace_controller.registerCallback("equipment:imports", (imports: Imports) => {
+            this.imports = imports
         })
-        workspace_controller.registerCommand("equipment:create", (data: Equipment) => {
-            this.#equipments[data.name] = data
+        workspace_controller.registerCallback("equipment:create", (equipment: Equipment) => {
+            console.log(equipment)
+
+            this.#equipments[equipment.name] = equipment
+
+            if (equipment.name === this.temp_name && equipment.module === this.temp_module && equipment.cls === this.temp_cls) {
+                this.temp_name = ""
+                this.temp_module = ""
+                this.temp_cls = ""
+            }
         })
-        workspace_controller.registerCommand("equipment:remove", (name: string) => {
+        workspace_controller.registerCallback("equipment:remove", (name: string) => {
             delete this.#equipments[name]
         })
+
+
 
     }
 
@@ -41,18 +55,18 @@ class EquipmentController {
         workspace_controller.sendCommand("equipment:imports", { packages: dependency_controller.hasDriverPackageNames })
     }
 
-    create(name: string, module: string, cls: string) {
+    create() {
         for (const equipment of Object.values(this.#equipments)) {
-            if (equipment.name === name) {
-                beinn_log_controller.append(`ERROR Equipment with name ${name} already exists`)
+            if (equipment.name === this.temp_name) {
+                beinn_log_controller.append(`ERROR Equipment with name ${this.temp_name} already exists`)
                 return
             }
         }
         const equipment: Equipment = {
 
-            name,
-            module,
-            cls,
+            name: this.temp_name,
+            module: this.temp_module,
+            cls: this.temp_cls,
             params: {},
             temp_params: {}
         }

@@ -22,28 +22,30 @@ experiment, please refer to the example directory.
 
 """
 
-from abc import ABC, abstractmethod
-from pickle import FALSE
-from typing import Literal, override
+from abc import ABC
 from .experiment import ExperimentABC
-from pydantic import BaseModel
 from .equipment import EquipmentABC, EquipmentProxy
 
 
-class _QosParam[T: BaseModel](ABC):
-    @abstractmethod
-    def toBaseModel(self) -> T:
-        # This function should return a BaseModel
-        raise NotImplementedError
-
-    @abstractmethod
-    def getValue(self) -> str:
-        raise NotImplementedError
-
-
-class SelectStrParam(_QosParam):
+class SingleSelectABC[T: str | int | float](ABC):
     """
-    Singleselect param with value of type str
+    Base class for single select param type
+    """
+
+    _type: str
+
+    def __init__(self, options: list[str], value: T | None = None):
+        self._options = options
+        self.value = options[0] if value is None else value
+
+    # To and from json
+    def toDict(self):
+        return {"type": self._type, "options": self._options, "value": self.value}
+
+
+class SelectStrParam(SingleSelectABC[str]):
+    """
+    Single select param with value of type str
 
     Attributes
     ----------
@@ -53,13 +55,7 @@ class SelectStrParam(_QosParam):
         the selected option
     """
 
-    class PydanticBaseModel(BaseModel):
-        type: Literal["select.str"]
-        options: list[str]
-        value: str
-
-        def toParam(self):
-            return SelectStrParam(options=self.options, value=self.value)
+    _type = "select.str"
 
     def __init__(self, options: list[str], value: str | None = None):
         """
@@ -72,85 +68,66 @@ class SelectStrParam(_QosParam):
             default value of the param. If none is given, the first option
             would be used
         """
-        self._type: Literal["select.str"] = "select.str"
-        self.options = options
-        if value is None:
-            self.value = options[0]
-        else:
-            self.value = value
+        super().__init__(options, value)
 
-    @override
-    def toBaseModel(self) -> PydanticBaseModel:
-        return self.PydanticBaseModel(
-            type=self._type, options=self.options, value=self.value
-        )
-
-    @override
-    def getValue(self):
-        return self.value
+    @classmethod
+    def fromDict(cls, data: dict):
+        if data["type"] != cls._type:
+            raise ValueError(f"Invalid type {data['type']} for {cls._type}")
+        return cls(data["options"], data["value"])
 
 
-class SelectIntParam(_QosParam):
-    """Singleselect of int type. Detail refer to SelectStrParam class"""
+class SelectIntParam(SingleSelectABC[int]):
+    """Single select of int type. Detail refer to SelectStrParam class"""
 
-    class PydanticBaseModel(BaseModel):
-        type: Literal["select.int"]
-        options: list[int]
-        value: int
-
-        def toParam(self):
-            return SelectIntParam(options=self.options, value=self.value)
+    _type = "select.int"
 
     def __init__(self, options: list[int], value: int | None = None):
-        self._type: Literal["select.int"] = "select.int"
-        self.options = options
-        if value is None:
-            self.value = options[0]
-        else:
-            self.value = value
+        super().__init__(options, value)
 
-    @override
-    def toBaseModel(self) -> PydanticBaseModel:
-        return self.PydanticBaseModel(
-            type=self._type, options=self.options, value=self.value
-        )
-
-    @override
-    def getValue(self):
-        return f"{self.value}"
+    @classmethod
+    def fromDict(cls, data: dict):
+        if data["type"] != cls._type:
+            raise ValueError(f"Invalid type {data['type']} for {cls._type}")
+        return cls(data["options"], data["value"])
 
 
-class SelectFloatParam(_QosParam):
-    """Singleselect of float type. Detail refer to SelectStrParam class"""
+class SelectFloatParam(SingleSelectABC[float]):
+    """Single select of float type. Detail refer to SelectStrParam class"""
 
-    class PydanticBaseModel(BaseModel):
-        type: Literal["select.float"]
-        options: list[float]
-        value: float
-
-        def toParam(self):
-            return SelectFloatParam(options=self.options, value=self.value)
+    _type = "select.float"
 
     def __init__(self, options: list[float], value: float | None = None):
-        self._type: Literal["select.float"] = "select.float"
-        self.options = options
-        if value is None:
-            self.value = options[0]
-        else:
-            self.value = value
+        super().__init__(options, value)
 
-    @override
-    def toBaseModel(self) -> PydanticBaseModel:
-        return self.PydanticBaseModel(
-            type=self._type, options=self.options, value=self.value
-        )
-
-    @override
-    def getValue(self):
-        return f"{self.value}"
+    @classmethod
+    def fromDict(cls, data: dict):
+        if data["type"] != cls._type:
+            raise ValueError(f"Invalid type {data['type']} for {cls._type}")
+        return cls(data["options"], data["value"])
 
 
-class IntParam(_QosParam):
+class NumberABC[T: int | float](ABC):
+    """
+    Base class for Number param type
+    """
+
+    _type: str
+
+    def __init__(
+        self,
+        default: T,  # Default value is 0 for int and float
+        suffix: str,
+    ):
+        self.value = default
+        self.suffix = suffix
+
+    # To and from json
+    def toDict(self):
+        return {"type": self._type, "suffix": self.suffix, "value": self.value}
+
+
+class IntParam(NumberABC[int]):
     """
     param with value of type int
 
@@ -162,127 +139,101 @@ class IntParam(_QosParam):
         suffix of the parameter displayed on frontend
     """
 
-    class PydanticBaseModel(BaseModel):
-        type: Literal["int"]
-        suffix: str
-        value: int
-
-        def toParam(self):
-            return IntParam(default=self.value, suffix=self.suffix)
+    _type = "int"
 
     def __init__(self, default: int = 0, suffix: str = ""):
         """
         Parameters
         ----------
         default : int , optional
-            default value of the param. If none is given, it would be assiged
+            default value of the param. If none is given, it would be assigned
             as 0
 
         suffix: str , optional
             suffix shown as hint on the frontend
         """
-        self._type: Literal["int"] = "int"
-        self.suffix = suffix
-        self.value = default
+        super().__init__(default, suffix)
 
-    @override
-    def toBaseModel(self) -> PydanticBaseModel:
-        return self.PydanticBaseModel(
-            type=self._type, suffix=self.suffix, value=self.value
-        )
-
-    @override
-    def getValue(self):
-        return f"{self.value} {self.suffix}"
+    @classmethod
+    def fromDict(cls, data: dict):
+        if data["type"] != cls._type:
+            raise ValueError(f"Invalid type {data['type']} for {cls._type}")
+        return cls(data["value"], data["suffix"])
 
 
-class FloatParam(_QosParam):
+class FloatParam(NumberABC[float]):
     """IntParam but of float type. Detail refer to IntParam class
 
     Default value if none is given is 0.0
     """
 
-    class PydanticBaseModel(BaseModel):
-        type: Literal["float"]
-        suffix: str
-        value: float
-
-        def toParam(self):
-            return FloatParam(default=self.value, suffix=self.suffix)
+    _type = "float"
 
     def __init__(self, default: float = 0.0, suffix: str = ""):
-        self._type: Literal["float"] = "float"
-        self.suffix = suffix
-        self.value = default
+        super().__init__(default, suffix)
 
-    @override
-    def toBaseModel(self) -> PydanticBaseModel:
-        return self.PydanticBaseModel(
-            type=self._type, suffix=self.suffix, value=self.value
-        )
-
-    @override
-    def getValue(self):
-        return f"{self.value} {self.suffix}"
+    @classmethod
+    def fromDict(cls, data: dict):
+        if data["type"] != cls._type:
+            raise ValueError(f"Invalid type {data['type']} for {cls._type}")
+        return cls(data["value"], data["suffix"])
 
 
-class StrParam(_QosParam):
-    """StrParam but of str type. Detail refer to IntParam class
-
-    Do note that suffix is not provided in this param type
-
-    Default value if not given is ""
+class PrimitiveABC[T: str | bool](ABC):
+    """
+    Base class for Number param type
     """
 
-    class PydanticBaseModel(BaseModel):
-        type: Literal["str"]
-        value: str
+    _type: str
 
-        def toParam(self):
-            return StrParam(default=self.value)
+    def __init__(
+        self,
+        default: T,  # Default value is 0 for int and float
+    ):
+        self.value = default
+
+    # To and from json
+    def toDict(self):
+        return {"type": self._type, "value": self.value}
+
+
+class StrParam(PrimitiveABC[str]):
+    """
+    IntParam but of str type, without suffix. Detail refer to IntParam class.
+    Default value if not given is empty string.
+    """
+
+    _type = "str"
 
     def __init__(self, default: str = ""):
-        self._type: Literal["str"] = "str"
-        self.value = default
+        super().__init__(default)
 
-    @override
-    def toBaseModel(self) -> PydanticBaseModel:
-        return self.PydanticBaseModel(type=self._type, value=self.value)
-
-    @override
-    def getValue(self):
-        return self.value
+    @classmethod
+    def fromDict(cls, data: dict):
+        if data["type"] != cls._type:
+            raise ValueError(f"Invalid type {data['type']} for {cls._type}")
+        return cls(data["value"])
 
 
-class BoolParam(_QosParam):
-    """StrParam but of str type. Detail refer to IntParam class
-
-    Do note that suffix is not provided in this param type
-
-    Default value if not given is False
+class BoolParam:
+    """
+    IntParam but of bool type, without suffix. Detail refer to IntParam class.
+    Default value if not given is empty string.
     """
 
-    class PydanticBaseModel(BaseModel):
-        type: Literal["bool"]
-        value: bool
+    _type = "bool"
 
-        def toParam(self):
-            return BoolParam(default=self.value)
+    def __init__(self, default: str = False):
+        super().__init__(default)
 
-    def __init__(self, default: bool = FALSE):
-        self._type: Literal["bool"] = "bool"
-        self.value = default
-
-    @override
-    def toBaseModel(self) -> PydanticBaseModel:
-        return self.PydanticBaseModel(type=self._type, value=self.value)
-
-    @override
-    def getValue(self):
-        return f"{self.value}"
+    @classmethod
+    def fromDict(cls, data: dict):
+        if data["type"] != cls._type:
+            raise ValueError(f"Invalid type {data['type']} for {cls._type}")
+        return cls(data["value"])
 
 
-class InstanceEquipmentParam[T: EquipmentABC](_QosParam):
+class InstanceEquipmentParam[T: EquipmentABC]:
     """
     param type with instance implementing EquipmentProxy type
 
@@ -294,28 +245,26 @@ class InstanceEquipmentParam[T: EquipmentABC](_QosParam):
         The wrapper class of the driver that implements the protocol
     """
 
-    class PydanticBaseModel(BaseModel):
-        type: Literal["instance.equipment"]
-        instance_id: str | None
+    _type = "instance.equipment"
 
-        def toParam(self):
-            return InstanceEquipmentParam[T](self.instance_id)
-
-    def __init__(self, instance_id: str | None = None):
-        self._type: Literal["instance.equipment"] = "instance.equipment"
-        self._instance_id = instance_id
+    def __init__(self, name: str | None = None):
+        self._name = name
         self.instance: EquipmentProxy[T] | None = None
 
-    @override
-    def toBaseModel(self) -> PydanticBaseModel:
-        return self.PydanticBaseModel(type=self._type, instance_id=self._instance_id)
+    def toDict(self):
+        return {
+            "type": self._type,
+            "name": self._name,
+        }
 
-    @override
-    def getValue(self):
-        return f"{self._instance_id}"
+    @classmethod
+    def fromDict(cls, data: dict):
+        if data["type"] != cls._type:
+            raise ValueError(f"Invalid type {data['type']} for {cls._type}")
+        return cls(data["name"])
 
 
-class InstanceExperimentParam[T: ExperimentABC](_QosParam):
+class InstanceExperimentParam[T: ExperimentABC]:
     """
     param type with instance inheriting ExperimentABC type
 
@@ -330,28 +279,26 @@ class InstanceExperimentParam[T: ExperimentABC](_QosParam):
         The wrapper class of the experiment that implements the protocol
     """
 
-    class PydanticBaseModel(BaseModel):
-        type: Literal["instance.experiment"]
-        instance_id: str | None
+    _type = "instance.experiment"
 
-        def toParam(self):
-            return InstanceExperimentParam[T](self.instance_id)
+    def __init__(self, name: str | None = None):
+        self._name = name
+        self.instance: EquipmentProxy[T] | None = None
 
-    def __init__(self, instance_id: str | None = None):
-        self._type: Literal["instance.experiment"] = "instance.experiment"
-        self._instance_id = instance_id
-        self.instance: T | None = None
+    def toDict(self):
+        return {
+            "type": self._type,
+            "name": self._name,
+        }
 
-    @override
-    def toBaseModel(self) -> PydanticBaseModel:
-        return self.PydanticBaseModel(type=self._type, instance_id=self._instance_id)
-
-    @override
-    def getValue(self):
-        return f"{self._instance_id}"
+    @classmethod
+    def fromDict(cls, data: dict):
+        if data["type"] != cls._type:
+            raise ValueError(f"Invalid type {data['type']} for {cls._type}")
+        return cls(data["name"])
 
 
-type AllParamTypes = (
+type _SimpleParamType = (
     SelectStrParam
     | SelectFloatParam
     | SelectIntParam
@@ -359,27 +306,63 @@ type AllParamTypes = (
     | FloatParam
     | StrParam
     | BoolParam
-    # | CompositeParam
     | InstanceEquipmentParam[EquipmentABC]
     | InstanceExperimentParam[ExperimentABC]
 )
 
-type AllParamModelTypes = (
-    SelectStrParam.PydanticBaseModel
-    | SelectFloatParam.PydanticBaseModel
-    | SelectIntParam.PydanticBaseModel
-    | IntParam.PydanticBaseModel
-    | FloatParam.PydanticBaseModel
-    | StrParam.PydanticBaseModel
-    | BoolParam.PydanticBaseModel
-    # | CompositeParam.PydanticBaseModel
-    | InstanceEquipmentParam.PydanticBaseModel
-    | InstanceExperimentParam.PydanticBaseModel
-)
 
+class CompositeParam:
+    _type = "composite"
+
+    def __init__(self, title: str, children: dict[str, _SimpleParamType]):
+        self.title = title
+        self.children = children
+
+    def toDict(self):
+        return {
+            "type": self._type,
+            "title": self.title,
+            "children": {k: v.toDict() for k, v in self.children.items()},
+        }
+
+    @classmethod
+    def fromDict(cls, data: dict):
+        if data["type"] != cls._type:
+            raise ValueError(f"Invalid type {data['type']} for {cls._type}")
+
+        children: Params = {}
+        for k, v in data.items():
+            for tp in _param_type_arr:
+                if v["type"] == tp._type:
+                    children[k] = tp.fromDict(v)
+                    break
+
+        return CompositeParam(
+            data["title"],
+            children,
+        )
+
+
+type AllParamTypes = _SimpleParamType | CompositeParam
 type Params = dict[str, AllParamTypes]
 
 
-# class CompositeParam:
-#     _type: Literal["composite"]
-#     children: Params
+_param_type_arr: list[AllParamTypes] = [
+    SelectStrParam,
+    SelectIntParam,
+    SelectFloatParam,
+    IntParam,
+    FloatParam,
+    StrParam,
+    BoolParam,
+    InstanceEquipmentParam[EquipmentABC],
+    InstanceExperimentParam[ExperimentABC],
+    CompositeParam,
+]
+
+
+def param2Dict(params: Params) -> dict[str, dict]:
+    """
+    Convert the params to a dictionary representation
+    """
+    return {k: v.toDict() for k, v in params.items()}

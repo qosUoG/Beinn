@@ -4,6 +4,10 @@ import json
 import pkgutil
 from typing import TypedDict
 
+from ...public.params import Params, _param_type_arr
+
+from ..state.equipments import Equipments
+
 
 # from ...public.params import ParamModels2Params
 
@@ -66,6 +70,18 @@ def eeImports[T: type[ExperimentABC] | type[EquipmentABC]](eetype: T, names: lis
     return list(res.values())
 
 
+def dict2Param(data: dict[str, dict]) -> Params:
+    """
+    Convert the dictionary representation back to Params
+    """
+    params: Params = {}
+    for k, v in data.items():
+        for tp in _param_type_arr:
+            if v["type"] == tp._type:
+                params[k] = tp.fromDict(v)
+                break
+
+
 async def workspaceHandler(ws: ServerConnection):
     async for message in ws:
         req = json.loads(message)
@@ -94,8 +110,24 @@ async def workspaceHandler(ws: ServerConnection):
                 )
 
             case "equipment:create":
-                # State.create("equipment", req["id"], req["module"], req["cls"])
-                pass
+                Equipments.create(
+                    name=req["name"],
+                    module_str=req["module"],
+                    cls_str=req["cls"],
+                )
+                await ws.send(
+                    json.dumps(
+                        {
+                            "command": "experiment:create",
+                            "value": Equipments.create(
+                                name=req["name"],
+                                module_str=req["module"],
+                                cls_str=req["cls"],
+                            ),
+                        }
+                    )
+                )
+
             case "experiment:create":
                 # State.create("experiment", req["id"], req["module"], req["cls"])
                 pass

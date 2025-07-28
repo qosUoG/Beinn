@@ -18,7 +18,7 @@
 	<Label {label} {mandatory} />
 	<input
 		bind:value
-		class=" py-0.5 px-1 placeholder:italic flex-grow w-fit border-l-1 border-slate-400"
+		class=" py-0.5 px-1 placeholder:italic placeholder:text-center flex-grow w-fit border-l-1 border-slate-400"
 		spellcheck="false"
 		autocapitalize="off"
 		autocomplete="off"
