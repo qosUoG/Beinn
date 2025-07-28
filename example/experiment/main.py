@@ -14,6 +14,8 @@ from io import StringIO
 from contextlib import redirect_stderr, redirect_stdout
 import sys
 
+from cnoc.public import params as p
+
 
 async def main():
     # try:
@@ -68,10 +70,7 @@ async def main():
     #         print("stdout2")
 
     # print(f.getvalue())
-    www = {"h": 1, "e": 2, "l": 3, "l2": 4, "o": 5}
-    wow = {"h": www, "e": 2, "l": www, "l2": 4, "o": 5}
-    print([list(item) for _, item in enumerate(wow.items())])
-    print({k: json.dumps(v) for k, v in wow.items()})
+    p.BoolParam(False)
 
 
 if __name__ == "__main__":

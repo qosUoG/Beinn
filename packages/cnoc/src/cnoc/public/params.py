@@ -188,7 +188,7 @@ class PrimitiveABC[T: str | bool](ABC):
 
     def __init__(
         self,
-        default: T,  # Default value is "" for str and False for bool
+        default: str | bool,  # Default value is "" for str and False for bool
     ):
         self.value = default
 
