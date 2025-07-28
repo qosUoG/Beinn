@@ -3,6 +3,7 @@ import importlib.util
 import inspect
 import json
 import pkgutil
+import pprint
 from struct import pack
 from typing import TypedDict
 import warnings
@@ -52,6 +53,7 @@ def eeImports[T: type[ExperimentABC] | type[EquipmentABC]](
 async def workspaceHandler(ws: ServerConnection):
     async for message in ws:
         req = json.loads(message)
+        pprint.pprint(req)
         command: str = req["command"]
         match command:
             case "equipment:imports":

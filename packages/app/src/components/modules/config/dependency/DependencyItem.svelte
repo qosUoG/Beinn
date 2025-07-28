@@ -10,7 +10,7 @@
 	import { Trash2 } from "@lucide/svelte";
 	import { tick } from "svelte";
 
-	let { dependency }: { dependency: Dependency } = $props();
+	let { dependency = $bindable() }: { dependency: Dependency } = $props();
 </script>
 
 <div class="bg-slate-100 rounded p-1 flex flex-col gap-0.5">
