@@ -26,6 +26,7 @@ def eeImports[T: type[ExperimentABC] | type[EquipmentABC]](
     # Check all possible paths
     packages.append(".")
     for package in pkgutil.walk_packages(packages):
+        print(package.name)
         try:
             for [cls, clsT] in inspect.getmembers(
                 importlib.import_module(package.name), inspect.isclass
@@ -45,7 +46,7 @@ def eeImports[T: type[ExperimentABC] | type[EquipmentABC]](
             )
             continue
 
-    return list(res.keys())
+    return list(res.values())
 
 
 async def workspaceHandler(ws: ServerConnection):
