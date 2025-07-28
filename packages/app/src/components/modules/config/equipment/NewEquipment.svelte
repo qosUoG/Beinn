@@ -4,24 +4,15 @@
 
 	import Label from "$components/fields/Label.svelte";
 	import { equipment_controller } from "$controllers/EquipmentController.svelte";
-	import { cn } from "$components/utils.svelte";
+	import { cn, getClickOutsideAttachment } from "$components/utils.svelte";
 	import type { Attachment } from "svelte/attachments";
 	import { on } from "svelte/events";
 
 	let open = $state(false);
 
-	const clickoutside: Attachment<HTMLDivElement> = (
-		element: HTMLDivElement
-	) => {
-		const destroy = on(window, "click", (event) => {
-			if (
-				!element.contains(event.target as Node) &&
-				!event.defaultPrevented
-			)
-				open = false;
-		});
-		return destroy;
-	};
+	const clickoutside = getClickOutsideAttachment(() => {
+		open = false;
+	});
 </script>
 
 <div class="bg-slate-100 rounded p-1 pb-2 fcol">

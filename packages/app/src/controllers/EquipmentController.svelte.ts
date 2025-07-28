@@ -1,3 +1,4 @@
+import type { Prettify } from "$lib/utils"
 import { dependency_controller } from "./DependencyController.svelte"
 import { beinn_log_controller } from "./LogController.svelte"
 import type { AllParamTypes } from "./Params.svelte"
@@ -32,10 +33,9 @@ class EquipmentController {
         workspace_controller.registerCallback("equipment:imports", (imports: Imports) => {
             this.imports = imports
         })
-        workspace_controller.registerCallback("equipment:create", (equipment: Equipment) => {
-            console.log(equipment)
+        workspace_controller.registerCallback("equipment:create", (equipment: Prettify<Omit<Equipment, "temp_params">>) => {
 
-            this.#equipments[equipment.name] = equipment
+            this.#equipments[equipment.name] = { ...equipment, temp_params: JSON.parse(JSON.stringify(equipment.params)) }
 
             if (equipment.name === this.temp_name && equipment.module === this.temp_module && equipment.cls === this.temp_cls) {
                 this.temp_name = ""

@@ -9,6 +9,11 @@ import { Command } from "@tauri-apps/plugin-shell";
 import type { LogController } from "$controllers/LogController.svelte";
 import { workspace_controller } from "$controllers/WorkspaceController.svelte";
 
+export type Prettify<T> = {
+    [K in keyof T]: T[K];
+} & {};
+
+
 
 export function zeropad(num: number) {
     if (num < 10) return `0${num}`;

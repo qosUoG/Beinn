@@ -6,11 +6,15 @@
 		value = $bindable(),
 		placeholder = "",
 		mandatory = false,
+		onkeydown = () => {},
+		onfocus = () => {},
 	}: {
 		label: string;
 		value: string | number;
 		placeholder?: string;
 		mandatory?: boolean;
+		onkeydown?: (e: KeyboardEvent) => void;
+		onfocus?: (e: FocusEvent) => void;
 	} = $props();
 </script>
 
@@ -22,5 +26,6 @@
 		spellcheck="false"
 		autocapitalize="off"
 		autocomplete="off"
+		{onkeydown}
 		{placeholder} />
 </div>
