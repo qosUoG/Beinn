@@ -188,7 +188,7 @@ class PrimitiveABC[T: str | bool](ABC):
 
     def __init__(
         self,
-        default: str | bool,  # Default value is "" for str and False for bool
+        default: T,  # Default value is "" for str and False for bool
     ):
         self.value = default
 
@@ -215,7 +215,7 @@ class StrParam(PrimitiveABC[str]):
         return cls(data["value"])
 
 
-class BoolParam:
+class BoolParam(PrimitiveABC[bool]):
     """
     IntParam but of bool type, without suffix. Detail refer to IntParam class.
     Default value if not given is empty string.

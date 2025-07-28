@@ -70,7 +70,7 @@ async def main():
     #         print("stdout2")
 
     # print(f.getvalue())
-    p.BoolParam(False)
+    p.BoolParam(True)
 
 
 if __name__ == "__main__":
