@@ -1,4 +1,5 @@
 import importlib
+import importlib.util
 import inspect
 import json
 import pkgutil
@@ -232,46 +233,38 @@ def eeImports[T: type[ExperimentABC] | type[EquipmentABC]](eetype: T):
         cls: str
 
     res: dict[T, ReturnType] = {}
-    temp_res = []
+
+    return res
 
     warnings.filterwarnings("ignore")
 
     # Check all possible paths
-    for package in pkgutil.walk_packages():
+    for package in importlib.util.find_spec(""):
         # Exclude these
 
         if package.name.startswith(tuple(escapes)):
             continue
         if package.name.endswith("__main__"):
             continue
-        if package.name.startswith("xkcd"):
-            print(f"Skipping {package.name} as it starts with xkcd")
-            continue
+
         try:
             for [cls, clsT] in inspect.getmembers(
                 importlib.import_module(package.name), inspect.isclass
             ):
-                # print(package.name)
-                if package.name not in temp_res:
-                    temp_res.append(package.name)
+                if not issubclass(clsT, eetype) or clsT is eetype:
+                    continue
 
-                # if not issubclass(clsT, eetype) or clsT is eetype:
-                #     continue
-
-                # if clsT not in res:
-
-                # res[clsT] = {"modules": [package.name], "cls": cls}
-                # else:
-
-                # res[clsT]["modules"].append(package.name)
+                if clsT not in res:
+                    res[clsT] = {"modules": [package.name], "cls": cls}
+                else:
+                    res[clsT]["modules"].append(package.name)
 
         except Exception:
             pass
 
     warnings.filterwarnings("default")
 
-    # return list(res.keys())
-    return temp_res
+    return list(res.keys())
 
 
 async def workspaceHandler(ws: ServerConnection):

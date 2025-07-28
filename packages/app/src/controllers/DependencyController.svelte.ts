@@ -27,6 +27,7 @@ export type Dependency = {
     source: DependencySource
     name: string,
     fullname: string,
+    has_driver: boolean,
 }
 
 class Dependencies {
@@ -61,7 +62,7 @@ class Dependencies {
                     source: { type: "pip", package: parsed_dependency },
                     name: parsed_dependency,
                     fullname: dependency,
-
+                    has_driver: false,
                 })
 
             else if ("git" in sources[parsed_dependency])
@@ -69,13 +70,14 @@ class Dependencies {
                     name: parsed_dependency,
                     fullname: dependency,
                     source: { type: "git", ...(sources[parsed_dependency] as Omit<GitSource, "type">) },
-
+                    has_driver: false,
                 })
             else if ("path" in sources[parsed_dependency])
                 uv_dependencies.push({
                     name: parsed_dependency,
                     fullname: dependency,
                     source: { type: "path", ...(sources[parsed_dependency] as Omit<PathSource, "type">) },
+                    has_driver: false,
                 })
         }
 

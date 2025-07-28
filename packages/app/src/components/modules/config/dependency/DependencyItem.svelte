@@ -1,4 +1,5 @@
 <script lang="ts">
+	import { cn } from "$components/utils.svelte";
 	import {
 		dependency_controller,
 		type Dependency,
@@ -15,7 +16,17 @@
 		<div class=" text-slate-950 font-medium wrapped px-0">
 			{dependency.name}
 		</div>
-		<div class="self-stretch">
+		<div class="">
+			<button
+				class={cn(
+					dependency.has_driver ? "bg-green-400" : "bg-slate-400",
+					"border wrapped border-green-600 icon-btn-sm text-green-600"
+				)}
+				onclick={() => {
+					dependency.has_driver = !dependency.has_driver;
+				}}>
+				Has Driver
+			</button>
 			<button
 				aria-label="Remove dependency"
 				class="bg-red-600 icon-btn-sm text-white"
