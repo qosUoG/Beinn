@@ -110,19 +110,14 @@ async def workspaceHandler(ws: ServerConnection):
                 )
 
             case "equipment:create":
-                Equipments.create(
-                    name=req["name"],
-                    module_str=req["module"],
-                    cls_str=req["cls"],
-                )
                 await ws.send(
                     json.dumps(
                         {
                             "command": "experiment:create",
                             "value": Equipments.create(
-                                name=req["name"],
-                                module_str=req["module"],
-                                cls_str=req["cls"],
+                                name=req["value"]["name"],
+                                module_str=req["value"]["module"],
+                                cls_str=req["value"]["cls"],
                             ),
                         }
                     )
