@@ -25,7 +25,7 @@ def eeImports[T: type[ExperimentABC] | type[EquipmentABC]](
 
     # Check all possible paths
     packages.append(".")
-    for package in pkgutil.iter_modules(packages):
+    for package in pkgutil.walk_packages(packages):
         try:
             for [cls, clsT] in inspect.getmembers(
                 importlib.import_module(package), inspect.isclass
