@@ -57,33 +57,34 @@ async def workspaceHandler(ws: ServerConnection):
         pprint.pprint(req)
         print("", flush=True)
         command: str = req["command"]
-        match command:
-            case "equipment:imports":
-                await ws.send(
-                    json.dumps(
-                        {
-                            "command": "equipment:imports",
-                            "value": eeImports(EquipmentABC, req["value"]["packages"]),
-                        }
-                    )
-                )
-                break
-            case "experiment:imports":
-                await ws.send(
-                    json.dumps(
-                        {
-                            "command": "experiment:imports",
-                            "value": eeImports(ExperimentABC, req["value"]["packages"]),
-                        }
-                    )
-                )
-                break
-            case "equipment:create":
-                # State.create("equipment", req["id"], req["module"], req["cls"])
-                pass
-            case "experiment:create":
-                # State.create("experiment", req["id"], req["module"], req["cls"])
-                pass
-            # case "set_params":
-            #     State.setParams(req["id"], ParamModels2Params(req["params"]))
-            #     break
+
+        # match command:
+        #     case "equipment:imports":
+        #         await ws.send(
+        #             json.dumps(
+        #                 {
+        #                     "command": "equipment:imports",
+        #                     "value": eeImports(EquipmentABC, req["value"]["packages"]),
+        #                 }
+        #             )
+        #         )
+        #         break
+        #     case "experiment:imports":
+        #         await ws.send(
+        #             json.dumps(
+        #                 {
+        #                     "command": "experiment:imports",
+        #                     "value": eeImports(ExperimentABC, req["value"]["packages"]),
+        #                 }
+        #             )
+        #         )
+        #         break
+        #     case "equipment:create":
+        #         # State.create("equipment", req["id"], req["module"], req["cls"])
+        #         pass
+        #     case "experiment:create":
+        #         # State.create("experiment", req["id"], req["module"], req["cls"])
+        #         pass
+        #     # case "set_params":
+        #     #     State.setParams(req["id"], ParamModels2Params(req["params"]))
+        #     #     break
