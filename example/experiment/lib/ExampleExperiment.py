@@ -3,16 +3,16 @@ from dataclasses import dataclass
 import random
 from typing import TypedDict, override
 
-from click import ParamType
 
 from cnoc.public import params as p
-from cnoc.experiment import ExperimentABC
-from cnoc.managers import ManagerABC
+from cnoc.public.experiment import ExperimentABC
+from cnoc.public.managers import ManagerABC
 import time
+
 
 from cnoc.extensions.chart import XY
 from cnoc.extensions.saver import XYFloatSaver
-from examplelib.ExampleDriver import ExampleEquipment
+# from examplelib.ExampleDriver import ExampleEquipment
 
 
 @dataclass
@@ -27,7 +27,7 @@ class ExampleExperiment(ExperimentABC):
         selectfloatparam: p.SelectFloatParam
         instance_equipment_param: p.InstanceEquipmentParam[ExampleEquipment]
 
-    params: ParamType
+    params: ParamsType
 
     def __init__(self):
         # The name of the experiment assigned during runtime would be made accessible.

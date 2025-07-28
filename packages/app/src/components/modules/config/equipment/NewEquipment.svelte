@@ -3,10 +3,12 @@
 	import InputField from "$components/fields/InputField.svelte";
 	import TabSelect from "$components/fields/TabSelect.svelte";
 	import Label from "$components/fields/Label.svelte";
+	import { equipment_controller } from "$controllers/EquipmentController.svelte";
 
 	let cls = $state("");
 	let module = $state("");
 	let name = $state("");
+	console.log(equipment_controller.imports);
 </script>
 
 <div class="bg-slate-100 rounded p-1 pb-2 fcol">

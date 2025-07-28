@@ -3,7 +3,7 @@ from random import random
 from typing import TypedDict
 from cnoc.public import params as p
 
-from cnoc.equipment import EquipmentABC
+from cnoc.public.equipment import EquipmentABC
 
 """
 @dataclass decorator allow us to type hint the type of the class,
