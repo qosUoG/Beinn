@@ -9,6 +9,8 @@
 	} from "$controllers/EquipmentController.svelte";
 
 	import { Trash2 } from "@lucide/svelte";
+	import Param from "../Param.svelte";
+	import Composite from "../Composite.svelte";
 
 	let { equipment = $bindable() }: { equipment: Equipment } = $props();
 </script>
@@ -32,41 +34,13 @@
 
 	<div
 		class="fcol *:border-1 *:border-slate-400 *:border-b-0 last:border-b-1 last:border-b-slate-400">
-		{#each Object.entries(equipment.temp_params) as [label, p]}
-			{#if p.type === "int" || p.type === "float" || p.type === "str"}
-				<InputField
-					{label}
-					bind:value={p.value}
-					onkeydown={(e: KeyboardEvent) => {
-						if (p.type === "str") return;
-
-						if (
-							e.key === "Backspace" ||
-							e.key === "Delete" ||
-							e.key === "ArrowLeft" ||
-							e.key === "ArrowRight"
-						)
-							return;
-						if (/[0-9]/.test(e.key)) return;
-						if (e.key === "." && p.type === "float") return;
-
-						e.preventDefault();
-					}}
-					onfocus={autofocus} />
-			{:else if p.type === "bool"}
-				<TabSelect
-					{label}
-					bind:value={p.value}
-					items={[
-						{ key: "True", value: true },
-						{ key: "False", value: false },
-					]} />
-			{:else if p.type === "select.float" || p.type === "select.int" || p.type === "select.str"}
-				<DropSelect {label} bind:value={p.value} options={p.options} />
-			{:else if p.type === "instance.equipment" || p.type === "instance.experiment"}
-				<!-- TODO -->
-			{:else if p.type === "composite"}
-				<!-- TODO -->
+		{#each Object.keys(equipment.temp_params) as key}
+			{#if equipment.temp_params[key].type === "composite"}
+				<Composite
+					label={key}
+					bind:params={equipment.temp_params[key].children} />
+			{:else}
+				<Param label={key} bind:param={equipment.temp_params[key]} />
 			{/if}
 		{/each}
 	</div>

@@ -27,6 +27,7 @@ class ExampleEquipment(EquipmentABC):
         selectstrparam: p.SelectStrParam
         selectintparam: p.SelectIntParam
         selectfloatparam: p.SelectFloatParam
+        compositeparam: p.CompositeParam
 
     # These are class attributes instead of instance attributes
     # While you may acquire it through the instance, it maybe easily mixed up
@@ -43,6 +44,20 @@ class ExampleEquipment(EquipmentABC):
             "select_strparam": p.SelectStrParam(["option1", "option2", "option3"]),
             "select_intparam": p.SelectIntParam([1, 2, 3]),
             "select_floatparam": p.SelectFloatParam([1.1, 2.2, 3.3]),
+            "compositeparam": p.CompositeParam(
+                "Category A",
+                {
+                    "comp_strparam": p.StrParam(),
+                    "comp_floatparam": p.FloatParam(suffix="W"),
+                    "comp_intparam": p.IntParam(),
+                    "comp_boolparam": p.BoolParam(False),
+                    "comp_select_strparam": p.SelectStrParam(
+                        ["option1", "option2", "option3"]
+                    ),
+                    "comp_select_intparam": p.SelectIntParam([1, 2, 3]),
+                    "comp_select_floatparam": p.SelectFloatParam([1.1, 2.2, 3.3]),
+                },
+            ),
         }
 
         # # After the params list, one shall instantiate the equipment instance if needed

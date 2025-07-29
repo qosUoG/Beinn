@@ -26,6 +26,7 @@ class ExampleExperiment(ExperimentABC):
         selectintparam: p.SelectIntParam
         selectfloatparam: p.SelectFloatParam
         instance_equipment_param: p.InstanceEquipmentParam[ExampleEquipment]
+        compositeparam: p.CompositeParam
 
     params: ParamsType
 
@@ -42,6 +43,23 @@ class ExampleExperiment(ExperimentABC):
             "select_intparam": p.SelectIntParam([1, 2, 3]),
             "select_floatparam": p.SelectFloatParam([1.1, 2.2, 3.3]),
             "instance_equipmentparam": p.InstanceEquipmentParam[ExampleEquipment](),
+            "compositeparam": p.CompositeParam(
+                "Category A",
+                {
+                    "comp_strparam": p.StrParam(),
+                    "comp_floatparam": p.FloatParam(suffix="W"),
+                    "comp_intparam": p.IntParam(),
+                    "comp_boolparam": p.BoolParam(False),
+                    "comp_select_strparam": p.SelectStrParam(
+                        ["option1", "option2", "option3"]
+                    ),
+                    "comp_select_intparam": p.SelectIntParam([1, 2, 3]),
+                    "comp_select_floatparam": p.SelectFloatParam([1.1, 2.2, 3.3]),
+                    "comp_instance_equipmentparam": p.InstanceEquipmentParam[
+                        ExampleEquipment
+                    ](),
+                },
+            ),
         }
 
         # This should be all of the __init__ code. For instantiation of params from the final params list, or turning on equipment, initializing equipment etc, define in the initialization method
