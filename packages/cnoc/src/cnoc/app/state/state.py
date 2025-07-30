@@ -30,10 +30,10 @@ def _importModule(
 class State:
     """workspace_handler interface"""
 
-    _equipment_proxies: dict[str, EquipmentProxy[EquipmentABC]] = {}
+    _equipmentproxies: dict[str, EquipmentProxy[EquipmentABC]] = {}
     _equipment_imported_modules: list[ModuleType] = []
 
-    _experiment_proxies: dict[str, ExperimentProxy] = {}
+    _experimentproxies: dict[str, ExperimentProxy] = {}
     _experiment_imported_modules: list[ModuleType] = []
 
     @classmethod
@@ -47,28 +47,28 @@ class State:
         match eetype:
             case "equipment":
                 module = _importModule(cls._equipment_imported_modules, module_str)
-                cls._equipment_proxies[id] = EquipmentProxy(getattr(module, ecls_str))
+                cls._equipmentproxies[id] = EquipmentProxy(getattr(module, ecls_str))
             case "experiment":
                 module = _importModule(cls._experiment_imported_modules, module_str)
-                cls._experiment_proxies[id] = ExperimentProxy(getattr(module, ecls_str))
+                cls._experimentproxies[id] = ExperimentProxy(getattr(module, ecls_str))
 
     # TODO Handle should not be removed yet
     @classmethod
     def remove(cls, id: str):
-        if id in cls._equipment_proxies:
-            del cls._equipment_proxies[id]
+        if id in cls._equipmentproxies:
+            del cls._equipmentproxies[id]
             return
-        if id in cls._experiment_proxies:
-            del cls._experiment_proxies[id]
+        if id in cls._experimentproxies:
+            del cls._experimentproxies[id]
 
     @classmethod
     def setParams(cls, id: str, params: Params):
-        if id in cls._equipment_proxies:
-            with cls._equipment_proxies[id].lock() as equipment:
+        if id in cls._equipmentproxies:
+            with cls._equipmentproxies[id].lock() as equipment:
                 equipment.params = params
             return
-        if id in cls._experiment_proxies:
-            cls._experiment_proxies[id].params = params
+        if id in cls._experimentproxies:
+            cls._experimentproxies[id].params = params
 
     """
     Experiment handler interface
@@ -76,38 +76,38 @@ class State:
 
     @classmethod
     def get(cls, id: str):
-        if id in cls._experiment_proxies:
-            return cls._experiment_proxies[id]
+        if id in cls._experimentproxies:
+            return cls._experimentproxies[id]
 
     @classmethod
     def start(cls, id: str):
-        if id in cls._experiment_proxies:
-            cls._experiment_proxies[id].start()
+        if id in cls._experimentproxies:
+            cls._experimentproxies[id].start()
 
     @classmethod
     def pause(cls, id: str):
-        if id in cls._experiment_proxies:
-            cls._experiment_proxies[id].pause()
+        if id in cls._experimentproxies:
+            cls._experimentproxies[id].pause()
 
     @classmethod
     def unpause(cls, id: str):
-        if id in cls._experiment_proxies:
-            cls._experiment_proxies[id].unpause()
+        if id in cls._experimentproxies:
+            cls._experimentproxies[id].unpause()
 
     @classmethod
     def stop(cls, id: str):
-        if id in cls._experiment_proxies:
-            cls._experiment_proxies[id].stop()
+        if id in cls._experimentproxies:
+            cls._experimentproxies[id].stop()
 
     @classmethod
     def subscribeExperimentMessage(cls, id: str, ws: ServerConnection):
-        return cls._experiment_proxies[id].subscribeMessage(ws)
+        return cls._experimentproxies[id].subscribeMessage(ws)
 
     """Experiment Extensions"""
 
     @classmethod
     def subscribeChart(cls, id: str, title: str, ws: ServerConnection):
-        return cls._experiment_proxies[id].subscribeChart(title, ws)
+        return cls._experimentproxies[id].subscribeChart(title, ws)
 
     """App Life cycle"""
 
@@ -117,10 +117,10 @@ class State:
 
         # First stop async for each function
         coros: list[CoroutineType[Any, Any, Any]] = []
-        for experiment_proxy in cls._experiment_proxies.values():
+        for experiment_proxy in cls._experimentproxies.values():
             coros.append(experiment_proxy.kill())
 
-        for equipment_proxy in cls._equipment_proxies.values():
+        for equipment_proxy in cls._equipmentproxies.values():
             equipment_proxy.cleanup()
 
         await asyncio.gather(*coros, SqlWorker.stop())
@@ -163,4 +163,4 @@ class State:
 
     @classmethod
     def eqiupment_interpret(cls, *, id: str, name: str, code: str, type: str):
-        return cls._equipment_proxies[id].interpret(code, name)
+        return cls._equipmentproxies[id].interpret(code, name)

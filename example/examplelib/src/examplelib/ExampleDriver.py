@@ -45,7 +45,6 @@ class ExampleEquipment(EquipmentABC):
             "select_intparam": p.SelectIntParam([1, 2, 3]),
             "select_floatparam": p.SelectFloatParam([1.1, 2.2, 3.3]),
             "compositeparam": p.CompositeParam(
-                "Category A",
                 {
                     "comp_strparam": p.StrParam(),
                     "comp_floatparam": p.FloatParam(suffix="W"),

@@ -74,7 +74,7 @@ def populateParam(param: AllParamTypes):
 
         case "instance.experiment":
             raise Exception("Playlist is not being implemented yet")
-            # param.instance = AppState._experiment_proxies[param.instance_id]
+            # param.instance = AppState._experimentproxies[param.instance_id]
 
         # case "composite":
         #     # Recursively instantiate params

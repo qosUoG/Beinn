@@ -44,7 +44,7 @@
 	<DropSelect
 		{label}
 		bind:value={param.name}
-		options={Object.keys(equipment_controller.equipments)} />
+		options={Object.keys(equipment_controller.instances)} />
 {:else if param.type === "instance.experiment"}
 	<!-- TODO -->
 	<!-- <DropSelect

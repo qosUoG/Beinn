@@ -1,9 +1,14 @@
 import importlib
-from ..proxies.equipment import EquipmentABC, EquipmentProxy
+
+from ...public.equipment import EquipmentABC
+
+
+from .ees import EEInstance
+from ...public.params import dict2Param, param2Dict
 
 
 class Equipments:
-    _proxies: dict[str, EquipmentProxy[EquipmentABC]] = {}
+    instances: dict[str, EEInstance[EquipmentABC]] = {}
 
     @classmethod
     def create(
@@ -15,12 +20,18 @@ class Equipments:
         module = importlib.import_module(module_str)
         module = importlib.reload(module)
 
-        cls._proxies[name] = EquipmentProxy(
-            getattr(module, cls_str), module_str, cls_str, name
+        cls.instances[name] = EEInstance[EquipmentABC](
+            instance=getattr(module, cls_str)(),
+            module=module_str,
+            cls=cls_str,
         )
 
-        return cls._proxies[name].js
+        return param2Dict(cls.instances[name].instance.params)
+
+    @classmethod
+    def save(cls, name: str, params: dict):
+        cls.instances[name].instance.params = dict2Param(params)
 
     @classmethod
     def remove(cls, name: str):
-        del cls._proxies[name]
+        del cls.instances[name]

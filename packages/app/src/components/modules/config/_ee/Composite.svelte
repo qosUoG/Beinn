@@ -1,15 +1,17 @@
 <script lang="ts">
 	import type { CompositeParam } from "$controllers/Params.svelte";
 	import { ChevronDown, ChevronRight } from "@lucide/svelte";
-
 	import Param from "./Param.svelte";
 
 	let {
 		label,
 		params = $bindable(),
-	}: { label: string; params: CompositeParam["children"] } = $props();
-
-	let open = $state(false);
+		open = $bindable(),
+	}: {
+		label: string;
+		params: CompositeParam["children"];
+		open: boolean;
+	} = $props();
 </script>
 
 <button

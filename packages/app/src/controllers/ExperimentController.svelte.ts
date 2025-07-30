@@ -7,13 +7,13 @@ import { workspace_controller } from "./WorkspaceController.svelte"
 
 
 
-export type Equipment = Instance
+export type Experiment = Instance
 
-export class EquipmentController extends EEBaseController {
+export class ExperimentController extends EEBaseController {
 
     constructor() {
-        super("equipment")
+        super("experiment")
     }
 }
 
-export const equipment_controller = $state(new EquipmentController())
+export const experiment_controller = $state(new ExperimentController())

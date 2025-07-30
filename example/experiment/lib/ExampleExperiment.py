@@ -44,7 +44,6 @@ class ExampleExperiment(ExperimentABC):
             "select_floatparam": p.SelectFloatParam([1.1, 2.2, 3.3]),
             "instance_equipmentparam": p.InstanceEquipmentParam[ExampleEquipment](),
             "compositeparam": p.CompositeParam(
-                "Category A",
                 {
                     "comp_strparam": p.StrParam(),
                     "comp_floatparam": p.FloatParam(suffix="W"),

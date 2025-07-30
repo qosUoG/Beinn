@@ -13,6 +13,10 @@ export type Prettify<T> = {
     [K in keyof T]: T[K];
 } & {};
 
+export function deepCopy<T>(obj: T): T {
+    return JSON.parse(JSON.stringify(obj))
+}
+
 
 
 export function zeropad(num: number) {

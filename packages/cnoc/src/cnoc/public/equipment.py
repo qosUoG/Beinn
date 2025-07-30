@@ -12,9 +12,12 @@ example/examplelib.
         contextmanager is blocking.
 """
 
-from abc import ABC, abstractmethod
-from contextlib import contextmanager
-from typing import Iterator, Protocol
+from abc import ABC
+from contextlib import redirect_stderr, redirect_stdout
+from io import StringIO
+import sys
+from threading import Lock
+import functools
 
 
 class EquipmentABC(ABC):
@@ -23,7 +26,7 @@ class EquipmentABC(ABC):
 
     Attributes
     ----------
-    params : .params.Params
+    params : Params
         a dictionary of parameters accessible by the equipment driver
 
     """
@@ -41,6 +44,41 @@ class EquipmentABC(ABC):
         from .params import Params
 
         self.params: Params
+        self._lock = Lock()
+
+    def interpret(self, code: str, name: str):
+        code = code.replace(name, "self")
+        try:
+            return {
+                "type": "eval",
+                "result": f"{eval(code, globals=globals(), locals=locals())}",
+            }
+
+        except SyntaxError:
+            pass
+        except Exception as e:
+            return {
+                "type": "error",
+                "result": f"code: {code}, error:{e}",
+            }
+
+        try:
+            f = StringIO()
+
+            with redirect_stdout(f):
+                with redirect_stderr(sys.stdout):
+                    exec(code, globals=globals(), locals=locals())
+
+            return {
+                "type": "exec",
+                "result": f.getvalue(),
+            }
+
+        except Exception as e:
+            return {
+                "type": "error",
+                "result": f"code: {code}, error:{e}",
+            }
 
     def cleanup(self):
         """
@@ -55,18 +93,11 @@ class EquipmentABC(ABC):
         pass
 
 
-class EquipmentProxy[T: EquipmentABC](Protocol):
-    """
-    Wrapper class of equipment driver during runtime
+def lock(func):
+    @functools.wraps(func)
+    def wrapper_decorator(self: EquipmentABC, *args, **kwargs):
+        with self._lock:
+            value = func(*args, **kwargs)
+            return value
 
-    Methods
-    ----------
-    lock()
-        A contextmanager for threadsafe access of the underlying equipment.
-        Users would need to attain the lock to access the equipment instance.
-    """
-
-    @contextmanager
-    @abstractmethod
-    def lock(self) -> Iterator[T]:
-        raise NotImplementedError
+    return wrapper_decorator

@@ -4,14 +4,18 @@ import json
 import pkgutil
 from typing import TypedDict
 
-from ...public.params import Params, _param_type_arr
+from ..state.experiments import Experiments
+
+from ..state.foundation import Foundation
+
+from ...public.params import (
+    AllParamTypes,
+    CompositeParam,
+    InstanceEquipmentParam,
+    InstanceExperimentParam,
+)
 
 from ..state.equipments import Equipments
-
-
-# from ...public.params import ParamModels2Params
-
-# from ..state.state import State
 
 from ...public.equipment import EquipmentABC
 from ...public.experiment import ExperimentABC
@@ -70,19 +74,23 @@ def eeImports[T: type[ExperimentABC] | type[EquipmentABC]](eetype: T, names: lis
     return list(res.values())
 
 
-def dict2Param(data: dict[str, dict]) -> Params:
-    """
-    Convert the dictionary representation back to Params
-    """
-    params: Params = {}
-    for k, v in data.items():
-        for tp in _param_type_arr:
-            if v["type"] == tp._type:
-                params[k] = tp.fromDict(v)
-                break
+def putParamsInstance(params: dict[str, AllParamTypes]):
+    for k in params.keys():
+        if params[k]._type == CompositeParam._type:
+            putParamsInstance(params[k].children)
+            continue
+
+        if params[k]._type == InstanceEquipmentParam._type:
+            params[k].instance = Equipments.instances[params[k].name].instance
+            continue
+
+        if params[k]._type == InstanceExperimentParam._type:
+            params[k].instance = Experiments.instances[params[k].name].instance
+            continue
 
 
 async def workspaceHandler(ws: ServerConnection):
+    Foundation.workspace_ws = ws
     async for message in ws:
         req = json.loads(message)
 
@@ -114,13 +122,30 @@ async def workspaceHandler(ws: ServerConnection):
                     json.dumps(
                         {
                             "command": "equipment:create",
-                            "value": Equipments.create(
-                                name=req["value"]["name"],
-                                module_str=req["value"]["module"],
-                                cls_str=req["value"]["cls"],
-                            ),
+                            "value": {
+                                "module": req["value"]["module"],
+                                "cls": req["value"]["cls"],
+                                "name": req["value"]["name"],
+                                "params": Equipments.create(
+                                    name=req["value"]["name"],
+                                    module_str=req["value"]["module"],
+                                    cls_str=req["value"]["cls"],
+                                ),
+                            },
                         }
                     )
+                )
+
+            case "equipment:save":
+                Equipments.save(
+                    name=req["value"]["name"], params=req["value"]["params"]
+                )
+                putParamsInstance(
+                    Equipments.instances[req["value"]["name"]].instance.params
+                )
+
+                await ws.send(
+                    json.dumps({"command": "equipment:save", "value": Equipments})
                 )
 
             case "equipment:remove":
@@ -132,7 +157,23 @@ async def workspaceHandler(ws: ServerConnection):
                 )
 
             case "experiment:create":
-                # State.create("experiment", req["id"], req["module"], req["cls"])
+                await ws.send(
+                    json.dumps(
+                        {
+                            "command": "equipment:create",
+                            "value": {
+                                "module": req["value"]["module"],
+                                "cls": req["value"]["cls"],
+                                "name": req["value"]["name"],
+                                "params": Experiments.create(
+                                    name=req["value"]["name"],
+                                    module_str=req["value"]["module"],
+                                    cls_str=req["value"]["cls"],
+                                ),
+                            },
+                        }
+                    )
+                )
                 pass
             # case "set_params":
             #     State.setParams(req["id"], ParamModels2Params(req["params"]))

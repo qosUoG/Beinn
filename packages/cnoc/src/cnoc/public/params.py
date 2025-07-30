@@ -24,7 +24,7 @@ experiment, please refer to the example directory.
 
 from abc import ABC
 from .experiment import ExperimentABC
-from .equipment import EquipmentABC, EquipmentProxy
+from .equipment import EquipmentABC
 
 
 class SingleSelectABC[T: str | int | float](ABC):
@@ -248,13 +248,13 @@ class InstanceEquipmentParam[T: EquipmentABC]:
     _type = "instance.equipment"
 
     def __init__(self, name: str | None = None):
-        self._name = name
-        self.instance: EquipmentProxy[T] | None = None
+        self.name = name
+        self.instance: T | None = None
 
     def toDict(self):
         return {
             "type": self._type,
-            "name": self._name,
+            "name": self.name,
         }
 
     @classmethod
@@ -282,13 +282,13 @@ class InstanceExperimentParam[T: ExperimentABC]:
     _type = "instance.experiment"
 
     def __init__(self, name: str | None = None):
-        self._name = name
-        self.instance: EquipmentProxy[T] | None = None
+        self.name = name
+        self.instance: T | None = None
 
     def toDict(self):
         return {
             "type": self._type,
-            "name": self._name,
+            "name": self.name,
         }
 
     @classmethod
@@ -314,14 +314,12 @@ type _SimpleParamType = (
 class CompositeParam:
     _type = "composite"
 
-    def __init__(self, title: str, children: dict[str, _SimpleParamType]):
-        self.title = title
+    def __init__(self, children: dict[str, _SimpleParamType]):
         self.children = children
 
     def toDict(self):
         return {
             "type": self._type,
-            "title": self.title,
             "children": {k: v.toDict() for k, v in self.children.items()},
         }
 
@@ -338,7 +336,6 @@ class CompositeParam:
                     break
 
         return CompositeParam(
-            data["title"],
             children,
         )
 
@@ -366,3 +363,21 @@ def param2Dict(params: Params) -> dict[str, dict]:
     Convert the params to a dictionary representation
     """
     return {k: v.toDict() for k, v in params.items()}
+
+
+def dict2Param(data: dict[str, dict]) -> Params:
+    """
+    Convert the dictionary representation back to Params
+    However this function does not set the instance of the params,
+    i.e. the instance must be set after all instances are loaded
+    """
+    params: Params = {}
+    for k, v in data.items():
+        if v["type"] == CompositeParam._type:
+            params[k] = CompositeParam.fromDict(v["children"])
+            continue
+
+        for tp in _param_type_arr:
+            if v["type"] == tp._type:
+                params[k] = tp.fromDict(v)
+                break

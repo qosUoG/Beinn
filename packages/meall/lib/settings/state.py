@@ -35,91 +35,91 @@ class AppState:
     Equipments 
     """
 
-    _equipment_proxies: dict[str, EquipmentProxy[EquipmentABC]] = {}
+    _equipmentproxies: dict[str, EquipmentProxy[EquipmentABC]] = {}
     _equipment_imported_modules: list[ModuleType] = []
 
     @classmethod
     def createEquipment(cls, id: str, module_str: str, ecls_str: str):
         module = cls.importModule(cls._equipment_imported_modules, module_str)
-        cls._equipment_proxies[id] = EquipmentProxy(getattr(module, ecls_str))
+        cls._equipmentproxies[id] = EquipmentProxy(getattr(module, ecls_str))
 
     @classmethod
     def getEquipment(cls, id: str):
-        return cls._equipment_proxies[id]
+        return cls._equipmentproxies[id]
 
     @classmethod
     def getEquipmentParams(cls, id: str):
-        with cls._equipment_proxies[id].lock() as equipment:
+        with cls._equipmentproxies[id].lock() as equipment:
             return equipment.params
 
     @classmethod
     def setEquipmentParams(cls, id: str, params: Params):
-        with cls._equipment_proxies[id].lock() as equipment:
+        with cls._equipmentproxies[id].lock() as equipment:
             equipment.params = params
 
     @classmethod
     def removeEquipment(cls, id: str):
-        if id in cls._equipment_proxies:
-            del cls._equipment_proxies[id]
+        if id in cls._equipmentproxies:
+            del cls._equipmentproxies[id]
 
     """
     Experiments 
     """
-    _experiment_proxies: dict[str, ExperimentProxy] = {}
+    _experimentproxies: dict[str, ExperimentProxy] = {}
     _experiment_imported_modules: list[ModuleType] = []
 
     @classmethod
     def createExperiment(cls, id: str, module_str: str, ecls_str: str):
         module = cls.importModule(cls._experiment_imported_modules, module_str)
 
-        cls._experiment_proxies[id] = ExperimentProxy(
+        cls._experimentproxies[id] = ExperimentProxy(
             id=id,
             experimentCls=getattr(module, ecls_str),
         )
 
     @classmethod
     def setExperimentParams(cls, id: str, params: Params):
-        cls._experiment_proxies[id].params = params
+        cls._experimentproxies[id].params = params
 
     @classmethod
     def getExperimentParams(cls, id: str):
-        return cls._experiment_proxies[id].params
+        return cls._experimentproxies[id].params
 
     @classmethod
     def removeExperiment(cls, id: str):
-        if id not in cls._experiment_proxies:
+        if id not in cls._experimentproxies:
             return
 
-        if not cls._experiment_proxies[id].removable():
+        if not cls._experimentproxies[id].removable():
             raise Exception("Experiment that is running cannot be removed")
 
-        del cls._experiment_proxies[id]
+        del cls._experimentproxies[id]
 
     @classmethod
     def startExperiment(cls, id: str):
-        cls._experiment_proxies[id].start()
+        cls._experimentproxies[id].start()
 
     @classmethod
     def pauseExperiment_sync(cls, id: str):
-        cls._experiment_proxies[id].pause_sync()
+        cls._experimentproxies[id].pause_sync()
 
     @classmethod
     def continueExperiment(cls, id: str):
-        cls._experiment_proxies[id].unpause()
+        cls._experimentproxies[id].unpause()
 
     @classmethod
     def stopExperiment_async(cls, id: str):
-        cls._experiment_proxies[id].stop_async()
+        cls._experimentproxies[id].stop_async()
 
     @classmethod
     def subscribeExperimentMessage(cls, id: str, ws: WebSocket):
-        return cls._experiment_proxies[id].subscribeMessage(ws)
+        return cls._experimentproxies[id].subscribeMessage(ws)
 
     """Experiment Extensions"""
 
     @classmethod
     def subscribeChart(cls, id: str, title: str, ws: WebSocket):
-        return cls._experiment_proxies[id].subscribeChart(title, ws)
+        return cls._experimentproxies[id].subscribeChart(title, ws)
 
     """App Life cycle"""
 
@@ -134,10 +134,10 @@ class AppState:
 
         # First stop async for each function
         coros: list[CoroutineType[Any, Any, Any]] = []
-        for experiment_proxy in cls._experiment_proxies.values():
+        for experiment_proxy in cls._experimentproxies.values():
             coros.append(experiment_proxy.kill())
 
-        for equipment_proxy in cls._equipment_proxies.values():
+        for equipment_proxy in cls._equipmentproxies.values():
             equipment_proxy.cleanup()
 
         await asyncio.gather(*coros, SqlWorker.stop())
@@ -180,4 +180,4 @@ class AppState:
 
     @classmethod
     def eqiupment_interpret(cls, *, id: str, name: str, code: str, type: str):
-        return cls._equipment_proxies[id].interpret(code, name)
+        return cls._equipmentproxies[id].interpret(code, name)

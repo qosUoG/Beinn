@@ -4,10 +4,13 @@ import threading
 import time
 from typing import Any, Coroutine
 
+from websockets import ServerConnection
+
 
 class Foundation:
     _loop: asyncio.EventLoop
     _tasks: list[asyncio.Task]
+    workspace_ws: ServerConnection
 
     @classmethod
     def crateTask(cls, coro: Coroutine[Any, Any, Any]):
