@@ -34,7 +34,7 @@ export const cli_panel = $state({
     },
 
     get query_list() {
-        return [""].concat(
+        return [""].cnocat(
             (this.command_history as string[]).filter((c) => c.startsWith(this.query) && c !== this.query))
     },
 

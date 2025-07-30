@@ -8,7 +8,8 @@ import { shell, sleep } from "$lib/utils"
 import { Child, Command } from "@tauri-apps/plugin-shell"
 
 import { beinn_log_controller } from "./LogController.svelte"
-import { conc_controller } from "./ConcController.svelte"
+import { cnoc_controller } from "./CnocController.svelte"
+
 
 const ws_url = "ws://localhost:8001/"
 
@@ -101,8 +102,8 @@ class WorkspaceController {
             encoding: "utf8",
             cwd: path
         })
-        handler.stdout.on("data", (message) => { conc_controller.append(message) })
-        handler.stderr.on("data", (message) => { conc_controller.append(message) })
+        handler.stdout.on("data", (message) => { cnoc_controller.append(message) })
+        handler.stderr.on("data", (message) => { cnoc_controller.append(message) })
 
         this.uvproc = await handler.spawn()
         if (this.uvproc === undefined) {

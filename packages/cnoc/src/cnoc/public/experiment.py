@@ -30,7 +30,7 @@ class Listeners(TypedDict):
     loop_start: list[Callable[[int], None]]
     loop_end: list[Callable[[int], None]]
 
-    chart_created: list[Callable[[int], None]]
+    chart_created: list[Callable[[dict], None]]
 
 
 type ExperimentEvents = (
@@ -184,7 +184,7 @@ class ExperimentABC(ABC):
         """
         pass
 
-    def cnocCreateChart(self, chart_name: str, chart: ChartABC):
-        self._cnoc_charts[chart_name] = chart
+    def cnocCreateChart(self, chart: ChartABC):
+        self._cnoc_charts[chart.title] = chart
         for listener in self._cnoc_listeners["chart_created"]:
             listener(chart.getConfig())

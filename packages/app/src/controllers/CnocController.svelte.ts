@@ -1,6 +1,6 @@
 import { LogController } from "./LogController.svelte";
 
-class ConcController extends LogController {
+class CnocController extends LogController {
     constructor() {
         super();
 
@@ -46,4 +46,4 @@ class ConcController extends LogController {
 
 }
 
-export const conc_controller = $state(new ConcController());
+export const cnoc_controller = $state(new CnocController());

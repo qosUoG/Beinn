@@ -9,7 +9,11 @@ import { workspace_controller } from "./WorkspaceController.svelte"
 
 export type Experiment = Instance
 
+
+
 export class ExperimentController extends EEBaseController {
+
+
 
     constructor() {
         super("experiment")

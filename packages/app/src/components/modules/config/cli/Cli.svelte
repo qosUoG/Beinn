@@ -1,6 +1,6 @@
 <script lang="ts">
 	import { cn } from "$components/utils.svelte";
-	import { conc_controller } from "$controllers/ConcController.svelte";
+	import { cnoc_controller } from "$controllers/CnocController.svelte";
 	import { zeropad } from "$lib/utils";
 	import { stairsArrowDownLeft } from "@lucide/lab";
 	import { Clock, ListVideo, SendHorizontal } from "@lucide/svelte";
@@ -25,13 +25,13 @@
 	const refreshAttachment: Attachment<HTMLDivElement> = (
 		element: HTMLDivElement
 	) => {
-		if (conc_controller.is_refreshing) {
+		if (cnoc_controller.is_refreshing) {
 			element.scrollTo({
 				top: element.scrollHeight,
 				left: element.scrollLeft,
 				behavior: "instant",
 			});
-			conc_controller.scroll_position = element.scrollHeight;
+			cnoc_controller.scroll_position = element.scrollHeight;
 		}
 		return () => {};
 	};
@@ -42,18 +42,18 @@
 		switch (e.key) {
 			case "Enter":
 				e.preventDefault();
-				conc_controller.send(input);
+				cnoc_controller.send(input);
 				input = "";
 				return;
 			case "ArrowDown": {
 				e.preventDefault();
-				input = conc_controller.getLaterQuery();
+				input = cnoc_controller.getLaterQuery();
 			}
 			case "ArrowUp":
 				e.preventDefault();
-				input = conc_controller.getEarlierQuery();
+				input = cnoc_controller.getEarlierQuery();
 			default:
-				conc_controller.updateQuery(input);
+				cnoc_controller.updateQuery(input);
 		}
 	}
 </script>
@@ -63,12 +63,12 @@
 		<button
 			class={cn(
 				"icon-btn-sm  rounded border-1 border-green-500 text-slate-700",
-				conc_controller.show_timetext
+				cnoc_controller.show_timetext
 					? "bg-green-500"
 					: "text-green-500"
 			)}
 			onclick={() => {
-				conc_controller.show_timetext = !conc_controller.show_timetext;
+				cnoc_controller.show_timetext = !cnoc_controller.show_timetext;
 			}}>
 			<Clock />
 		</button>
@@ -76,19 +76,19 @@
 		<button
 			class={cn(
 				" border-white border-1 icon-btn-sm wrapped",
-				conc_controller.is_refreshing ? "bg-white" : "text-white"
+				cnoc_controller.is_refreshing ? "bg-white" : "text-white"
 			)}
 			onclick={() => {
-				conc_controller.is_refreshing = !conc_controller.is_refreshing;
+				cnoc_controller.is_refreshing = !cnoc_controller.is_refreshing;
 			}}><ListVideo /></button>
 	</div>
 
 	<div
 		{@attach refreshAttachment}
 		class="flex-grow overflow-y-scroll font-mono tracking-tighter font-light scrollbar-slate-200">
-		{#each conc_controller.log_entries as entry}
+		{#each cnoc_controller.log_entries as entry}
 			<div class="frow">
-				{#if conc_controller.show_timetext}
+				{#if cnoc_controller.show_timetext}
 					{@render timetext(entry.timestamp)}
 				{/if}
 				<div
@@ -108,7 +108,7 @@
 		<button
 			class="icon-btn-sm rounded border-slate-200 border-1 text-slate-200"
 			onclick={() => {
-				conc_controller.send(input);
+				cnoc_controller.send(input);
 				input = "";
 			}}><SendHorizontal /></button>
 	</div>

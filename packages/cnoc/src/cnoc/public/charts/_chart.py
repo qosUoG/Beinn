@@ -31,6 +31,8 @@ class ChartABC(ABC):
         self._cnoc_should_stop = Event()
         self._frames_history = bytes()
 
+        self.title: str
+
     def _cnoc_stopChart(self):
         self._cnoc_should_stop.set()
 
