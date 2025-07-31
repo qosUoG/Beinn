@@ -54,7 +54,7 @@ export abstract class EEBaseController {
             }
         })
 
-        workspace_controller.registerCallback(`${eetype}:save`, ({ name, params }: { name: string, params: Prettify<Instance["params"]> }) => {
+        workspace_controller.registerCallback(`${eetype}:param`, ({ name, params }: { name: string, params: Prettify<Instance["params"]> }) => {
             this.#instances[name].params = params
         })
 
@@ -88,13 +88,13 @@ export abstract class EEBaseController {
         workspace_controller.sendCommand(`${this.eetype}:create`, instance)
     }
 
-    save(name: string) {
+    param(name: string) {
         if (!(name in this.#instances)) {
             beinn_log_controller.append(`ERROR Instance with name ${name} does not exist`)
             return
         }
 
-        workspace_controller.sendCommand(`${this.eetype}:save`, {
+        workspace_controller.sendCommand(`${this.eetype}:param`, {
             name,
             params: this.#instances[name].temp_params
         })

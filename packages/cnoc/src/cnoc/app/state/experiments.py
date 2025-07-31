@@ -1,6 +1,6 @@
 import importlib
+import json
 
-from packages.cnoc.src.cnoc.app.utils.messenger import kv2str
 
 from .foundation import Foundation
 
@@ -8,6 +8,12 @@ from .ees import EEInstance
 
 from ...public.params import dict2Param, param2Dict
 from ...public.experiment import ExperimentABC
+
+
+def sendExperimentCommand(command: str, value: dict):
+    Foundation.workspace_ws.send(
+        json.dumps({"command": f"experiment:{command}", "value": value})
+    )
 
 
 class Experiments:
@@ -33,49 +39,51 @@ class Experiments:
         cls.instances[name].instance._cnoc_on(
             "started",
             lambda: Foundation.runCoroThreadsafeBlocking(
-                Foundation.workspace_ws.send(kv2str("status", "started"))
+                sendExperimentCommand("status", {"name": name, "status": "started"})
             ),
         )
 
         cls.instances[name].instance._cnoc_on(
             "loop_start",
             lambda iteration_count: Foundation.runCoroThreadsafeBlocking(
-                Foundation.workspace_ws.send(kv2str("status", "loop_start"))
+                sendExperimentCommand("status", {"name": name, "status": "loop_start"})
             ),
         )
 
         cls.instances[name].instance._cnoc_on(
             "loop_end",
             lambda iteration_count: Foundation.runCoroThreadsafeBlocking(
-                Foundation.workspace_ws.send(kv2str("iteration_count", iteration_count))
+                sendExperimentCommand(
+                    "loop_count", {"name": name, "loop_count": iteration_count}
+                )
             ),
         )
 
         cls.instances[name].instance._cnoc_on(
             "paused",
             lambda: Foundation.runCoroThreadsafeBlocking(
-                Foundation.workspace_ws.send(kv2str("status", "paused"))
+                sendExperimentCommand("status", {"name": name, "status": "paused"})
             ),
         )
 
         cls.instances[name].instance._cnoc_on(
             "stopped",
             lambda: Foundation.runCoroThreadsafeBlocking(
-                Foundation.workspace_ws.send(kv2str("status", "stopped"))
+                sendExperimentCommand("status", {"name": name, "status": "stopped"})
             ),
         )
 
         cls.instances[name].instance._cnoc_on(
             "completed",
             lambda: Foundation.runCoroThreadsafeBlocking(
-                Foundation.workspace_ws.send(kv2str("status", "completed"))
+                sendExperimentCommand("status", {"name": name, "status": "completed"})
             ),
         )
 
         cls.instances[name].instance._cnoc_on(
             "chart_created",
             lambda config: Foundation.runCoroThreadsafeBlocking(
-                Foundation.workspace_ws.send(kv2str("chart_config", config))
+                sendExperimentCommand("chart_config", {"name": name, "config": config})
             ),
         )
 

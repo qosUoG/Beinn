@@ -1,21 +1,56 @@
-import { Chart, type ChartConfiguration, type Point } from "chart.js/auto";
+import { Chart, type ChartConfiguration, type ChartData, type Point } from "chart.js";
 import type { ScatterConfig } from "./scatter";
 import type { ChartMessages } from "../types";
+import { cnoc_url, deepCopy } from "$lib/utils";
 
 
 // Worker local variables
-let _chart: Chart
-let _canvas: OffscreenCanvas
+let _chart: Chart | undefined = undefined
+let _canvas: OffscreenCanvas | undefined = undefined
 
-let _experiment_name: string
-let _config: ScatterConfig
+
+let _scatter_config: ScatterConfig
 let _ws: WebSocket
 
 let _datasets: { data: { x: number, y: number }[], label: string }[] = []
 let _ws_interval: Timer
-let _online = false
-let _decimation = 0
-let _last_update_timestamp: number
+
+
+
+
+const _chart_config = {
+    type: "line",
+    data: {
+        datasets: [{ data: [], label: "" }]
+    },
+    options: {
+        responsive: true,
+        maintainAspectRatio: false,
+        // resizeDelay: 500,
+        animation: false,
+        parsing: false,
+
+        scales: {
+            x: {
+                type: "linear",
+                title: { text: "", display: true }
+            },
+            y: {
+                type: "linear",
+                title: { text: "", display: true }
+            }
+        },
+        elements: {
+            point: {
+                radius: 0
+            },
+            line: {
+                borderWidth: 2
+            }
+        }
+    },
+
+} satisfies ChartConfiguration<"line">
 
 
 
@@ -31,323 +66,83 @@ const handlers: Handler = {
     set_is_drawing_points: function () { },
 }
 
+let _experiment_name: string
+
 handlers.instantiate = function instantiate({ experiment_name, config }: { experiment_name: string, config: ScatterConfig }) {
+    _scatter_config = config
     _experiment_name = experiment_name
-    _config = config
+    _chart_config.data.datasets = config.y_names.map(label => ({ data: [], label }))
+    _chart_config.options.scales.x.title.text = config.x_axis
+    _chart_config.options.scales.y.title.text = config.y_axis
     _datasets = config.y_names.map(label => ({ data: [], label }))
 }
 
 handlers.set_is_drawing_points = function set_is_drawing_points({ is_drawing_points }: { is_drawing_points: boolean }) {
-
-    if (_chart.options.elements === undefined)
-        _chart.options.elements = {}
-
-    if (_chart.options.elements.point === undefined)
-        _chart.options.elements.point = {}
-
-    if (is_drawing_points)
-        _chart.options.elements.point.radius = 4
-    else
-        _chart.options.elements.point.radius = 0
-
-    _chart.update()
-
+    if (_chart) {
+        _chart.options.elements!.point!.radius = is_drawing_points ? 4 : 0
+        _chart.update()
+    }
+    _chart_config.options.elements.point.radius = is_drawing_points ? 4 : 0
 }
 
 handlers.resize = function resize({ width, height }: { width: number, height: number }) {
-
-    _canvas.width = width
-    _canvas.height = height - 1
-
-    _chart.resize()
-    _chart.update()
+    if (_canvas && _chart) {
+        _canvas.width = width
+        _canvas.height = height - 1
+        _chart.resize()
+        _chart.update()
+    }
 }
 
 handlers.set_canvas = function set_canvas({ canvas, width, height }: { canvas: OffscreenCanvas, width: number, height: number }) {
     _canvas = canvas
     _canvas.width = width
-    _canvas.height = height - 1
-
-    _chart.resize()
-    _chart.update()
-}
-
-function getChartConfig(): ChartConfiguration {
-    return {
-        type: "line",
-        data: {
-            datasets: _config.y_names.map(label => ({ data: [], label }))
-        },
-        options: {
-            responsive: true,
-            maintainAspectRatio: false,
-            // resizeDelay: 500,
-            animation: false,
-            parsing: false,
-
-            scales: {
-                x: {
-                    type: "linear",
-                    title: { text: _config!.x_axis, display: true }
-                },
-                y: {
-                    type: "linear",
-                    title: { text: _config!.y_axis, display: true }
-                }
-            },
-            elements: {
-                point: {
-                    radius: _is_drawing_points ? 4 : 0
-                },
-                line: {
-                    borderWidth: 2
-                }
-            }
-        },
-
-    }
-
-}
-
-function set_canvas(canvas: OffscreenCanvas, width?: number, height?: number) {
-    _canvas = canvas
-    if (width) _canvas.width = width
-    if (height) _canvas.height = height
+    _canvas.height = height
 
     if (_chart !== undefined)
         _chart.destroy()
 
-    const config = getChartConfig()
-
-    _chart = new Chart(_canvas as unknown as HTMLCanvasElement, config)
+    _chart = new Chart(_canvas as unknown as HTMLCanvasElement, deepCopy(_chart_config))
 
     // load previous chart data 
-    update_with_decimated_data()
+    updateData()
 
 
-
-    if (_ws === undefined || (_ws.readyState !== WebSocket.OPEN && _ws.readyState !== WebSocket.CONNECTING))
-        establish_web_socket()
-
-    if (_ws_interval === undefined) {
-        _ws_interval = setInterval(() => {
-
-            if (_online && (_ws === undefined || (_ws.readyState !== WebSocket.OPEN && _ws.readyState !== WebSocket.CONNECTING)))
-                establish_web_socket()
-            // Runs once every 10 seconds so it does not fall asleep
-        }, 10000)
-    }
+    // Establish websocket connection if not already established
+    wsConnect()
 }
 
-function update_with_decimated_data() {
-    const width = _canvas.width
-    const data_length = _datasets[0].data.length
-    const number_of_datasets = _datasets.length
-    // Decimate data only if needed
-    if (data_length < width * 4) {
-        _chart.data.datasets = _datasets
-        _chart.update()
-        _last_update_timestamp = Date.now()
-        return
-    }
+let _online = false
+let _pending_update = false
+let _update_timeout: Timer | undefined = undefined
+function wsConnect() {
+    const wsNotConnected = () =>
+        (_ws === undefined || (_ws.readyState !== WebSocket.OPEN && _ws.readyState !== WebSocket.CONNECTING))
 
-    const new_decimation = Math.floor(data_length / width)
-    let from_index = 0
-
-    // If decimation still the same, find where to add new decimated data from
-    if (new_decimation === _decimation) {
-        // Only update chart if new datapoints is enough to form new decimation
-        const old_data_length = _chart.data.datasets[0].data.length
-
-        // Nothing to decimate
-        if (data_length < old_data_length + _decimation)
-            return
-
-        // Get the data point to decimate from
-        from_index = old_data_length * _decimation / 2
+    if (!wsNotConnected()) return
 
 
-    } else {
-        // Otherwise, this is a new decimation. Start from scratch
-        _decimation = new_decimation
-
-        _chart.destroy()
-        const config = getChartConfig()
-        _chart = new Chart(_canvas as unknown as HTMLCanvasElement, config)
-    }
-
-    for (let i = from_index; i < data_length; i += _decimation) {
-
-        // First check if reached end of possible decimation
-        if (i + _decimation >= data_length)
-            break
-
-        // Decimate each dataset
-        for (let d_i = 0; d_i < number_of_datasets; d_i++) {
-            const slice = _datasets[d_i].data.slice(i + 1, i + _decimation)
-
-            let min_y = _datasets[d_i].data[i].y
-            let max_y = _datasets[d_i].data[i].y
-
-            for (let s_i = 0; s_i < slice.length; s_i++) {
-                if (slice[s_i].y < min_y) min_y = slice[s_i].y
-                else if (slice[s_i].y > max_y) max_y = slice[s_i].y
-            }
-
-            const min_x = _datasets[d_i].data[i].x
-            const max_x = min_x + (slice[slice.length - 1].x - _datasets[d_i].data[i].x) / 2
-
-            _chart.data.datasets[d_i].data.push({ x: min_x, y: min_y })
-
-            _chart.data.datasets[d_i].data.push({ x: max_x, y: max_y })
-
-        }
-    }
-    _last_update_timestamp = Date.now()
-    _chart.update()
-
-}
-
-function tick_update() {
-    if (Date.now() - _last_update_timestamp > 100)
-        update_with_decimated_data()
-}
-
-function resize(width?: number, height?: number) {
-    if (width) {
-        _width = width
-        _canvas.width = width
-    }
-
-    if (height) {
-        _height = height
-        _canvas.height = height
-    }
-
-    _chart.resize(_width, _height - 1)
-    _chart.update()
-}
-function reset() {
-    // let new_datasets: { data: Point[], label: string }[] = []
-    // _config.y_names.forEach(y_name => {
-    //     new_datasets.push({ data: [], label: y_name })
-    // })
-    // _datasets = new_datasets
-
-    // _chart.update()
-
-    // establish_web_socket()
-    // return
-
-    if (_ws !== undefined)
-        _ws.close()
-
-    if (_ws_interval !== undefined)
-        clearInterval(_ws_interval)
-
-
-    _datasets = _config.y_names.map(label => ({ data: [], label }))
-    _decimation = 0
-    _chart.destroy()
-
-    setTimeout(() => {
-
-        const config = getChartConfig()
-        _chart = new Chart(_canvas as unknown as HTMLCanvasElement, config)
-
-
-
-
-        establish_web_socket()
-
-
-        _ws_interval = setInterval(() => {
-
-            if (_online && (_ws === undefined || (_ws.readyState !== WebSocket.OPEN && _ws.readyState !== WebSocket.CONNECTING)))
-                establish_web_socket()
-            // Runs once every 10 seconds so it does not fall asleep
-        }, 10000)
-    })
-
-
-}
-function establish_web_socket() {
-
-
-    _online = true
-    _ws = new WebSocket(meallWs(`chart/${_id}/${_config.title}`))
-
+    _ws = new WebSocket(cnoc_url + "chart/" + _experiment_name + "/" + _scatter_config.title)
     _ws.binaryType = "arraybuffer"
 
-    _ws.onmessage = getWsOnmessageHandler(_config.y_names.length, _config.mode)
+    _ws.onopen = () => {
+        _online = true
+        // Run once every 10 seconds so it does not fall asleep
+        _ws_interval = setInterval(() => {
+            if (_online && wsNotConnected()) wsConnect()
+        }, 10000)
+    }
 
     _ws.onclose = (event) => {
         if (event.code !== 4000)
-            establish_web_socket()
-        else {
+            wsConnect()
+        else
             _online = false
-        }
-
     }
-}
 
 
-
-
-
-
-
-// Webworker onmessage
-onmessage = function (event: MessageEvent<ChartWebWorkerMessage>) {
-    switch (event.data.type) {
-        case "instantiate": {
-            const { id, config } = event.data.payload
-            instantiate(id, config)
-            return
-        }
-        case "set_canvas": {
-            const { canvas, width, height } = event.data.payload
-            set_canvas(canvas, width, height)
-            return
-        }
-        case "resize": {
-            const { width, height } = event.data.payload
-            resize(width, height)
-            return
-        }
-        case "reset": {
-            reset()
-            return
-        }
-        case "enable_draw_points": {
-            enable_draw_points()
-            return
-        }
-        case "disable_draw_points": {
-            disable_draw_points()
-            return
-        }
-        case "kill": {
-            _online = false
-
-            _chart.destroy()
-            if (_ws !== undefined) {
-                _ws.onclose = null
-                _ws.close()
-            }
-
-            if (_ws_interval !== undefined)
-                clearInterval(_ws_interval)
-        }
-    }
-}
-
-
-
-// WebSocket onmessage
-const getWsOnmessageHandler = (y_length: number, mode: XYChartMode) => {
-
-    function onmessage(event: MessageEvent<ArrayBuffer>) {
+    _ws.onmessage = (event: MessageEvent<ArrayBuffer>) => {
+        const y_length = _chart_config.data.datasets.length
 
         const frames_bytes = new DataView(event.data)
         // Frame size is assumed to be right, thus not checked
@@ -377,7 +172,7 @@ const getWsOnmessageHandler = (y_length: number, mode: XYChartMode) => {
 
 
 
-        switch (mode) {
+        switch (_scatter_config.mode) {
             case "overwrite": {
                 // In overwrite mode
 
@@ -458,10 +253,170 @@ const getWsOnmessageHandler = (y_length: number, mode: XYChartMode) => {
             }
 
         }
-        // Call the update chart function
-        tick_update()
+
+        // Flag that update is pending
+        if (_update_timeout !== undefined) {
+            _pending_update = true
+            return
+        }
+
+        updateData()
+
+        _update_timeout = setInterval(() => {
+            if (_pending_update) {
+                updateData()
+                return
+            }
+            clearInterval(_update_timeout)
+            _update_timeout = undefined
+        }, 200)
+
+
+
+
     }
 
-    return onmessage
+
+}
+
+
+
+
+let _decimation = 0
+let _last_update_timestamp: number
+function updateData() {
+
+    if (_chart === undefined || _canvas === undefined) return
+
+    const width = _canvas.width
+    const data_length = _datasets[0].data.length
+    const number_of_datasets = _datasets.length
+    // Decimate data only if needed
+    if (data_length < width * 4) {
+        _chart.data.datasets = _datasets
+        _chart.update()
+        _last_update_timestamp = Date.now()
+        return
+    }
+
+    const new_decimation = Math.floor(data_length / width)
+
+    // Cursor to start decimating from
+    let from_index = 0
+
+    if (new_decimation === _decimation) {
+        // If decimation still the same, check if new data points is enough to form new decimation
+        const old_data_length = _chart.data.datasets[0].data.length
+
+        // Not enough data
+        if (data_length < old_data_length + _decimation)
+            return
+
+        // Cursor for decimating new point(s)
+        from_index = old_data_length * _decimation / 2
+
+
+    } else {
+        // Otherwise, start from scratch
+        _decimation = new_decimation
+
+        _chart.destroy()
+        _chart = new Chart(_canvas as unknown as HTMLCanvasElement, deepCopy(_chart_config))
+    }
+
+    for (let i = from_index; i < data_length; i += _decimation) {
+
+        // First check if reached end of possible decimation
+        if (i + _decimation >= data_length)
+            break
+
+        // Decimate each dataset
+        for (let d_i = 0; d_i < number_of_datasets; d_i++) {
+            const slice = _datasets[d_i].data.slice(i + 1, i + _decimation)
+
+            let min_y = _datasets[d_i].data[i].y
+            let max_y = _datasets[d_i].data[i].y
+
+            for (let s_i = 0; s_i < slice.length; s_i++) {
+                if (slice[s_i].y < min_y) min_y = slice[s_i].y
+                else if (slice[s_i].y > max_y) max_y = slice[s_i].y
+            }
+
+            const min_x = _datasets[d_i].data[i].x
+            const max_x = min_x + (slice[slice.length - 1].x - _datasets[d_i].data[i].x) / 2
+
+            _chart.data.datasets[d_i].data.push({ x: min_x, y: min_y })
+
+            _chart.data.datasets[d_i].data.push({ x: max_x, y: max_y })
+
+        }
+    }
+    _chart.update()
+    _pending_update = false
+
+
+}
+
+
+
+
+// function reset() {
+
+//     if (_ws !== undefined)
+//         _ws.close()
+
+//     if (_ws_interval !== undefined)
+//         clearInterval(_ws_interval)
+
+
+//     _datasets = _chart_config.y_names.map(label => ({ data: [], label }))
+//     _decimation = 0
+//     _chart.destroy()
+
+//     setTimeout(() => {
+
+//         const config = getChartConfig()
+//         _chart = new Chart(_canvas as unknown as HTMLCanvasElement, config)
+
+
+
+
+//         wsConnect()
+
+
+//         _ws_interval = setInterval(() => {
+
+//             if (_online && (_ws === undefined || (_ws.readyState !== WebSocket.OPEN && _ws.readyState !== WebSocket.CONNECTING)))
+//                 wsConnect()
+//             // Runs once every 10 seconds so it does not fall asleep
+//         }, 10000)
+//     })
+
+
+// }
+
+
+
+
+
+
+
+
+// Webworker onmessage
+onmessage = function (event: MessageEvent<ChartMessages>) {
+    handlers[event.data.command](event.data.payload as Extract<ChartMessages, [typeof event.data.command]>)
+    //     case "kill": {
+    //         _online = false
+
+    //         _chart.destroy()
+    //         if (_ws !== undefined) {
+    //             _ws.onclose = null
+    //             _ws.close()
+    //         }
+
+    //         if (_ws_interval !== undefined)
+    //             clearInterval(_ws_interval)
+    //     }
+    // }
 }
 

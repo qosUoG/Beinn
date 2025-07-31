@@ -9,6 +9,8 @@ import { Command } from "@tauri-apps/plugin-shell";
 import type { LogController } from "$controllers/LogController.svelte";
 import { workspace_controller } from "$controllers/WorkspaceController.svelte";
 
+export const cnoc_url = "ws://localhost:8001/"
+
 export type Prettify<T> = {
     [K in keyof T]: T[K];
 } & {};

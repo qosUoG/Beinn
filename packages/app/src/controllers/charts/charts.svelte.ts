@@ -6,7 +6,7 @@ import type { ChartConfigs, ChartMessages } from "./types";
 
 
 
-export class Chart<T extends ChartConfigs> {
+export class Chart<T extends ChartConfigs = ChartConfigs> {
     worker: Worker
 
     // Worker interface
@@ -49,11 +49,16 @@ export class Chart<T extends ChartConfigs> {
     config: T
 
 
-    constructor(config: T, experiment_name: string, worker_init: typeof ScatterWorker
+    constructor(config: T, experiment_name: string
     ) {
         this.config = config
-        this.worker = new worker_init()
-
+        switch (config.type) {
+            case "chart:scatter": {
+                this.worker = new ScatterWorker()
+                break
+            }
+        }
+        if (this.worker === undefined) throw Error(`Worker script of ${config.type} is undefined`)
         this.worker.postMessage({
             command: "instantiate",
             payload: {

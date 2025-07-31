@@ -5,8 +5,7 @@
 	import Label from "$components/fields/Label.svelte";
 	import { EquipmentController } from "$controllers/EquipmentController.svelte";
 	import { cn, getClickOutsideAttachment } from "$components/utils.svelte";
-	import type { Attachment } from "svelte/attachments";
-	import { on } from "svelte/events";
+
 	import type { ExperimentController } from "$controllers/ExperimentController.svelte";
 
 	let open = $state(false);

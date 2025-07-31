@@ -4,14 +4,14 @@ import { parse, stringify } from "smol-toml"
 import { dependency_controller } from "./DependencyController.svelte"
 import { tick } from "svelte"
 import { confirm } from "@tauri-apps/plugin-dialog"
-import { shell, sleep } from "$lib/utils"
+import { cnoc_url, shell, sleep } from "$lib/utils"
 import { Child, Command } from "@tauri-apps/plugin-shell"
 
 import { beinn_log_controller } from "./LogController.svelte"
 import { cnoc_controller } from "./CnocController.svelte"
 
 
-const ws_url = "ws://localhost:8001/"
+
 
 class WorkspaceController {
 
@@ -22,7 +22,7 @@ class WorkspaceController {
     private uvproc: Child | undefined
 
     constructor() {
-        this.workspace_ws = new WebSocket(ws_url + "close")
+        this.workspace_ws = new WebSocket(cnoc_url + "close")
 
     }
 
@@ -119,7 +119,7 @@ class WorkspaceController {
 
         // Connect to the websocket
 
-        this.workspace_ws = new WebSocket(ws_url + "workspace")
+        this.workspace_ws = new WebSocket(cnoc_url + "workspace")
 
         this.workspace_ws.onmessage = async (event: MessageEvent<string>) => {
             const data = JSON.parse(event.data)
