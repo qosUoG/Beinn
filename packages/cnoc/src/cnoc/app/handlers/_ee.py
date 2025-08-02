@@ -4,6 +4,7 @@ import json
 import pkgutil
 import pprint
 import sys
+from traceback import print_tb
 from typing import Literal, TypedDict
 from websockets import ServerConnection
 
@@ -78,7 +79,13 @@ def eeImports(eetype: type[ExperimentABC] | type[EquipmentABC], names: list[str]
     venv_index = roots.index(".venv")
     path = "/".join(roots[:venv_index])
     print(path, flush=True)
-    for package in pkgutil.walk_packages([path], onerror=lambda x: print(x)):
+
+    def onerror(x):
+        print("Error importing module %s" % x)
+        _, _, traceback = sys.exc_info()
+        print_tb(traceback)
+
+    for package in pkgutil.walk_packages([path], onerror=onerror):
         pprint.pprint(package)
         print(flush=True)
         examinePackage(path, package.name)
