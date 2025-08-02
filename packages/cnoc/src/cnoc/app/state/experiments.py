@@ -5,7 +5,7 @@ from typing import override
 
 from .foundation import Foundation
 
-from .ees import EEInstance, EEsABC
+from ._ees import EEInstance, EEsABC
 
 
 from ...public.experiment import ExperimentABC
@@ -18,6 +18,8 @@ def sendExperimentCommand(command: str, value: dict):
 
 
 class Experiments(EEsABC[ExperimentABC]):
+    instances: dict[str, EEInstance[ExperimentABC]] = {}
+
     @classmethod
     @override
     def create(

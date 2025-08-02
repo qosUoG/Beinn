@@ -4,10 +4,12 @@ from typing import override
 from ...public.equipment import EquipmentABC
 
 
-from .ees import EEInstance, EEsABC
+from ._ees import EEInstance, EEsABC
 
 
 class Equipments(EEsABC[EquipmentABC]):
+    instances: dict[str, EEInstance[EquipmentABC]] = {}
+
     @classmethod
     @override
     def create(
