@@ -14,11 +14,9 @@ from threading import Event
 from time import time
 from typing import Callable, Literal, TypedDict
 
+from ..public.exceptions import ExperimentCompleted
+
 from .charts._chart import ChartABC
-
-
-class ExperimentCompleted(Exception):
-    pass
 
 
 class Listeners(TypedDict):
