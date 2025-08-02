@@ -120,7 +120,7 @@ async def create(
     await ws.send(
         json.dumps(
             {
-                "command": "equipment:create",
+                "command": f"{eetype}:create",
                 "value": {
                     "module": module,
                     "cls": cls,
