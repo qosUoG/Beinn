@@ -23,7 +23,6 @@ class Experiments:
     instances: dict[str, EEInstance[ExperimentABC]] = {}
 
     @classmethod
-    @override
     def create(
         cls,
         name: str,
@@ -93,8 +92,10 @@ class Experiments:
 
         return cls.instances[name]
 
+    @classmethod
     def updateParams(cls, name: str, params: dict):
         cls.instances[name].instance.params = dict2Param(params)
 
+    @classmethod
     def remove(cls, name: str):
         del cls.instances[name]
