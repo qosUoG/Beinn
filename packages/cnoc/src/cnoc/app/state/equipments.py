@@ -1,7 +1,6 @@
 import importlib
-from typing import override
 
-from ...public.params import dict2Param
+from ...public.params import dict2Params
 
 from ...public.equipment import EquipmentABC
 
@@ -32,7 +31,7 @@ class Equipments:
 
     @classmethod
     def updateParams(cls, name: str, params: dict):
-        cls.instances[name].instance.params = dict2Param(params)
+        cls.instances[name].instance.params = dict2Params(params)
 
     @classmethod
     def remove(cls, name: str):

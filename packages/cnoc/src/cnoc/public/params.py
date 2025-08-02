@@ -363,7 +363,7 @@ def param2Dict(params: Params) -> dict[str, dict]:
     return {k: v.toDict() for k, v in params.items()}
 
 
-def dict2Param(data: dict[str, dict]) -> Params:
+def dict2Params(data: dict[str, dict]) -> Params:
     """
     Convert the dictionary representation back to Params
     However this function does not set the instance of the params,
@@ -379,3 +379,5 @@ def dict2Param(data: dict[str, dict]) -> Params:
             if v["type"] == tp._type:
                 params[k] = tp.fromDict(v)
                 break
+
+    return params
