@@ -177,22 +177,30 @@ async def updateParams(
             json.dumps(
                 {
                     "command": "equipment:update_params",
-                    "value": param2Dict(Equipments.instances[name].instance.params),
+                    "value": {
+                        "name": name,
+                        "params": param2Dict(
+                            Equipments.instances[name].instance.params
+                        ),
+                    },
                 }
             )
         )
 
     elif eetype == "experiment":
         Experiments.updateParams(name=name, params=params)
-        pprint.pprint(Experiments.instances[name].instance)
-        print(end=None, flush=True)
         putParamsInstance(Experiments.instances[name].instance.params)
 
         await ws.send(
             json.dumps(
                 {
                     "command": "experiment:update_params",
-                    "value": param2Dict(Experiments.instances[name].instance.params),
+                    "value": {
+                        "name": name,
+                        "params": param2Dict(
+                            Experiments.instances[name].instance.params
+                        ),
+                    },
                 }
             )
         )
