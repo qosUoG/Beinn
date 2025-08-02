@@ -2,6 +2,7 @@ import importlib
 import inspect
 import json
 import pkgutil
+import pprint
 import sys
 from typing import Literal, TypedDict
 from websockets import ServerConnection
@@ -78,6 +79,7 @@ def eeImports(eetype: type[ExperimentABC] | type[EquipmentABC], names: list[str]
     path = "/".join(roots[:venv_index])
     print(path, flush=True)
     for package in pkgutil.walk_packages([path]):
+        pprint.pprint(package, flush=True)
         examinePackage(path, package.name)
 
     return list(res.values())

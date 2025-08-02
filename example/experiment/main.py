@@ -44,6 +44,7 @@ async def main():
     for package in pkgutil.walk_packages(
         ["/Volumes/External/UofGQos/Beinn/example/experiment"]
     ):
+        pprint.pprint(package)
         for [cls, clsT] in inspect.getmembers(
             importlib.import_module(package.name), inspect.isclass
         ):
