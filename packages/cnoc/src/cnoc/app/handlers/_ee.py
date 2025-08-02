@@ -168,7 +168,7 @@ async def remove(
 
 def getEEFn(eetype: Literal["equipment"] | Literal["experiment"]):
     return {
-        f"{eetype}:imports": lambda ws, value: imports(ws, eetype, value["names"]),
+        f"{eetype}:imports": lambda ws, value: imports(ws, eetype, value["packages"]),
         f"{eetype}:create": lambda ws, value,: create(
             ws, eetype, value["name"], value["module"], value["cls"]
         ),
