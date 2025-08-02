@@ -26,14 +26,10 @@ class Foundation:
 
     @classmethod
     def runCoroThreadsafeBlocking(cls, coro: Coroutine[Any, Any, None]):
-        # done = threading.Event()
-
-        # async def _inner():
-        #     await coro
-        #     done.set()
-
-        # done.wait()
-        cls._loop.run_until_complete(coro)
+        done = threading.Event()
+        future = asyncio.run_coroutine_threadsafe(coro, cls._loop)
+        future.add_done_callback(lambda _: done.set())
+        done.wait()
 
 
 class ExperimentStatus:
