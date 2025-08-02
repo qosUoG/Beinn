@@ -2,8 +2,7 @@ import importlib
 import inspect
 import json
 import pkgutil
-import pprint
-import site
+
 import sys
 from traceback import print_tb
 from typing import Literal, TypedDict
@@ -34,7 +33,6 @@ def eeImports(eetype: type[ExperimentABC] | type[EquipmentABC], names: list[str]
     res: dict[type[ExperimentABC] | type[EquipmentABC], ReturnType] = {}
 
     def examinePackage(src: str, name: str):
-        print(name, flush=True)
         try:
             for [cls, clsT] in inspect.getmembers(
                 importlib.import_module(name), inspect.isclass
@@ -45,9 +43,6 @@ def eeImports(eetype: type[ExperimentABC] | type[EquipmentABC], names: list[str]
                     or clsT.__module__ != name
                 ):
                     continue
-
-                print(f"{cls}, {clsT.__module__}", flush=True)
-                print(f"{clsT.__module__}, {name}", flush=True)
 
                 if clsT not in res:
                     res[clsT] = {"module": name, "cls": cls}
@@ -76,21 +71,17 @@ def eeImports(eetype: type[ExperimentABC] | type[EquipmentABC], names: list[str]
         for package in pkgutil.walk_packages(pkg.__path__, pkg.__name__ + "."):
             examinePackage("walk_packages", package.name)
 
+    def onerror(x):
+        print(f"Error importing module {x} while walk_packages ")
+        _, _, traceback = sys.exc_info()
+        print_tb(traceback)
+        print(end=None, flush=True)
+
     roots = __file__.split("/")
     venv_index = roots.index(".venv")
     path = "/".join(roots[:venv_index])
-    print(path, flush=True)
-
-    def onerror(x):
-        print("Error importing module %s" % x)
-        _, _, traceback = sys.exc_info()
-        print_tb(traceback)
-
-    site.addsitedir(path)
 
     for package in pkgutil.walk_packages([path], onerror=onerror):
-        pprint.pprint(package)
-        print(flush=True)
         examinePackage(path, package.name)
 
     return list(res.values())
