@@ -3,6 +3,7 @@ import inspect
 import json
 import pkgutil
 import pprint
+import site
 import sys
 from traceback import print_tb
 from typing import Literal, TypedDict
@@ -84,6 +85,8 @@ def eeImports(eetype: type[ExperimentABC] | type[EquipmentABC], names: list[str]
         print("Error importing module %s" % x)
         _, _, traceback = sys.exc_info()
         print_tb(traceback)
+
+    site.addsitedir(path)
 
     for package in pkgutil.walk_packages(
         [path], roots[venv_index - 1] + ".", onerror=onerror
