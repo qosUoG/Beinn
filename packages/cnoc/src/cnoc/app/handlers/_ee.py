@@ -141,13 +141,26 @@ def putParamsInstance(params: dict[str, AllParamTypes]):
             putParamsInstance(params[k].children)
             continue
 
-        if params[k]._type == InstanceEquipmentParam._type:
-            params[k].instance = Equipments.instances[params[k].name].instance
-            continue
+        try:
+            if (
+                params[k]._type == InstanceEquipmentParam._type
+                and params[k].name is not None
+            ):
+                params[k].instance = Equipments.instances[params[k].name].instance
+                continue
 
-        if params[k]._type == InstanceExperimentParam._type:
-            params[k].instance = Experiments.instances[params[k].name].instance
-            continue
+            if (
+                params[k]._type == InstanceExperimentParam._type
+                and params[k].name is not None
+            ):
+                params[k].instance = Experiments.instances[params[k].name].instance
+                continue
+
+        except KeyError:
+            print(
+                f"Param {k} of type {params[k]._type} with name {params[k].name} does not exist",
+                flush=True,
+            )
 
 
 async def updateParams(
