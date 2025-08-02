@@ -4,7 +4,7 @@ import random
 from typing import TypedDict, override
 
 
-from cnoc import ExperimentEnded
+from cnoc import ExperimentCompleted
 from cnoc.public import params as p
 from cnoc.public.experiment import ExperimentABC
 
@@ -142,7 +142,7 @@ class ExampleExperiment(ExperimentABC):
         # print("saved")
 
         if index >= 9:
-            raise ExperimentEnded
+            raise ExperimentCompleted
         # if index % 100 == 0:
         #     print(index)
 
