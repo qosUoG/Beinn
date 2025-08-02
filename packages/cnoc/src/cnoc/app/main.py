@@ -15,7 +15,6 @@ async def handler(ws: ServerConnection):
     if path == "/workspace":
         await workspaceHandler(ws)
     elif path == "/close":
-        print("Closing websocket", flush=True)
         await ws.close()
         sys.exit()
 

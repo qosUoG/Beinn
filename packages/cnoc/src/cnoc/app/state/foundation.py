@@ -32,7 +32,7 @@ class Foundation:
             await coro
             done.set()
 
-        asyncio.create_task(_inner())
+        asyncio.run_coroutine_threadsafe(_inner(), cls._loop)
         done.wait()
 
 
