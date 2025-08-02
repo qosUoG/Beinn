@@ -41,22 +41,24 @@ async def main():
     #                 print(cls, clsT.__module__)
     #                 print(clsT.__module__, package.name)
 
-    #     for package in pkgutil.walk_packages(["."]):
-    #         for [cls, clsT] in inspect.getmembers(
-    #             importlib.import_module(package.name), inspect.isclass
-    #         ):
-    #             if (
-    #                 (
-    #                     not issubclass(clsT, ExperimentABC)
-    #                     and not issubclass(clsT, EquipmentABC)
-    #                 )
-    #                 or clsT is ExperimentABC
-    #                 or clsT is EquipmentABC
-    #                 or clsT.__module__ != package.name
-    #             ):
-    #                 continue
-    #             print(cls, clsT.__module__)
-    #             print(clsT.__module__, package.name)
+    for package in pkgutil.walk_packages(
+        ["/Volumes/External/UofGQos/Beinn/example/experiment"]
+    ):
+        for [cls, clsT] in inspect.getmembers(
+            importlib.import_module(package.name), inspect.isclass
+        ):
+            if (
+                (
+                    not issubclass(clsT, ExperimentABC)
+                    and not issubclass(clsT, EquipmentABC)
+                )
+                or clsT is ExperimentABC
+                or clsT is EquipmentABC
+                or clsT.__module__ != package.name
+            ):
+                continue
+            print(cls, clsT.__module__)
+            print(clsT.__module__, package.name)
 
     # except Exception as e:
     #     traceback.print_exception(e)
@@ -71,9 +73,9 @@ async def main():
     #         print("stdout2")
 
     # print(f.getvalue())
-    print(lib.__path__, flush=True)
-    print(__file__, flush=True)
-    print(sys.path, flush=True)
+    # print(lib.__path__, flush=True)
+    # print(__file__, flush=True)
+    # print(sys.path, flush=True)
 
 
 if __name__ == "__main__":

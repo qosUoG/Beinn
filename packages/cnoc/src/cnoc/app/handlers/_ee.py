@@ -31,6 +31,7 @@ def eeImports(eetype: type[ExperimentABC] | type[EquipmentABC], names: list[str]
     res: dict[type[ExperimentABC] | type[EquipmentABC], ReturnType] = {}
 
     def examinePackage(src: str, name: str):
+        print(name, flush=True)
         try:
             for [cls, clsT] in inspect.getmembers(
                 importlib.import_module(name), inspect.isclass
@@ -41,6 +42,9 @@ def eeImports(eetype: type[ExperimentABC] | type[EquipmentABC], names: list[str]
                     or clsT.__module__ != name
                 ):
                     continue
+
+                print(cls, clsT.__module__)
+                print(clsT.__module__, package.name)
 
                 if clsT not in res:
                     res[clsT] = {"module": name, "cls": cls}
@@ -74,7 +78,7 @@ def eeImports(eetype: type[ExperimentABC] | type[EquipmentABC], names: list[str]
     path = "/".join(roots[:venv_index])
     print(path, flush=True)
     for package in pkgutil.walk_packages([path]):
-        examinePackage(".", package.name)
+        examinePackage(path, package.name)
 
     return list(res.values())
 
