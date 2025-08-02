@@ -29,6 +29,8 @@ def eeImports(eetype: type[ExperimentABC] | type[EquipmentABC], names: list[str]
 
     res: dict[type[ExperimentABC] | type[EquipmentABC], ReturnType] = {}
 
+    print(__file__)
+
     def examinePackage(src: str, name: str):
         try:
             for [cls, clsT] in inspect.getmembers(
