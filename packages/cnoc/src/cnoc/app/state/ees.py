@@ -1,7 +1,7 @@
 from abc import ABC, abstractmethod
 from dataclasses import dataclass
 
-from packages.cnoc.src.cnoc.public.params import dict2Param
+from ...public.params import dict2Param
 
 from ...public.equipment import EquipmentABC
 from ...public.experiment import ExperimentABC

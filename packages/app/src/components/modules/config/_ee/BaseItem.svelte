@@ -84,7 +84,7 @@
 					aria-label="Save params"
 					class="bg-green-600 icon-btn-sm text-white"
 					onclick={() => {
-						controller.param(ee.name);
+						controller.updateParams(ee.name);
 					}}>
 					<Check />
 				</button>
