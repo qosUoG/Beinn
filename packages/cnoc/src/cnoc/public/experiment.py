@@ -107,7 +107,7 @@ class ExperimentABC(ABC):
         self._cnoc_should_stop.set()
         self._cnoc_should_run.set()
 
-    async def _cnoc_start(self):
+    def _cnoc_start(self):
         # Make sure the experiment starts in a fresh state
         self._cnoc_loop_count_count = -1
         self._cnoc_should_run.clear()
