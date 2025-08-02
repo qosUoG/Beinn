@@ -15,7 +15,7 @@ class EEInstance[T: EquipmentABC | ExperimentABC]:
 
 
 class EEsABC[T: EquipmentABC | ExperimentABC](ABC):
-    instances: dict[str, EEInstance[T]]
+    instances: dict[str, EEInstance[T]] = {}
 
     @classmethod
     @abstractmethod

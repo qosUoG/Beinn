@@ -19,10 +19,10 @@ class Equipments(EEsABC[EquipmentABC]):
         module = importlib.import_module(module_str)
         module = importlib.reload(module)
 
-        super().instances[name] = EEInstance[EquipmentABC](
+        cls.instances[name] = EEInstance[EquipmentABC](
             instance=getattr(module, cls_str)(),
             module=module_str,
             cls=cls_str,
         )
 
-        return super().instances[name]
+        return cls.instances[name]
