@@ -13,8 +13,8 @@ from ._ees import EEInstance
 from ...public.experiment import ExperimentABC
 
 
-def sendExperimentCommand(command: str, value: dict):
-    Foundation.workspace_ws.send(
+async def sendExperimentCommand(command: str, value: dict):
+    await Foundation.workspace_ws.send(
         json.dumps({"command": f"experiment:{command}", "value": value})
     )
 
