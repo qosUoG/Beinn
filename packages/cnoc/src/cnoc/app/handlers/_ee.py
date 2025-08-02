@@ -71,7 +71,7 @@ def eeImports(eetype: type[ExperimentABC] | type[EquipmentABC], names: list[str]
 
     roots = __file__.split("/")
     venv_index = roots.index(".venv")
-    path = roots[:venv_index].join("/")
+    path = "/".join(roots[: venv_index + 1])
     print(path)
     for package in pkgutil.walk_packages([path]):
         examinePackage(".", package.name)
