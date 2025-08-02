@@ -335,9 +335,7 @@ class CompositeParam:
                     children[k] = tp.fromDict(v)
                     break
 
-        return CompositeParam(
-            children,
-        )
+        return CompositeParam(children)
 
 
 type AllParamTypes = _SimpleParamType | CompositeParam
@@ -374,7 +372,7 @@ def dict2Param(data: dict[str, dict]) -> Params:
     params: Params = {}
     for k, v in data.items():
         if v["type"] == CompositeParam._type:
-            params[k] = CompositeParam.fromDict(v["children"])
+            params[k] = CompositeParam.fromDict(v)
             continue
 
         for tp in _param_type_arr:
