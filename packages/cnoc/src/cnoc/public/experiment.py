@@ -192,7 +192,7 @@ class ExperimentABC(ABC):
                     listener(self._cnoc_loop_count_count)
 
         except Exception as e:
-            print(f"Exception in experiment: {e}", flush=True)
+            print(f"{type(e)} in experiment: {e}", flush=True)
             return
 
     @abstractmethod
