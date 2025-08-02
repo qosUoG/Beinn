@@ -1,12 +1,13 @@
 import importlib
 import json
+from typing import override
 
 
 from .foundation import Foundation
 
-from .ees import EEInstance
+from .ees import EEInstance, EEsABC
 
-from ...public.params import dict2Param, param2Dict
+
 from ...public.experiment import ExperimentABC
 
 
@@ -16,10 +17,9 @@ def sendExperimentCommand(command: str, value: dict):
     )
 
 
-class Experiments:
-    instances: dict[str, EEInstance[ExperimentABC]] = {}
-
+class Experiments(EEsABC[ExperimentABC]):
     @classmethod
+    @override
     def create(
         cls,
         name: str,
@@ -88,11 +88,3 @@ class Experiments:
         )
 
         return cls.instances[name]
-
-    @classmethod
-    def save(cls, name: str, params: dict):
-        cls.instances[name].instance.params = dict2Param(params)
-
-    @classmethod
-    def remove(cls, name: str):
-        del cls.instances[name]

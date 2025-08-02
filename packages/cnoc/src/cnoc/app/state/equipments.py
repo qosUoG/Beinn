@@ -1,16 +1,15 @@
 import importlib
+from typing import override
 
 from ...public.equipment import EquipmentABC
 
 
-from .ees import EEInstance
-from ...public.params import dict2Param
+from .ees import EEInstance, EEsABC
 
 
-class Equipments:
-    instances: dict[str, EEInstance[EquipmentABC]] = {}
-
+class Equipments(EEsABC[EquipmentABC]):
     @classmethod
+    @override
     def create(
         cls,
         name: str,
@@ -27,11 +26,3 @@ class Equipments:
         )
 
         return cls.instances[name]
-
-    @classmethod
-    def save(cls, name: str, params: dict):
-        cls.instances[name].instance.params = dict2Param(params)
-
-    @classmethod
-    def remove(cls, name: str):
-        del cls.instances[name]

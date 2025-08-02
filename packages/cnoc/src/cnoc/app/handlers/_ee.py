@@ -154,16 +154,20 @@ async def updateParams(
     params: dict[str, AllParamTypes],
 ):
     if eetype == "equipment":
-        Equipments.save(name=name, params=params)
+        Equipments.update_params(name=name, params=params)
         putParamsInstance(Equipments.instances[name].instance.params)
 
-        await ws.send(json.dumps({"command": "equipment:save", "value": Equipments}))
+        await ws.send(
+            json.dumps({"command": "equipment:update_params", "value": Equipments})
+        )
 
     elif eetype == "experiment":
-        Experiments.save(name=name, params=params)
+        Experiments.update_params(name=name, params=params)
         putParamsInstance(Experiments.instances[name].instance.params)
 
-        await ws.send(json.dumps({"command": "experiment:save", "value": Experiments}))
+        await ws.send(
+            json.dumps({"command": "experiment:update_params", "value": Experiments})
+        )
 
 
 async def remove(
@@ -185,7 +189,7 @@ def getEEFn(eetype: Literal["equipment"] | Literal["experiment"]):
         f"{eetype}:create": lambda ws, value,: create(
             ws, eetype, value["name"], value["module"], value["cls"]
         ),
-        f"{eetype}:params": lambda ws, value: updateParams(
+        f"{eetype}:update_params": lambda ws, value: updateParams(
             ws, eetype, value["name"], value["params"]
         ),
         f"{eetype}:remove": lambda ws, value: remove(ws, eetype, value["name"]),
