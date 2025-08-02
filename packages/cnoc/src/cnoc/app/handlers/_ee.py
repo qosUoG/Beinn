@@ -3,7 +3,10 @@ import inspect
 import json
 import pkgutil
 
+
+import pprint
 import sys
+from tkinter import E
 from traceback import print_tb
 from typing import Literal, TypedDict
 from websockets import ServerConnection
@@ -158,15 +161,26 @@ async def updateParams(
         putParamsInstance(Equipments.instances[name].instance.params)
 
         await ws.send(
-            json.dumps({"command": "equipment:update_params", "value": Equipments})
+            json.dumps(
+                {
+                    "command": "equipment:update_params",
+                    "value": param2Dict(Equipments.instances[name].instance.params),
+                }
+            )
         )
 
     elif eetype == "experiment":
         Experiments.updateParams(name=name, params=params)
+        pprint.pprint(Experiments.instances[name].instance)
         putParamsInstance(Experiments.instances[name].instance.params)
 
         await ws.send(
-            json.dumps({"command": "experiment:update_params", "value": Experiments})
+            json.dumps(
+                {
+                    "command": "experiment:update_params",
+                    "value": param2Dict(Experiments.instances[name].instance.params),
+                }
+            )
         )
 
 
