@@ -172,6 +172,7 @@ async def updateParams(
     elif eetype == "experiment":
         Experiments.updateParams(name=name, params=params)
         pprint.pprint(Experiments.instances[name].instance)
+        print(end=None, flush=True)
         putParamsInstance(Experiments.instances[name].instance.params)
 
         await ws.send(
