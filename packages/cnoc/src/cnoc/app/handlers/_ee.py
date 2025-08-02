@@ -85,7 +85,9 @@ def eeImports(eetype: type[ExperimentABC] | type[EquipmentABC], names: list[str]
         _, _, traceback = sys.exc_info()
         print_tb(traceback)
 
-    for package in pkgutil.walk_packages([path], onerror=onerror):
+    for package in pkgutil.walk_packages(
+        [path], roots[venv_index - 1] + ".", onerror=onerror
+    ):
         pprint.pprint(package)
         print(flush=True)
         examinePackage(path, package.name)
