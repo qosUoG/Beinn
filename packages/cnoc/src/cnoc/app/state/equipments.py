@@ -8,8 +8,6 @@ from ._ees import EEInstance, EEsABC
 
 
 class Equipments(EEsABC[EquipmentABC]):
-    instances: dict[str, EEInstance[EquipmentABC]] = {}
-
     @classmethod
     @override
     def create(
@@ -21,10 +19,10 @@ class Equipments(EEsABC[EquipmentABC]):
         module = importlib.import_module(module_str)
         module = importlib.reload(module)
 
-        cls.instances[name] = EEInstance[EquipmentABC](
+        super().instances[name] = EEInstance[EquipmentABC](
             instance=getattr(module, cls_str)(),
             module=module_str,
             cls=cls_str,
         )
 
-        return cls.instances[name]
+        return super().instances[name]

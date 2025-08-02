@@ -18,8 +18,6 @@ def sendExperimentCommand(command: str, value: dict):
 
 
 class Experiments(EEsABC[ExperimentABC]):
-    instances: dict[str, EEInstance[ExperimentABC]] = {}
-
     @classmethod
     @override
     def create(
@@ -31,28 +29,28 @@ class Experiments(EEsABC[ExperimentABC]):
         module = importlib.import_module(module_str)
         module = importlib.reload(module)
 
-        cls.instances[name] = EEInstance[ExperimentABC](
+        super().instances[name] = EEInstance[ExperimentABC](
             instance=getattr(module, cls_str)(),
             module=module_str,
             cls=cls_str,
         )
 
         # Set all callbacks
-        cls.instances[name].instance._cnoc_on(
+        super().instances[name].instance._cnoc_on(
             "started",
             lambda: Foundation.runCoroThreadsafeBlocking(
                 sendExperimentCommand("status", {"name": name, "status": "started"})
             ),
         )
 
-        cls.instances[name].instance._cnoc_on(
+        super().instances[name].instance._cnoc_on(
             "loop_start",
             lambda _: Foundation.runCoroThreadsafeBlocking(
                 sendExperimentCommand("status", {"name": name, "status": "loop_start"})
             ),
         )
 
-        cls.instances[name].instance._cnoc_on(
+        super().instances[name].instance._cnoc_on(
             "loop_end",
             lambda loop_count: Foundation.runCoroThreadsafeBlocking(
                 sendExperimentCommand(
@@ -61,32 +59,32 @@ class Experiments(EEsABC[ExperimentABC]):
             ),
         )
 
-        cls.instances[name].instance._cnoc_on(
+        super().instances[name].instance._cnoc_on(
             "paused",
             lambda: Foundation.runCoroThreadsafeBlocking(
                 sendExperimentCommand("status", {"name": name, "status": "paused"})
             ),
         )
 
-        cls.instances[name].instance._cnoc_on(
+        super().instances[name].instance._cnoc_on(
             "stopped",
             lambda: Foundation.runCoroThreadsafeBlocking(
                 sendExperimentCommand("status", {"name": name, "status": "stopped"})
             ),
         )
 
-        cls.instances[name].instance._cnoc_on(
+        super().instances[name].instance._cnoc_on(
             "completed",
             lambda: Foundation.runCoroThreadsafeBlocking(
                 sendExperimentCommand("status", {"name": name, "status": "completed"})
             ),
         )
 
-        cls.instances[name].instance._cnoc_on(
+        super().instances[name].instance._cnoc_on(
             "chart_created",
             lambda config: Foundation.runCoroThreadsafeBlocking(
                 sendExperimentCommand("chart_config", {"name": name, "config": config})
             ),
         )
 
-        return cls.instances[name]
+        return super().instances[name]
