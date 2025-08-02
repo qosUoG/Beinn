@@ -61,6 +61,8 @@ class ExampleExperiment(ExperimentABC):
             ),
         }
 
+        super().__init__()
+
         # This should be all of the __init__ code. For instantiation of params from the final params list, or turning on equipment, initializing equipment etc, define in the initialization method
 
     @override

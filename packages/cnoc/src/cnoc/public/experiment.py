@@ -77,7 +77,15 @@ class ExperimentABC(ABC):
         self._cnoc_iteration_count = -1
 
         # Lifecycle hooks
-        self._cnoc_listeners: Listeners = {}
+        self._cnoc_listeners: Listeners = {
+            "started": [],
+            "paused": [],
+            "stopped": [],
+            "completed": [],
+            "loop_start": [],
+            "loop_end": [],
+            "chart_created": [],
+        }
 
         # Charts
         self._cnoc_charts: dict[str, ChartABC] = []
