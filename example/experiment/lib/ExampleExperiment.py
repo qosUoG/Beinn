@@ -6,7 +6,7 @@ from typing import TypedDict, override
 
 from cnoc.public import params as p
 from cnoc.public.experiment import ExperimentABC
-from cnoc.public.managers import ManagerABC
+
 import time
 
 
@@ -64,7 +64,7 @@ class ExampleExperiment(ExperimentABC):
         # This should be all of the __init__ code. For instantiation of params from the final params list, or turning on equipment, initializing equipment etc, define in the initialization method
 
     @override
-    def initialize(self, manager: ManagerABC) -> int:
+    def initialize(self, manager) -> int:
         # import pprint
 
         # pprint.pprint(self.params)

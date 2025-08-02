@@ -30,9 +30,6 @@ def eeImports(eetype: type[ExperimentABC] | type[EquipmentABC], names: list[str]
 
     res: dict[type[ExperimentABC] | type[EquipmentABC], ReturnType] = {}
 
-    print(__file__, flush=True)
-    print(sys.path, flush=True)
-
     def examinePackage(src: str, name: str):
         try:
             for [cls, clsT] in inspect.getmembers(
@@ -72,7 +69,11 @@ def eeImports(eetype: type[ExperimentABC] | type[EquipmentABC], names: list[str]
         for package in pkgutil.walk_packages(pkg.__path__, pkg.__name__ + "."):
             examinePackage("walk_packages", package.name)
 
-    for package in pkgutil.walk_packages(["."]):
+    roots = __file__.split("/")
+    venv_index = roots.index(".venv")
+    path = roots[:venv_index].join("/")
+    print(path)
+    for package in pkgutil.walk_packages([path]):
         examinePackage(".", package.name)
 
     return list(res.values())

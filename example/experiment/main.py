@@ -13,6 +13,7 @@ import traceback
 from io import StringIO
 from contextlib import redirect_stderr, redirect_stdout
 import sys
+import lib
 
 from cnoc.public import params as p
 
@@ -70,7 +71,9 @@ async def main():
     #         print("stdout2")
 
     # print(f.getvalue())
-    p.BoolParam(True)
+    print(lib.__path__, flush=True)
+    print(__file__, flush=True)
+    print(sys.path, flush=True)
 
 
 if __name__ == "__main__":
