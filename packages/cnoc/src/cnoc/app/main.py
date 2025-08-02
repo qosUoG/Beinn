@@ -2,6 +2,8 @@ import asyncio
 import site
 import sys
 
+from .state.foundation import Foundation
+
 
 # from .handlers.experiment_handler import experimentHandler
 from .handlers.workspace_handler import workspaceHandler
@@ -29,6 +31,7 @@ async def handler(ws: ServerConnection):
 
 
 async def _main():
+    Foundation.setLoop(asyncio.get_event_loop())
     async with serve(handler, "localhost", 8001) as server:
         await server.serve_forever()
 
