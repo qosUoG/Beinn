@@ -329,7 +329,7 @@ class CompositeParam:
             raise ValueError(f"Invalid type {data['type']} for {cls._type}")
 
         children: Params = {}
-        for k, v in data.items():
+        for k, v in data["children"].items():
             for tp in _param_type_arr:
                 if v["type"] == tp._type:
                     children[k] = tp.fromDict(v)
