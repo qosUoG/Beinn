@@ -26,6 +26,7 @@ from ._ee import handlers as eeHandlers
 
 async def workspaceHandler(ws: ServerConnection):
     Foundation.workspace_ws = ws
+    print("Connected to workspace", flush=True)
     async for message in ws:
         req = json.loads(message)
 
