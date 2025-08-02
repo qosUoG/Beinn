@@ -88,9 +88,7 @@ def eeImports(eetype: type[ExperimentABC] | type[EquipmentABC], names: list[str]
 
     site.addsitedir(path)
 
-    for package in pkgutil.walk_packages(
-        [path], roots[venv_index - 1] + ".", onerror=onerror
-    ):
+    for package in pkgutil.walk_packages([path], onerror=onerror):
         pprint.pprint(package)
         print(flush=True)
         examinePackage(path, package.name)
