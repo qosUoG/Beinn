@@ -2,6 +2,7 @@ import importlib
 import inspect
 import json
 import pkgutil
+import sys
 from typing import Literal, TypedDict
 from websockets import ServerConnection
 
@@ -29,7 +30,8 @@ def eeImports(eetype: type[ExperimentABC] | type[EquipmentABC], names: list[str]
 
     res: dict[type[ExperimentABC] | type[EquipmentABC], ReturnType] = {}
 
-    print(__file__)
+    print(__file__, flush=True)
+    print(sys.path, flush=True)
 
     def examinePackage(src: str, name: str):
         try:
