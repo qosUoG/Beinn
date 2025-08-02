@@ -188,7 +188,7 @@ class ExperimentABC(ABC):
 
                 # self._cnoc_not_running.set()
 
-                for listener in self._cnoc_listeners["completed"]:
+                for listener in self._cnoc_listeners["loop_end"]:
                     listener(self._cnoc_loop_count_count)
 
         except Exception as e:
