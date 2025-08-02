@@ -4,8 +4,8 @@ Managers used by initialize of experiment script
     * ChartManagerABC - Base class of chart manager. Provide method to create chart instance.
 
     * ExperimentmanagerABC - Base class of manager received as parameter in initialize method
-        contains the suggetTotalIterations method for the user to suggest the total number
-        of iterations and display in frontend.
+        contains the suggetTotalloop_count method for the user to suggest the total number
+        of loop_count and display in frontend.
 
         The manager class implements all *managerABC of the framework. To look at the final
         ManagerABC, refer to runtime.py module.
@@ -23,12 +23,12 @@ class ExperimentManagerABC(ABC):
 
     Methods
     -------
-    suggestTotalIterations(total_iterations: int)
-        suggest a total number of iterations loop is going to take
+    suggestTotalloop_count(total_loop_count: int)
+        suggest a total number of loop_count loop is going to take
     """
 
     @abstractmethod
-    def suggestTotalIterations(self, total_iterations: int):
+    def suggestTotalloop_count(self, total_loop_count: int):
         raise NotImplementedError
 
 

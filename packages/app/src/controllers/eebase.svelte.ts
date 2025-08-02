@@ -24,6 +24,9 @@ export type Instance = Prettify<ConcInstance & {
 export abstract class EEBaseController<T extends Instance = Instance> {
 
     instances = $state<Record<string, T>>({})
+    get selectable_instances() {
+        return Object.keys(this.instances)
+    }
     get instances_arr() {
         return Object.values(this.instances)
     }

@@ -40,6 +40,16 @@ class Experiments:
 
         # Set all callbacks
         cls.instances[name].instance._cnoc_on(
+            "expected_loop_count",
+            lambda expected_loop_count: Foundation.runCoroThreadsafeBlocking(
+                sendExperimentCommand(
+                    "expected_loop_count",
+                    {"name": name, "expected_loop_count": expected_loop_count},
+                )
+            ),
+        )
+
+        cls.instances[name].instance._cnoc_on(
             "started",
             lambda: Foundation.runCoroThreadsafeBlocking(
                 sendExperimentCommand("status", {"name": name, "status": "started"})

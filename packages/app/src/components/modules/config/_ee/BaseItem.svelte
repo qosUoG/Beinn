@@ -34,9 +34,10 @@
 		  } = $props();
 </script>
 
-<div class="bg-slate-50 rounded p-1 fcol">
-	<div class="flex items-center w-full justify-between mb-1">
-		<div class=" text-slate-950 font-medium">
+<div class="bg-slate-50 rounded fcol-1 p-1">
+	<div class="flex items-center w-full justify-between">
+		<div
+			class="  font-light text-slate-950 h-full flex items-center px-1 rounded text-sm">
 			{ee.name}
 		</div>
 
@@ -49,63 +50,67 @@
 			<Trash2 />
 		</button>
 	</div>
-
-	<div class="frow justify-between h-7">
-		<button
+	<div>
+		<div
 			class={cn(
-				"frow items-center bg-slate-800  w-fit pr-4 rounded-t",
+				"grid grid-cols-2 border-2 border-slate-800 bg-slate-300 rounded-t p-0.5",
 				ee.param_opens ? "" : "rounded-b"
-			)}
-			onclick={() => {
-				ee.param_opens = !ee.param_opens;
-			}}>
-			<span class="h-3 text-white">
-				{#if !ee.param_opens}
-					<ChevronRight strokeWidth="3px" />
-				{:else}
-					<ChevronDown strokeWidth="3px" />
-				{/if}
-			</span>
-			<div class="  font-medium wrapped px-0 text-white">Params</div>
-		</button>
+			)}>
+			<button
+				class={cn(
+					"frow items-center   pr-4 rounded-tr rounded-tl h-full"
+				)}
+				onclick={() => {
+					ee.param_opens = !ee.param_opens;
+				}}>
+				<span class="h-3">
+					{#if !ee.param_opens}
+						<ChevronRight strokeWidth="3px" />
+					{:else}
+						<ChevronDown strokeWidth="3px" />
+					{/if}
+				</span>
+				<div class="  font-medium wrapped px-0">Params</div>
+			</button>
 
-		{#if JSON.stringify(ee.params) !== JSON.stringify(ee.temp_params)}
-			<div class="frow-1 items-center">
-				<button
-					aria-label="Save params"
-					class="bg-slate-600 icon-btn-sm text-white"
-					onclick={() => {
-						ee.temp_params = deepCopy(ee.params);
-					}}>
-					<Undo />
-				</button>
+			{#if JSON.stringify(ee.params) !== JSON.stringify(ee.temp_params)}
+				<div class="frow-1 items-center place-self-end">
+					<button
+						aria-label="Save params"
+						class="bg-slate-500 icon-btn-sm text-white"
+						onclick={() => {
+							ee.temp_params = deepCopy(ee.params);
+						}}>
+						<Undo />
+					</button>
 
-				<button
-					aria-label="Save params"
-					class="bg-green-600 icon-btn-sm text-white"
-					onclick={() => {
-						controller.updateParams(ee.name);
-					}}>
-					<Check />
-				</button>
+					<button
+						aria-label="Save params"
+						class=" bg-green-500 icon-btn-sm text-white"
+						onclick={() => {
+							controller.updateParams(ee.name);
+						}}>
+						<Check />
+					</button>
+				</div>
+			{/if}
+		</div>
+
+		{#if ee.param_opens}
+			<div
+				class="fcol *:border-b-1 *:border-slate-400 border-2 border-t-0 border-slate-800">
+				{#each Object.keys(ee.temp_params) as key}
+					{#if ee.temp_params[key].type === "composite"}
+						<Composite
+							label={key}
+							bind:open={ee.composite_opens[key]}
+							bind:params={ee.temp_params[key].children} />
+					{:else}
+						<Param label={key} bind:param={ee.temp_params[key]} />
+					{/if}
+				{/each}
 			</div>
 		{/if}
 	</div>
-
-	{#if ee.param_opens}
-		<div
-			class="fcol *:border-b-1 *:border-slate-400 border-2 border-slate-800">
-			{#each Object.keys(ee.temp_params) as key}
-				{#if ee.temp_params[key].type === "composite"}
-					<Composite
-						label={key}
-						bind:open={ee.composite_opens[key]}
-						bind:params={ee.temp_params[key].children} />
-				{:else}
-					<Param label={key} bind:param={ee.temp_params[key]} />
-				{/if}
-			{/each}
-		</div>
-	{/if}
 	{@render children?.()}
 </div>

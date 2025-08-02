@@ -23,7 +23,7 @@
 	<Label {label} />
 	<div
 		{@attach clickoutside}
-		class=" py-0.5 px-1 flex-grow w-fit border-l-1 border-slate-400 text-center relative">
+		class="  flex-grow w-fit border-l-1 border-slate-400 text-center relative box-border h-5">
 		{#if open}
 			<div
 				class="bg-white absolute top-0 left-0 w-full border border-black z-1 h-fit max-h-84">
@@ -62,7 +62,7 @@
 			</div>
 		{/if}
 		<button
-			class="w-full"
+			class="w-full h-full py-0.5 px-1 box-border"
 			onclick={() => {
 				open = true;
 			}}>

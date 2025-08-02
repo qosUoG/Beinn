@@ -22,6 +22,8 @@ class ExperimentCompleted(Exception):
 
 
 class Listeners(TypedDict):
+    expected_loop_count: list[Callable[[int], None]]
+
     started: list[Callable[[], None]]
     paused: list[Callable[[], None]]
     stopped: list[Callable[[], None]]
@@ -34,7 +36,8 @@ class Listeners(TypedDict):
 
 
 type ExperimentEvents = (
-    Literal["started"]
+    Literal["expected_loop_count"]
+    | Literal["started"]
     | Literal["paused"]
     | Literal["stopped"]
     | Literal["completed"]
@@ -74,10 +77,11 @@ class ExperimentABC(ABC):
 
         self._cnoc_should_run = Event()
         self._cnoc_should_stop = Event()
-        self._cnoc_iteration_count = -1
+        self._cnoc_loop_count_count = -1
 
         # Lifecycle hooks
         self._cnoc_listeners: Listeners = {
+            "expected_loop_count": [],
             "started": [],
             "paused": [],
             "stopped": [],
@@ -93,15 +97,33 @@ class ExperimentABC(ABC):
     def _cnoc_on(self, event: ExperimentEvents, callback: Callable[[], None]):
         self._cnoc_listeners[event].append(callback)
 
+    def _cnoc_pause(self):
+        self._cnoc_should_run.clear()
+
+    def _cnoc_continue(self):
+        self._cnoc_should_run.set()
+
+    def _cnoc_stop(self):
+        self._cnoc_should_stop.set()
+        self._cnoc_should_run.set()
+
     async def _cnoc_start(self):
         # Make sure the experiment starts in a fresh state
-        self._cnoc_iteration_count = -1
+        self._cnoc_loop_count_count = -1
         self._cnoc_should_run.clear()
         self._cnoc_should_stop.clear()
 
         self._timestamp = int(time() * 1000)
 
         self.start()
+
+        for listener in self._cnoc_listeners["expected_loop_count"]:
+            listener(
+                self._cnoc_expected_loop_count
+                if hasattr(self, "_cnoc_expected_loop_count")
+                else -1
+            )
+
         self._runner_task = asyncio.create_task(asyncio.to_thread(self._cnoc_runner))
         self._cnoc_should_run.set()
 
@@ -127,13 +149,13 @@ class ExperimentABC(ABC):
                 # Loop the experiment once with the newest index
 
                 # self._cnoc_not_running.clear()
-                self._cnoc_iteration_count += 1
+                self._cnoc_loop_count_count += 1
 
                 try:
                     for listener in self._cnoc_listeners["loop_start"]:
-                        listener(self._cnoc_iteration_count)
+                        listener(self._cnoc_loop_count_count)
 
-                    self.loop(self._cnoc_iteration_count)
+                    self.loop(self._cnoc_loop_count_count)
                     # flush stdout
                     print("", end="", flush=True)
 
@@ -145,7 +167,7 @@ class ExperimentABC(ABC):
                         print("Experiment completed", flush=True)
 
                         for listener in self._cnoc_listeners["loop_end"]:
-                            listener(self._cnoc_iteration_count)
+                            listener(self._cnoc_loop_count_count)
 
                         # Run all stop listeners
                         for listener in self._cnoc_listeners["completed"]:
@@ -159,7 +181,7 @@ class ExperimentABC(ABC):
                 # we want to pause
                 if not self._cnoc_should_run.is_set():
                     # Decrement to exclude the previous loop index
-                    self._cnoc_iteration_count -= 1
+                    self._cnoc_loop_count_count -= 1
                     for listener in self._cnoc_listeners["paused"]:
                         listener()
                     continue
@@ -167,21 +189,21 @@ class ExperimentABC(ABC):
                 # self._cnoc_not_running.set()
 
                 for listener in self._cnoc_listeners["completed"]:
-                    listener(self._cnoc_iteration_count)
+                    listener(self._cnoc_loop_count_count)
 
         except Exception as e:
             print(f"Exception in experiment: {e}", flush=True)
             return
 
     @abstractmethod
-    def start(self) -> int:
+    def start(self) -> None:
         raise NotImplementedError
 
     @abstractmethod
-    def loop(self, index: int):
+    def loop(self, index: int) -> None:
         raise NotImplementedError
 
-    def cleanup(self):
+    def cleanup(self) -> None:
         """
         Perform any clean up if needed
 
@@ -196,3 +218,6 @@ class ExperimentABC(ABC):
         self._cnoc_charts[chart.title] = chart
         for listener in self._cnoc_listeners["chart_created"]:
             listener(chart.getConfig())
+
+    def cnocExpectedLoopCount(self, loop_count: int):
+        self._cnoc_expected_loop_count = loop_count
