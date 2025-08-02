@@ -6,8 +6,8 @@ import { fetch } from "@tauri-apps/plugin-http"
 import { Command } from "@tauri-apps/plugin-shell";
 
 
-import type { LogController } from "$controllers/LogController.svelte";
-import { workspace_controller } from "$controllers/WorkspaceController.svelte";
+import type { LogController } from "$controllers/log.svelte";
+import { workspace_controller } from "$controllers/workspace.svelte";
 
 export const cnoc_url = "ws://localhost:8001/"
 

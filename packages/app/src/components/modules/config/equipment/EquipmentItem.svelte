@@ -2,7 +2,7 @@
 	import {
 		equipment_controller,
 		type Equipment,
-	} from "$controllers/EquipmentController.svelte";
+	} from "$controllers/equipment.svelte";
 
 	import BaseItem from "../_ee/BaseItem.svelte";
 

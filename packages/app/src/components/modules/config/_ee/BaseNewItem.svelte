@@ -3,10 +3,10 @@
 	import InputField from "$components/fields/InputField.svelte";
 
 	import Label from "$components/fields/Label.svelte";
-	import { EquipmentController } from "$controllers/EquipmentController.svelte";
+	import { EquipmentController } from "$controllers/equipment.svelte";
 	import { cn, getClickOutsideAttachment } from "$components/utils.svelte";
 
-	import type { ExperimentController } from "$controllers/ExperimentController.svelte";
+	import type { ExperimentController } from "$controllers/experiment.svelte";
 
 	let open = $state(false);
 

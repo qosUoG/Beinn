@@ -1,7 +1,7 @@
 import { shell } from "$lib/utils"
 import { readTextFile } from "@tauri-apps/plugin-fs"
 import { parse } from "smol-toml"
-import { beinn_log_controller } from "./LogController.svelte"
+import { beinn_log_controller } from "./log.svelte"
 
 export type GitSource = {
     type: "git",

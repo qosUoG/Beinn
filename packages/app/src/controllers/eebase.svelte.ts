@@ -1,36 +1,42 @@
 import { deepCopy, type Prettify } from "$lib/utils"
-import { dependency_controller } from "./DependencyController.svelte"
-import { beinn_log_controller } from "./LogController.svelte"
-import type { AllParamTypes } from "./Params.svelte"
-import { workspace_controller } from "./WorkspaceController.svelte"
+import { dependency_controller } from "./dependency.svelte"
+import { beinn_log_controller } from "./log.svelte"
+import type { AllParamTypes } from "./params.svelte"
+import { workspace_controller } from "./workspace.svelte"
 
 export type Imports = { module: string, cls: string }[]
 
-export type Instance = {
+
+
+type ConcInstance = {
     name: string,
     module: string,
     cls: string,
     params: Record<string, AllParamTypes>,
-    temp_params: Record<string, AllParamTypes>
 }
 
-export abstract class EEBaseController {
+export type Instance = Prettify<ConcInstance & {
+    temp_params: Record<string, AllParamTypes>
+    param_opens: boolean
+    composite_opens: Record<string, boolean>
+}>
 
-    #instances = $state<Record<string, Instance>>({})
-    get instances() {
-        return Object.values(this.#instances)
+export abstract class EEBaseController<T extends Instance = Instance> {
+
+    instances = $state<Record<string, T>>({})
+    get instances_arr() {
+        return Object.values(this.instances)
     }
+
     imports: Imports = $state([])
 
     temp_module: string = $state("")
     temp_cls: string = $state("")
     temp_name: string = $state("")
 
-    composite_opens = $state<Record<string, boolean>>({})
-
     eetype: "equipment" | "experiment"
 
-    constructor(eetype: "equipment" | "experiment") {
+    constructor(eetype: "equipment" | "experiment", createFn: (_: Instance) => T) {
         this.eetype = eetype
         workspace_controller.registerOnOpen(() => {
 
@@ -38,13 +44,16 @@ export abstract class EEBaseController {
         workspace_controller.registerCallback(`${eetype}:imports`, (imports: Imports) => {
             this.imports = imports
         })
-        workspace_controller.registerCallback(`${eetype}:create`, (instance: Prettify<Omit<Instance, "temp_params">>) => {
-
-            this.#instances[instance.name] = { ...instance, temp_params: deepCopy(instance.params) }
+        workspace_controller.registerCallback(`${eetype}:create`, (instance: ConcInstance) => {
+            const temp_instance: Instance = {
+                ...instance, temp_params: deepCopy(instance.params), param_opens: true, composite_opens: {},
+            }
 
             for (const [key, value] of Object.entries(instance.params))
-                if (value.type === "composite" && this.composite_opens[`${instance.name}.${key}`] === undefined)
-                    this.composite_opens[`${instance.name}.${key}`] = false
+                if (value.type === "composite" && temp_instance.composite_opens[key] === undefined)
+                    temp_instance.composite_opens[key] = false
+
+            this.instances[instance.name] = createFn(temp_instance)
 
 
             if (instance.name === this.temp_name && instance.module === this.temp_module && instance.cls === this.temp_cls) {
@@ -55,11 +64,11 @@ export abstract class EEBaseController {
         })
 
         workspace_controller.registerCallback(`${eetype}:param`, ({ name, params }: { name: string, params: Prettify<Instance["params"]> }) => {
-            this.#instances[name].params = params
+            this.instances[name].params = params
         })
 
         workspace_controller.registerCallback(`${eetype}:remove`, (name: string) => {
-            delete this.#instances[name]
+            delete this.instances[name]
         })
 
 
@@ -71,37 +80,37 @@ export abstract class EEBaseController {
     }
 
     create() {
-        for (const instance of Object.values(this.#instances)) {
+        for (const instance of Object.values(this.instances)) {
             if (instance.name === this.temp_name) {
                 beinn_log_controller.append(`ERROR Instance with name ${this.temp_name} already exists`)
                 return
             }
         }
-        const instance: Instance = {
+        const instance: ConcInstance = {
 
             name: this.temp_name,
             module: this.temp_module,
             cls: this.temp_cls,
             params: {},
-            temp_params: {}
+
         }
         workspace_controller.sendCommand(`${this.eetype}:create`, instance)
     }
 
     param(name: string) {
-        if (!(name in this.#instances)) {
+        if (!(name in this.instances)) {
             beinn_log_controller.append(`ERROR Instance with name ${name} does not exist`)
             return
         }
 
         workspace_controller.sendCommand(`${this.eetype}:param`, {
             name,
-            params: this.#instances[name].temp_params
+            params: this.instances[name].temp_params
         })
     }
 
     remove(name: string) {
-        if (!(name in this.#instances)) {
+        if (!(name in this.instances)) {
             beinn_log_controller.append(`ERROR Instance with name ${name} does not exist`)
             return
         }

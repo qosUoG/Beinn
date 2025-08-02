@@ -1,5 +1,5 @@
 <script lang="ts">
-	import type { CompositeParam } from "$controllers/Params.svelte";
+	import type { CompositeParam } from "$controllers/params.svelte";
 	import { ChevronDown, ChevronRight } from "@lucide/svelte";
 	import Param from "./Param.svelte";
 

@@ -3,10 +3,10 @@
 	import {
 		dependency_controller,
 		type Dependency,
-	} from "$controllers/DependencyController.svelte";
-	import { equipment_controller } from "$controllers/EquipmentController.svelte";
-	import { beinn_log_controller } from "$controllers/LogController.svelte";
-	import { workspace_controller } from "$controllers/WorkspaceController.svelte";
+	} from "$controllers/dependency.svelte";
+	import { equipment_controller } from "$controllers/equipment.svelte";
+	import { beinn_log_controller } from "$controllers/log.svelte";
+	import { workspace_controller } from "$controllers/workspace.svelte";
 	import { Trash2 } from "@lucide/svelte";
 	import { tick } from "svelte";
 

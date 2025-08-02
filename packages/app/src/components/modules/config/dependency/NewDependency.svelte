@@ -4,9 +4,9 @@
 	import {
 		dependency_controller,
 		type DependencySource,
-	} from "$controllers/DependencyController.svelte";
-	import { workspace_controller } from "$controllers/WorkspaceController.svelte";
-	import { beinn_log_controller } from "$controllers/LogController.svelte";
+	} from "$controllers/dependency.svelte";
+	import { workspace_controller } from "$controllers/workspace.svelte";
+	import { beinn_log_controller } from "$controllers/log.svelte";
 	import { Plus } from "@lucide/svelte";
 	import InputField from "$components/fields/InputField.svelte";
 	import TabSelect from "$components/fields/TabSelect.svelte";

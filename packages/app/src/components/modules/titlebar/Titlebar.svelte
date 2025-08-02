@@ -5,7 +5,7 @@
 
 	import { load, type Store } from "@tauri-apps/plugin-store";
 	import { homeDir } from "@tauri-apps/api/path";
-	import { workspace_controller } from "$controllers/WorkspaceController.svelte";
+	import { workspace_controller } from "$controllers/workspace.svelte";
 	import {
 		Ban,
 		Check,

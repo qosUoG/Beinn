@@ -2,22 +2,34 @@
 	import {
 		EquipmentController,
 		type Equipment,
-	} from "$controllers/EquipmentController.svelte";
+	} from "$controllers/equipment.svelte";
 
-	import { Check, Trash2, Undo } from "@lucide/svelte";
+	import {
+		Check,
+		ChevronDown,
+		ChevronRight,
+		Trash2,
+		Undo,
+	} from "@lucide/svelte";
 	import Param from "../_ee/Param.svelte";
 	import Composite from "../_ee/Composite.svelte";
 	import type {
 		Experiment,
 		ExperimentController,
-	} from "$controllers/ExperimentController.svelte";
+	} from "$controllers/experiment.svelte";
+	import type { Snippet } from "svelte";
 
 	let {
 		ee = $bindable(),
 		controller,
+		children,
 	}:
-		| { ee: Equipment; controller: EquipmentController }
-		| { ee: Experiment; controller: ExperimentController } = $props();
+		| { ee: Equipment; controller: EquipmentController; children?: Snippet }
+		| {
+				ee: Experiment;
+				controller: ExperimentController;
+				children?: Snippet;
+		  } = $props();
 </script>
 
 <div class="bg-slate-50 rounded p-1 flex flex-col gap-0.5">
@@ -31,9 +43,22 @@
 				}}>
 				<Trash2 />
 			</button>
-			<div class=" text-slate-950 font-medium wrapped px-0">
-				{ee.name}
-			</div>
+			<button
+				class="frow items-center"
+				onclick={() => {
+					ee.param_opens = !ee.param_opens;
+				}}>
+				<span class="h-3">
+					{#if !ee.param_opens}
+						<ChevronRight strokeWidth="3px" />
+					{:else}
+						<ChevronDown strokeWidth="3px" />
+					{/if}
+				</span>
+				<div class=" text-slate-950 font-medium wrapped px-0">
+					{ee.name}
+				</div>
+			</button>
 		</div>
 
 		{#if JSON.stringify(ee.params) !== JSON.stringify(ee.temp_params)}
@@ -58,18 +83,20 @@
 			</div>
 		{/if}
 	</div>
-
-	<div
-		class="fcol *:border-1 *:border-slate-400 *:border-b-0 last:border-b-1 last:border-b-slate-400">
-		{#each Object.keys(ee.temp_params) as key}
-			{#if ee.temp_params[key].type === "composite"}
-				<Composite
-					label={key}
-					bind:open={controller.composite_opens[`${ee.name}.${key}`]}
-					bind:params={ee.temp_params[key].children} />
-			{:else}
-				<Param label={key} bind:param={ee.temp_params[key]} />
-			{/if}
-		{/each}
-	</div>
+	{#if ee.param_opens}
+		<div
+			class="fcol *:border-1 *:border-slate-400 *:border-b-0 last:border-b-1 last:border-b-slate-400">
+			{#each Object.keys(ee.temp_params) as key}
+				{#if ee.temp_params[key].type === "composite"}
+					<Composite
+						label={key}
+						bind:open={ee.composite_opens[key]}
+						bind:params={ee.temp_params[key].children} />
+				{:else}
+					<Param label={key} bind:param={ee.temp_params[key]} />
+				{/if}
+			{/each}
+		</div>
+	{/if}
+	{@render children?.()}
 </div>

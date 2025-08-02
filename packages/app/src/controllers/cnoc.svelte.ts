@@ -1,4 +1,4 @@
-import { LogController } from "./LogController.svelte";
+import { LogController } from "./log.svelte";
 
 class CnocController extends LogController {
     constructor() {

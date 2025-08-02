@@ -1,6 +1,6 @@
 <script lang="ts">
 	import { cn } from "$components/utils.svelte";
-	import { beinn_log_controller } from "$controllers/LogController.svelte";
+	import { beinn_log_controller } from "$controllers/log.svelte";
 	import { zeropad } from "$lib/utils";
 	import { Clock, ListVideo } from "@lucide/svelte";
 	import type { Attachment } from "svelte/attachments";

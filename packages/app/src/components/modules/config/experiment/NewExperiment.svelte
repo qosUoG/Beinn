@@ -1,5 +1,5 @@
 <script lang="ts">
-	import { experiment_controller } from "$controllers/ExperimentController.svelte";
+	import { experiment_controller } from "$controllers/experiment.svelte";
 
 	import BaseNewItem from "../_ee/BaseNewItem.svelte";
 </script>

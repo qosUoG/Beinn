@@ -45,16 +45,16 @@ class Experiments:
 
         cls.instances[name].instance._cnoc_on(
             "loop_start",
-            lambda iteration_count: Foundation.runCoroThreadsafeBlocking(
+            lambda _: Foundation.runCoroThreadsafeBlocking(
                 sendExperimentCommand("status", {"name": name, "status": "loop_start"})
             ),
         )
 
         cls.instances[name].instance._cnoc_on(
             "loop_end",
-            lambda iteration_count: Foundation.runCoroThreadsafeBlocking(
+            lambda loop_count: Foundation.runCoroThreadsafeBlocking(
                 sendExperimentCommand(
-                    "loop_count", {"name": name, "loop_count": iteration_count}
+                    "loop_count", {"name": name, "loop_count": loop_count}
                 )
             ),
         )

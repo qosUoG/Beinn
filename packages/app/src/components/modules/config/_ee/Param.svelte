@@ -2,8 +2,8 @@
 	import DropSelect from "$components/fields/DropSelect.svelte";
 	import InputField from "$components/fields/InputField.svelte";
 	import TabSelect from "$components/fields/TabSelect.svelte";
-	import { equipment_controller } from "$controllers/EquipmentController.svelte";
-	import type { SimpleParamType } from "$controllers/Params.svelte";
+	import { equipment_controller } from "$controllers/equipment.svelte";
+	import type { SimpleParamType } from "$controllers/params.svelte";
 
 	let {
 		label,

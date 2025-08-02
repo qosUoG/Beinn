@@ -1,6 +1,6 @@
 <script lang="ts">
-	import { dependency_controller } from "$controllers/DependencyController.svelte";
-	import { workspace_controller } from "$controllers/WorkspaceController.svelte";
+	import { dependency_controller } from "$controllers/dependency.svelte";
+	import { workspace_controller } from "$controllers/workspace.svelte";
 	import DependencyItem from "./DependencyItem.svelte";
 	import NewDependency from "./NewDependency.svelte";
 </script>
