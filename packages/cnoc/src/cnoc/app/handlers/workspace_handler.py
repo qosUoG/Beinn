@@ -43,7 +43,7 @@ async def workspaceHandler(ws: ServerConnection):
 
             match command.split(":")[1]:
                 case "start":
-                    Experiments.instances[name].instance._cnoc_start()
+                    await Experiments.instances[name].instance._cnoc_start()
                 case "pause":
                     Experiments.instances[name].instance._cnoc_pause()
                 case "stop":
