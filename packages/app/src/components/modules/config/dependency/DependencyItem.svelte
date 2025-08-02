@@ -5,6 +5,7 @@
 		type Dependency,
 	} from "$controllers/dependency.svelte";
 	import { equipment_controller } from "$controllers/equipment.svelte";
+	import { experiment_controller } from "$controllers/experiment.svelte";
 	import { beinn_log_controller } from "$controllers/log.svelte";
 	import { workspace_controller } from "$controllers/workspace.svelte";
 	import { Trash2 } from "@lucide/svelte";
@@ -13,12 +14,12 @@
 	let { dependency = $bindable() }: { dependency: Dependency } = $props();
 </script>
 
-<div class="bg-slate-50 rounded p-1 flex flex-col gap-0.5">
+<div class="bg-slate-50 rounded p-1 fcol-1">
 	<div class="flex items-center w-full justify-between">
 		<div class=" text-slate-950 font-medium wrapped px-0">
 			{dependency.name}
 		</div>
-		<div class=" flex items-stretch gap-1">
+		<div class=" frow-1">
 			<button
 				class={cn(
 					dependency.has_driver
@@ -30,6 +31,7 @@
 					dependency.has_driver = !dependency.has_driver;
 					await tick();
 					equipment_controller.updateImports();
+					experiment_controller.updateImports();
 				}}>
 				Driver / Script
 			</button>
@@ -52,26 +54,28 @@
 			</button>
 		</div>
 	</div>
-	{#if dependency.source.type === "git"}
-		<div class="text-slate-950/75">
-			Git: {dependency.source.git}
-		</div>
-		<div class="text-slate-950/75">
-			Branch: {dependency.source.branch}
-		</div>
-		<div class="text-slate-950/75">
-			Subdirectory: {dependency.source.subdirectory}
-		</div>
-	{:else if dependency.source.type === "path"}
-		<div class="text-slate-950/75">
-			Path: {dependency.source.path}
-		</div>
-		<div class="text-slate-950/75">
-			{dependency.source.editable ? "Editable" : "Not editable"}
-		</div>
-	{:else if dependency.source.type === "pip"}
-		<div class="text-slate-950/75">
-			Pip: {dependency.fullname}
-		</div>
-	{/if}
+	<div class="fcol gap-0.5">
+		{#if dependency.source.type === "git"}
+			<div class="text-slate-950/75">
+				Git: {dependency.source.git}
+			</div>
+			<div class="text-slate-950/75">
+				Branch: {dependency.source.branch}
+			</div>
+			<div class="text-slate-950/75">
+				Subdirectory: {dependency.source.subdirectory}
+			</div>
+		{:else if dependency.source.type === "path"}
+			<div class="text-slate-950/75">
+				Path: {dependency.source.path}
+			</div>
+			<div class="text-slate-950/75">
+				{dependency.source.editable ? "Editable" : "Not editable"}
+			</div>
+		{:else if dependency.source.type === "pip"}
+			<div class="text-slate-950/75">
+				Pip: {dependency.fullname}
+			</div>
+		{/if}
+	</div>
 </div>

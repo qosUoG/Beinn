@@ -5,10 +5,11 @@
 	import Dependency from "./dependency/Dependencies.svelte";
 	import Equipments from "./equipment/Equipments.svelte";
 	import Logger from "./logger/Logger.svelte";
+	import Experiments from "./experiment/Experiments.svelte";
 
 	type Page = "Dependency" | "Equipment" | "Experiment" | "Cli" | "Log";
 
-	let page: Page = $state("Equipment");
+	let page: Page = $state("Experiment");
 
 	let { open = $bindable() } = $props();
 </script>
@@ -29,11 +30,13 @@
 		{@render tab("Log")}
 	</div>
 
-	<div class={cn(" bg-slate-800 flex-grow min-h-0 rounded-b p-2 fcol-2")}>
+	<div class={cn(" bg-slate-800 flex-grow min-h-0  p-2 fcol-2")}>
 		{#if page === "Dependency"}
 			<Dependency />
 		{:else if page === "Equipment"}
 			<Equipments />
+		{:else if page === "Experiment"}
+			<Experiments />
 		{:else if page === "Cli"}
 			<Cli />
 		{:else if page === "Log"}

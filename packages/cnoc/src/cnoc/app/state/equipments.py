@@ -4,7 +4,7 @@ from ...public.equipment import EquipmentABC
 
 
 from .ees import EEInstance
-from ...public.params import dict2Param, param2Dict
+from ...public.params import dict2Param
 
 
 class Equipments:
@@ -26,7 +26,7 @@ class Equipments:
             cls=cls_str,
         )
 
-        return param2Dict(cls.instances[name].instance.params)
+        return cls.instances[name]
 
     @classmethod
     def save(cls, name: str, params: dict):

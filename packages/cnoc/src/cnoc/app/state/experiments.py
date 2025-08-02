@@ -87,7 +87,7 @@ class Experiments:
             ),
         )
 
-        return param2Dict(cls.instances[name].instance.params)
+        return cls.instances[name]
 
     @classmethod
     def save(cls, name: str, params: dict):
