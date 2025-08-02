@@ -2,10 +2,12 @@ import importlib
 import json
 from typing import override
 
+from ...public.params import dict2Param
+
 
 from .foundation import Foundation
 
-from ._ees import EEInstance, EEsABC
+from ._ees import EEInstance
 
 
 from ...public.experiment import ExperimentABC
@@ -17,7 +19,9 @@ def sendExperimentCommand(command: str, value: dict):
     )
 
 
-class Experiments(EEsABC[ExperimentABC]):
+class Experiments:
+    instances: dict[str, EEInstance[ExperimentABC]] = {}
+
     @classmethod
     @override
     def create(
@@ -29,28 +33,28 @@ class Experiments(EEsABC[ExperimentABC]):
         module = importlib.import_module(module_str)
         module = importlib.reload(module)
 
-        super().instances[name] = EEInstance[ExperimentABC](
+        cls.instances[name] = EEInstance[ExperimentABC](
             instance=getattr(module, cls_str)(),
             module=module_str,
             cls=cls_str,
         )
 
         # Set all callbacks
-        super().instances[name].instance._cnoc_on(
+        cls.instances[name].instance._cnoc_on(
             "started",
             lambda: Foundation.runCoroThreadsafeBlocking(
                 sendExperimentCommand("status", {"name": name, "status": "started"})
             ),
         )
 
-        super().instances[name].instance._cnoc_on(
+        cls.instances[name].instance._cnoc_on(
             "loop_start",
             lambda _: Foundation.runCoroThreadsafeBlocking(
                 sendExperimentCommand("status", {"name": name, "status": "loop_start"})
             ),
         )
 
-        super().instances[name].instance._cnoc_on(
+        cls.instances[name].instance._cnoc_on(
             "loop_end",
             lambda loop_count: Foundation.runCoroThreadsafeBlocking(
                 sendExperimentCommand(
@@ -59,32 +63,38 @@ class Experiments(EEsABC[ExperimentABC]):
             ),
         )
 
-        super().instances[name].instance._cnoc_on(
+        cls.instances[name].instance._cnoc_on(
             "paused",
             lambda: Foundation.runCoroThreadsafeBlocking(
                 sendExperimentCommand("status", {"name": name, "status": "paused"})
             ),
         )
 
-        super().instances[name].instance._cnoc_on(
+        cls.instances[name].instance._cnoc_on(
             "stopped",
             lambda: Foundation.runCoroThreadsafeBlocking(
                 sendExperimentCommand("status", {"name": name, "status": "stopped"})
             ),
         )
 
-        super().instances[name].instance._cnoc_on(
+        cls.instances[name].instance._cnoc_on(
             "completed",
             lambda: Foundation.runCoroThreadsafeBlocking(
                 sendExperimentCommand("status", {"name": name, "status": "completed"})
             ),
         )
 
-        super().instances[name].instance._cnoc_on(
+        cls.instances[name].instance._cnoc_on(
             "chart_created",
             lambda config: Foundation.runCoroThreadsafeBlocking(
                 sendExperimentCommand("chart_config", {"name": name, "config": config})
             ),
         )
 
-        return super().instances[name]
+        return cls.instances[name]
+
+    def updateParams(cls, name: str, params: dict):
+        cls.instances[name].instance.params = dict2Param(params)
+
+    def remove(cls, name: str):
+        del cls.instances[name]
