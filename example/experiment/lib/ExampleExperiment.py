@@ -4,6 +4,7 @@ import random
 from typing import TypedDict, override
 
 
+from cnoc import ExperimentEnded
 from cnoc.public import params as p
 from cnoc.public.experiment import ExperimentABC
 
@@ -66,7 +67,7 @@ class ExampleExperiment(ExperimentABC):
         # This should be all of the __init__ code. For instantiation of params from the final params list, or turning on equipment, initializing equipment etc, define in the initialization method
 
     @override
-    def start(self, manager) -> int:
+    def start(self) -> int:
         # import pprint
 
         # pprint.pprint(self.params)
@@ -99,14 +100,15 @@ class ExampleExperiment(ExperimentABC):
         #     ),
         # )
 
-        self.saver: XYFloatSaver = manager.createSaver(
-            XYFloatSaver,
-            XYFloatSaver.kwargs(title="ExampleSqlSaver", y_names=["temperature"]),
-        )
+        # self.saver: XYFloatSaver = manager.createSaver(
+        #     XYFloatSaver,
+        #     XYFloatSaver.kwargs(title="ExampleSqlSaver", y_names=["temperature"]),
+        # )
 
         print("initialized experiment")
 
         # manager.suggestTotalIterations(10)
+        self.cnocExpectedLoopCount(10)
 
     @override
     def loop(self, index: int):
@@ -123,26 +125,26 @@ class ExampleExperiment(ExperimentABC):
         # self.saver.save({"index": index, "temperature": temp})
 
         # # This is here just to not make everything happening too quickly
-        time.sleep(0.01)
+        time.sleep(0.1)
 
         # Raise an exception such that qoslapapp knows experiment is ended
         # print(f"loop: {index}")
         value = random.random()
-        self.xyplot.plot(
-            {
-                "chart:x": index,
-                "temperature": value,
-            }
-        )
-        # print("plotted")
+        # self.xyplot.plot(
+        #     {
+        #         "chart:x": index,
+        #         "temperature": value,
+        #     }
+        # )
+        # # print("plotted")
 
-        self.saver.save({"saver$x": index, "temperature": value})
+        # self.saver.save({"saver$x": index, "temperature": value})
         # print("saved")
 
-        # if index >= 9:
-        #     raise e.ExperimentEnded
-        if index % 100 == 0:
-            print(index)
+        if index >= 9:
+            raise ExperimentEnded
+        # if index % 100 == 0:
+        #     print(index)
 
     def stop(self):
         # define code here for clean up, for example switching off some equipment etc
