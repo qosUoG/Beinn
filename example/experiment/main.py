@@ -6,6 +6,7 @@ import os
 import pickle
 import pkgutil
 import pprint
+import threading
 
 from cnoc.public.equipment import EquipmentABC
 from cnoc.public.experiment import ExperimentABC
@@ -41,25 +42,34 @@ async def main():
     #                 print(cls, clsT.__module__)
     #                 print(clsT.__module__, package.name)
 
-    for package in pkgutil.walk_packages(
-        ["/Volumes/External/UofGQos/Beinn/example/experiment"]
-    ):
-        pprint.pprint(package)
-        for [cls, clsT] in inspect.getmembers(
-            importlib.import_module(package.name), inspect.isclass
-        ):
-            if (
-                (
-                    not issubclass(clsT, ExperimentABC)
-                    and not issubclass(clsT, EquipmentABC)
-                )
-                or clsT is ExperimentABC
-                or clsT is EquipmentABC
-                or clsT.__module__ != package.name
-            ):
-                continue
-            print(cls, clsT.__module__)
-            print(clsT.__module__, package.name)
+    # for package in pkgutil.walk_packages(
+    #     ["/Volumes/External/UofGQos/Beinn/example/experiment"]
+    # ):
+    #     pprint.pprint(package)
+    #     for [cls, clsT] in inspect.getmembers(
+    #         importlib.import_module(package.name), inspect.isclass
+    #     ):
+    #         if (
+    #             (
+    #                 not issubclass(clsT, ExperimentABC)
+    #                 and not issubclass(clsT, EquipmentABC)
+    #             )
+    #             or clsT is ExperimentABC
+    #             or clsT is EquipmentABC
+    #             or clsT.__module__ != package.name
+    #         ):
+    #             continue
+    #         print(cls, clsT.__module__)
+    #         print(clsT.__module__, package.name)
+
+    done = threading.Event()
+
+    async def _inner():
+        await asyncio.sleep(1)
+        done.set()
+
+    asyncio.run_coroutine_threadsafe(_inner(), asyncio.get_running_loop())
+    done.wait()
 
     # except Exception as e:
     #     traceback.print_exception(e)

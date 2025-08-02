@@ -31,7 +31,7 @@ async def handler(ws: ServerConnection):
 
 
 async def _main():
-    Foundation.setLoop(asyncio.get_event_loop())
+    Foundation.setLoop(asyncio.get_running_loop())
     async with serve(handler, "localhost", 8001) as server:
         await server.serve_forever()
 
