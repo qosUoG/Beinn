@@ -114,7 +114,7 @@ export abstract class EEBaseController<T extends Instance = Instance> {
             beinn_log_controller.append(`ERROR Instance with name ${name} does not exist`)
             return
         }
-        workspace_controller.sendCommand(`${this.eetype}:remove`, name)
+        workspace_controller.sendCommand(`${this.eetype}:remove`, { name })
     }
 }
 
