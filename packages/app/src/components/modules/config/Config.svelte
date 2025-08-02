@@ -6,6 +6,8 @@
 	import Equipments from "./equipment/Equipments.svelte";
 	import Logger from "./logger/Logger.svelte";
 	import Experiments from "./experiment/Experiments.svelte";
+	import { experiment_controller } from "$controllers/experiment.svelte";
+	import { equipment_controller } from "$controllers/equipment.svelte";
 
 	type Page = "Dependency" | "Equipment" | "Experiment" | "Cli" | "Log";
 
@@ -57,5 +59,10 @@
 		)}
 		onclick={() => {
 			page = value;
+			if (value === "Experiment") {
+				experiment_controller.updateImports();
+			} else if (value === "Equipment") {
+				equipment_controller.updateImports();
+			}
 		}}>{value}</button>
 {/snippet}

@@ -43,8 +43,8 @@ def eeImports(eetype: type[ExperimentABC] | type[EquipmentABC], names: list[str]
                 ):
                     continue
 
-                print(cls, clsT.__module__)
-                print(clsT.__module__, package.name)
+                print(f"{cls}, {clsT.__module__}", flush=True)
+                print(f"{clsT.__module__}, {name}", flush=True)
 
                 if clsT not in res:
                     res[clsT] = {"module": name, "cls": cls}
@@ -57,7 +57,7 @@ def eeImports(eetype: type[ExperimentABC] | type[EquipmentABC], names: list[str]
             return
         except Exception as e:
             print(
-                f"Failed to import package {package.name} from {src} for {eetype.__name__}: {e}",
+                f"Failed to import package {name} from {src} for {eetype.__name__}: {e}",
                 flush=True,
             )
 

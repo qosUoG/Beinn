@@ -27,11 +27,8 @@
 						: "text-slate-600 border-slate-600 line-through",
 					"border rounded px-1 box-border"
 				)}
-				onclick={async () => {
+				onclick={() => {
 					dependency.has_driver = !dependency.has_driver;
-					await tick();
-					equipment_controller.updateImports();
-					experiment_controller.updateImports();
 				}}>
 				Driver / Script
 			</button>
