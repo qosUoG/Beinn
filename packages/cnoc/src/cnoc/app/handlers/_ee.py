@@ -154,7 +154,7 @@ async def updateParams(
     params: dict[str, AllParamTypes],
 ):
     if eetype == "equipment":
-        Equipments.update_params(name=name, params=params)
+        Equipments.updateParams(name=name, params=params)
         putParamsInstance(Equipments.instances[name].instance.params)
 
         await ws.send(
@@ -162,7 +162,7 @@ async def updateParams(
         )
 
     elif eetype == "experiment":
-        Experiments.update_params(name=name, params=params)
+        Experiments.updateParams(name=name, params=params)
         putParamsInstance(Experiments.instances[name].instance.params)
 
         await ws.send(
