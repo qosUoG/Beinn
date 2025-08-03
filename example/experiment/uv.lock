@@ -17,7 +17,7 @@ wheels = [
 [[package]]
 name = "cnoc"
 version = "0.1.0"
-source = { git = "https://github.com/qosUoG/Beinn?subdirectory=packages%2Fcnoc&branch=revert_threading#c686a25ecf211bbc6499f2692dfc0cbaf50274cd" }
+source = { git = "https://github.com/qosUoG/Beinn?subdirectory=packages%2Fcnoc&branch=revert_threading#75f1a34c0ed309c02d581626715b957a495f8514" }
 dependencies = [
     { name = "websockets" },
 ]

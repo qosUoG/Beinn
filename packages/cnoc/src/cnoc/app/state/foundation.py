@@ -1,6 +1,5 @@
 import asyncio
 from asyncio import Event
-import threading
 import time
 from typing import Any, Coroutine
 

@@ -94,7 +94,11 @@ class ExperimentABC(ABC):
         # Charts
         self._cnoc_charts: dict[str, ChartABC] = {}
 
-    def _cnoc_on(self, event: ExperimentEvents, callback: Callable[[], None]):
+    def _cnoc_on(
+        self,
+        event: ExperimentEvents,
+        callback: Callable[[], None],
+    ):
         self._cnoc_listeners[event].append(callback)
 
     def _cnoc_pause(self):

@@ -4,9 +4,8 @@ import json
 import pkgutil
 
 
-import pprint
 import sys
-from tkinter import E
+
 from traceback import print_tb
 from typing import Literal, TypedDict
 from websockets import ServerConnection
