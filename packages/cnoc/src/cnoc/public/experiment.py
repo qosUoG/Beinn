@@ -10,8 +10,10 @@ example/examplelib.
 
 from abc import ABC, abstractmethod
 import asyncio
+import sys
 from threading import Event
 from time import time
+from traceback import print_tb
 from typing import Callable, Literal, TypedDict
 
 from ..public.exceptions import ExperimentCompleted
@@ -197,7 +199,10 @@ class ExperimentABC(ABC):
                     listener(self._cnoc_loop_count_count)
 
         except Exception as e:
-            print(f"{type(e)} in experiment: {e}", flush=True)
+            print(f"{type(e).__name__} in experiment: {e}", flush=True)
+            _, _, traceback = sys.exc_info()
+            print_tb(traceback)
+            print(end=None, flush=True)
             return
 
     @abstractmethod
