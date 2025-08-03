@@ -42,7 +42,7 @@ export abstract class EEBaseController<T extends Instance = Instance> {
     constructor(eetype: "equipment" | "experiment", createFn: (_: Instance) => T) {
         this.eetype = eetype
         workspace_controller.registerOnOpen(() => {
-
+            this.updateImports()
         })
         workspace_controller.registerCallback(`${eetype}:imports`, (imports: Imports) => {
             this.imports = imports
