@@ -115,6 +115,13 @@ class ExperimentABC(ABC):
 
         self.start()
 
+        print(
+            self._cnoc_expected_loop_count
+            if hasattr(self, "_cnoc_expected_loop_count")
+            else -1,
+            flush=True,
+        )
+
         for listener in self._cnoc_listeners["expected_loop_count"]:
             listener(
                 self._cnoc_expected_loop_count

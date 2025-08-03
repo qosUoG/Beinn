@@ -16,6 +16,8 @@
 	import Timer from "./Timer.svelte";
 
 	let { experiment = $bindable() }: { experiment: Experiment } = $props();
+
+	$inspect({ expected_loop_count: experiment.expected_loop_count });
 </script>
 
 <BaseItem bind:ee={experiment} controller={experiment_controller}>
@@ -95,7 +97,9 @@
 					<span class="icon-btn-sm">
 						<Clock />
 					</span>
-					<Timer time={experiment.total_time * 1000} class="px-1" />
+					{#key experiment.total_time}
+						<Timer time={experiment.total_time} class="px-1" />
+					{/key}
 				</div>
 
 				<div
@@ -103,7 +107,9 @@
 					<span class="icon-btn-sm">
 						<History />
 					</span>
-					<Timer time={experiment.loop_time * 1000} class="px-1" />
+					{#key experiment.loop_time}
+						<Timer time={experiment.loop_time} class="px-1" />
+					{/key}
 				</div>
 				<div
 					class="border-1 border-slate-600 box-border bg-slate-200 rounded flex-grow justify-center frow items-center h-full">
