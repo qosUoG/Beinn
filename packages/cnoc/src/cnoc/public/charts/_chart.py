@@ -25,7 +25,7 @@ class ChartBuf:
 
 class ChartABC(ABC):
     def __init__(self):
-        self._cnoc_bufs: dict[ServerConnection, ChartBuf] = []
+        self._cnoc_bufs: dict[ServerConnection, ChartBuf] = {}
         self._cnoc_history = bytes()
         self._cnoc_lock = Lock()
         self._cnoc_should_stop = Event()
