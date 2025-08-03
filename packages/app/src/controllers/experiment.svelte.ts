@@ -55,7 +55,7 @@ export class ExperimentController extends EEBaseController<Experiment> {
             temp_params: deepCopy(instance.params),
             status: "initial",
             charts: {},
-            loop_count: -1,
+            loop_count: 0,
             total_time: -1,
             loop_time: -1,
             total_time_timer: undefined,
@@ -68,6 +68,12 @@ export class ExperimentController extends EEBaseController<Experiment> {
 
         workspace_controller.registerCallback("experiment:status", ({ name, status }: { name: string, status: "started" | "loop_start" | "paused" | "stopped" | "completed" }) => {
 
+            // Handle loop count
+            if (status === "started") {
+                this.instances[name].loop_count = 0
+            }
+
+            // Handle timer
             const updateTotalTime = () => {
                 const now = Date.now()
                 this.instances[name].total_time += now - this.instances[name].total_time_timer_timestamp
@@ -80,7 +86,7 @@ export class ExperimentController extends EEBaseController<Experiment> {
                 this.instances[name].loop_time_timer_timestamp = now
             }
 
-            // Handle timer
+
             switch (status) {
                 case "started":
                     if (this.instances[name].total_time_timer !== undefined)

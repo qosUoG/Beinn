@@ -70,11 +70,13 @@
 						<div class="w-full text-center">∞</div>
 					{:else}
 						{@const percentage =
-							Math.round(
-								(experiment.loop_count /
-									experiment.expected_loop_count!) *
-									10000
-							) / 100}
+							experiment.expected_loop_count > 0
+								? Math.round(
+										(experiment.loop_count /
+											experiment.expected_loop_count!) *
+											10000
+									) / 100
+								: 0}
 						<div
 							class="bg-slate-600 h-full frow items-center"
 							style={`width: ${percentage}%`}>
