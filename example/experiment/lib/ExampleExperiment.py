@@ -1,23 +1,20 @@
 from dataclasses import dataclass
 
+
 import random
 from typing import TypedDict, override
 
 
-from cnoc import ExperimentCompleted
-from cnoc.public import params as p
-from cnoc.public.experiment import ExperimentABC
-
 import time
 
 
-from cnoc import chart
+from cnoc import charts, exceptions, params as p, experiment
 
 from examplelib.ExampleDriver import ExampleEquipment
 
 
 @dataclass
-class ExampleExperiment(ExperimentABC):
+class ExampleExperiment(experiment.ExperimentABC):
     class ParamsType(TypedDict):
         strparam: p.StrParam
         floatparam: p.FloatParam
@@ -64,14 +61,10 @@ class ExampleExperiment(ExperimentABC):
 
         super().__init__()
 
-        # This should be all of the __init__ code. For instantiation of params from the final params list, or turning on equipment, initializing equipment etc, define in the initialization method
+        # This should be all of the __init__ code. For instantiation of params from the final params list, or turning on equipment, initializing equipment etc, define in the start method
 
     @override
     def start(self) -> int:
-        # import pprint
-
-        # pprint.pprint(self.params)
-
         # # You may interact with the equipment here to do initialization
         # self.params["instance_equipment_param"].instance.echo("hellow world")
         # self.params["instance_equipment_param"].instance.power = 10
@@ -80,16 +73,14 @@ class ExampleExperiment(ExperimentABC):
         # self.inputs = numpy.arange(self.params["intparam"].value)
 
         # # # After the params, instantiate charts and sql savers as needed
-        # self.xyplot: XYFloat = manager.createChart(
-        #     XYFloat,
-        #     XYFloat.kwargs(
-        #         title="Example XY Plot",
-        #         x_axis="index",
-        #         y_axis="C",
-        #         y_names=["temperature"],
-        #         mode="append",
-        #     ),
-        # )
+        self.scatter_plot: charts.Scatter = charts.Scatter(
+            title="Example Scatter Plot",
+            x_axis="index",
+            y_axis="C",
+            y_names=["temperature"],
+            mode="append",
+        )
+        self.cnocCreateChart(self.scatter_plot)
 
         # self.xyplot2: XY = manager.createChart(
         #     XY,
@@ -105,9 +96,6 @@ class ExampleExperiment(ExperimentABC):
         #     XYFloatSaver.kwargs(title="ExampleSqlSaver", y_names=["temperature"]),
         # )
 
-        print("initialized experiment")
-
-        # manager.suggestTotalIterations(10)
         self.cnocExpectedLoopCount(10)
 
     @override
@@ -130,19 +118,19 @@ class ExampleExperiment(ExperimentABC):
         # Raise an exception such that qoslapapp knows experiment is ended
         # print(f"loop: {index}")
         value = random.random()
-        # self.xyplot.plot(
-        #     {
-        #         "chart:x": index,
-        #         "temperature": value,
-        #     }
-        # )
-        # # print("plotted")
+        self.scatter_plot.plot(
+            {
+                "chart:x": index,
+                "temperature": value,
+            }
+        )
+        # print("plotted")
 
         # self.saver.save({"saver$x": index, "temperature": value})
         # print("saved")
 
         if index >= 9:
-            raise ExperimentCompleted
+            raise exceptions.ExperimentCompleted
         # if index % 100 == 0:
         #     print(index)
 
