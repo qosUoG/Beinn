@@ -20,12 +20,20 @@
 	$inspect({ expected_loop_count: experiment.expected_loop_count });
 </script>
 
-<BaseItem bind:ee={experiment} controller={experiment_controller}>
+<BaseItem
+	bind:ee={experiment}
+	controller={experiment_controller}
+	deletable={!experiment.status.endsWith("ing")}>
 	<div class="fcol-2 border-2 border-slate-800 rounded p-1">
 		<div class="grid grid-cols-3 gap-2">
-			<div class="font-medium p-1 pb-0">Progress</div>
-
-			<div class="frow-1 items-center justify-end col-span-2">
+			<div class="frow-1 items-center">
+				{#if experiment.status === "paused"}
+					<button
+						class="icon-btn-sm bg-green-500 text-white"
+						onclick={() => {
+							experiment_controller.continue(experiment.name);
+						}}><Play /></button>
+				{/if}
 				{#if experiment.status === "initial" || experiment.status === "completed" || experiment.status === "stopped"}
 					<button
 						class="icon-btn-sm bg-green-500 text-white"
@@ -45,13 +53,7 @@
 							experiment_controller.stop(experiment.name);
 						}}><Square /></button>
 				{/if}
-				{#if experiment.status === "paused"}
-					<button
-						class="icon-btn-sm bg-green-500 text-white"
-						onclick={() => {
-							experiment_controller.continue(experiment.name);
-						}}><Play /></button>
-				{/if}
+
 				{#if experiment.status === "stopping" || experiment.status === "pausing"}
 					<div class="icon-btn-sm bg-slate-200">
 						<div class="animate-pulse text-white">
@@ -61,7 +63,7 @@
 				{/if}
 			</div>
 			<div
-				class="h-full w-full border-1 border-slate-600 bg-slate-200 relative rounded overflow-clip">
+				class="h-full w-full border-1 border-slate-600 bg-slate-200 relative rounded overflow-clip col-span-2">
 				<div
 					class="absolute top-0 left-0 h-full rounded-l frow-1 w-full items-center">
 					{#if experiment.status === "initial"}
@@ -80,20 +82,21 @@
 						<div
 							class="bg-slate-600 h-full frow items-center"
 							style={`width: ${percentage}%`}>
-							{#if percentage > 20}
-								<div class="w-full text-right pr-1 text-white">
-									{percentage} %
+							{#if percentage > 40}
+								<div
+									class="w-full text-right pr-1.5 text-white">
+									{percentage}%
 								</div>
 							{/if}
 						</div>
-						{#if percentage <= 20}
-							<div>{percentage} %</div>
+						{#if percentage <= 40}
+							<div class="pl-0.5">{percentage}%</div>
 						{/if}
 					{/if}
 				</div>
 			</div>
 			<div
-				class="frow-2 items-center justify-between col-span-2 *:flex-1">
+				class="frow-2 items-center justify-between col-span-3 *:flex-1">
 				<div
 					class="border-1 border-slate-600 box-border bg-slate-200 rounded frow items-center justify-center">
 					<span class="icon-btn-sm">

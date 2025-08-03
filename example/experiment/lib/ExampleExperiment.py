@@ -11,8 +11,8 @@ from cnoc.public.experiment import ExperimentABC
 import time
 
 
-# from cnoc.extensions.chart import XYFloat
-from cnoc.extensions.saver import XYFloatSaver
+from cnoc import chart
+
 from examplelib.ExampleDriver import ExampleEquipment
 
 

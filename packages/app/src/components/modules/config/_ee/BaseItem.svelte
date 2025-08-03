@@ -1,9 +1,4 @@
-<script lang="ts">
-	import {
-		EquipmentController,
-		type Equipment,
-	} from "$controllers/equipment.svelte";
-
+<script lang="ts" generics="T extends Instance, U extends EEBaseController<T>">
 	import {
 		Check,
 		ChevronDown,
@@ -13,25 +8,26 @@
 	} from "@lucide/svelte";
 	import Param from "../_ee/Param.svelte";
 	import Composite from "../_ee/Composite.svelte";
-	import type {
-		Experiment,
-		ExperimentController,
-	} from "$controllers/experiment.svelte";
+
 	import type { Snippet } from "svelte";
 	import { cn } from "$components/utils.svelte";
 	import { deepCopy } from "$lib/utils";
+	import type {
+		EEBaseController,
+		Instance,
+	} from "$controllers/eebase.svelte";
 
 	let {
 		ee = $bindable(),
 		controller,
+		deletable = $bindable(),
 		children,
-	}:
-		| { ee: Equipment; controller: EquipmentController; children?: Snippet }
-		| {
-				ee: Experiment;
-				controller: ExperimentController;
-				children?: Snippet;
-		  } = $props();
+	}: {
+		ee: T;
+		controller: U;
+		deletable: boolean;
+		children?: Snippet;
+	} = $props();
 </script>
 
 <div class="bg-slate-50 rounded fcol-1 p-1">
@@ -43,9 +39,14 @@
 
 		<button
 			aria-label="Remove dependency"
-			class="bg-red-600 icon-btn-sm text-white"
+			class={cn(
+				" icon-btn-sm text-white",
+				deletable
+					? "bg-red-600"
+					: "bg-slate-300 cursor-not-allowed *:cursor-not-allowed **:cursor-not-allowed"
+			)}
 			onclick={() => {
-				controller.remove(ee.name);
+				if (deletable) controller.remove(ee.name);
 			}}>
 			<Trash2 />
 		</button>

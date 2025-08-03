@@ -112,24 +112,30 @@ export class ExperimentController extends EEBaseController<Experiment> {
                     this.instances[name].loop_time_timer = setInterval(updateLoopTime, 1000)
 
                     // Restart total time timer in case of coming from paused
-                    if (this.instances[name].total_time_timer === undefined)
+                    if (this.instances[name].total_time_timer === undefined) {
+                        this.instances[name].total_time_timer_timestamp = Date.now()
                         this.instances[name].total_time_timer = setInterval(updateTotalTime, 1000)
+                    }
                     break
 
                 case "paused":
                 case "stopped":
                 case "completed":
-                    clearInterval(this.instances[name].total_time_timer)
-                    clearInterval(this.instances[name].loop_time_timer)
-                    this.instances[name].loop_time_timer = undefined
-                    this.instances[name].total_time_timer = undefined
+                    if (this.instances[name].total_time_timer !== undefined) {
+                        clearInterval(this.instances[name].total_time_timer)
+                        updateTotalTime()
+                        this.instances[name].total_time_timer = undefined
+                        this.instances[name].total_time_timer_timestamp = 0
+                    }
+                    if (this.instances[name].loop_time_timer !== undefined) {
+                        clearInterval(this.instances[name].loop_time_timer)
+                        updateLoopTime()
+                        this.instances[name].loop_time_timer = undefined
+                        this.instances[name].loop_time_timer_timestamp = 0
+                    }
 
 
-                    updateLoopTime()
-                    updateTotalTime()
 
-                    this.instances[name].total_time_timer_timestamp = 0
-                    this.instances[name].loop_time_timer_timestamp = 0
             }
 
             // Handle status
