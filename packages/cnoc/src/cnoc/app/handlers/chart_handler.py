@@ -32,8 +32,9 @@ async def chartHandler(experiment_name: str, chart_name: str, ws: ServerConnecti
             if frames:
                 await ws.send(frames)
 
-        await ws.close(4000)
+        consumer_task.cancel()
         unsubscribe()
+        await ws.close(4000)
         return
 
     except ConnectionClosed:
