@@ -125,7 +125,7 @@ class ExampleExperiment(ExperimentABC):
         # self.saver.save({"index": index, "temperature": temp})
 
         # # This is here just to not make everything happening too quickly
-        time.sleep(0.1)
+        time.sleep(0.5)
 
         # Raise an exception such that qoslapapp knows experiment is ended
         # print(f"loop: {index}")

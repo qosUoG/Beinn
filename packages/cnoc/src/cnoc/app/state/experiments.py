@@ -67,7 +67,7 @@ class Experiments:
             "loop_end",
             lambda loop_count: Foundation.runCoroThreadsafeBlocking(
                 sendExperimentCommand(
-                    "loop_count", {"name": name, "loop_count": loop_count}
+                    "loop_count", {"name": name, "loop_count": loop_count + 1}
                 )
             ),
         )

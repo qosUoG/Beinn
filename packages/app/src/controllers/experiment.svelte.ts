@@ -141,8 +141,8 @@ export class ExperimentController extends EEBaseController<Experiment> {
             }
         })
 
-        workspace_controller.registerCallback("experiment:expected_loop_count", ({ name, loop_count }: { name: string, loop_count: number }) => {
-            this.instances[name].expected_loop_count = loop_count
+        workspace_controller.registerCallback("experiment:expected_loop_count", ({ name, expected_loop_count }: { name: string, expected_loop_count: number }) => {
+            this.instances[name].expected_loop_count = expected_loop_count
         })
 
 
