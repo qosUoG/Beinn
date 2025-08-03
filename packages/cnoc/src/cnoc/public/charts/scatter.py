@@ -30,6 +30,8 @@ class Scatter(ChartABC):
         self.y_names = y_names
         self.mode = mode
 
+        super().__init__()
+
     @override
     def getConfig(self):
         return {

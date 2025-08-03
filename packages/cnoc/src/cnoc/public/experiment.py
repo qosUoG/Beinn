@@ -77,7 +77,7 @@ class ExperimentABC(ABC):
 
         self._cnoc_should_run = Event()
         self._cnoc_should_stop = Event()
-        self._cnoc_loop_count_count = -1
+        self._cnoc_loop_count = -1
 
         # Lifecycle hooks
         self._cnoc_listeners: Listeners = {
@@ -113,7 +113,7 @@ class ExperimentABC(ABC):
 
     def _cnoc_start(self):
         # Make sure the experiment starts in a fresh state
-        self._cnoc_loop_count_count = -1
+        self._cnoc_loop_count = -1
         self._cnoc_should_run.clear()
         self._cnoc_should_stop.clear()
 
@@ -160,13 +160,13 @@ class ExperimentABC(ABC):
                 # Loop the experiment once with the newest index
 
                 # self._cnoc_not_running.clear()
-                self._cnoc_loop_count_count += 1
+                self._cnoc_loop_count += 1
 
                 try:
                     for listener in self._cnoc_listeners["loop_start"]:
-                        listener(self._cnoc_loop_count_count)
+                        listener(self._cnoc_loop_count)
 
-                    self.loop(self._cnoc_loop_count_count)
+                    self.loop(self._cnoc_loop_count)
                     # flush stdout
                     print("", end="", flush=True)
 
@@ -178,7 +178,7 @@ class ExperimentABC(ABC):
                         print("Experiment completed", flush=True)
 
                         for listener in self._cnoc_listeners["loop_end"]:
-                            listener(self._cnoc_loop_count_count)
+                            listener(self._cnoc_loop_count)
 
                         # Run all stop listeners
                         for listener in self._cnoc_listeners["completed"]:
@@ -192,7 +192,7 @@ class ExperimentABC(ABC):
                 # we want to pause
                 if not self._cnoc_should_run.is_set():
                     # Decrement to exclude the previous loop index
-                    self._cnoc_loop_count_count -= 1
+                    self._cnoc_loop_count -= 1
                     for listener in self._cnoc_listeners["paused"]:
                         listener()
                     continue
@@ -200,7 +200,7 @@ class ExperimentABC(ABC):
                 # self._cnoc_not_running.set()
 
                 for listener in self._cnoc_listeners["loop_end"]:
-                    listener(self._cnoc_loop_count_count)
+                    listener(self._cnoc_loop_count)
 
         except Exception as e:
             print(f"{type(e).__name__} in experiment: {e}", flush=True)

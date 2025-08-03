@@ -123,7 +123,7 @@ class WorkspaceController {
 
         this.workspace_ws.onmessage = async (event: MessageEvent<string>) => {
             const data = JSON.parse(event.data)
-            console.log(data)
+
             await this.#commands[data.command](data.value)
         }
 
