@@ -4,11 +4,12 @@ import { parse, stringify } from "smol-toml"
 import { dependency_controller } from "./dependency.svelte"
 import { tick } from "svelte"
 import { confirm } from "@tauri-apps/plugin-dialog"
-import { cnoc_url, shell, sleep } from "$lib/utils"
+import { cnoc_url, sleep } from "$lib/utils"
 import { Child, Command } from "@tauri-apps/plugin-shell"
 
 import { beinn_log_controller } from "./log.svelte"
 import { cnoc_controller } from "./cnoc.svelte"
+import { shell } from "$lib/svelte_utils"
 
 
 

@@ -19,7 +19,7 @@ export function move(
 
     onmove: ({ top, left }: { top: number, left: number }) => void,
 ): Attachment<HTMLElement> {
-    return (_) => {
+    return (e) => {
         const r = {
 
             t: 0,
@@ -28,30 +28,55 @@ export function move(
             y: 0,
         };
 
-        on(window, "mousedown", (m) => {
-            moving = true;
-            const { left, top } = target.getBoundingClientRect();
-            const { left: parent_left, top: parent_top } = parent.getBoundingClientRect();
-            r.t = top - parent_top
-            r.l = left - parent_left;
-            r.x = m.clientX;
-            r.y = m.clientY;
+        $effect(() => {
 
 
-        });
 
-        on(window, "mousemove", (m) => {
-            if (!moving) return;
-            const top = r.t + m.clientY - r.y;
-            const left = r.l + m.clientX - r.x;
 
-            target.style = `top: ${top}px; left: ${left}px;`
-            onmove({ top, left })
-        });
 
-        on(window, "mouseup", () => {
-            moving = false;
-        });
+
+            const cancel_mousedown = on(e, "mousedown", (m) => {
+                moving = true;
+                const { left, top } = target.getBoundingClientRect();
+                const { left: parent_left, top: parent_top } = parent.getBoundingClientRect();
+                r.t = top - parent_top
+                r.l = left - parent_left;
+                r.x = m.clientX;
+                r.y = m.clientY;
+
+
+            });
+
+            const cancel_mousemove = on(window, "mousemove", (m) => {
+                if (!moving) return;
+                let top = r.t + m.clientY - r.y;
+                let left = r.l + m.clientX - r.x;
+
+                if (top < 8) top = 8
+                if (left < 8) left = 8
+
+
+
+                target.style.top = `${top}px`;
+                target.style.left = `${left}px`;
+
+                setTimeout(() => {
+                    onmove({ top, left })
+                })
+
+
+            });
+
+            const cancel_mouseup = on(window, "mouseup", () => {
+                moving = false;
+            });
+
+            return () => {
+                cancel_mousedown();
+                cancel_mousemove();
+                cancel_mouseup();
+            }
+        })
     };
 }
 
@@ -59,78 +84,92 @@ export function move(
 export function resize(
     v: "top" | "bottom" | null,
     h: "left" | "right" | null,
+    parent: HTMLElement,
     target: HTMLElement,
-    onresize: ({ width, height }: { width: number, height: number }) => void,
+    onresize: ({ width, height, top, left }: { width: number, height: number, top: number, left: number }) => void,
 
 )
     : Attachment<HTMLElement> {
-    return (_) => {
+    return (e) => {
         const r = {
             resizing: false,
-            h: null as { w: number, l: number, from: "left" | "right" } | null,
-            v: null as { h: number, t: number, from: "top" | "bottom" } | null,
+            h: { w: 0, l: 0, from: null, x: 0 } as { w: number, l: number, from: "left" | "right" | null, x: number },
+            v: { h: 0, t: 0, from: null, y: 0 } as { h: number, t: number, from: "top" | "bottom" | null, y: number },
         };
+        $effect(() => {
 
 
-        on(window, "mousedown", (m) => {
-            r.resizing = true
-            const { width, height, left, top } = target.getBoundingClientRect();
 
 
-            if (h) {
-                r.h = { w: width, l: left, from: "left" }
-                if (h === "right") r.h.from = "right"
-            }
 
-            if (v) {
-                r.v = { h: height, t: top, from: "top" }
-                if (v === "bottom") r.v.from = "bottom"
+            const cancel_mousedown = on(e, "mousedown", (m) => {
+                r.resizing = true
+                const { width, height, left, top } = target.getBoundingClientRect();
+                const { left: parent_left, top: parent_top } = parent.getBoundingClientRect();
+
+                r.h = { w: width, l: left - parent_left, from: h, x: m.clientX }
+                r.v = { h: height, t: top - parent_top, from: v, y: m.clientY }
+            })
+
+            const cancel_mousemove = on(window, "mousemove", (m) => {
+
+                if (!r.resizing) return
+
+
+                let width = r.h.w
+                let height = r.v.h
+                let left = r.h.l
+                let top = r.v.t
+
+                if (r.h.from) {
+
+                    const delta = m.clientX - r.h.x;
+                    if (r.h.from === "right") {
+                        width = r.h.w + delta;
+                        if (width < 24) width = 24
+
+                    } else {
+                        left = r.h.l + delta;
+                        width = r.h.w - delta;
+
+                        if (left < 8) left = 8
+                        if (width < 24) width = 24
+                    }
+                }
+                if (r.v.from) {
+
+                    const delta = m.clientY - r.v.y;
+                    if (r.v.from === "bottom") {
+                        height = r.v.h + delta;
+                        if (height < 24) height = 24
+
+
+
+                    } else {
+                        top = r.v.t + delta;
+                        height = r.v.h - delta;
+
+                        if (top < 8) top = 8
+                        if (height < 24) height = 24
+                    }
+                }
+
+
+
+                target.style = `width: ${width}px; height: ${height}px; left: ${left}px; top: ${top}px;`
+
+                onresize({ width, height, top, left })
+            });
+
+            const cancel_mouseup = on(window, "mouseup", () => {
+                r.resizing = false
+            });
+
+            return () => {
+                cancel_mousedown();
+                cancel_mousemove();
+                cancel_mouseup();
             }
         })
-
-
-        on(window, "mousemove", (m) => {
-
-            if (!r.resizing) return
-
-            let { width, height, left, top } = target.getBoundingClientRect();
-
-            if (r.h) {
-                const delta = m.clientX - r.h.w;
-                if (r.h.from === "right") {
-                    width = r.h.w + delta;
-                    if (width < 1) width = 1
-
-                } else {
-                    left = r.h.l + delta;
-                    width = r.h.w - delta;
-
-                    if (left < 8) left = 8
-                    if (width < 24) width = 24
-                }
-            }
-            if (r.v) {
-                const delta = m.clientX - r.v.h;
-                if (r.v.from === "bottom") {
-                    height = r.v.h + delta;
-                    if (height < 1) height = 1
-
-                } else {
-                    top = r.v.t + delta;
-                    height = r.v.h - delta;
-
-                    if (top < 8) top = 8
-                    if (height < 24) height = 24
-                }
-            }
-
-            target.style = `width: ${width}px; height: ${height}px; left: ${left}px; top: ${top}px;`
-
-            onresize({ width, height })
-        });
-
-        on(window, "mouseup", () => {
-            r.resizing = false
-        });
     };
 }

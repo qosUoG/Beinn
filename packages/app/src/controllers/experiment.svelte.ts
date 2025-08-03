@@ -94,7 +94,7 @@ export class ExperimentController extends EEBaseController<Experiment> {
 
                     this.instances[name].total_time = 0
                     this.instances[name].total_time_timer_timestamp = Date.now()
-                    this.instances[name].total_time_timer = setInterval(updateTotalTime, 1000)
+                    this.instances[name].total_time_timer = setInterval(updateTotalTime, 500)
 
                     this.instances[name].loop_time = -1
                     break
@@ -109,12 +109,12 @@ export class ExperimentController extends EEBaseController<Experiment> {
                     this.instances[name].loop_time_timer_timestamp = Date.now()
 
 
-                    this.instances[name].loop_time_timer = setInterval(updateLoopTime, 1000)
+                    this.instances[name].loop_time_timer = setInterval(updateLoopTime, 500)
 
                     // Restart total time timer in case of coming from paused
                     if (this.instances[name].total_time_timer === undefined) {
                         this.instances[name].total_time_timer_timestamp = Date.now()
-                        this.instances[name].total_time_timer = setInterval(updateTotalTime, 1000)
+                        this.instances[name].total_time_timer = setInterval(updateTotalTime, 500)
                     }
                     break
 
@@ -163,9 +163,10 @@ export class ExperimentController extends EEBaseController<Experiment> {
         })
 
         workspace_controller.registerCallback("experiment:chart_config", ({ name, config }: { name: string, config: ChartConfigs }) => {
+            if (this.instances[name].charts[config.title] !== undefined) { return }
             const chart = new Chart(config, name)
             this.instances[name].charts[config.title] = chart
-            console.log(chart)
+
         })
     }
 

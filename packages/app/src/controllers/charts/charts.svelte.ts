@@ -1,5 +1,4 @@
 
-import ScatterWorker from "./scatter/worker.js?worker";
 import type { ChartConfigs, ChartMessages } from "./types";
 
 
@@ -28,22 +27,25 @@ export class Chart<T extends ChartConfigs = ChartConfigs> {
         this.#is_drawing_points = value
         this.#setIsDrawingPoints(value)
     }
-    #width = $state(300)
-    #height = $state(200)
+    #width = $state(560)
+    #height = $state(400)
     get width() {
         return this.#width
     }
     set width(value: number) {
         this.#width = value
-        this.#resize(value, this.#height)
+        this.#resize(value - 16, this.#height - 48)
     }
     get height() {
         return this.#height
     }
     set height(value: number) {
         this.#height = value
-        this.#resize(this.#width, value)
+        this.#resize(this.#width - 16, value - 48)
     }
+
+    top: number = $state(8)
+    left: number = $state(8)
 
 
     config: T
@@ -54,10 +56,21 @@ export class Chart<T extends ChartConfigs = ChartConfigs> {
         this.config = config
         switch (config.type) {
             case "chart:scatter": {
-                this.worker = new ScatterWorker()
+                this.worker = new Worker(new URL("./scatter/worker.js", import.meta.url), { type: "module" })
+                this.worker.onmessage = (e) => {
+                    console.log(e.data)
+                }
+                this.worker.onerror = (e) => {
+                    console.log(e)
+                }
+                this.worker.onmessageerror = (e) => {
+                    console.log(e)
+                }
                 break
             }
         }
+
+
         if (this.worker === undefined) throw Error(`Worker script of ${config.type} is undefined`)
         this.worker.postMessage({
             command: "instantiate",
@@ -68,7 +81,8 @@ export class Chart<T extends ChartConfigs = ChartConfigs> {
     }
 
     setCanvas(canvas: OffscreenCanvas) {
-        this.worker.postMessage({ command: "set_canvas", payload: { canvas, width: this.#width, height: this.#height } } satisfies ChartMessages)
+
+        this.worker.postMessage({ command: "set_canvas", payload: { canvas, width: this.#width - 16, height: this.#height - 48 } } satisfies ChartMessages, [canvas])
     }
 
 

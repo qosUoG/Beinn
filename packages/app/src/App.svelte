@@ -7,6 +7,7 @@
 	import Config from "$components/modules/config/Config.svelte";
 	import { workspace_controller } from "$controllers/workspace.svelte";
 	import { ChevronLeft, ChevronRight, ChevronsRight } from "@lucide/svelte";
+	import Board from "$components/modules/charts/Board.svelte";
 
 	getCurrentWindow().listen("tauri://close-requested", async () => {
 		// const should_kill = await workspace.kill();
@@ -25,7 +26,7 @@
 				<Config bind:open />
 			{/if}
 
-			<div class="bg-slate-300 flex-grow rounded-t relative"></div>
+			<Board />
 		</div>
 
 		{#if !open}

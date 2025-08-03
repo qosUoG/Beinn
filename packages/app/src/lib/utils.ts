@@ -1,13 +1,9 @@
 
 
-import { readTextFile } from "@tauri-apps/plugin-fs"
-import { parse } from "smol-toml"
+
 import { fetch } from "@tauri-apps/plugin-http"
-import { Command } from "@tauri-apps/plugin-shell";
 
 
-import type { LogController } from "$controllers/log.svelte";
-import { workspace_controller } from "$controllers/workspace.svelte";
 
 export const cnoc_url = "ws://localhost:8001/"
 
@@ -134,33 +130,7 @@ export const getRequestJsonOut_throwable = async (url: string) => {
     return obj.value
 }
 
-export async function shell({ fn, cmd, cwd, logger }: { fn: string, cmd: string, cwd: string, logger: LogController }) {
 
-    try {
-
-        const handler = Command.create(
-            fn, cmd.split(" "), {
-            encoding: "utf8",
-            cwd
-        })
-        const p = new Promise((resolve) => {
-            handler.on("close", resolve)
-            handler.on("error", resolve)
-        })
-
-        logger.append(`    ${fn} ${cmd}\n    cwd: ${cwd}`)
-
-        handler.stdout.on("data", (message) => { logger.append("        " + message) })
-        handler.stderr.on("data", (message) => { logger.append("        " + message) })
-
-        await handler.spawn()
-        await p
-        return { success: true }
-    } catch (e) {
-        logger.append(`    ERROR: ${e}`)
-        return { success: false }
-    }
-}
 
 
 export async function timeoutLoop(timeout_ms: number, fn: () => Promise<boolean>) {

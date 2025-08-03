@@ -7,14 +7,10 @@
 	"compilerOptions": {
 		"baseUrl": "src",
 		"paths": {
-			"$icons/*": ["icons/*"],
-			"$workers/*": ["workers/*"],
-			"$websockets/*": ["websockets/*"],
-			"$components/*": ["components/*"],
+			"$components/*": ["./components/*"],
 
-			"$lib/*": ["lib/*"],
-			"$services/*": ["services/*"],
-			"$pages/*": ["pages/*"],
+			"$lib/*": ["./lib/*"],
+
 			"$controllers/*": ["./controllers/*"]
 		}
 	}

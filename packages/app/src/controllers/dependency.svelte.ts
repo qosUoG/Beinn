@@ -1,4 +1,4 @@
-import { shell } from "$lib/utils"
+import { shell } from "$lib/svelte_utils"
 import { readTextFile } from "@tauri-apps/plugin-fs"
 import { parse } from "smol-toml"
 import { beinn_log_controller } from "./log.svelte"

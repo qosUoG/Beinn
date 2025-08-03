@@ -21,14 +21,8 @@
 		"noUncheckedSideEffectImports": true,
 		"baseUrl": "./src",
 		"paths": {
-			"$icons/*": ["./icons/*"],
-			"$workers/*": ["./workers/*"],
-			"$websockets/*": ["./websockets/*"],
 			"$components/*": ["./components/*"],
-
 			"$lib/*": ["./lib/*"],
-			"$services/*": ["./services/*"],
-			"$pages/*": ["./pages/*"],
 			"$controllers/*": ["./controllers/*"]
 		}
 	},

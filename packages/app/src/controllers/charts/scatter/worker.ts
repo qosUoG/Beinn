@@ -1,4 +1,4 @@
-import { Chart, type ChartConfiguration, type ChartData, type Point } from "chart.js";
+import { Chart, type ChartConfiguration, type ChartData, type Point } from "chart.js/auto";
 import type { ScatterConfig } from "./scatter";
 import type { ChartMessages } from "../types";
 import { cnoc_url, deepCopy } from "$lib/utils";
@@ -26,7 +26,7 @@ const _chart_config = {
     options: {
         responsive: true,
         maintainAspectRatio: false,
-        // resizeDelay: 500,
+        resizeDelay: 500,
         animation: false,
         parsing: false,
 
@@ -75,6 +75,8 @@ handlers.instantiate = function instantiate({ experiment_name, config }: { exper
     _chart_config.options.scales.x.title.text = config.x_axis
     _chart_config.options.scales.y.title.text = config.y_axis
     _datasets = config.y_names.map(label => ({ data: [], label }))
+
+
 }
 
 handlers.set_is_drawing_points = function set_is_drawing_points({ is_drawing_points }: { is_drawing_points: boolean }) {
@@ -88,13 +90,16 @@ handlers.set_is_drawing_points = function set_is_drawing_points({ is_drawing_poi
 handlers.resize = function resize({ width, height }: { width: number, height: number }) {
     if (_canvas && _chart) {
         _canvas.width = width
-        _canvas.height = height - 1
-        _chart.resize()
+        _canvas.height = height
+        _chart.resize(width, height)
         _chart.update()
+
+
     }
 }
 
 handlers.set_canvas = function set_canvas({ canvas, width, height }: { canvas: OffscreenCanvas, width: number, height: number }) {
+
     _canvas = canvas
     _canvas.width = width
     _canvas.height = height
@@ -116,6 +121,8 @@ let _online = false
 let _pending_update = false
 let _update_timeout: Timer | undefined = undefined
 function wsConnect() {
+
+
     const wsNotConnected = () =>
         (_ws === undefined || (_ws.readyState !== WebSocket.OPEN && _ws.readyState !== WebSocket.CONNECTING))
 
@@ -404,6 +411,7 @@ function updateData() {
 
 // Webworker onmessage
 onmessage = function (event: MessageEvent<ChartMessages>) {
+
     handlers[event.data.command](event.data.payload as Extract<ChartMessages, [typeof event.data.command]>)
     //     case "kill": {
     //         _online = false

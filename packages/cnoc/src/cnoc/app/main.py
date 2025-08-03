@@ -2,6 +2,8 @@ import asyncio
 import site
 import sys
 
+from .handlers.chart_handler import chartHandler
+
 from .state.foundation import Foundation
 
 
@@ -19,15 +21,8 @@ async def handler(ws: ServerConnection):
     elif path == "/close":
         await ws.close()
         sys.exit()
-
-    # # Experiment
-    # elif path.startswith("/experiment"):
-    #     id = path.split("/")[2]
-    #     experimentHandler(ws, id)
-
-    # # Chart
-    # elif path.startswith("/chart"):
-    #     pass
+    elif path.startswith("/chart"):
+        await chartHandler(*path.split("/")[2:], ws)
 
 
 async def _main():

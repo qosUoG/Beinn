@@ -4,20 +4,20 @@
 		type Experiment,
 	} from "$controllers/experiment.svelte";
 	import {
+		CalendarClock,
 		Clock,
 		History,
 		Loader,
 		Pause,
 		Play,
 		Square,
+		TimerReset,
 	} from "@lucide/svelte";
 
 	import BaseItem from "../_ee/BaseItem.svelte";
 	import Timer from "./Timer.svelte";
 
 	let { experiment = $bindable() }: { experiment: Experiment } = $props();
-
-	$inspect({ expected_loop_count: experiment.expected_loop_count });
 </script>
 
 <BaseItem
@@ -25,7 +25,7 @@
 	controller={experiment_controller}
 	deletable={!experiment.status.endsWith("ing")}>
 	<div class="fcol-2 border-2 border-slate-800 rounded p-1">
-		<div class="grid grid-cols-3 gap-2">
+		<div class="grid grid-cols-4 gap-2">
 			<div class="frow-1 items-center">
 				{#if experiment.status === "paused"}
 					<button
@@ -63,7 +63,7 @@
 				{/if}
 			</div>
 			<div
-				class="h-full w-full border-1 border-slate-600 bg-slate-200 relative rounded overflow-clip col-span-2">
+				class="h-full w-full border-1 border-slate-600 bg-slate-200 relative rounded overflow-clip col-span-3">
 				<div
 					class="absolute top-0 left-0 h-full rounded-l frow-1 w-full items-center">
 					{#if experiment.status === "initial"}
@@ -95,8 +95,27 @@
 					{/if}
 				</div>
 			</div>
-			<div
-				class="frow-2 items-center justify-between col-span-3 *:flex-1">
+			<div class="grid grid-cols-4 gap-2 justify-between col-span-4">
+				<div
+					class="border-1 border-slate-600 box-border bg-slate-200 rounded frow items-center justify-center">
+					<span class="icon-btn-sm">
+						<CalendarClock />
+					</span>
+					{#if experiment.expected_loop_count > 0 && experiment.loop_count > 0}
+						{#key experiment.total_time - experiment.loop_time}
+							<Timer
+								time={((experiment.total_time -
+									experiment.loop_time) /
+									experiment.loop_count) *
+									(experiment.expected_loop_count -
+										experiment.loop_count)}
+								class="px-1" />
+						{/key}
+					{:else}
+						-
+					{/if}
+				</div>
+
 				<div
 					class="border-1 border-slate-600 box-border bg-slate-200 rounded frow items-center justify-center">
 					<span class="icon-btn-sm">
@@ -110,7 +129,7 @@
 				<div
 					class="border-1 border-slate-600 box-border bg-slate-200 rounded frow items-center justify-center">
 					<span class="icon-btn-sm">
-						<History />
+						<TimerReset />
 					</span>
 					{#key experiment.loop_time}
 						<Timer time={experiment.loop_time} class="px-1" />
