@@ -163,7 +163,10 @@ export class ExperimentController extends EEBaseController<Experiment> {
         })
 
         workspace_controller.registerCallback("experiment:chart_config", ({ name, config }: { name: string, config: ChartConfigs }) => {
-            if (this.instances[name].charts[config.title] !== undefined) { return }
+            if (this.instances[name].charts[config.title] !== undefined) {
+                this.instances[name].charts[config.title].reset()
+                return
+            }
             const chart = new Chart(config, name)
             this.instances[name].charts[config.title] = chart
 

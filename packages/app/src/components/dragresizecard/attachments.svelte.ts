@@ -126,14 +126,14 @@ export function resize(
                     const delta = m.clientX - r.h.x;
                     if (r.h.from === "right") {
                         width = r.h.w + delta;
-                        if (width < 24) width = 24
+                        if (width < 400) width = 400
 
                     } else {
                         left = r.h.l + delta;
                         width = r.h.w - delta;
 
                         if (left < 8) left = 8
-                        if (width < 24) width = 24
+                        if (width < 400) width = 400
                     }
                 }
                 if (r.v.from) {
@@ -141,7 +141,7 @@ export function resize(
                     const delta = m.clientY - r.v.y;
                     if (r.v.from === "bottom") {
                         height = r.v.h + delta;
-                        if (height < 24) height = 24
+                        if (height < 250) height = 250
 
 
 
@@ -150,7 +150,7 @@ export function resize(
                         height = r.v.h - delta;
 
                         if (top < 8) top = 8
-                        if (height < 24) height = 24
+                        if (height < 250) height = 250
                     }
                 }
 

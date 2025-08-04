@@ -24,4 +24,8 @@ export type ChartMessages =
         payload: { width: number, height: number }
     } | {
         command: "set_is_drawing_points", payload: { is_drawing_points: boolean }
-    } 
+    } | {
+        command: "reset", payload?: undefined
+    } | {
+        command: "hide", payload?: undefined
+    }

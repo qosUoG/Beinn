@@ -17,6 +17,10 @@ export class Chart<T extends ChartConfigs = ChartConfigs> {
         this.worker.postMessage({ command: "resize", payload: { width, height } } satisfies ChartMessages)
     }
 
+    #hideChart() {
+        this.worker.postMessage({ command: "hide" } satisfies ChartMessages)
+    }
+
 
     #is_drawing_points = $state(false)
 
@@ -49,6 +53,21 @@ export class Chart<T extends ChartConfigs = ChartConfigs> {
 
 
     config: T
+
+    #showing = $state(true)
+
+    get showing() {
+        return this.#showing
+    }
+    set showing(value: boolean) {
+        this.#showing = value
+        if (value === false) {
+            this.#hideChart()
+            return
+        }
+        // reset the chart
+        this.reset()
+    }
 
 
     constructor(config: T, experiment_name: string
@@ -83,6 +102,10 @@ export class Chart<T extends ChartConfigs = ChartConfigs> {
     setCanvas(canvas: OffscreenCanvas) {
 
         this.worker.postMessage({ command: "set_canvas", payload: { canvas, width: this.#width - 16, height: this.#height - 48 } } satisfies ChartMessages, [canvas])
+    }
+
+    reset() {
+        this.worker.postMessage({ command: "reset" } satisfies ChartMessages)
     }
 
 

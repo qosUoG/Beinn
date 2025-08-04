@@ -13,7 +13,7 @@ let _scatter_config: ScatterConfig
 let _ws: WebSocket
 
 let _datasets: { data: { x: number, y: number }[], label: string }[] = []
-let _ws_interval: Timer
+let _ws_interval: Timer | undefined
 
 
 
@@ -64,19 +64,18 @@ const handlers: Handler = {
     set_canvas: function () { },
     resize: function () { },
     set_is_drawing_points: function () { },
+    reset: function () { },
+    hide: function () { },
 }
 
 let _experiment_name: string
 
+
+
 handlers.instantiate = function instantiate({ experiment_name, config }: { experiment_name: string, config: ScatterConfig }) {
     _scatter_config = config
     _experiment_name = experiment_name
-    _chart_config.data.datasets = config.y_names.map(label => ({ data: [], label }))
-    _chart_config.options.scales.x.title.text = config.x_axis
-    _chart_config.options.scales.y.title.text = config.y_axis
-    _datasets = config.y_names.map(label => ({ data: [], label }))
-
-
+    resetConfig()
 }
 
 handlers.set_is_drawing_points = function set_is_drawing_points({ is_drawing_points }: { is_drawing_points: boolean }) {
@@ -115,6 +114,59 @@ handlers.set_canvas = function set_canvas({ canvas, width, height }: { canvas: O
 
     // Establish websocket connection if not already established
     wsConnect()
+}
+
+handlers.reset = function reset() {
+
+    if (_ws !== undefined)
+        _ws.close()
+
+    if (_ws_interval !== undefined) {
+        clearInterval(_ws_interval)
+        _ws_interval = undefined
+    }
+
+    resetConfig()
+    _decimation = 0
+
+    if (_chart) _chart.destroy()
+
+    if (_canvas)
+        _chart = new Chart(_canvas as unknown as HTMLCanvasElement, deepCopy(_chart_config))
+
+    // load previous chart data 
+    updateData()
+
+
+    // Establish websocket connection if not already established
+    wsConnect()
+
+}
+
+
+handlers.hide = function hide() {
+    if (_chart) _chart.destroy()
+    _canvas = undefined
+
+    _online = false
+
+
+    if (_ws !== undefined) {
+        _ws.onclose = null
+        _ws.close()
+    }
+
+    if (_ws_interval !== undefined) {
+        clearInterval(_ws_interval)
+        _ws_interval = undefined
+    }
+}
+
+function resetConfig() {
+    _chart_config.data.datasets = _scatter_config.y_names.map(label => ({ data: [], label }))
+    _chart_config.options.scales.x.title.text = _scatter_config.x_axis
+    _chart_config.options.scales.y.title.text = _scatter_config.y_axis
+    _datasets = _scatter_config.y_names.map(label => ({ data: [], label }))
 }
 
 let _online = false
@@ -367,40 +419,7 @@ function updateData() {
 
 
 
-// function reset() {
 
-//     if (_ws !== undefined)
-//         _ws.close()
-
-//     if (_ws_interval !== undefined)
-//         clearInterval(_ws_interval)
-
-
-//     _datasets = _chart_config.y_names.map(label => ({ data: [], label }))
-//     _decimation = 0
-//     _chart.destroy()
-
-//     setTimeout(() => {
-
-//         const config = getChartConfig()
-//         _chart = new Chart(_canvas as unknown as HTMLCanvasElement, config)
-
-
-
-
-//         wsConnect()
-
-
-//         _ws_interval = setInterval(() => {
-
-//             if (_online && (_ws === undefined || (_ws.readyState !== WebSocket.OPEN && _ws.readyState !== WebSocket.CONNECTING)))
-//                 wsConnect()
-//             // Runs once every 10 seconds so it does not fall asleep
-//         }, 10000)
-//     })
-
-
-// }
 
 
 

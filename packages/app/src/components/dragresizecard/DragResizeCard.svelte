@@ -14,6 +14,7 @@
 		onresize,
 		onmove,
 		children,
+		class: clazz,
 	}: {
 		parent: HTMLElement;
 		top: number;
@@ -34,6 +35,7 @@
 		onmove: ({ top, left }: { top: number; left: number }) => void;
 
 		children: Snippet;
+		class?: string;
 	} = $props();
 
 	let target: HTMLDivElement | undefined = $state(undefined);
@@ -78,7 +80,7 @@
 	});
 </script>
 
-<div class={cn(" bg-white absolute ")} bind:this={target}>
+<div class={cn("  absolute ", clazz)} bind:this={target}>
 	<div
 		class={cn("cursor-ns-resize", getStyle("top", null))}
 		{@attach resize("top", null, parent, target, onresize)}>
