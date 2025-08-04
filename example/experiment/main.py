@@ -26,15 +26,9 @@ from cnoc.public import params as p
 
 
 async def main():
-    store = pd.HDFStore("store.h5")
-    store.put("data", pd.DataFrame())
-    store.put("data", pd.DataFrame([1, 2]))
-    attrs = store.get_storer("data").attrs
-    attrs.sth = [time.localtime()]
-    print(store.get_storer("data").attrs.sth)
-    attrs.sth = "wowowow"
-    print(store.get_storer("data").attrs.sth)
-    print(store.get("data"))
+    store = pd.HDFStore("data.h5")
+    print(store.get("1"))
+    print(store.get_storer("1").attrs.metadata)
     store.close()
 
     # without_time = print(timeit.timeit(withoutJson, number=10000))
