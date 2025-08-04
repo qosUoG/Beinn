@@ -17,7 +17,6 @@ from contextlib import redirect_stderr, redirect_stdout
 from io import StringIO
 import sys
 from threading import Lock
-import functools
 
 
 class EquipmentABC(ABC):
@@ -44,7 +43,7 @@ class EquipmentABC(ABC):
         from .params import Params
 
         self.params: Params
-        self._lock = Lock()
+        self.lock = Lock()
 
     def interpret(self, code: str, name: str):
         code = code.replace(name, "self")
@@ -91,13 +90,3 @@ class EquipmentABC(ABC):
         It is optional to implement this method.
         """
         pass
-
-
-def lock(func):
-    @functools.wraps(func)
-    def wrapper_decorator(self: EquipmentABC, *args, **kwargs):
-        with self._lock:
-            value = func(*args, **kwargs)
-            return value
-
-    return wrapper_decorator

@@ -13,7 +13,7 @@ from ._ee import handlers as eeHandlers
 
 async def workspaceHandler(ws: ServerConnection):
     Foundation.workspace_ws = ws
-    print("Connected to workspace", flush=True)
+
     async for message in ws:
         try:
             req = json.loads(message)
@@ -31,7 +31,7 @@ async def workspaceHandler(ws: ServerConnection):
 
                 match command.split(":")[1]:
                     case "start":
-                        Experiments.instances[name].instance._cnoc_start()
+                        await Experiments.instances[name].instance._cnoc_start()
                     case "pause":
                         Experiments.instances[name].instance._cnoc_pause()
                     case "stop":

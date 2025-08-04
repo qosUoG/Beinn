@@ -2,7 +2,7 @@ import importlib
 import json
 
 
-from ...public.params import dict2Params
+from ...public.params import _cnoc_dict2Params
 
 
 from .foundation import Foundation
@@ -104,7 +104,9 @@ class Experiments:
 
     @classmethod
     def updateParams(cls, name: str, params: dict):
-        cls.instances[name].instance.params = dict2Params(params)
+        cls.instances[name].instance.params = _cnoc_dict2Params(params)
+
+        cls.instances[name].instance._cnoc_saveParams()
 
     @classmethod
     def remove(cls, name: str):

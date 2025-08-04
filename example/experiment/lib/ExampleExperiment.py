@@ -2,13 +2,14 @@ from dataclasses import dataclass
 
 
 import random
+from re import S
 from typing import TypedDict, override
 
 
 import time
 
 
-from cnoc import charts, exceptions, params as p, experiment
+from cnoc import charts, exceptions, params as p, experiment, saver
 
 from examplelib.ExampleDriver import ExampleEquipment
 
@@ -81,6 +82,7 @@ class ExampleExperiment(experiment.ExperimentABC):
             mode="append",
         )
         self.cnocCreateChart(self.scatter_plot)
+        self.saver = Saver(path="example/experiment/lib/example.h5")
 
         # self.xyplot2: XY = manager.createChart(
         #     XY,

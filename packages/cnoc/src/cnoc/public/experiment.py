@@ -16,8 +16,10 @@ from time import time
 from traceback import print_tb
 from typing import Callable, Literal, TypedDict
 
-from ..public.exceptions import ExperimentCompleted
+from .params import params2Save
 
+from .saver import Saver
+from .exceptions import ExperimentCompleted
 from .charts._chart import ChartABC
 
 
@@ -93,6 +95,7 @@ class ExperimentABC(ABC):
 
         # Charts
         self._cnoc_charts: dict[str, ChartABC] = {}
+        self._cnoc_savers: list[Saver] = []
 
     def _cnoc_on(
         self,
@@ -111,7 +114,7 @@ class ExperimentABC(ABC):
         self._cnoc_should_stop.set()
         self._cnoc_should_run.set()
 
-    def _cnoc_start(self):
+    async def _cnoc_start(self):
         # Make sure the experiment starts in a fresh state
         self._cnoc_loop_count = -1
         self._cnoc_should_run.clear()
@@ -119,14 +122,7 @@ class ExperimentABC(ABC):
 
         self._timestamp = int(time() * 1000)
 
-        self.start()
-
-        print(
-            self._cnoc_expected_loop_count
-            if hasattr(self, "_cnoc_expected_loop_count")
-            else -1,
-            flush=True,
-        )
+        await asyncio.to_thread(self.start)
 
         for listener in self._cnoc_listeners["expected_loop_count"]:
             listener(
@@ -155,6 +151,7 @@ class ExperimentABC(ABC):
                     for listener in self._cnoc_listeners["stopped"]:
                         listener()
 
+                    self._cnoc_cleanup()
                     return
 
                 # Loop the experiment once with the newest index
@@ -184,9 +181,7 @@ class ExperimentABC(ABC):
                         for listener in self._cnoc_listeners["completed"]:
                             listener()
 
-                        # Signal the charts to stop
-                        for chart in self._cnoc_charts.values():
-                            chart._cnoc_stopChart()
+                        self._cnoc_cleanup()
                         return
 
                 # we want to pause
@@ -207,7 +202,18 @@ class ExperimentABC(ABC):
             _, _, traceback = sys.exc_info()
             print_tb(traceback)
             print(end=None, flush=True)
+            self._cnoc_cleanup()
             return
+
+    def _cnoc_cleanup(self):
+        # Signal the charts to stop
+        for chart in self._cnoc_charts.values():
+            chart._cnoc_stopChart()
+
+        for saver in self._cnoc_savers:
+            saver._cnoc_close()
+
+        self._cnoc_savers = []
 
     @abstractmethod
     def start(self) -> None:
@@ -217,21 +223,28 @@ class ExperimentABC(ABC):
     def loop(self, index: int) -> None:
         raise NotImplementedError
 
-    def cleanup(self) -> None:
-        """
-        Perform any clean up if needed
+    # def cleanup(self) -> None:
+    #     """
+    #     Perform any clean up if needed
 
-        This method would run once after the loop method is no longer iterating. Users may perform
-        any clean up in this method. However, please be aware other experiment script may still be running
+    #     This method would run once after the loop method is no longer iterating. Users may perform
+    #     any clean up in this method. However, please be aware other experiment script may still be running
 
-        It is optional to implement this method.
-        """
-        pass
+    #     It is optional to implement this method.
+    #     """
+    #     pass
 
     def cnocCreateChart(self, chart: ChartABC):
         self._cnoc_charts[chart.title] = chart
         for listener in self._cnoc_listeners["chart_created"]:
             listener(chart.getConfig())
+
+    def cnocCreateSaver(self, saver: Saver):
+        self._cnoc_savers.append(saver)
+
+    def _cnoc_saveParams(self):
+        for saver in self._cnoc_savers:
+            saver._cnoc_saveParams(params2Save(self.params))
 
     def cnocExpectedLoopCount(self, loop_count: int):
         self._cnoc_expected_loop_count = loop_count

@@ -15,7 +15,7 @@ from ...public.params import (
     CompositeParam,
     InstanceEquipmentParam,
     InstanceExperimentParam,
-    param2Dict,
+    _cnoc_params2Dict,
 )
 
 from ..state.experiments import Experiments
@@ -127,7 +127,7 @@ async def create(
                     "module": module,
                     "cls": cls,
                     "name": name,
-                    "params": param2Dict(instance.instance.params),
+                    "params": _cnoc_params2Dict(instance.instance.params),
                 },
             }
         )
@@ -178,7 +178,7 @@ async def updateParams(
                     "command": "equipment:update_params",
                     "value": {
                         "name": name,
-                        "params": param2Dict(
+                        "params": _cnoc_params2Dict(
                             Equipments.instances[name].instance.params
                         ),
                     },
@@ -196,7 +196,7 @@ async def updateParams(
                     "command": "experiment:update_params",
                     "value": {
                         "name": name,
-                        "params": param2Dict(
+                        "params": _cnoc_params2Dict(
                             Experiments.instances[name].instance.params
                         ),
                     },

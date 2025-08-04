@@ -23,7 +23,8 @@ experiment, please refer to the example directory.
 """
 
 from abc import ABC
-from .experiment import ExperimentABC
+
+# from .experiment import ExperimentABC
 from .equipment import EquipmentABC
 
 
@@ -41,6 +42,9 @@ class SingleSelectABC[T: str | int | float](ABC):
     # To and from json
     def toDict(self):
         return {"type": self._type, "options": self._options, "value": self.value}
+
+    def toSave(self):
+        return {"value": self.value}
 
 
 class SelectStrParam(SingleSelectABC[str]):
@@ -126,6 +130,9 @@ class NumberABC[T: int | float](ABC):
     def toDict(self):
         return {"type": self._type, "suffix": self.suffix, "value": self.value}
 
+    def toSave(self):
+        return {"value": self.value, "suffix": self.suffix}
+
 
 class IntParam(NumberABC[int]):
     """
@@ -196,6 +203,9 @@ class PrimitiveABC[T: str | bool](ABC):
     def toDict(self):
         return {"type": self._type, "value": self.value}
 
+    def toSave(self):
+        return {"value": self.value}
+
 
 class StrParam(PrimitiveABC[str]):
     """
@@ -263,39 +273,47 @@ class InstanceEquipmentParam[T: EquipmentABC]:
             raise ValueError(f"Invalid type {data['type']} for {cls._type}")
         return cls(data["name"])
 
-
-class InstanceExperimentParam[T: ExperimentABC]:
-    """
-    param type with instance inheriting ExperimentABC type
-
-    NOTE THAT this param type is not being supported yet. This
-    will be intended for playlist feature.
-
-    Examples of utilizing the param please refer to examples
-
-    Attributes
-    ----------
-    instance : [T : ExperimentABC]
-        The wrapper class of the experiment that implements the protocol
-    """
-
-    _type = "instance.experiment"
-
-    def __init__(self, name: str | None = None):
-        self.name = name
-        self.instance: T | None = None
-
-    def toDict(self):
+    def toSave(self):
         return {
-            "type": self._type,
             "name": self.name,
+            "params": _cnoc_params2Dict(self.instance.params)
+            if self.instance
+            else None,
         }
 
-    @classmethod
-    def fromDict(cls, data: dict):
-        if data["type"] != cls._type:
-            raise ValueError(f"Invalid type {data['type']} for {cls._type}")
-        return cls(data["name"])
+
+# class InstanceExperimentParam[T: ExperimentABC]:
+#     """
+#     param type with instance inheriting ExperimentABC type
+
+#     NOTE THAT this param type is not being supported yet. This
+#     will be intended for playlist feature.
+
+#     Examples of utilizing the param please refer to examples
+
+#     Attributes
+#     ----------
+#     instance : [T : ExperimentABC]
+#         The wrapper class of the experiment that implements the protocol
+#     """
+
+#     _type = "instance.experiment"
+
+#     def __init__(self, name: str | None = None):
+#         self.name = name
+#         self.instance: T | None = None
+
+#     def toDict(self):
+#         return {
+#             "type": self._type,
+#             "name": self.name,
+#         }
+
+#     @classmethod
+#     def fromDict(cls, data: dict):
+#         if data["type"] != cls._type:
+#             raise ValueError(f"Invalid type {data['type']} for {cls._type}")
+#         return cls(data["name"])
 
 
 type _SimpleParamType = (
@@ -307,7 +325,7 @@ type _SimpleParamType = (
     | StrParam
     | BoolParam
     | InstanceEquipmentParam[EquipmentABC]
-    | InstanceExperimentParam[ExperimentABC]
+    # | InstanceExperimentParam[ExperimentABC]
 )
 
 
@@ -337,6 +355,9 @@ class CompositeParam:
 
         return CompositeParam(children)
 
+    def toSave(self):
+        return {k: v.toSave() for k, v in self.children.items()}
+
 
 type AllParamTypes = _SimpleParamType | CompositeParam
 type Params = dict[str, AllParamTypes]
@@ -351,19 +372,19 @@ _param_type_arr: list[AllParamTypes] = [
     StrParam,
     BoolParam,
     InstanceEquipmentParam[EquipmentABC],
-    InstanceExperimentParam[ExperimentABC],
+    # InstanceExperimentParam[ExperimentABC],
     CompositeParam,
 ]
 
 
-def param2Dict(params: Params) -> dict[str, dict]:
+def _cnoc_params2Dict(params: Params) -> dict[str, dict]:
     """
     Convert the params to a dictionary representation
     """
     return {k: v.toDict() for k, v in params.items()}
 
 
-def dict2Params(data: dict[str, dict]) -> Params:
+def _cnoc_dict2Params(data: dict[str, dict]) -> Params:
     """
     Convert the dictionary representation back to Params
     However this function does not set the instance of the params,
@@ -381,3 +402,7 @@ def dict2Params(data: dict[str, dict]) -> Params:
                 break
 
     return params
+
+
+def params2Save(params: Params) -> dict[str, dict]:
+    return {k: v.toSave() for k, v in params.items()}
