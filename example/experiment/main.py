@@ -27,8 +27,8 @@ from cnoc.public import params as p
 
 async def main():
     store = pd.HDFStore("data.h5")
-    print(store.get("1"))
-    print(store.get_storer("1").attrs.metadata)
+    print(store.get("1")[3:5])
+    pprint.pprint(store.get_storer("1").attrs.metadata)
     store.close()
 
     # without_time = print(timeit.timeit(withoutJson, number=10000))

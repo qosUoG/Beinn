@@ -3,19 +3,18 @@ from typing import TypedDict
 import pandas as pd
 
 
-class _Metadata(TypedDict):
-    time: time.struct_time
-    params: list[dict]
-
-
 class Saver:
+    class _Metadata(TypedDict):
+        time: time.struct_time
+        params: list[dict]
+
     def __init__(self, path: str):
         self.path = path
         self._store = pd.HDFStore(path)
 
         self._key = len(self._store.keys())
 
-        self._metadata: _Metadata = {
+        self._metadata: Saver._Metadata = {
             "time": time.localtime(),
             "params": [],
         }
@@ -36,3 +35,25 @@ class Saver:
 
     def _cnoc_close(self):
         self._store.close()
+
+
+class Reader:
+    class DataSet:
+        def __init__(self, data: pd.DataFrame, metadata: Saver._Metadata):
+            self.data = data
+            self.timestruct = metadata["time"]
+            self.params = metadata["params"]
+
+        @property
+        def time(self):
+            return time.strftime("%Y/%m/%d %H:%M:%S UTC%z", self.timestruct)
+
+    @classmethod
+    def read(cls, index: int, path: str):
+        _store = pd.HDFStore(path)
+        dataset = cls.DataSet(
+            _store.get(f"{index}"),
+            _store.get_storer(f"{index}").attrs.metadata,
+        )
+        _store.close()
+        return dataset
