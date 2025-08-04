@@ -82,7 +82,7 @@ class Reader:
         store = pd.HDFStore(self.path)
         res = {
             key: Reader.DataSet(store.get(key), store.get_storer(key).attrs.metadata)
-            for key in store.keys()
+            for key in [key[1:] for key in store.keys()]
         }
         store.close()
         return res
