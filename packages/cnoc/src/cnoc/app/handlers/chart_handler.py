@@ -18,12 +18,11 @@ async def chartHandler(experiment_name: str, chart_name: str, ws: ServerConnecti
         return
 
     async def consumer():
-        while True:
-            async for message in ws:
-                data = json.loads(message)
-                assert data["command"] == "rate"
-                await setRate(data["value"])
-                await ws.send(json.dumps({"command": "rate", "value": getRate()}))
+        async for message in ws:
+            data = json.loads(message)
+            assert data["command"] == "rate"
+            await setRate(data["value"])
+            await ws.send(json.dumps({"command": "rate", "value": getRate()}))
 
     consumer_task = asyncio.create_task(consumer())
 

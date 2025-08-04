@@ -100,6 +100,7 @@ export class Chart<T extends ChartConfigs = ChartConfigs> {
     }
 
     setCanvas(canvas: OffscreenCanvas) {
+        console.log("setCanvas")
 
         this.worker.postMessage({ command: "set_canvas", payload: { canvas, width: this.#width - 16, height: this.#height - 48 } } satisfies ChartMessages, [canvas])
     }
