@@ -1,4 +1,6 @@
+import { equipment_controller } from "./equipment.svelte";
 import { LogController } from "./log.svelte";
+import { workspace_controller } from "./workspace.svelte";
 
 class CnocController extends LogController {
     constructor() {
@@ -40,7 +42,16 @@ class CnocController extends LogController {
     send(command: string) {
         this.command_history.unshift(command);
         this.updateQuery("");
-        //TODO: send command to backend
+        this.append(command);
+        // Check if the command is an equipment code
+        for (const name of Object.keys(equipment_controller.instances)) {
+            if (command.match(name)) {
+                workspace_controller.sendCommand("interpret:equipment", { code: command, name });
+                return
+            }
+        }
+
+        workspace_controller.sendCommand("interpret:general", { code: command });
     }
 
 

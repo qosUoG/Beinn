@@ -42,8 +42,12 @@
 		switch (e.key) {
 			case "Enter":
 				e.preventDefault();
-				cnoc_controller.send(input);
-				input = "";
+
+				if (!e.shiftKey && !e.ctrlKey) {
+					cnoc_controller.send(input);
+					input = "";
+				}
+
 				return;
 			case "ArrowDown": {
 				e.preventDefault();
@@ -52,6 +56,7 @@
 			case "ArrowUp":
 				e.preventDefault();
 				input = cnoc_controller.getEarlierQuery();
+
 			default:
 				cnoc_controller.updateQuery(input);
 		}

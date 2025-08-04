@@ -19,6 +19,26 @@ import sys
 from threading import Lock
 
 
+def _interpret(code: str):
+    try:
+        print(f"{eval(code, globals=globals(), locals=locals())}", flush=True)
+
+    except SyntaxError:
+        pass
+    except Exception as e:
+        print(e, flush=True)
+
+    try:
+        f = StringIO()
+
+        with redirect_stdout(f):
+            with redirect_stderr(sys.stdout):
+                exec(code, globals=globals(), locals=locals())
+
+    except Exception as e:
+        print(e, flush=True)
+
+
 class EquipmentABC(ABC):
     """
     Base class of all equipment drivers
@@ -47,37 +67,7 @@ class EquipmentABC(ABC):
 
     def interpret(self, code: str, name: str):
         code = code.replace(name, "self")
-        try:
-            return {
-                "type": "eval",
-                "result": f"{eval(code, globals=globals(), locals=locals())}",
-            }
-
-        except SyntaxError:
-            pass
-        except Exception as e:
-            return {
-                "type": "error",
-                "result": f"code: {code}, error:{e}",
-            }
-
-        try:
-            f = StringIO()
-
-            with redirect_stdout(f):
-                with redirect_stderr(sys.stdout):
-                    exec(code, globals=globals(), locals=locals())
-
-            return {
-                "type": "exec",
-                "result": f.getvalue(),
-            }
-
-        except Exception as e:
-            return {
-                "type": "error",
-                "result": f"code: {code}, error:{e}",
-            }
+        return _interpret(code)
 
     def cleanup(self):
         """

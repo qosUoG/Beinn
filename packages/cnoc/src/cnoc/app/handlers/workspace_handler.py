@@ -2,6 +2,10 @@ import json
 import sys
 from traceback import print_tb
 
+from ..state.equipments import Equipments
+
+
+from ...public.equipment import _interpret
 
 from ..state.experiments import Experiments
 
@@ -34,14 +38,27 @@ async def workspaceHandler(ws: ServerConnection):
                 match command.split(":")[1]:
                     case "start":
                         await Experiments.instances[name].instance._cnoc_start()
+                        continue
                     case "pause":
                         Experiments.instances[name].instance._cnoc_pause()
+                        continue
                     case "stop":
                         Experiments.instances[name].instance._cnoc_stop()
+                        continue
                     case "continue":
                         Experiments.instances[name].instance._cnoc_continue()
+                        continue
 
-                continue
+            if command.startswith("interpret:"):
+                code: str = req["value"]["code"]
+                match command.split(":")[1]:
+                    case "general":
+                        _interpret(code)
+
+                    case "equipment":
+                        Equipments.instances[name].instance.interpret(code, name)
+                        pass
+
         except Exception as e:
             print(f"Exception in workspace handler: {e}", flush=True)
             _, _, traceback = sys.exc_info()

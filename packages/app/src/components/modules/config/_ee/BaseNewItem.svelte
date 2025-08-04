@@ -44,7 +44,14 @@
 			label="name"
 			bind:value={controller.temp_name}
 			mandatory
-			placeholder="Name must be unique" />
+			placeholder="Unique, alphanumeric characters only"
+			onkeydown={(e: KeyboardEvent) => {
+				if (
+					!/[a-zA-Z0-9_]/.test(e.key) ||
+					(controller.temp_name.length === 0 && /[0-9]/.test(e.key))
+				)
+					e.preventDefault();
+			}} />
 		<div class="frow items-center">
 			<Label label="import" mandatory />
 			<div
