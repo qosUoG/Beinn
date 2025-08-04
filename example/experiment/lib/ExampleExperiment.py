@@ -12,6 +12,7 @@ import time
 from cnoc import charts, exceptions, params as p, experiment, saver
 
 from examplelib.ExampleDriver import ExampleEquipment
+import pandas as pd
 
 
 @dataclass
@@ -82,7 +83,9 @@ class ExampleExperiment(experiment.ExperimentABC):
             mode="append",
         )
         self.cnocCreateChart(self.scatter_plot)
-        self.saver = Saver(path="example/experiment/lib/example.h5")
+        self.saver = saver.Saver(path="data.h5")
+
+        self.cnocCreateSaver(self.saver)
 
         # self.xyplot2: XY = manager.createChart(
         #     XY,
@@ -126,6 +129,7 @@ class ExampleExperiment(experiment.ExperimentABC):
                 "temperature": value,
             }
         )
+        self.saver.save(pd.DataFrame({"index": [index], "temperature": [value]}))
         # print("plotted")
 
         # self.saver.save({"saver$x": index, "temperature": value})

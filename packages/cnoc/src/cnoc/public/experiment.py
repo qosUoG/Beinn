@@ -148,10 +148,11 @@ class ExperimentABC(ABC):
                     # self._cnoc_experiment.cleanup()
                     self._cnoc_should_run.clear()
 
+                    self._cnoc_cleanup()
+
                     for listener in self._cnoc_listeners["stopped"]:
                         listener()
 
-                    self._cnoc_cleanup()
                     return
 
                 # Loop the experiment once with the newest index
@@ -177,11 +178,12 @@ class ExperimentABC(ABC):
                         for listener in self._cnoc_listeners["loop_end"]:
                             listener(self._cnoc_loop_count)
 
+                        self._cnoc_cleanup()
+
                         # Run all stop listeners
                         for listener in self._cnoc_listeners["completed"]:
                             listener()
 
-                        self._cnoc_cleanup()
                         return
 
                 # we want to pause
@@ -203,6 +205,8 @@ class ExperimentABC(ABC):
             print_tb(traceback)
             print(end=None, flush=True)
             self._cnoc_cleanup()
+            for listener in self._cnoc_listeners["stopped"]:
+                listener()
             return
 
     def _cnoc_cleanup(self):
