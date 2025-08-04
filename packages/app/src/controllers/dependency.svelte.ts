@@ -37,7 +37,7 @@ class Dependencies {
         return this.#dependencies.value
     }
 
-    get hasDriverPackageNames() {
+    get has_driver_package_names() {
         return this.dependencies.filter(d => d.has_driver).map(d => d.name)
     }
 
@@ -142,5 +142,19 @@ class Dependencies {
     }
 
 
+
+    getSave() {
+        return {
+            has_driver_package_names: this.has_driver_package_names
+        }
+    }
+
+    loadSave({ has_driver_package_names }: { has_driver_package_names: string[] }) {
+        for (const dependency of this.dependencies)
+            if (has_driver_package_names.includes(dependency.name))
+                dependency.has_driver = true
+    }
+
+
 }
-export let dependency_controller = $state(new Dependencies())
+export const dependency_controller = $state(new Dependencies())

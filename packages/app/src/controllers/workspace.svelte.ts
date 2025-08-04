@@ -10,6 +10,8 @@ import { Child, Command } from "@tauri-apps/plugin-shell"
 import { beinn_log_controller } from "./log.svelte"
 import { cnoc_controller } from "./cnoc.svelte"
 import { shell } from "$lib/svelte_utils"
+import { equipment_controller } from "./equipment.svelte"
+import { experiment_controller } from "./experiment.svelte"
 
 
 
@@ -20,15 +22,14 @@ class WorkspaceController {
     connected: boolean = $state(false)
     path: string | null = $state(null)
 
-    private uvproc: Child | undefined
+    #uvproc: Child | undefined
 
     constructor() {
         this.workspace_ws = new WebSocket(cnoc_url + "close")
-
     }
 
     #commands: Record<string, (obj: any) => Promise<void> | void> = {}
-    #onopen: (() => void)[] = []
+    #onopen: (() => void | Promise<void>)[] = []
     /* 
     Connect to the python workspace
     */
@@ -106,20 +107,28 @@ class WorkspaceController {
         handler.stdout.on("data", (message) => { cnoc_controller.append(message) })
         handler.stderr.on("data", (message) => { cnoc_controller.append(message) })
 
-        this.uvproc = await handler.spawn()
-        if (this.uvproc === undefined) {
+        this.#uvproc = await handler.spawn()
+        if (this.#uvproc === undefined) {
             beinn_log_controller.append("FAILED connect to python: uv process is undefined")
             return
         }
 
-        // Get dependency_controller
+
         await dependency_controller.get_dependencies({ path })
+
+        // Get save
+        if (await exists(path + "/.beinn")) {
+
+            beinn_log_controller.append("Try to load save from " + path + "/.beinn")
+            const save = JSON.parse(await readTextFile(path + "/.beinn"))
+            dependency_controller.loadSave(save.dependencies)
+            equipment_controller.loadSave(save.equipments)
+            experiment_controller.loadSave(save.experiments)
+        }
 
         await sleep(2000) // Wait for uv to start
 
-
         // Connect to the websocket
-
         this.workspace_ws = new WebSocket(cnoc_url + "workspace")
 
         this.workspace_ws.onmessage = async (event: MessageEvent<string>) => {
@@ -129,8 +138,12 @@ class WorkspaceController {
         }
 
         this.workspace_ws.onopen = () => {
-            this.#onopen.forEach((cb) => cb())
-            this.connected = true
+            this.#onopen.forEach(async (cb) => await cb())
+            // Wait for 2 seconds to make sure the save is loaded
+            setTimeout(() => {
+                this.connected = true
+            }, 2000)
+
         }
 
         this.workspace_ws.onclose = () => {
@@ -156,6 +169,27 @@ class WorkspaceController {
             return
         }
         this.workspace_ws.send(JSON.stringify({ command, value: data }))
+    }
+
+    async save() {
+        const save_path = this.path + "/.beinn"
+        const save = {
+            // dependencies: dependency_controller.getSave(),
+            // equipments: equipment_controller.getSave(),
+            // experiments: experiment_controller.getSave(),
+
+        }
+        beinn_log_controller.append(`BEGIN save workspace to ${save_path}`)
+
+        try {
+            await writeTextFile(save_path, JSON.stringify(save))
+            beinn_log_controller.append(`END save workspace to ${save_path}`)
+            return true
+        }
+        catch (e) {
+            beinn_log_controller.append(`FAILED save workspace to ${save_path}`)
+            return false
+        }
     }
 
 

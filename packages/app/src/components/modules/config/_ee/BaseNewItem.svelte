@@ -28,7 +28,11 @@
 			class="absolute right-0 top-0 flex items-center h-full bg-blue-600 rounded aspect-square justify-center icon-btn-sm text-white"
 			aria-label={`Add ${controller.eetype}`}
 			onclick={() => {
-				controller.create();
+				controller.create(
+					controller.temp_name,
+					controller.temp_module,
+					controller.temp_cls
+				);
 			}}>
 			<Plus />
 		</button>

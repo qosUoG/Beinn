@@ -6,7 +6,6 @@
 	import {
 		CalendarClock,
 		Clock,
-		History,
 		Loader,
 		Pause,
 		Play,

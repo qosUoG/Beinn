@@ -1,4 +1,5 @@
 <script lang="ts">
+	import ContentEditable from "$components/fields/ContentEditable.svelte";
 	import DropSelect from "$components/fields/DropSelect.svelte";
 	import InputField from "$components/fields/InputField.svelte";
 	import TabSelect from "$components/fields/TabSelect.svelte";
@@ -11,13 +12,11 @@
 	}: { label: string; param: SimpleParamType } = $props();
 </script>
 
-{#if param.type === "int" || param.type === "float" || param.type === "str"}
+{#if param.type === "int" || param.type === "float"}
 	<InputField
 		{label}
 		bind:value={param.value}
 		onkeydown={(e: KeyboardEvent) => {
-			if (param.type === "str") return;
-
 			if (
 				e.key === "Backspace" ||
 				e.key === "Delete" ||
@@ -30,6 +29,8 @@
 
 			e.preventDefault();
 		}} />
+{:else if param.type === "str"}
+	<ContentEditable {label} bind:value={param.value} />
 {:else if param.type === "bool"}
 	<TabSelect
 		{label}
@@ -45,8 +46,8 @@
 		{label}
 		bind:value={param.name}
 		options={equipment_controller.selectable_instances} />
-{:else if param.type === "instance.experiment"}
-	<!-- TODO -->
+	<!-- {:else if param.type === "instance.experiment"} -->
+
 	<!-- <DropSelect
 		{label}
 		bind:value={param.name}

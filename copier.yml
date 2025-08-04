@@ -1,7 +1,0 @@
-_subdirectory: packages/meall
-_templates_suffix: ""
-_exclude:
-    - "pyproject.toml"
-    - ".python-version"
-    - "uv.lock"
-    

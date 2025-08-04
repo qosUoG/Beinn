@@ -37,7 +37,6 @@
 	}
 
 	async function saveHandler() {
-		await tick();
 		// const success = await workspace_controller.save();
 		// show_save = success ? "success" : "fail";
 
@@ -58,11 +57,6 @@
 	async function getSavedWorkspacePath() {
 		if (!store) store = await load("workspace_path.json");
 		return await store.get<string>("workspace_path");
-	}
-
-	async function saveWorkspacePath(path: string) {
-		if (!store) store = await load("workspace_path.json");
-		await store.set("workspace_path", path);
 	}
 </script>
 
