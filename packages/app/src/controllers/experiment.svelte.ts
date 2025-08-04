@@ -49,6 +49,14 @@ export class ExperimentController extends EEBaseController<Experiment> {
         workspace_controller.sendCommand("experiment:continue", { name })
     }
 
+    get closeable() {
+        for (const instance of this.instances_arr)
+            if (instance.status !== "completed" && instance.status !== "stopped" && instance.status !== "initial")
+                return false
+
+        return true
+    }
+
     constructor() {
         super("experiment", (instance) => ({
             ...instance,
@@ -65,110 +73,114 @@ export class ExperimentController extends EEBaseController<Experiment> {
             expected_loop_count: -1,
         }))
 
-
-        workspace_controller.registerCallback("experiment:status", ({ name, status }: { name: string, status: "started" | "loop_start" | "paused" | "stopped" | "completed" }) => {
-
-            // Handle loop count
-            if (status === "started") {
-                this.instances[name].loop_count = 0
-            }
-
-            // Handle timer
-            const updateTotalTime = () => {
-                const now = Date.now()
-                this.instances[name].total_time += now - this.instances[name].total_time_timer_timestamp
-                this.instances[name].total_time_timer_timestamp = now
-            }
-
-            const updateLoopTime = () => {
-                const now = Date.now()
-                this.instances[name].loop_time += now - this.instances[name].loop_time_timer_timestamp
-                this.instances[name].loop_time_timer_timestamp = now
-            }
+        setTimeout(() => {
 
 
-            switch (status) {
-                case "started":
-                    if (this.instances[name].total_time_timer !== undefined)
-                        clearInterval(this.instances[name].total_time_timer)
+            workspace_controller.registerCallback("experiment:status", ({ name, status }: { name: string, status: "started" | "loop_start" | "paused" | "stopped" | "completed" }) => {
 
-                    this.instances[name].total_time = 0
-                    this.instances[name].total_time_timer_timestamp = Date.now()
-                    this.instances[name].total_time_timer = setInterval(updateTotalTime, 500)
+                // Handle loop count
+                if (status === "started") {
+                    this.instances[name].loop_count = 0
+                }
 
-                    this.instances[name].loop_time = -1
-                    break
-                case "loop_start":
-                    if (this.instances[name].loop_time_timer !== undefined) {
-                        clearInterval(this.instances[name].loop_time_timer)
-                        updateLoopTime()
-                    }
+                // Handle timer
+                const updateTotalTime = () => {
+                    const now = Date.now()
+                    this.instances[name].total_time += now - this.instances[name].total_time_timer_timestamp
+                    this.instances[name].total_time_timer_timestamp = now
+                }
+
+                const updateLoopTime = () => {
+                    const now = Date.now()
+                    this.instances[name].loop_time += now - this.instances[name].loop_time_timer_timestamp
+                    this.instances[name].loop_time_timer_timestamp = now
+                }
 
 
-                    this.instances[name].loop_time = 0
-                    this.instances[name].loop_time_timer_timestamp = Date.now()
+                switch (status) {
+                    case "started":
+                        if (this.instances[name].total_time_timer !== undefined)
+                            clearInterval(this.instances[name].total_time_timer)
 
-
-                    this.instances[name].loop_time_timer = setInterval(updateLoopTime, 500)
-
-                    // Restart total time timer in case of coming from paused
-                    if (this.instances[name].total_time_timer === undefined) {
+                        this.instances[name].total_time = 0
                         this.instances[name].total_time_timer_timestamp = Date.now()
                         this.instances[name].total_time_timer = setInterval(updateTotalTime, 500)
-                    }
-                    break
 
-                case "paused":
-                case "stopped":
-                case "completed":
-                    if (this.instances[name].total_time_timer !== undefined) {
-                        clearInterval(this.instances[name].total_time_timer)
-                        updateTotalTime()
-                        this.instances[name].total_time_timer = undefined
-                        this.instances[name].total_time_timer_timestamp = 0
-                    }
-                    if (this.instances[name].loop_time_timer !== undefined) {
-                        clearInterval(this.instances[name].loop_time_timer)
-                        updateLoopTime()
-                        this.instances[name].loop_time_timer = undefined
-                        this.instances[name].loop_time_timer_timestamp = 0
-                    }
+                        this.instances[name].loop_time = -1
+                        break
+                    case "loop_start":
+                        if (this.instances[name].loop_time_timer !== undefined) {
+                            clearInterval(this.instances[name].loop_time_timer)
+                            updateLoopTime()
+                        }
 
 
-
-            }
-
-            // Handle status
-            switch (status) {
-                case "started":
-                case "paused":
-                case "stopped":
-                case "completed":
-                    this.instances[name].status = status
-                    break
-                case "loop_start":
-                    this.instances[name].status = "running"
-                    break
-
-            }
-        })
-
-        workspace_controller.registerCallback("experiment:expected_loop_count", ({ name, expected_loop_count }: { name: string, expected_loop_count: number }) => {
-            this.instances[name].expected_loop_count = expected_loop_count
-        })
+                        this.instances[name].loop_time = 0
+                        this.instances[name].loop_time_timer_timestamp = Date.now()
 
 
-        workspace_controller.registerCallback("experiment:loop_count", ({ name, loop_count }: { name: string, loop_count: number }) => {
-            this.instances[name].loop_count = loop_count
-        })
+                        this.instances[name].loop_time_timer = setInterval(updateLoopTime, 500)
 
-        workspace_controller.registerCallback("experiment:chart_config", ({ name, config }: { name: string, config: ChartConfigs }) => {
-            if (this.instances[name].charts[config.title] !== undefined) {
-                this.instances[name].charts[config.title].reset()
-                return
-            }
-            const chart = new Chart(config, name)
-            this.instances[name].charts[config.title] = chart
+                        // Restart total time timer in case of coming from paused
+                        if (this.instances[name].total_time_timer === undefined) {
+                            this.instances[name].total_time_timer_timestamp = Date.now()
+                            this.instances[name].total_time_timer = setInterval(updateTotalTime, 500)
+                        }
+                        break
+
+                    case "paused":
+                    case "stopped":
+                    case "completed":
+                        if (this.instances[name].total_time_timer !== undefined) {
+                            clearInterval(this.instances[name].total_time_timer)
+                            updateTotalTime()
+                            this.instances[name].total_time_timer = undefined
+                            this.instances[name].total_time_timer_timestamp = 0
+                        }
+                        if (this.instances[name].loop_time_timer !== undefined) {
+                            clearInterval(this.instances[name].loop_time_timer)
+                            updateLoopTime()
+                            this.instances[name].loop_time_timer = undefined
+                            this.instances[name].loop_time_timer_timestamp = 0
+                        }
+
+
+
+                }
+
+                // Handle status
+                switch (status) {
+                    case "started":
+                    case "paused":
+                    case "stopped":
+                    case "completed":
+                        this.instances[name].status = status
+                        break
+                    case "loop_start":
+                        this.instances[name].status = "running"
+                        break
+
+                }
+            })
+
+            workspace_controller.registerCallback("experiment:expected_loop_count", ({ name, expected_loop_count }: { name: string, expected_loop_count: number }) => {
+                this.instances[name].expected_loop_count = expected_loop_count
+            })
+
+
+            workspace_controller.registerCallback("experiment:loop_count", ({ name, loop_count }: { name: string, loop_count: number }) => {
+                this.instances[name].loop_count = loop_count
+            })
+
+            workspace_controller.registerCallback("experiment:chart_config", ({ name, config }: { name: string, config: ChartConfigs }) => {
+                if (this.instances[name].charts[config.title] !== undefined) {
+                    this.instances[name].charts[config.title].reset()
+                    return
+                }
+                const chart = new Chart(config, name)
+                this.instances[name].charts[config.title] = chart
+
+            })
 
         })
     }

@@ -43,71 +43,74 @@ export abstract class EEBaseController<T extends Instance = Instance> {
     constructor(eetype: "equipment" | "experiment", createFn: (_: Instance) => T) {
         this.eetype = eetype
 
-        workspace_controller.registerOnOpen(() => {
-            this.updateImports()
-        })
-        workspace_controller.registerCallback(`${eetype}:imports`, async (imports: Imports) => {
-            this.imports = imports
-            await tick()
-            if (this.temp_save === undefined) return
-            // Create instances
-            for (const instance of Object.values(this.temp_save)) {
-                this.create(instance.name, instance.module, instance.cls)
-            }
-
-        })
-        workspace_controller.registerCallback(`${eetype}:create`, async (instance: ConcInstance) => {
-            const temp_instance: Instance = {
-                ...instance, temp_params: deepCopy(instance.params), param_opens: true, composite_opens: {},
-            }
-
-            for (const [key, value] of Object.entries(instance.params))
-                if (value.type === "composite" && temp_instance.composite_opens[key] === undefined)
-                    temp_instance.composite_opens[key] = false
-
-            this.instances[instance.name] = createFn(temp_instance)
+        setTimeout(() => {
 
 
-            if (instance.name === this.temp_name && instance.module === this.temp_module && instance.cls === this.temp_cls) {
-                this.temp_name = ""
-                this.temp_module = ""
-                this.temp_cls = ""
-            }
-
-            await tick()
-            if (!this.save_pending_create.includes(instance.name)) return
-
-            this.save_pending_create = this.save_pending_create.filter(name => name !== instance.name)
-
-            // Check if params need update
-            if (this.temp_save !== undefined &&
-                JSON.stringify(this.temp_save[instance.name].params) !==
-                JSON.stringify(this.instances[instance.name].temp_params)) {
-
-
-                this.instances[instance.name].temp_params = this.temp_save[instance.name].params
+            workspace_controller.registerOnOpen(() => {
+                this.updateImports()
+            })
+            workspace_controller.registerCallback(`${eetype}:imports`, async (imports: Imports) => {
+                this.imports = imports
                 await tick()
-                this.updateParams(instance.name)
+                if (this.temp_save === undefined) return
+                // Create instances
+                for (const instance of Object.values(this.temp_save)) {
+                    this.create(instance.name, instance.module, instance.cls)
+                }
 
-            }
+            })
+            workspace_controller.registerCallback(`${eetype}:create`, async (instance: ConcInstance) => {
+                const temp_instance: Instance = {
+                    ...instance, temp_params: deepCopy(instance.params), param_opens: true, composite_opens: {},
+                }
 
+                for (const [key, value] of Object.entries(instance.params))
+                    if (value.type === "composite" && temp_instance.composite_opens[key] === undefined)
+                        temp_instance.composite_opens[key] = false
+
+                this.instances[instance.name] = createFn(temp_instance)
+
+
+                if (instance.name === this.temp_name && instance.module === this.temp_module && instance.cls === this.temp_cls) {
+                    this.temp_name = ""
+                    this.temp_module = ""
+                    this.temp_cls = ""
+                }
+
+                await tick()
+                if (!this.save_pending_create.includes(instance.name)) return
+
+                this.save_pending_create = this.save_pending_create.filter(name => name !== instance.name)
+
+                // Check if params need update
+                if (this.temp_save !== undefined &&
+                    JSON.stringify(this.temp_save[instance.name].params) !==
+                    JSON.stringify(this.instances[instance.name].temp_params)) {
+
+
+                    this.instances[instance.name].temp_params = this.temp_save[instance.name].params
+                    await tick()
+                    this.updateParams(instance.name)
+
+                }
+            })
+
+
+
+            workspace_controller.registerCallback(`${eetype}:update_params`, async ({ name, params }: { name: string, params: Prettify<Instance["params"]> }) => {
+                this.instances[name].params = params
+
+                await tick()
+                if (!this.save_pending_params.includes(name)) return
+                this.save_pending_params = this.save_pending_params.filter(name => name !== name)
+
+            })
+
+            workspace_controller.registerCallback(`${eetype}:remove`, (name: string) => {
+                delete this.instances[name]
+            })
 
         })
-
-        workspace_controller.registerCallback(`${eetype}:update_params`, async ({ name, params }: { name: string, params: Prettify<Instance["params"]> }) => {
-            this.instances[name].params = params
-
-            await tick()
-            if (!this.save_pending_params.includes(name)) return
-            this.save_pending_params = this.save_pending_params.filter(name => name !== name)
-
-        })
-
-        workspace_controller.registerCallback(`${eetype}:remove`, (name: string) => {
-            delete this.instances[name]
-        })
-
-
 
     }
 

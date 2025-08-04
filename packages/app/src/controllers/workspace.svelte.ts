@@ -19,7 +19,9 @@ import { experiment_controller } from "./experiment.svelte"
 class WorkspaceController {
 
     workspace_ws: WebSocket | null = null
-    connected: boolean = $state(false)
+    connection: "connecting" | "connected" | "disconnected" = $state("disconnected")
+    save_status: "normal" | "success" | "fail" | "saving" = $state("normal")
+
     path: string | null = $state(null)
 
     #uvproc: Child | undefined
@@ -34,6 +36,7 @@ class WorkspaceController {
     Connect to the python workspace
     */
     async connect(path: string) {
+        this.connection = "connecting"
 
         beinn_log_controller.append("BEGIN connect to python")
 
@@ -141,18 +144,24 @@ class WorkspaceController {
             this.#onopen.forEach(async (cb) => await cb())
             // Wait for 2 seconds to make sure the save is loaded
             setTimeout(() => {
-                this.connected = true
+                this.connection = "connected"
             }, 2000)
 
         }
 
         this.workspace_ws.onclose = () => {
             console.log("Workspace WebSocket closed")
-            this.connected = false
+            this.connection = "disconnected"
         }
 
         beinn_log_controller.append("END connect to python")
 
+    }
+
+    disconnect() {
+        if (this.workspace_ws === null) return
+        this.workspace_ws.close()
+        this.path = null
     }
 
     registerOnOpen(cb: () => void) {
@@ -165,18 +174,19 @@ class WorkspaceController {
 
     sendCommand(command: string, data: any) {
         if (this.workspace_ws === null || this.workspace_ws.readyState !== WebSocket.OPEN) {
-            beinn_log_controller.append(`FAILED send command ${command}: workspace is not connected`)
+            beinn_log_controller.append(`FAILED send command ${command}: workspace is not connection`)
             return
         }
         this.workspace_ws.send(JSON.stringify({ command, value: data }))
     }
 
     async save() {
+        this.save_status = "saving"
         const save_path = this.path + "/.beinn"
         const save = {
-            // dependencies: dependency_controller.getSave(),
-            // equipments: equipment_controller.getSave(),
-            // experiments: experiment_controller.getSave(),
+            dependencies: dependency_controller.getSave(),
+            equipments: equipment_controller.getSave(),
+            experiments: experiment_controller.getSave(),
 
         }
         beinn_log_controller.append(`BEGIN save workspace to ${save_path}`)
@@ -184,12 +194,14 @@ class WorkspaceController {
         try {
             await writeTextFile(save_path, JSON.stringify(save))
             beinn_log_controller.append(`END save workspace to ${save_path}`)
-            return true
+            this.save_status = "success"
+
         }
         catch (e) {
             beinn_log_controller.append(`FAILED save workspace to ${save_path}`)
-            return false
+            this.save_status = "fail"
         }
+
     }
 
 

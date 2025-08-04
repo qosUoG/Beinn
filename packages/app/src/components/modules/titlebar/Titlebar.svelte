@@ -1,8 +1,6 @@
 <script lang="ts">
 	import { open } from "@tauri-apps/plugin-dialog";
 
-	import { tick } from "svelte";
-
 	import { load, type Store } from "@tauri-apps/plugin-store";
 	import { homeDir } from "@tauri-apps/api/path";
 	import { workspace_controller } from "$controllers/workspace.svelte";
@@ -14,10 +12,7 @@
 		Loader,
 		Save,
 	} from "@lucide/svelte";
-
-	let workspace_loading = $state(false);
-
-	let show_save: "normal" | "success" | "fail" = $state("normal");
+	import { experiment_controller } from "$controllers/experiment.svelte";
 
 	async function folderSearchHandler() {
 		const path = await open({
@@ -26,30 +21,19 @@
 			defaultPath: (await getSavedWorkspacePath()) ?? (await homeDir()),
 		});
 
-		if (path) {
-			workspace_loading = true;
-			await tick();
-			await workspace_controller.connect(path);
-			await tick();
-			// if (workspace_controller.connected) await saveWorkspacePath(path);
-			workspace_loading = false;
-		}
+		if (path) await workspace_controller.connect(path);
 	}
 
 	async function saveHandler() {
-		// const success = await workspace_controller.save();
-		// show_save = success ? "success" : "fail";
+		await workspace_controller.save();
 
 		setTimeout(() => {
-			show_save = "normal";
+			workspace_controller.save_status = "normal";
 		}, 2000);
 	}
 
-	async function closeHandler() {
-		workspace_loading = true;
-		await tick();
-		// await workspace_controller.kill();
-		workspace_loading = false;
+	function closeHandler() {
+		workspace_controller.disconnect();
 	}
 
 	let store: Store;
@@ -69,28 +53,32 @@
 					{workspace_controller.path}
 				</div>
 			</div>
-			{#if workspace_loading}
+			{#if workspace_controller.connection === "connecting"}
 				<div class="icon-btn-sm bg-slate-200">
 					<div class="animate-pulse">
 						<Loader />
 					</div>
 				</div>
-			{:else if !workspace_controller.connected}
+			{:else if workspace_controller.connection === "disconnected"}
 				<button class="icon-btn-sm slate" onclick={folderSearchHandler}
 					><FolderOpen /></button>
-			{:else}
+			{:else if experiment_controller.closeable}
 				<button class="icon-btn-sm slate" onclick={closeHandler}
 					><Ban /></button>
+			{:else}
+				<div class="icon-btn-sm bg-slate-200 text-white">
+					<Ban />
+				</div>
 			{/if}
-			{#if !workspace_controller.connected}
+			{#if workspace_controller.save_status === "saving"}
 				<div class="icon-btn-sm bg-slate-200 text-white">
 					<Save />
 				</div>
-			{:else if show_save === "success"}
+			{:else if workspace_controller.save_status === "success"}
 				<div class="icon-btn-sm green">
 					<Check />
 				</div>
-			{:else if show_save === "fail"}
+			{:else if workspace_controller.save_status === "fail"}
 				<div class="icon-btn-sm red">
 					<Cross />
 				</div>
