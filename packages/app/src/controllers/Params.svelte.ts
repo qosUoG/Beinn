@@ -45,14 +45,15 @@ export interface InstanceEquipmentParam {
     name: string
 }
 
-export interface InstanceExperimentParam {
-    type: "instance.experiment"
-    name: string
-}
+// export interface InstanceExperimentParam {
+//     type: "instance.experiment"
+//     name: string
+// }
 
 export type SimpleParamType = (
     SelectStrParam | SelectFloatParam | SelectIntParam | IntParam | FloatParam | StrParam | BoolParam |
-    InstanceEquipmentParam | InstanceExperimentParam
+    InstanceEquipmentParam
+    //  | InstanceExperimentParam
 )
 
 export interface CompositeParam {

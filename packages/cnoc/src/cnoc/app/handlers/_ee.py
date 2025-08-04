@@ -14,7 +14,6 @@ from ...public.params import (
     AllParamTypes,
     CompositeParam,
     InstanceEquipmentParam,
-    InstanceExperimentParam,
     _cnoc_params2Dict,
 )
 
@@ -148,12 +147,12 @@ def putParamsInstance(params: dict[str, AllParamTypes]):
                 params[k].instance = Equipments.instances[params[k].name].instance
                 continue
 
-            if (
-                params[k]._type == InstanceExperimentParam._type
-                and params[k].name is not None
-            ):
-                params[k].instance = Experiments.instances[params[k].name].instance
-                continue
+            # if (
+            #     params[k]._type == InstanceExperimentParam._type
+            #     and params[k].name is not None
+            # ):
+            #     params[k].instance = Experiments.instances[params[k].name].instance
+            #     continue
 
         except KeyError:
             print(

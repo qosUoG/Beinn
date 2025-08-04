@@ -17,8 +17,8 @@ experiment, please refer to the example directory.
     * FloatParam - param type with value of float type
     * BoolParam - param type with value of bool type
 
-    * InstanceEquipmentParam - param type with value implementing EquipmentProxy type
-    * InstanceExperimentParam - param type with value inheriting ExperimentABC type
+    * InstanceEquipmentParam - param type with value implementing EquipmentABC type
+
 
 """
 
