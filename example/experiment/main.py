@@ -11,6 +11,7 @@ import threading
 import time
 import timeit
 
+
 from cnoc.public.equipment import EquipmentABC
 from cnoc.public.experiment import ExperimentABC
 import traceback
@@ -24,12 +25,14 @@ import lib
 
 from cnoc.public import params as p
 
+from cnoc.public import saver
+
 
 async def main():
-    store = pd.HDFStore("data.h5")
-    print(store.get("1")[3:5])
-    pprint.pprint(store.get_storer("1").attrs.metadata)
-    store.close()
+    store = saver.Reader("data.h5")
+    print(store[4].data)
+    print(store[4].params)
+    print(store[4].time)
 
     # without_time = print(timeit.timeit(withoutJson, number=10000))
 

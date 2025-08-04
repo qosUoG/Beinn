@@ -48,12 +48,45 @@ class Reader:
         def time(self):
             return time.strftime("%Y/%m/%d %H:%M:%S UTC%z", self.timestruct)
 
-    @classmethod
-    def read(cls, index: int, path: str):
-        _store = pd.HDFStore(path)
-        dataset = cls.DataSet(
-            _store.get(f"{index}"),
-            _store.get_storer(f"{index}").attrs.metadata,
+    def __init__(self, path: str):
+        self.path = path
+
+    def __getitem__(self, index: int) -> DataSet:
+        store = pd.HDFStore(self.path)
+        dataset = Reader.DataSet(
+            store.get(f"{index}"),
+            store.get_storer(f"{index}").attrs.metadata,
         )
-        _store.close()
+        store.close()
         return dataset
+
+    def keys(self):
+        store = pd.HDFStore(self.path)
+        keys = [int(item) for item in store.keys()]
+        store.close()
+        return keys
+
+    def values(self):
+        store = pd.HDFStore(self.path)
+        keys = [int(item) for item in store.keys()]
+        res = [
+            Reader.DataSet(
+                store.get(f"{key}"),
+                store.get_storer(f"{key}").attrs.metadata,
+            )
+            for key in keys
+        ]
+        store.close()
+        return res
+
+    def items(self):
+        store = pd.HDFStore(self.path)
+        keys = [int(item) for item in store.keys()]
+        res = {
+            key: Reader.DataSet(
+                store.get(f"{key}"), store.get_storer(f"{key}").attrs.metadata
+            )
+            for key in keys
+        }
+        store.close()
+        return res
