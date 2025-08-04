@@ -124,7 +124,7 @@ class ExperimentABC(ABC):
 
         await asyncio.to_thread(self.start)
 
-        self._cnoc_saveParams(_cnoc_params2Save(self.params))
+        self._cnoc_saveParams()
 
         for listener in self._cnoc_listeners["expected_loop_count"]:
             listener(

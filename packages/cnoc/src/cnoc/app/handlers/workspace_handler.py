@@ -1,4 +1,6 @@
 import json
+import sys
+from traceback import print_tb
 
 
 from ..state.experiments import Experiments
@@ -42,4 +44,7 @@ async def workspaceHandler(ws: ServerConnection):
                 continue
         except Exception as e:
             print(f"Exception in workspace handler: {e}", flush=True)
+            _, _, traceback = sys.exc_info()
+            print_tb(traceback)
+            print(end=None, flush=True)
             continue
