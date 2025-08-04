@@ -51,7 +51,7 @@ class Reader:
     def __init__(self, path: str):
         self.path = path
 
-    def __getitem__(self, index: int) -> DataSet:
+    def get(self, index: int) -> DataSet:
         store = pd.HDFStore(self.path)
         dataset = Reader.DataSet(
             store.get(f"{index}"),
