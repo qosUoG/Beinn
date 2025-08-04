@@ -62,13 +62,13 @@ class Reader:
 
     def keys(self):
         store = pd.HDFStore(self.path)
-        keys = [int(item) for item in store.keys()]
+        keys = store.keys()
         store.close()
         return keys
 
     def values(self):
         store = pd.HDFStore(self.path)
-        keys = [int(item) for item in store.keys()]
+        keys = store.keys()
         res = [
             Reader.DataSet(
                 store.get(f"{key}"),
@@ -81,7 +81,7 @@ class Reader:
 
     def items(self):
         store = pd.HDFStore(self.path)
-        keys = [int(item) for item in store.keys()]
+        keys = store.keys()
         res = {
             key: Reader.DataSet(
                 store.get(f"{key}"), store.get_storer(f"{key}").attrs.metadata

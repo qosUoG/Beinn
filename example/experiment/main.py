@@ -30,7 +30,13 @@ from cnoc.public import saver
 
 async def main():
     store = saver.Reader("data.h5")
-    wow = store.get(3)
+    print(store.keys())
+    print(store.values())
+    print(store.items())
+
+    # store = pd.HDFStore("data.h5")
+    # print(store.keys())
+    # store.close()
 
     # without_time = print(timeit.timeit(withoutJson, number=10000))
 
