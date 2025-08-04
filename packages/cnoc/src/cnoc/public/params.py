@@ -404,5 +404,5 @@ def _cnoc_dict2Params(data: dict[str, dict]) -> Params:
     return params
 
 
-def params2Save(params: Params) -> dict[str, dict]:
+def _cnoc_params2Save(params: Params) -> dict[str, dict]:
     return {k: v.toSave() for k, v in params.items()}

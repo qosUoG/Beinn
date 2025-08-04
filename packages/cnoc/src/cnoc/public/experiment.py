@@ -16,7 +16,7 @@ from time import time
 from traceback import print_tb
 from typing import Callable, Literal, TypedDict
 
-from .params import params2Save
+from .params import _cnoc_params2Save
 
 from .saver import Saver
 from .exceptions import ExperimentCompleted
@@ -123,6 +123,8 @@ class ExperimentABC(ABC):
         self._timestamp = int(time() * 1000)
 
         await asyncio.to_thread(self.start)
+
+        self._cnoc_saveParams(_cnoc_params2Save(self.params))
 
         for listener in self._cnoc_listeners["expected_loop_count"]:
             listener(
@@ -248,7 +250,7 @@ class ExperimentABC(ABC):
 
     def _cnoc_saveParams(self):
         for saver in self._cnoc_savers:
-            saver._cnoc_saveParams(params2Save(self.params))
+            saver._cnoc_saveParams(_cnoc_params2Save(self.params))
 
     def cnocExpectedLoopCount(self, loop_count: int):
         self._cnoc_expected_loop_count = loop_count
