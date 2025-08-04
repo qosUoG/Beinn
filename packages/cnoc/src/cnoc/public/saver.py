@@ -26,11 +26,11 @@ class Saver:
 
     def save(self, data: pd.DataFrame):
         if hasattr(self, "_attrs"):
-            self._store.append(f"{self._key}", data)
+            self._store.append(f"pid{self._key}", data)
             return
 
-        self._store.put(f"{self._key}", data, format="table")
-        self._attrs = self._store.get_storer(f"{self._key}").attrs
+        self._store.put(f"pid{self._key}", data, format="table")
+        self._attrs = self._store.get_storer(f"pid{self._key}").attrs
         self._attrs.metadata = self._metadata
 
     def _cnoc_close(self):
@@ -51,11 +51,11 @@ class Reader:
     def __init__(self, path: str):
         self.path = path
 
-    def get(self, index: int) -> DataSet:
+    def get(self, key: str) -> DataSet:
         store = pd.HDFStore(self.path)
         dataset = Reader.DataSet(
-            store.get(f"{index}"),
-            store.get_storer(f"{index}").attrs.metadata,
+            store.get(key),
+            store.get_storer(key).attrs.metadata,
         )
         store.close()
         return dataset
@@ -71,8 +71,8 @@ class Reader:
         keys = store.keys()
         res = [
             Reader.DataSet(
-                store.get(f"{key}"),
-                store.get_storer(f"{key}").attrs.metadata,
+                store.get(key),
+                store.get_storer(key).attrs.metadata,
             )
             for key in keys
         ]
@@ -83,9 +83,7 @@ class Reader:
         store = pd.HDFStore(self.path)
         keys = store.keys()
         res = {
-            key: Reader.DataSet(
-                store.get(f"{key}"), store.get_storer(f"{key}").attrs.metadata
-            )
+            key: Reader.DataSet(store.get(key), store.get_storer(key).attrs.metadata)
             for key in keys
         }
         store.close()

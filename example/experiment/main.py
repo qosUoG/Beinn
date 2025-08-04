@@ -33,6 +33,7 @@ async def main():
     print(store.keys())
     print(store.values())
     print(store.items())
+    print(store.get("pid0"))
 
     # store = pd.HDFStore("data.h5")
     # print(store.keys())
