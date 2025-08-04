@@ -39,4 +39,3 @@ async def chartHandler(experiment_name: str, chart_name: str, ws: ServerConnecti
     except ConnectionClosed:
         consumer_task.cancel()
         unsubscribe()
-        print("ConnectionClosed", flush=True)

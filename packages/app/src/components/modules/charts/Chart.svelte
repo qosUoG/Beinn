@@ -12,10 +12,13 @@
 	$effect(() => {
 		if (canvas) chart.setCanvas(canvas.transferControlToOffscreen());
 	});
+
+	let target: HTMLDivElement | undefined = $state(undefined);
 </script>
 
 <DragResizeCard
 	bind:parent
+	bind:target
 	top={chart.top}
 	left={chart.left}
 	width={chart.width}
@@ -39,6 +42,9 @@
 			<button
 				class="icon-btn-sm bg-gray-400 rounded text-gray-100"
 				onclick={() => {
+					if (!chart.showing && target)
+						target.style.height = `${chart.height}px`;
+					else if (target) target.style.height = "32px";
 					chart.showing = !chart.showing;
 				}}>
 				{#if chart.showing}

@@ -14,6 +14,7 @@
 		onresize,
 		onmove,
 		children,
+		target = $bindable(),
 		class: clazz,
 	}: {
 		parent: HTMLElement;
@@ -36,9 +37,8 @@
 
 		children: Snippet;
 		class?: string;
+		target: HTMLElement | undefined;
 	} = $props();
-
-	let target: HTMLDivElement | undefined = $state(undefined);
 
 	const getStyle = (
 		v: "top" | "bottom" | null,
