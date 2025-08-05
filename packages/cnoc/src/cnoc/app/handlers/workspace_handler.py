@@ -55,6 +55,7 @@ async def workspaceHandler(ws: ServerConnection):
                     name = req["value"]["name"]
                     code = code.replace(name, f"Equipments.instances[{name}].instance")
 
+                print(code, flush=True)
                 try:
                     print(
                         f"{eval(code, globals=globals(), locals=locals())}",

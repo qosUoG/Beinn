@@ -43,8 +43,10 @@ class CnocController extends LogController {
         this.command_history.unshift(command);
         this.updateQuery("");
         this.append(command);
+
         // Check if the command is an equipment code
         for (const name of Object.keys(equipment_controller.instances)) {
+            console.log({ name, command })
             if (command.match(name)) {
                 workspace_controller.sendCommand("interpret:equipment", { code: command, name });
                 return
