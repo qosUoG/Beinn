@@ -7,8 +7,6 @@ from traceback import print_tb
 from ..state.equipments import Equipments
 
 
-from ...public.equipment import _interpret
-
 from ..state.experiments import Experiments
 
 from ..state.foundation import Foundation
