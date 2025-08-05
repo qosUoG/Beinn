@@ -49,11 +49,13 @@ class EquipmentABC(ABC):
         with self.lock:
             try:
                 print(f"{eval(code, globals=globals(), locals=locals())}", flush=True)
+                return
 
             except SyntaxError:
                 pass
             except Exception as e:
                 print(e, flush=True)
+                return
 
             try:
                 f = StringIO()
