@@ -110,6 +110,10 @@
 			<input
 				class="w-full bg-slate-200 wrapped"
 				bind:value={input}
+				autocapitalize="off"
+				autocomplete="off"
+				autocorrect="off"
+				spellcheck="false"
 				onkeydown={keyDownHandler} />
 
 			<button
