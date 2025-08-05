@@ -65,9 +65,9 @@ class EquipmentABC(ABC):
         self.params: Params
         self.lock = Lock()
 
-    def interpret(self, code: str, name: str):
-        code = code.replace(name, "self")
-        return _interpret(code)
+    def _cnoc_interpret(self, code: str, name: str):
+        with self.lock:
+            _interpret(code)
 
     def cleanup(self):
         """

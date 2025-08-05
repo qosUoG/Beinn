@@ -56,7 +56,9 @@ async def workspaceHandler(ws: ServerConnection):
                         _interpret(code)
 
                     case "equipment":
-                        Equipments.instances[name].instance.interpret(code, name)
+                        name = req["value"]["name"]
+                        code = code.replace(name, "self")
+                        Equipments.instances[name].instance._cnoc_interpret(code, name)
                         pass
 
         except Exception as e:
