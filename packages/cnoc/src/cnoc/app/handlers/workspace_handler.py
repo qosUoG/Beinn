@@ -55,31 +55,31 @@ async def workspaceHandler(ws: ServerConnection):
                     name = req["value"]["name"]
                     code = code.replace(name, f"Equipments.instances[{name}].instance")
 
-                    try:
-                        print(
-                            f"{eval(code, globals=globals(), locals=locals())}",
-                            flush=True,
-                        )
-                        continue
+                try:
+                    print(
+                        f"{eval(code, globals=globals(), locals=locals())}",
+                        flush=True,
+                    )
+                    continue
 
-                    except SyntaxError:
-                        pass
-                    except Exception as e:
-                        print(e, flush=True)
-                        continue
+                except SyntaxError:
+                    pass
+                except Exception as e:
+                    print(e, flush=True)
+                    continue
 
-                    try:
-                        f = StringIO()
+                try:
+                    f = StringIO()
 
-                        with redirect_stdout(f):
-                            with redirect_stderr(sys.stdout):
-                                exec(code, globals=globals(), locals=locals())
+                    with redirect_stdout(f):
+                        with redirect_stderr(sys.stdout):
+                            exec(code, globals=globals(), locals=locals())
 
-                        continue
+                    continue
 
-                    except Exception as e:
-                        print(e, flush=True)
-                        continue
+                except Exception as e:
+                    print(e, flush=True)
+                    continue
 
             print(f"Unknown command {command}", flush=True)
 
