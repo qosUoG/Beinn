@@ -10,8 +10,7 @@
 	import Board from "$components/modules/charts/Board.svelte";
 
 	getCurrentWindow().listen("tauri://close-requested", async () => {
-		workspace_controller.disconnect();
-		await exit();
+		if (await workspace_controller.kill()) await exit();
 	});
 
 	let open = $state(false);

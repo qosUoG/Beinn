@@ -173,7 +173,7 @@ class WorkspaceController {
             const should_kill = await confirm("Experiment might still be running. Are you sure to force kill the workspace?",
                 { title: "Beinn", kind: "warning" })
 
-            if (!should_kill) return
+            if (!should_kill) return false
 
             // send stop experiments command
             for (const experiment of experiment_controller.instances_arr) {
@@ -190,6 +190,8 @@ class WorkspaceController {
 
         // There are no running experiment
         this.workspace_ws.close()
+
+        return true
 
     }
 
