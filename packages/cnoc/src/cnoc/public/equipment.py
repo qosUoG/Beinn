@@ -45,27 +45,27 @@ class EquipmentABC(ABC):
         self.params: Params
         self.lock = Lock()
 
-    def _cnoc_interpret(self, code: str, name: str):
-        with self.lock:
-            try:
-                print(f"{eval(code, globals=globals(), locals=locals())}", flush=True)
-                return
+    # def _cnoc_interpret(self, code: str, name: str):
+    #     with self.lock:
+    #         try:
+    #             print(f"{eval(code, globals=globals(), locals=locals())}", flush=True)
+    #             return
 
-            except SyntaxError:
-                pass
-            except Exception as e:
-                print(e, flush=True)
-                return
+    #         except SyntaxError:
+    #             pass
+    #         except Exception as e:
+    #             print(e, flush=True)
+    #             return
 
-            try:
-                f = StringIO()
+    #         try:
+    #             f = StringIO()
 
-                with redirect_stdout(f):
-                    with redirect_stderr(sys.stdout):
-                        exec(code, globals=globals(), locals=locals())
+    #             with redirect_stdout(f):
+    #                 with redirect_stderr(sys.stdout):
+    #                     exec(code, globals=globals(), locals=locals())
 
-            except Exception as e:
-                print(e, flush=True)
+    #         except Exception as e:
+    #             print(e, flush=True)
 
     def cleanup(self):
         """

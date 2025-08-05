@@ -51,39 +51,34 @@ async def workspaceHandler(ws: ServerConnection):
 
             if command.startswith("interpret:"):
                 code: str = req["value"]["code"]
-                match command.split(":")[1]:
-                    case "general":
-                        try:
-                            print(
-                                f"{eval(code, globals=globals())}",
-                                flush=True,
-                            )
-                            continue
+                if command.split(":")[1] == "equipment":
+                    name = req["value"]["name"]
+                    code = code.replace(name, f"Equipments.instances[{name}].instance")
 
-                        except SyntaxError:
-                            pass
-                        except Exception as e:
-                            print(e, flush=True)
-                            continue
+                    try:
+                        print(
+                            f"{eval(code, globals=globals())}",
+                            flush=True,
+                        )
+                        continue
 
-                        try:
-                            f = StringIO()
+                    except SyntaxError:
+                        pass
+                    except Exception as e:
+                        print(e, flush=True)
+                        continue
 
-                            with redirect_stdout(f):
-                                with redirect_stderr(sys.stdout):
-                                    exec(code, globals=globals())
+                    try:
+                        f = StringIO()
 
-                            continue
+                        with redirect_stdout(f):
+                            with redirect_stderr(sys.stdout):
+                                exec(code, globals=globals())
 
-                        except Exception as e:
-                            print(e, flush=True)
-                            continue
+                        continue
 
-                    case "equipment":
-                        name = req["value"]["name"]
-                        code = code.replace(name, "self")
-                        Equipments.instances[name].instance._cnoc_interpret(code, name)
-
+                    except Exception as e:
+                        print(e, flush=True)
                         continue
 
             print(f"Unknown command {command}", flush=True)
