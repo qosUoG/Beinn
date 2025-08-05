@@ -1,71 +1,97 @@
-import importlib
-import inspect
+from contextlib import redirect_stderr, redirect_stdout
+from io import StringIO
 import json
-import pkgutil
-from typing import Literal, TypedDict
-import warnings
+import sys
+from traceback import print_tb
 
-from packages.meall.lib.utils.params import ParamModels2Params
+from ..state.equipments import Equipments  # noqa: F401
 
-from ..state.state import State
-from ...public.equipment import EquipmentABC
-from ...public.experiment import ExperimentABC
+
+from ..state.experiments import Experiments
+
+from ..state.foundation import Foundation
+
+
 from websockets import ServerConnection
+
+from ._ee import handlers as eeHandlers
 
 
 async def workspaceHandler(ws: ServerConnection):
+    Foundation.workspace_ws = ws
+
     async for message in ws:
-        req = json.loads(message)
-        command: str = req["command"]
-
-        match command:
-            case "options:equipment":
-                ws.send(json.dumps(eeOptions(EquipmentABC)))
-                break
-            case "options:experiment":
-                ws.send(json.dumps(eeOptions(ExperimentABC)))
-                break
-            case "create:equipment":
-                State.create("equipment", req["id"], req["module"], req["cls"])
-                break
-            case "create:experiment":
-                State.create("equipment", req["id"], req["module"], req["cls"])
-                break
-            case "set_params":
-                State.setParams(req["id"], ParamModels2Params(req["params"]))
-                break
-
-
-def eeOptions[T: type[ExperimentABC] | type[EquipmentABC]](eetype: T):
-    class ReturnType(TypedDict):
-        modules: list[str]
-        cls: str
-
-    res: dict[T, ReturnType] = {}
-
-    warnings.filterwarnings("ignore")
-
-    # Check all possible paths
-    for package in pkgutil.walk_packages():
-        # Exclude these
-        if package.name.endswith("__main__"):
-            continue
-
         try:
-            for [cls, clsT] in inspect.getmembers(
-                importlib.import_module(package.name), inspect.isclass
-            ):
-                if not issubclass(clsT, eetype) or clsT is eetype:
+            req = json.loads(message)
+            command: str = req["command"]
+
+            if command in eeHandlers.keys():
+                await eeHandlers[command](ws, req["value"])
+                continue
+
+            if command.startswith("experiment:"):
+                name = req["value"]["name"]
+                if name not in Experiments.instances:
+                    print(f"Experiment {name} does not exist", flush=True)
                     continue
 
-                if clsT not in res:
-                    res[clsT] = {"modules": [package.name], "cls": cls}
-                else:
-                    res[clsT]["modules"].append(package.name)
+                match command.split(":")[1]:
+                    case "start":
+                        await Experiments.instances[name].instance._cnoc_start()
+                        continue
+                    case "pause":
+                        Experiments.instances[name].instance._cnoc_pause()
+                        continue
+                    case "stop":
+                        Experiments.instances[name].instance._cnoc_stop()
+                        continue
+                    case "continue":
+                        Experiments.instances[name].instance._cnoc_continue()
+                        continue
 
-        except Exception:
-            pass
+            if command.startswith("interpret:"):
+                code: str = req["value"]["code"]
+                if command.split(":")[1] == "equipment":
+                    name = req["value"]["name"]
+                    code = code.replace(
+                        name, f"Equipments.instances['{name}'].instance"
+                    )
 
-    warnings.filterwarnings("default")
+                try:
+                    print(
+                        f"{eval(code, globals=globals())}",
+                        flush=True,
+                    )
+                    continue
 
-    return list(res.values())
+                except SyntaxError:
+                    pass
+                except Exception as e:
+                    print(e, flush=True)
+                    continue
+
+                try:
+                    f = StringIO()
+
+                    with redirect_stdout(f):
+                        with redirect_stderr(sys.stdout):
+                            exec(code, globals=globals())
+
+                    continue
+
+                except Exception as e:
+                    print(e, flush=True)
+                    continue
+
+            if command == "kill":
+                for experiment in Experiments.instances.values():
+                    experiment.instance._cnoc_kill()
+
+            print(f"Unknown command {command}", flush=True)
+
+        except Exception as e:
+            print(f"Exception in workspace handler: {e}", flush=True)
+            _, _, traceback = sys.exc_info()
+            print_tb(traceback)
+            print(end=None, flush=True)
+            continue

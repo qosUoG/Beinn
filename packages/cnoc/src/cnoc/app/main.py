@@ -1,24 +1,45 @@
 import asyncio
+import site
+import sys
+from urllib.parse import unquote
 
-from .handlers.experiment_handler import experimentHandler
+from .handlers.chart_handler import chartHandler
+
+from .state.foundation import Foundation
+
+
+# from .handlers.experiment_handler import experimentHandler
 from .handlers.workspace_handler import workspaceHandler
 from websockets import ServerConnection, serve
 
 
 async def handler(ws: ServerConnection):
-    if ws.request.path == "/":
-        workspaceHandler(ws)
-    elif ws.request.path.startswith("/experiment"):
-        id = ws.request.path.split("/")[2]
-        experimentHandler(ws, id)
-    elif ws.request.path.startswith("/chart"):
-        pass
+    path = ws.request.path
+
+    # Workspace
+    if path == "/workspace":
+        await workspaceHandler(ws)
+    elif path == "/close":
+        await ws.close()
+        sys.exit()
+    elif path.startswith("/chart"):
+        await chartHandler(*unquote(path).split("/")[2:], ws)
 
 
-async def main():
+async def _main():
+    Foundation.setLoop(asyncio.get_running_loop())
     async with serve(handler, "localhost", 8001) as server:
         await server.serve_forever()
 
 
+def main():
+    roots = __file__.split("/")
+    venv_index = roots.index(".venv")
+    path = "/".join(roots[:venv_index])
+
+    site.addsitedir(path)
+    asyncio.run(_main())
+
+
 if __name__ == "__main__":
-    asyncio.run(main())
+    main()

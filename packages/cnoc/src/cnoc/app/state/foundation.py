@@ -1,13 +1,15 @@
 import asyncio
 from asyncio import Event
-import threading
 import time
 from typing import Any, Coroutine
+
+from websockets import ServerConnection
 
 
 class Foundation:
     _loop: asyncio.EventLoop
     _tasks: list[asyncio.Task]
+    workspace_ws: ServerConnection
 
     @classmethod
     def crateTask(cls, coro: Coroutine[Any, Any, Any]):
@@ -23,14 +25,7 @@ class Foundation:
 
     @classmethod
     def runCoroThreadsafeBlocking(cls, coro: Coroutine[Any, Any, None]):
-        done = threading.Event()
-
-        async def _inner():
-            await coro
-            done.set()
-
-        asyncio.create_task(_inner())
-        done.wait()
+        asyncio.run_coroutine_threadsafe(coro, cls._loop)
 
 
 class ExperimentStatus:

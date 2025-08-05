@@ -1,22 +1,21 @@
 from dataclasses import dataclass
 
+
 import random
 from typing import TypedDict, override
 
-from click import ParamType
 
-from cnoc.public import params as p
-from cnoc.experiment import ExperimentABC
-from cnoc.managers import ManagerABC
 import time
 
-from cnoc.extensions.chart import XY
-from cnoc.extensions.saver import XYFloatSaver
+
+from cnoc import charts, exceptions, params as p, experiment, saver
+
 from examplelib.ExampleDriver import ExampleEquipment
+import pandas as pd
 
 
 @dataclass
-class ExampleExperiment(ExperimentABC):
+class ExampleExperiment(experiment.ExperimentABC):
     class ParamsType(TypedDict):
         strparam: p.StrParam
         floatparam: p.FloatParam
@@ -26,8 +25,9 @@ class ExampleExperiment(ExperimentABC):
         selectintparam: p.SelectIntParam
         selectfloatparam: p.SelectFloatParam
         instance_equipment_param: p.InstanceEquipmentParam[ExampleEquipment]
+        compositeparam: p.CompositeParam
 
-    params: ParamType
+    params: ParamsType
 
     def __init__(self):
         # The name of the experiment assigned during runtime would be made accessible.
@@ -42,16 +42,30 @@ class ExampleExperiment(ExperimentABC):
             "select_intparam": p.SelectIntParam([1, 2, 3]),
             "select_floatparam": p.SelectFloatParam([1.1, 2.2, 3.3]),
             "instance_equipmentparam": p.InstanceEquipmentParam[ExampleEquipment](),
+            "compositeparam": p.CompositeParam(
+                {
+                    "comp_strparam": p.StrParam(),
+                    "comp_floatparam": p.FloatParam(suffix="W"),
+                    "comp_intparam": p.IntParam(),
+                    "comp_boolparam": p.BoolParam(False),
+                    "comp_select_strparam": p.SelectStrParam(
+                        ["option1", "option2", "option3"]
+                    ),
+                    "comp_select_intparam": p.SelectIntParam([1, 2, 3]),
+                    "comp_select_floatparam": p.SelectFloatParam([1.1, 2.2, 3.3]),
+                    "comp_instance_equipmentparam": p.InstanceEquipmentParam[
+                        ExampleEquipment
+                    ](),
+                },
+            ),
         }
 
-        # This should be all of the __init__ code. For instantiation of params from the final params list, or turning on equipment, initializing equipment etc, define in the initialization method
+        super().__init__()
+
+        # This should be all of the __init__ code. For instantiation of params from the final params list, or turning on equipment, initializing equipment etc, define in the start method
 
     @override
-    def initialize(self, manager: ManagerABC) -> int:
-        # import pprint
-
-        # pprint.pprint(self.params)
-
+    def start(self) -> int:
         # # You may interact with the equipment here to do initialization
         # self.params["instance_equipment_param"].instance.echo("hellow world")
         # self.params["instance_equipment_param"].instance.power = 10
@@ -60,16 +74,17 @@ class ExampleExperiment(ExperimentABC):
         # self.inputs = numpy.arange(self.params["intparam"].value)
 
         # # # After the params, instantiate charts and sql savers as needed
-        self.xyplot: XY = manager.createChart(
-            XY,
-            XY.kwargs(
-                title="Example XY Plot",
-                x_axis="index",
-                y_axis="C",
-                y_names=["temperature"],
-                mode="append",
-            ),
+        self.scatter_plot: charts.Scatter = charts.Scatter(
+            title="Example Scatter Plot",
+            x_axis="index",
+            y_axis="C",
+            y_names=["temperature"],
+            mode="append",
         )
+        self.cnocCreateChart(self.scatter_plot)
+        self.saver = saver.Saver(path="data.h5")
+
+        self.cnocCreateSaver(self.saver)
 
         # self.xyplot2: XY = manager.createChart(
         #     XY,
@@ -80,14 +95,12 @@ class ExampleExperiment(ExperimentABC):
         #     ),
         # )
 
-        self.saver: XYFloatSaver = manager.createSaver(
-            XYFloatSaver,
-            XYFloatSaver.kwargs(title="ExampleSqlSaver", y_names=["temperature"]),
-        )
+        # self.saver: XYFloatSaver = manager.createSaver(
+        #     XYFloatSaver,
+        #     XYFloatSaver.kwargs(title="ExampleSqlSaver", y_names=["temperature"]),
+        # )
 
-        print("initialized experiment")
-
-        # manager.suggestTotalIterations(10)
+        self.cnocExpectedLoopCount(10)
 
     @override
     def loop(self, index: int):
@@ -104,26 +117,27 @@ class ExampleExperiment(ExperimentABC):
         # self.saver.save({"index": index, "temperature": temp})
 
         # # This is here just to not make everything happening too quickly
-        time.sleep(0.01)
+        time.sleep(0.5)
 
         # Raise an exception such that qoslapapp knows experiment is ended
         # print(f"loop: {index}")
         value = random.random()
-        self.xyplot.plot(
+        self.scatter_plot.plot(
             {
                 "chart:x": index,
                 "temperature": value,
             }
         )
+        self.saver.save(pd.DataFrame({"index": [index], "temperature": [value]}))
         # print("plotted")
 
-        self.saver.save({"saver$x": index, "temperature": value})
+        # self.saver.save({"saver$x": index, "temperature": value})
         # print("saved")
 
-        # if index >= 9:
-        #     raise e.ExperimentEnded
-        if index % 100 == 0:
-            print(index)
+        if index >= 9:
+            raise exceptions.ExperimentCompleted
+        # if index % 100 == 0:
+        #     print(index)
 
     def stop(self):
         # define code here for clean up, for example switching off some equipment etc

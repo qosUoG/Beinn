@@ -1,52 +1,71 @@
 import asyncio
+import datetime
 import importlib
 import inspect
+import json
 import os
 import pickle
 import pkgutil
 import pprint
+import threading
+import time
+import timeit
 
-from cnoc.equipment import EquipmentABC
-from cnoc.experiment import ExperimentABC
+
+from cnoc.public.equipment import EquipmentABC
+from cnoc.public.experiment import ExperimentABC
 import traceback
 from io import StringIO
 from contextlib import redirect_stderr, redirect_stdout
 import sys
 
+from numpy import dtype
+import pandas as pd
+import lib
+
+from cnoc.public import params as p
+
+from cnoc.public import saver
+
 
 async def main():
-    # try:
-    #     for package in pkgutil.walk_packages():
-    #         if not package.name.startswith("lib"):
-    #             continue
-    #         for [cls, clsT] in inspect.getmembers(
-    #             importlib.import_module(package.name), inspect.isclass
-    #         ):
-    #             if (
-    #                 not issubclass(clsT, ExperimentABC)
-    #                 or clsT is ExperimentABC
-    #                 or clsT is EquipmentABC
-    #             ):
-    #                 continue
+    store = saver.Reader("data.h5")
+    print(store.keys())
+    print(store.values())
+    print(store.items())
+    pid0 = store.get("pid0")
+    print(pid0.data)
+    print(pid0.time)
+    # print(pid0.params)
+    pid1 = store.get("pid1")
+    print(pid1.data)
+    print(pid1.time)
+    # print(pid1.params)
+    pid1 = store.get(store.keys()[-1])
+    print(pid1.data)
+    print(pid1.time)
 
-    #             print(cls)
+    # store = pd.HDFStore("data.h5")
+    # print(store.keys())
+    # store.close()
 
-    # except Exception as e:
-    #     if package.name.startswith("lib"):
-    #         print(package.name)
-    #         print(e)
-    #         traceback.print_exception(e)
+    # without_time = print(timeit.timeit(withoutJson, number=10000))
 
-    f = StringIO()
+    # print(with_time)
+    # print(without_time)
 
-    with redirect_stdout(f):
-        with redirect_stderr(sys.stdout):
-            print("stderr1", file=sys.stderr)
-            print("stdout1")
-            print("stderr2", file=sys.stderr)
-            print("stdout2")
+    # store.put("data", json.dumps({"hi": {"hi": "hi"}}), format="table")
+    # df2 = pd.DataFrame([[5, 6], [7, 8]], columns=["A", "B"])
+    # store.append(
+    #     "data",
+    #     json.dumps({"bye": {"bye": "bye"}})),
+    # )
+    # print(store.get("data"))
+    # store.close()
 
-    print(f.getvalue())
+    # print(
+    #     time.strftime("%Y/%m/%d %H:%M:%S UTC%z", time.localtime()),
+    # )
 
 
 if __name__ == "__main__":

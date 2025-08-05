@@ -12,9 +12,9 @@ example/examplelib.
         contextmanager is blocking.
 """
 
-from abc import ABC, abstractmethod
-from contextlib import contextmanager
-from typing import Iterator, Protocol
+from abc import ABC
+
+from threading import Lock
 
 
 class EquipmentABC(ABC):
@@ -23,7 +23,7 @@ class EquipmentABC(ABC):
 
     Attributes
     ----------
-    params : .params.Params
+    params : Params
         a dictionary of parameters accessible by the equipment driver
 
     """
@@ -41,6 +41,29 @@ class EquipmentABC(ABC):
         from .params import Params
 
         self.params: Params
+        self.lock = Lock()
+
+    # def _cnoc_interpret(self, code: str, name: str):
+    #     with self.lock:
+    #         try:
+    #             print(f"{eval(code, globals=globals(), locals=locals())}", flush=True)
+    #             return
+
+    #         except SyntaxError:
+    #             pass
+    #         except Exception as e:
+    #             print(e, flush=True)
+    #             return
+
+    #         try:
+    #             f = StringIO()
+
+    #             with redirect_stdout(f):
+    #                 with redirect_stderr(sys.stdout):
+    #                     exec(code, globals=globals(), locals=locals())
+
+    #         except Exception as e:
+    #             print(e, flush=True)
 
     def cleanup(self):
         """
@@ -53,20 +76,3 @@ class EquipmentABC(ABC):
         It is optional to implement this method.
         """
         pass
-
-
-class EquipmentProxy[T: EquipmentABC](Protocol):
-    """
-    Wrapper class of equipment driver during runtime
-
-    Methods
-    ----------
-    lock()
-        A contextmanager for threadsafe access of the underlying equipment.
-        Users would need to attain the lock to access the equipment instance.
-    """
-
-    @contextmanager
-    @abstractmethod
-    def lock(self) -> Iterator[T]:
-        raise NotImplementedError

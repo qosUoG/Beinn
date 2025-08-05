@@ -1,36 +1,45 @@
 <script lang="ts">
-	import { mode_controller } from "$components/modules/ModeController.svelte";
-
-	import Config from "$components/modules/config/Config.svelte";
-	import Experiments from "$components/modules/runtime/Runtime.svelte";
-
-	import CliPanel from "$components/modules/CliPanel.svelte";
-
-	import Titlebar from "$components/modules/Titlebar.svelte";
+	import Titlebar from "$components/modules/titlebar/Titlebar.svelte";
 	import { exit } from "@tauri-apps/plugin-process";
 
 	import { getCurrentWindow } from "@tauri-apps/api/window";
-	import LogPanel from "$components/modules/LogPanel.svelte";
-	import { workspace } from "$states/workspace.svelte";
+
+	import Config from "$components/modules/config/Config.svelte";
+	import { workspace_controller } from "$controllers/workspace.svelte";
+	import { ChevronsRight } from "@lucide/svelte";
+	import Board from "$components/modules/charts/Board.svelte";
 
 	getCurrentWindow().listen("tauri://close-requested", async () => {
-		const should_kill = await workspace.kill();
-		if (should_kill) await exit(0);
+		if (await workspace_controller.kill()) await exit();
 	});
+
+	let open = $state(false);
 </script>
 
 <div class="w-screen h-screen fcol max-h-screen max-w-screen">
 	<Titlebar />
 
-	<div class="w-full flex-grow rounded relative frow-4 p-2 pt-0 min-h-0">
-		{#if mode_controller.mode === "Configuration"}
-			<Config />
-		{:else if mode_controller.mode === "Runtime"}
-			<Experiments />
+	<div class="w-full flex-grow relative">
+		<div class="absolute top-0 left-0 w-full h-full frow min-h-0">
+			{#if open}
+				<Config bind:open />
+			{/if}
+
+			<Board />
+		</div>
+
+		{#if !open}
+			<button
+				class=" text-white aspect-auto frow items-center pl-2 bg-slate-800 rounded-r h-6 w-fit absolute top-0 left-0"
+				onclick={() => {
+					open = true;
+				}}>
+				Configuration
+
+				<span class="icon-btn-sm text-white">
+					<ChevronsRight />
+				</span>
+			</button>
 		{/if}
-
-		<CliPanel />
-
-		<LogPanel />
 	</div>
 </div>

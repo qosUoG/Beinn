@@ -41,14 +41,13 @@ export default defineConfig({
   },
   resolve: {
     alias: {
-      $icons: path.resolve("./src/icons"),
-      $workers: path.resolve("./src/workers"),
+
       $components: path.resolve("./src/components"),
-      $websockets: path.resolve("./src/websockets"),
-      $states: path.resolve("./src/states"),
+
+
       $lib: path.resolve("./src/lib"),
-      $services: path.resolve("./src/services"),
-      $pages: path.resolve("./src/pages"),
+
+      $controllers: path.resolve("./src/controllers"),
     },
   },
 })
