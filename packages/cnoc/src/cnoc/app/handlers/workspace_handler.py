@@ -53,7 +53,9 @@ async def workspaceHandler(ws: ServerConnection):
                 code: str = req["value"]["code"]
                 if command.split(":")[1] == "equipment":
                     name = req["value"]["name"]
-                    code = code.replace(name, f"Equipments.instances[{name}].instance")
+                    code = code.replace(
+                        name, f"Equipments.instances['{name}'].instance"
+                    )
 
                 print(code, flush=True)
                 try:
