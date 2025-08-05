@@ -1,3 +1,5 @@
+from contextlib import redirect_stderr, redirect_stdout
+from io import StringIO
 import json
 import sys
 from traceback import print_tb
@@ -53,7 +55,26 @@ async def workspaceHandler(ws: ServerConnection):
                 code: str = req["value"]["code"]
                 match command.split(":")[1]:
                     case "general":
-                        _interpret(code)
+                        try:
+                            print(
+                                f"{eval(code, globals=globals(), locals=locals())}",
+                                flush=True,
+                            )
+
+                        except SyntaxError:
+                            pass
+                        except Exception as e:
+                            print(e, flush=True)
+
+                        try:
+                            f = StringIO()
+
+                            with redirect_stdout(f):
+                                with redirect_stderr(sys.stdout):
+                                    exec(code, globals=globals(), locals=locals())
+
+                        except Exception as e:
+                            print(e, flush=True)
 
                     case "equipment":
                         name = req["value"]["name"]
