@@ -58,11 +58,13 @@ async def workspaceHandler(ws: ServerConnection):
                                 f"{eval(code, globals=globals(), locals=locals())}",
                                 flush=True,
                             )
+                            continue
 
                         except SyntaxError:
                             pass
                         except Exception as e:
                             print(e, flush=True)
+                            continue
 
                         try:
                             f = StringIO()
@@ -71,14 +73,20 @@ async def workspaceHandler(ws: ServerConnection):
                                 with redirect_stderr(sys.stdout):
                                     exec(code, globals=globals(), locals=locals())
 
+                            continue
+
                         except Exception as e:
                             print(e, flush=True)
+                            continue
 
                     case "equipment":
                         name = req["value"]["name"]
                         code = code.replace(name, "self")
                         Equipments.instances[name].instance._cnoc_interpret(code, name)
-                        pass
+
+                        continue
+
+            print(f"Unknown command {command}", flush=True)
 
         except Exception as e:
             print(f"Exception in workspace handler: {e}", flush=True)
