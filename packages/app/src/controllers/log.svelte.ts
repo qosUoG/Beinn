@@ -14,7 +14,7 @@ export class LogController {
     }
 
     scroll_position: number = $state(0)
-    is_refreshing: boolean = $state(false)
+    is_refreshing: boolean = $state(true)
     show_timetext: boolean = $state(false)
 
     append(message: string) {

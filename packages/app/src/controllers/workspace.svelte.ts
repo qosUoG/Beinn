@@ -164,6 +164,35 @@ class WorkspaceController {
         this.path = null
     }
 
+    async kill() {
+        if (this.workspace_ws === null) return
+
+        for (const experiment of experiment_controller.instances_arr) {
+            if (!experiment.status.endsWith("ing")) continue
+
+            const should_kill = await confirm("Experiment might still be running. Are you sure to force kill the workspace?",
+                { title: "Beinn", kind: "warning" })
+
+            if (!should_kill) return
+
+            // send stop experiments command
+            for (const experiment of experiment_controller.instances_arr) {
+                if (!experiment.status.endsWith("ing")) continue
+                experiment_controller.stop(experiment.name)
+            }
+            await sleep(1000)
+
+            // Send kill command to workspace
+            this.sendCommand("kill", {})
+            await sleep(1000)
+            break
+        }
+
+        // There are no running experiment
+        this.workspace_ws.close()
+
+    }
+
     registerOnOpen(cb: () => void) {
         this.#onopen.push(cb)
     }

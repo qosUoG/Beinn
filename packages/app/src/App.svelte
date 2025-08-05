@@ -1,17 +1,17 @@
 <script lang="ts">
 	import Titlebar from "$components/modules/titlebar/Titlebar.svelte";
-	// import { exit } from "@tauri-apps/plugin-process";
+	import { exit } from "@tauri-apps/plugin-process";
 
 	import { getCurrentWindow } from "@tauri-apps/api/window";
 
 	import Config from "$components/modules/config/Config.svelte";
-	// import { workspace_controller } from "$controllers/workspace.svelte";
+	import { workspace_controller } from "$controllers/workspace.svelte";
 	import { ChevronsRight } from "@lucide/svelte";
 	import Board from "$components/modules/charts/Board.svelte";
 
 	getCurrentWindow().listen("tauri://close-requested", async () => {
-		// const should_kill = await workspace.kill();
-		// if (should_kill) await exit(0);
+		workspace_controller.disconnect();
+		await exit();
 	});
 
 	let open = $state(false);

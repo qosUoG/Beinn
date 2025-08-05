@@ -114,6 +114,12 @@ class ExperimentABC(ABC):
         self._cnoc_should_stop.set()
         self._cnoc_should_run.set()
 
+    def _cnoc_kill(self):
+        if hasattr(self, "_cnoc_runner_task"):
+            self._cnoc_runner_task.cancel()
+
+        self._cnoc_cleanup()
+
     async def _cnoc_start(self):
         # Make sure the experiment starts in a fresh state
         self._cnoc_loop_count = -1
@@ -133,7 +139,9 @@ class ExperimentABC(ABC):
                 else -1
             )
 
-        self._runner_task = asyncio.create_task(asyncio.to_thread(self._cnoc_runner))
+        self._cnoc_runner_task = asyncio.create_task(
+            asyncio.to_thread(self._cnoc_runner)
+        )
         self._cnoc_should_run.set()
 
     def _cnoc_runner(self):
