@@ -67,7 +67,23 @@ class EquipmentABC(ABC):
 
     def _cnoc_interpret(self, code: str, name: str):
         with self.lock:
-            _interpret(code)
+            try:
+                print(f"{eval(code, globals=globals(), locals=locals())}", flush=True)
+
+            except SyntaxError:
+                pass
+            except Exception as e:
+                print(e, flush=True)
+
+            try:
+                f = StringIO()
+
+                with redirect_stdout(f):
+                    with redirect_stderr(sys.stdout):
+                        exec(code, globals=globals(), locals=locals())
+
+            except Exception as e:
+                print(e, flush=True)
 
     def cleanup(self):
         """

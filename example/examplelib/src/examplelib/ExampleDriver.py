@@ -35,6 +35,7 @@ class ExampleEquipment(EquipmentABC):
     equipment_model: str = "QOS007"
 
     def __init__(self):
+        super().__init__()
         # Default params list
         self.params: ExampleEquipment.ParamsType = {
             "strparam": p.StrParam(),
