@@ -55,7 +55,7 @@ async def workspaceHandler(ws: ServerConnection):
                     case "general":
                         try:
                             print(
-                                f"{eval(code, globals=globals(), locals=locals())}",
+                                f"{eval(code, globals=globals())}",
                                 flush=True,
                             )
                             continue
@@ -71,7 +71,7 @@ async def workspaceHandler(ws: ServerConnection):
 
                             with redirect_stdout(f):
                                 with redirect_stderr(sys.stdout):
-                                    exec(code, globals=globals(), locals=locals())
+                                    exec(code, globals=globals())
 
                             continue
 
