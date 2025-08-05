@@ -4,7 +4,7 @@ import json
 import sys
 from traceback import print_tb
 
-from ..state.equipments import Equipments
+from ..state.equipments import Equipments  # noqa: F401
 
 
 from ..state.experiments import Experiments

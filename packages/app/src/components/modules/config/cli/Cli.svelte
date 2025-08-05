@@ -1,6 +1,7 @@
 <script lang="ts">
 	import { cn } from "$components/utils.svelte";
 	import { cnoc_controller } from "$controllers/cnoc.svelte";
+	import { workspace_controller } from "$controllers/workspace.svelte";
 	import { zeropad } from "$lib/utils";
 	import { stairsArrowDownLeft } from "@lucide/lab";
 	import { Clock, ListVideo, SendHorizontal } from "@lucide/svelte";
@@ -104,19 +105,21 @@
 		{/each}
 	</div>
 
-	<div class="w-full frow-2">
-		<input
-			class="w-full bg-slate-200 wrapped"
-			bind:value={input}
-			onkeydown={keyDownHandler} />
+	{#if workspace_controller.connection === "connected"}
+		<div class="w-full frow-2">
+			<input
+				class="w-full bg-slate-200 wrapped"
+				bind:value={input}
+				onkeydown={keyDownHandler} />
 
-		<button
-			class="icon-btn-sm rounded border-slate-200 border-1 text-slate-200"
-			onclick={() => {
-				cnoc_controller.send(input);
-				input = "";
-			}}><SendHorizontal /></button>
-	</div>
+			<button
+				class="icon-btn-sm rounded border-slate-200 border-1 text-slate-200"
+				onclick={() => {
+					cnoc_controller.send(input);
+					input = "";
+				}}><SendHorizontal /></button>
+		</div>
+	{/if}
 </div>
 {#snippet timetext(timestamp: number)}
 	{@const date_obj = new Date(timestamp)}

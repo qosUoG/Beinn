@@ -13,9 +13,7 @@ example/examplelib.
 """
 
 from abc import ABC
-from contextlib import redirect_stderr, redirect_stdout
-from io import StringIO
-import sys
+
 from threading import Lock
 
 
