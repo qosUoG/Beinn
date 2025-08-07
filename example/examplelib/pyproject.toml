@@ -15,7 +15,7 @@ build-backend = "hatchling.build"
 packages = ["src/examplelib"]
 
 [tool.uv.sources]
-cnoc = { git = "https://github.com/qosUoG/Beinn", subdirectory = "packages/cnoc", branch = "revert_threading" }
+cnoc = { git = "https://github.com/qosUoG/Beinn", subdirectory = "packages/cnoc" }
 
 [tool.uv]
 link-mode = "copy"
