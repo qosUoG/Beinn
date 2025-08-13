@@ -5,7 +5,7 @@ requires-python = ">=3.13"
 [[package]]
 name = "cnoc"
 version = "0.1.0"
-source = { git = "https://github.com/qosUoG/Beinn?subdirectory=packages%2Fcnoc#5c3ac33757274abe69c36235d2d8fcae7ef8fa11" }
+source = { git = "https://github.com/qosUoG/Beinn?subdirectory=packages%2Fcnoc#98a93a5abc60cda1f2449df3152a37cdbdce6e24" }
 dependencies = [
     { name = "websockets" },
 ]
