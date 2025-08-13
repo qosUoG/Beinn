@@ -25,6 +25,7 @@ experiment, please refer to the example directory.
 # from .experiment import ExperimentABC
 from .equipment import EquipmentABC
 
+
 class SelectStrParam:
     """
     Single select param with value of type str
@@ -58,8 +59,7 @@ class SelectStrParam:
         if data["type"] != cls._type:
             raise ValueError(f"Invalid type {data['type']} for {cls._type}")
         return cls(data["options"], data["value"])
-    
-    
+
     def toDict(self):
         return {"type": self._type, "options": self._options, "value": self.value}
 
@@ -76,13 +76,12 @@ class SelectIntParam:
         self._options = options
         self.value = options[0] if value is None else value
 
-
     @classmethod
     def fromDict(cls, data: dict):
         if data["type"] != cls._type:
             raise ValueError(f"Invalid type {data['type']} for {cls._type}")
         return cls(data["options"], data["value"])
-    
+
     def toDict(self):
         return {"type": self._type, "options": self._options, "value": self.value}
 
@@ -96,22 +95,20 @@ class SelectFloatParam:
     _type = "select.float"
 
     def __init__(self, options: list[float], value: float | None = None):
-        super().__init__(options, value)
+        self._options = options
+        self.value = options[0] if value is None else value
 
     @classmethod
     def fromDict(cls, data: dict):
         if data["type"] != cls._type:
             raise ValueError(f"Invalid type {data['type']} for {cls._type}")
         return cls(data["options"], data["value"])
-    
+
     def toDict(self):
         return {"type": self._type, "options": self._options, "value": self.value}
 
     def toSave(self):
         return {"value": self.value}
-
-
-
 
 
 class IntParam:
@@ -147,7 +144,7 @@ class IntParam:
         if data["type"] != cls._type:
             raise ValueError(f"Invalid type {data['type']} for {cls._type}")
         return cls(data["value"], data["suffix"])
-    
+
     def toDict(self):
         return {"type": self._type, "suffix": self.suffix, "value": self.value}
 
@@ -172,15 +169,12 @@ class FloatParam:
         if data["type"] != cls._type:
             raise ValueError(f"Invalid type {data['type']} for {cls._type}")
         return cls(data["value"], data["suffix"])
-    
+
     def toDict(self):
         return {"type": self._type, "suffix": self.suffix, "value": self.value}
 
     def toSave(self):
         return {"value": self.value, "suffix": self.suffix}
-
-
-
 
 
 class StrParam:
@@ -199,13 +193,12 @@ class StrParam:
         if data["type"] != cls._type:
             raise ValueError(f"Invalid type {data['type']} for {cls._type}")
         return cls(data["value"])
-    
+
     def toDict(self):
         return {"type": self._type, "value": self.value}
 
     def toSave(self):
         return {"value": self.value}
-
 
 
 class BoolParam:
@@ -224,13 +217,12 @@ class BoolParam:
         if data["type"] != cls._type:
             raise ValueError(f"Invalid type {data['type']} for {cls._type}")
         return cls(data["value"])
-    
+
     def toDict(self):
         return {"type": self._type, "value": self.value}
 
     def toSave(self):
         return {"value": self.value}
-
 
 
 class InstanceEquipmentParam[T: EquipmentABC]:

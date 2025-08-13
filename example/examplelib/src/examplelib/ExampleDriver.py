@@ -1,9 +1,7 @@
 import math
 from random import random
 from typing import TypedDict
-from cnoc.public import params as p
-
-from cnoc.public.equipment import EquipmentABC
+from cnoc import params as p, equipment
 
 """
 @dataclass decorator allow us to type hint the type of the class,
@@ -18,7 +16,7 @@ For class attribute, one must wrap the type with ClassVar like "equipment_pi",
 """
 
 
-class ExampleEquipment(EquipmentABC):
+class ExampleEquipment(equipment.EquipmentABC):
     class ParamsType(TypedDict):
         strparam: p.StrParam
         floatparam: p.FloatParam
@@ -42,9 +40,9 @@ class ExampleEquipment(EquipmentABC):
             "floatparam": p.FloatParam(suffix="W"),
             "intparam": p.IntParam(),
             "boolparam": p.BoolParam(False),
-            "select_strparam": p.SelectStrParam(["option1", "option2", "option3"]),
-            "select_intparam": p.SelectIntParam([1, 2, 3]),
-            "select_floatparam": p.SelectFloatParam([1.1, 2.2, 3.3]),
+            "selectstrparam": p.SelectStrParam(["option1", "option2", "option3"]),
+            "selectintparam": p.SelectIntParam([1, 2, 3]),
+            "selectfloatparam": p.SelectFloatParam([1.1, 2.2, 3.3]),
             "compositeparam": p.CompositeParam(
                 {
                     "comp_strparam": p.StrParam(),
