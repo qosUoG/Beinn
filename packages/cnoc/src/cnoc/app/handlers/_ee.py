@@ -78,7 +78,11 @@ def eeImports(eetype: type[ExperimentABC] | type[EquipmentABC], names: list[str]
         print_tb(traceback)
         print(end=None, flush=True)
 
-    roots = __file__.split("/")
+    roots: list[str]
+    if "/" in __file__:
+        roots = __file__.split("/")
+    elif "\\" in __file__:
+        roots = __file__.split("\\")
     venv_index = roots.index(".venv")
     path = "/".join(roots[:venv_index])
 
