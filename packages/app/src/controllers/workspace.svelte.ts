@@ -82,6 +82,13 @@ class WorkspaceController {
         beinn_log_controller.append("Install required dependencies")
 
         let success = true
+        success = (await shell({ fn: "uv", cmd: "add pandas tables numpy", cwd: path, logger: beinn_log_controller })).success
+
+        if (!success) {
+            beinn_log_controller.append("FAILED connect to python")
+            return
+        }
+
         success = (await shell({ fn: "uv", cmd: "add git+https://github.com/qosUoG/Beinn#subdirectory=packages/cnoc", cwd: path, logger: beinn_log_controller })).success
 
         if (!success) {
