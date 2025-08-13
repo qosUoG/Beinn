@@ -22,32 +22,10 @@ experiment, please refer to the example directory.
 
 """
 
-from abc import ABC
-
 # from .experiment import ExperimentABC
 from .equipment import EquipmentABC
 
-
-class SingleSelectABC[T: str | int | float](ABC):
-    """
-    Base class for single select param type
-    """
-
-    _type: str
-
-    def __init__(self, options: list[str], value: T | None = None):
-        self._options = options
-        self.value = options[0] if value is None else value
-
-    # To and from json
-    def toDict(self):
-        return {"type": self._type, "options": self._options, "value": self.value}
-
-    def toSave(self):
-        return {"value": self.value}
-
-
-class SelectStrParam(SingleSelectABC[str]):
+class SelectStrParam:
     """
     Single select param with value of type str
 
@@ -72,31 +50,47 @@ class SelectStrParam(SingleSelectABC[str]):
             default value of the param. If none is given, the first option
             would be used
         """
-        super().__init__(options, value)
+        self._options = options
+        self.value = options[0] if value is None else value
 
     @classmethod
     def fromDict(cls, data: dict):
         if data["type"] != cls._type:
             raise ValueError(f"Invalid type {data['type']} for {cls._type}")
         return cls(data["options"], data["value"])
+    
+    
+    def toDict(self):
+        return {"type": self._type, "options": self._options, "value": self.value}
+
+    def toSave(self):
+        return {"value": self.value}
 
 
-class SelectIntParam(SingleSelectABC[int]):
+class SelectIntParam:
     """Single select of int type. Detail refer to SelectStrParam class"""
 
     _type = "select.int"
 
     def __init__(self, options: list[int], value: int | None = None):
-        super().__init__(options, value)
+        self._options = options
+        self.value = options[0] if value is None else value
+
 
     @classmethod
     def fromDict(cls, data: dict):
         if data["type"] != cls._type:
             raise ValueError(f"Invalid type {data['type']} for {cls._type}")
         return cls(data["options"], data["value"])
+    
+    def toDict(self):
+        return {"type": self._type, "options": self._options, "value": self.value}
+
+    def toSave(self):
+        return {"value": self.value}
 
 
-class SelectFloatParam(SingleSelectABC[float]):
+class SelectFloatParam:
     """Single select of float type. Detail refer to SelectStrParam class"""
 
     _type = "select.float"
@@ -109,32 +103,18 @@ class SelectFloatParam(SingleSelectABC[float]):
         if data["type"] != cls._type:
             raise ValueError(f"Invalid type {data['type']} for {cls._type}")
         return cls(data["options"], data["value"])
-
-
-class NumberABC[T: int | float](ABC):
-    """
-    Base class for Number param type
-    """
-
-    _type: str
-
-    def __init__(
-        self,
-        default: T,  # Default value is 0 for int and float
-        suffix: str,
-    ):
-        self.value = default
-        self.suffix = suffix
-
-    # To and from json
+    
     def toDict(self):
-        return {"type": self._type, "suffix": self.suffix, "value": self.value}
+        return {"type": self._type, "options": self._options, "value": self.value}
 
     def toSave(self):
-        return {"value": self.value, "suffix": self.suffix}
+        return {"value": self.value}
 
 
-class IntParam(NumberABC[int]):
+
+
+
+class IntParam:
     """
     param with value of type int
 
@@ -159,16 +139,23 @@ class IntParam(NumberABC[int]):
         suffix: str , optional
             suffix shown as hint on the frontend
         """
-        super().__init__(default, suffix)
+        self.value = default
+        self.suffix = suffix
 
     @classmethod
     def fromDict(cls, data: dict):
         if data["type"] != cls._type:
             raise ValueError(f"Invalid type {data['type']} for {cls._type}")
         return cls(data["value"], data["suffix"])
+    
+    def toDict(self):
+        return {"type": self._type, "suffix": self.suffix, "value": self.value}
+
+    def toSave(self):
+        return {"value": self.value, "suffix": self.suffix}
 
 
-class FloatParam(NumberABC[float]):
+class FloatParam:
     """IntParam but of float type. Detail refer to IntParam class
 
     Default value if none is given is 0.0
@@ -177,37 +164,26 @@ class FloatParam(NumberABC[float]):
     _type = "float"
 
     def __init__(self, default: float = 0.0, suffix: str = ""):
-        super().__init__(default, suffix)
+        self.value = default
+        self.suffix = suffix
 
     @classmethod
     def fromDict(cls, data: dict):
         if data["type"] != cls._type:
             raise ValueError(f"Invalid type {data['type']} for {cls._type}")
         return cls(data["value"], data["suffix"])
-
-
-class PrimitiveABC[T: str | bool](ABC):
-    """
-    Base class for Number param type
-    """
-
-    _type: str
-
-    def __init__(
-        self,
-        default: T,  # Default value is "" for str and False for bool
-    ):
-        self.value = default
-
-    # To and from json
+    
     def toDict(self):
-        return {"type": self._type, "value": self.value}
+        return {"type": self._type, "suffix": self.suffix, "value": self.value}
 
     def toSave(self):
-        return {"value": self.value}
+        return {"value": self.value, "suffix": self.suffix}
 
 
-class StrParam(PrimitiveABC[str]):
+
+
+
+class StrParam:
     """
     IntParam but of str type, without suffix. Detail refer to IntParam class.
     Default value if not given is empty string.
@@ -216,16 +192,23 @@ class StrParam(PrimitiveABC[str]):
     _type = "str"
 
     def __init__(self, default: str = ""):
-        super().__init__(default)
+        self.value = default
 
     @classmethod
     def fromDict(cls, data: dict):
         if data["type"] != cls._type:
             raise ValueError(f"Invalid type {data['type']} for {cls._type}")
         return cls(data["value"])
+    
+    def toDict(self):
+        return {"type": self._type, "value": self.value}
+
+    def toSave(self):
+        return {"value": self.value}
 
 
-class BoolParam(PrimitiveABC[bool]):
+
+class BoolParam:
     """
     IntParam but of bool type, without suffix. Detail refer to IntParam class.
     Default value if not given is empty string.
@@ -234,13 +217,20 @@ class BoolParam(PrimitiveABC[bool]):
     _type = "bool"
 
     def __init__(self, default: bool = False):
-        super().__init__(default)
+        self.value = default
 
     @classmethod
     def fromDict(cls, data: dict):
         if data["type"] != cls._type:
             raise ValueError(f"Invalid type {data['type']} for {cls._type}")
         return cls(data["value"])
+    
+    def toDict(self):
+        return {"type": self._type, "value": self.value}
+
+    def toSave(self):
+        return {"value": self.value}
+
 
 
 class InstanceEquipmentParam[T: EquipmentABC]:
