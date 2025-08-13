@@ -38,9 +38,9 @@ class EquipmentABC(ABC):
         To be type safe, implementors may also define a params type specific
         to the equipment driver. Detail please refer to example/examplelib
         """
-        from .params import Params
+        # from .params import Params
 
-        self.params: Params
+        # self.params: Params
         self.lock = Lock()
 
     # def _cnoc_interpret(self, code: str, name: str):
