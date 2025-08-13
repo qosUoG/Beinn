@@ -1,5 +1,5 @@
 version = 1
-revision = 2
+revision = 3
 requires-python = ">=3.13"
 
 [[package]]
@@ -70,7 +70,7 @@ wheels = [
 [[package]]
 name = "cnoc"
 version = "0.1.0"
-source = { git = "https://github.com/qosUoG/Beinn?subdirectory=packages%2Fcnoc&branch=revert_threading#3e46cb2fdc4dcdb484b8e5103eb15f4515c73f2b" }
+source = { git = "https://github.com/qosUoG/Beinn?subdirectory=packages%2Fcnoc#0964f40862e7087bed2c0e0ac5dee65cfb5db0d4" }
 dependencies = [
     { name = "websockets" },
 ]
@@ -84,7 +84,7 @@ dependencies = [
 ]
 
 [package.metadata]
-requires-dist = [{ name = "cnoc", git = "https://github.com/qosUoG/Beinn?subdirectory=packages%2Fcnoc&branch=revert_threading" }]
+requires-dist = [{ name = "cnoc", git = "https://github.com/qosUoG/Beinn?subdirectory=packages%2Fcnoc" }]
 
 [[package]]
 name = "experiment"
@@ -102,7 +102,7 @@ dependencies = [
 [package.metadata]
 requires-dist = [
     { name = "aiosqlite", specifier = ">=0.21.0" },
-    { name = "cnoc", git = "https://github.com/qosUoG/Beinn?subdirectory=packages%2Fcnoc&branch=revert_threading" },
+    { name = "cnoc", git = "https://github.com/qosUoG/Beinn?subdirectory=packages%2Fcnoc" },
     { name = "examplelib", editable = "../examplelib" },
     { name = "numpy", specifier = ">=2.2.3" },
     { name = "pandas", specifier = ">=2.3.1" },

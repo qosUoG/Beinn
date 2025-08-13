@@ -79,7 +79,7 @@ class WorkspaceController {
         if (parsed.tool.uv["link-mode"] === undefined) parsed.tool.uv["link-mode"] = "copy"
         await writeTextFile(path + "/pyproject.toml", stringify(parsed))
 
-        beinn_log_controller.append("Install required dependency_controller")
+        beinn_log_controller.append("Install required dependencies")
 
         let success = true
         success = (await shell({ fn: "uv", cmd: "add git+https://github.com/qosUoG/Beinn#subdirectory=packages/cnoc", cwd: path, logger: beinn_log_controller })).success
