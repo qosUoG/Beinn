@@ -217,6 +217,8 @@ class ExperimentABC(ABC):
 
     def _cnoc_cleanup(self):
         # Signal the charts to stop
+        self.cleanup()
+
         for chart in self._cnoc_charts.values():
             chart._cnoc_stopChart()
 
@@ -233,16 +235,16 @@ class ExperimentABC(ABC):
     def loop(self, index: int) -> None:
         raise NotImplementedError
 
-    # def cleanup(self) -> None:
-    #     """
-    #     Perform any clean up if needed
+    def cleanup(self) -> None:
+        """
+        Perform any clean up if needed
 
-    #     This method would run once after the loop method is no longer iterating. Users may perform
-    #     any clean up in this method. However, please be aware other experiment script may still be running
+        This method would run once after the loop method is no longer iterating. Users may perform
+        any clean up in this method. However, please be aware other experiment script may still be running
 
-    #     It is optional to implement this method.
-    #     """
-    #     pass
+        It is optional to implement this method.
+        """
+        pass
 
     def cnocCreateChart(self, chart: ChartABC):
         self._cnoc_charts[chart.title] = chart
