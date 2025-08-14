@@ -73,10 +73,6 @@ class ExperimentABC(ABC):
         to the experiment script. Detail please refer to example/experiment
         """
 
-        from .params import Params
-
-        self.params: Params
-
         self._cnoc_should_run = Event()
         self._cnoc_should_stop = Event()
         self._cnoc_loop_count = -1
