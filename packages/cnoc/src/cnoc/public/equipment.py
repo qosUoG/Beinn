@@ -14,7 +14,7 @@ example/examplelib.
 
 from abc import ABC
 
-from threading import Lock
+from threading import RLock
 
 
 class EquipmentABC(ABC):
@@ -41,7 +41,7 @@ class EquipmentABC(ABC):
         # from .params import Params
 
         # self.params: Params
-        self.lock = Lock()
+        self.lock = RLock()
 
     # def _cnoc_interpret(self, code: str, name: str):
     #     with self.lock:
