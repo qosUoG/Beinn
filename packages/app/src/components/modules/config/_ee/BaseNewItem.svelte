@@ -95,7 +95,7 @@
 											? "text-white"
 											: "text-slate-950"
 									)}>
-									cls
+									{cls}
 								</span>
 							</button>
 						{:else}
