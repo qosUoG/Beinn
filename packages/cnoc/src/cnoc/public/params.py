@@ -311,7 +311,7 @@ type _SimpleParamType = (
 )
 
 
-class CompositeParam[T: dict[str, _SimpleParamType]]:
+class CompositeParam[T]:
     _type = "composite"
 
     def __init__(self, children: T):
