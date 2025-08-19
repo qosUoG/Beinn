@@ -23,6 +23,8 @@ experiment, please refer to the example directory.
 """
 
 # from .experiment import ExperimentABC
+
+from typing import Any, Literal, TypedDict
 from .equipment import EquipmentABC
 
 
@@ -38,7 +40,7 @@ class SelectStrParam:
         the selected option
     """
 
-    _type = "select.str"
+    _type: Literal["select.str"] = "select.str"
 
     def __init__(self, options: list[str], value: str | None = None):
         """
@@ -54,13 +56,18 @@ class SelectStrParam:
         self._options = options
         self.value = options[0] if value is None else value
 
+    class DictType(TypedDict):
+        type: Literal["select.str"]
+        options: list[str]
+        value: str
+
     @classmethod
-    def fromDict(cls, data: dict):
+    def fromDict(cls, data: DictType):
         if data["type"] != cls._type:
             raise ValueError(f"Invalid type {data['type']} for {cls._type}")
         return cls(data["options"], data["value"])
 
-    def toDict(self):
+    def toDict(self) -> DictType:
         return {"type": self._type, "options": self._options, "value": self.value}
 
     def toSave(self):
@@ -70,19 +77,24 @@ class SelectStrParam:
 class SelectIntParam:
     """Single select of int type. Detail refer to SelectStrParam class"""
 
-    _type = "select.int"
+    _type: Literal["select.int"] = "select.int"
 
     def __init__(self, options: list[int], value: int | None = None):
         self._options = options
         self.value = options[0] if value is None else value
 
+    class DictType(TypedDict):
+        type: Literal["select.int"]
+        options: list[int]
+        value: int
+
     @classmethod
-    def fromDict(cls, data: dict):
+    def fromDict(cls, data: DictType):
         if data["type"] != cls._type:
             raise ValueError(f"Invalid type {data['type']} for {cls._type}")
         return cls(data["options"], data["value"])
 
-    def toDict(self):
+    def toDict(self) -> DictType:
         return {"type": self._type, "options": self._options, "value": self.value}
 
     def toSave(self):
@@ -92,19 +104,24 @@ class SelectIntParam:
 class SelectFloatParam:
     """Single select of float type. Detail refer to SelectStrParam class"""
 
-    _type = "select.float"
+    _type: Literal["select.float"] = "select.float"
 
     def __init__(self, options: list[float], value: float | None = None):
         self._options = options
         self.value = options[0] if value is None else value
 
+    class DictType(TypedDict):
+        type: Literal["select.float"]
+        options: list[float]
+        value: float
+
     @classmethod
-    def fromDict(cls, data: dict):
+    def fromDict(cls, data: DictType):
         if data["type"] != cls._type:
             raise ValueError(f"Invalid type {data['type']} for {cls._type}")
         return cls(data["options"], data["value"])
 
-    def toDict(self):
+    def toDict(self) -> DictType:
         return {"type": self._type, "options": self._options, "value": self.value}
 
     def toSave(self):
@@ -123,7 +140,7 @@ class IntParam:
         suffix of the parameter displayed on frontend
     """
 
-    _type = "int"
+    _type: Literal["int"] = "int"
 
     def __init__(self, default: int = 0, suffix: str = ""):
         """
@@ -139,16 +156,21 @@ class IntParam:
         self.value = default
         self.suffix = suffix
 
+    class DictType(TypedDict):
+        type: Literal["int"]
+        suffix: str
+        value: int
+
     @classmethod
-    def fromDict(cls, data: dict):
+    def fromDict(cls, data: DictType):
         if data["type"] != cls._type:
             raise ValueError(f"Invalid type {data['type']} for {cls._type}")
         return cls(data["value"], data["suffix"])
 
-    def toDict(self):
+    def toDict(self) -> DictType:
         return {"type": self._type, "suffix": self.suffix, "value": self.value}
 
-    def toSave(self):
+    def toSave(self) -> dict[str, Any]:
         return {"value": self.value, "suffix": self.suffix}
 
 
@@ -158,22 +180,27 @@ class FloatParam:
     Default value if none is given is 0.0
     """
 
-    _type = "float"
+    _type: Literal["float"] = "float"
 
     def __init__(self, default: float = 0.0, suffix: str = ""):
         self.value = default
         self.suffix = suffix
 
+    class DictType(TypedDict):
+        type: Literal["float"]
+        suffix: str
+        value: float
+
     @classmethod
-    def fromDict(cls, data: dict):
+    def fromDict(cls, data: DictType):
         if data["type"] != cls._type:
             raise ValueError(f"Invalid type {data['type']} for {cls._type}")
         return cls(data["value"], data["suffix"])
 
-    def toDict(self):
+    def toDict(self) -> DictType:
         return {"type": self._type, "suffix": self.suffix, "value": self.value}
 
-    def toSave(self):
+    def toSave(self) -> dict[str, Any]:
         return {"value": self.value, "suffix": self.suffix}
 
 
@@ -183,18 +210,22 @@ class StrParam:
     Default value if not given is empty string.
     """
 
-    _type = "str"
+    _type: Literal["str"] = "str"
 
     def __init__(self, default: str = ""):
         self.value = default
 
+    class DictType(TypedDict):
+        type: Literal["str"]
+        value: str
+
     @classmethod
-    def fromDict(cls, data: dict):
+    def fromDict(cls, data: DictType):
         if data["type"] != cls._type:
             raise ValueError(f"Invalid type {data['type']} for {cls._type}")
         return cls(data["value"])
 
-    def toDict(self):
+    def toDict(self) -> DictType:
         return {"type": self._type, "value": self.value}
 
     def toSave(self):
@@ -207,18 +238,22 @@ class BoolParam:
     Default value if not given is empty string.
     """
 
-    _type = "bool"
+    _type: Literal["bool"] = "bool"
 
     def __init__(self, default: bool = False):
         self.value = default
 
+    class DictType(TypedDict):
+        type: Literal["bool"]
+        value: bool
+
     @classmethod
-    def fromDict(cls, data: dict):
+    def fromDict(cls, data: DictType):
         if data["type"] != cls._type:
             raise ValueError(f"Invalid type {data['type']} for {cls._type}")
         return cls(data["value"])
 
-    def toDict(self):
+    def toDict(self) -> DictType:
         return {"type": self._type, "value": self.value}
 
     def toSave(self):
@@ -237,28 +272,32 @@ class InstanceEquipmentParam[T: EquipmentABC]:
         The wrapper class of the driver that implements the protocol
     """
 
-    _type = "instance.equipment"
+    _type: Literal["instance.equipment"] = "instance.equipment"
 
     def __init__(self, name: str | None = None):
         self.name = name
         self.instance: T | None = None
 
-    def toDict(self):
+    class DictType(TypedDict):
+        type: Literal["instance.equipment"]
+        name: str
+
+    def toDict(self) -> DictType:
         return {
             "type": self._type,
-            "name": self.name,
+            "name": self.name if self.name else "",
         }
 
     @classmethod
-    def fromDict(cls, data: dict):
+    def fromDict(cls, data: DictType):
         if data["type"] != cls._type:
             raise ValueError(f"Invalid type {data['type']} for {cls._type}")
         return cls(data["name"])
 
-    def toSave(self):
+    def toSave(self) -> dict[str, Any]:
         return {
             "name": self.name,
-            "params": _cnoc_params2Dict(self.instance.params)
+            "params": _cnoc_params2Dict(self.instance.params)  # type: ignore
             if self.instance
             else None,
         }
@@ -312,40 +351,44 @@ type _SimpleParamType = (
 
 
 class CompositeParam[T]:
-    _type = "composite"
+    _type: Literal["composite"] = "composite"
 
     def __init__(self, children: T):
         self.children = children
 
-    def toDict(self):
+    class DictType(TypedDict):
+        type: Literal["composite"]
+        children: T
+
+    def toDict(self) -> DictType:
         return {
             "type": self._type,
-            "children": {k: v.toDict() for k, v in self.children.items()},
+            "children": {k: v.toDict() for k, v in self.children.items()},  # type: ignore
         }
 
     @classmethod
-    def fromDict(cls, data: dict):
+    def fromDict(cls, data: DictType):  # type: ignore
         if data["type"] != cls._type:
             raise ValueError(f"Invalid type {data['type']} for {cls._type}")
 
-        children: Params = {}
-        for k, v in data["children"].items():
-            for tp in _param_type_arr:
-                if v["type"] == tp._type:
-                    children[k] = tp.fromDict(v)
+        children: Params = {}  # type: ignore
+        for k, v in data["children"].items():  # type: ignore
+            for tp in _param_type_arr:  # type: ignore
+                if v["type"] == tp._type:  # type: ignore
+                    children[k] = tp.fromDict(v)  # type: ignore
                     break
 
-        return CompositeParam(children)
+        return CompositeParam(children)  # type: ignore
 
-    def toSave(self):
-        return {k: v.toSave() for k, v in self.children.items()}
+    def toSave(self):  # type: ignore
+        return {k: v.toSave() for k, v in self.children.items()}  # type: ignore
 
 
-type AllParamTypes = _SimpleParamType | CompositeParam
+type AllParamTypes = _SimpleParamType | CompositeParam[_SimpleParamType]
 type Params = dict[str, AllParamTypes]
 
 
-_param_type_arr: list[AllParamTypes] = [
+_param_type_arr = [  # type: ignore
     SelectStrParam,
     SelectIntParam,
     SelectFloatParam,
@@ -359,14 +402,14 @@ _param_type_arr: list[AllParamTypes] = [
 ]
 
 
-def _cnoc_params2Dict(params: Params) -> dict[str, dict]:
+def _cnoc_params2Dict(params: Params) -> dict[str, Any]:
     """
     Convert the params to a dictionary representation
     """
     return {k: v.toDict() for k, v in params.items()}
 
 
-def _cnoc_dict2Params(data: dict[str, dict]) -> Params:
+def cnoc_dict2Params(data: dict[str, Any]) -> Params:
     """
     Convert the dictionary representation back to Params
     However this function does not set the instance of the params,
@@ -374,17 +417,17 @@ def _cnoc_dict2Params(data: dict[str, dict]) -> Params:
     """
     params: Params = {}
     for k, v in data.items():
-        if v["type"] == CompositeParam._type:
-            params[k] = CompositeParam.fromDict(v)
+        if v["type"] == CompositeParam._type:  # type: ignore
+            params[k] = CompositeParam.fromDict(v)  # type: ignore
             continue
 
-        for tp in _param_type_arr:
-            if v["type"] == tp._type:
-                params[k] = tp.fromDict(v)
+        for tp in _param_type_arr:  # type: ignore
+            if v["type"] == tp._type:  # type: ignore
+                params[k] = tp.fromDict(v)  # type: ignore
                 break
 
     return params
 
 
-def _cnoc_params2Save(params: Params) -> dict[str, dict]:
+def cnoc_params2Save(params: Params) -> dict[str, Any]:
     return {k: v.toSave() for k, v in params.items()}

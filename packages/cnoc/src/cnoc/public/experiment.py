@@ -14,9 +14,9 @@ import sys
 from threading import Event
 from time import time
 from traceback import print_tb
-from typing import Callable, Literal, TypedDict
+from typing import Any, Callable, Literal, TypedDict
 
-from .params import _cnoc_params2Save
+from .params import cnoc_params2Save
 
 from .saver import Saver
 from .exceptions import ExperimentCompleted
@@ -34,7 +34,7 @@ class Listeners(TypedDict):
     loop_start: list[Callable[[int], None]]
     loop_end: list[Callable[[int], None]]
 
-    chart_created: list[Callable[[dict], None]]
+    chart_created: list[Callable[[Any], None]]
 
 
 type ExperimentEvents = (
@@ -98,7 +98,7 @@ class ExperimentABC(ABC):
         event: ExperimentEvents,
         callback: Callable[[], None],
     ):
-        self._cnoc_listeners[event].append(callback)
+        self._cnoc_listeners[event].append(callback)  # type: ignore
 
     def _cnoc_pause(self):
         self._cnoc_should_run.clear()
@@ -220,10 +220,10 @@ class ExperimentABC(ABC):
         self.cleanup()
 
         for chart in self._cnoc_charts.values():
-            chart._cnoc_stopChart()
+            chart._cnoc_stopChart()  # type: ignore
 
         for saver in self._cnoc_savers:
-            saver._cnoc_close()
+            saver._cnoc_close()  # type: ignore
 
         self._cnoc_savers = []
 
@@ -256,7 +256,7 @@ class ExperimentABC(ABC):
 
     def _cnoc_saveParams(self):
         for saver in self._cnoc_savers:
-            saver._cnoc_saveParams(_cnoc_params2Save(self.params))
+            saver._cnoc_saveParams(cnoc_params2Save(self.params))  # type: ignore
 
     def cnocExpectedLoopCount(self, loop_count: int):
         self._cnoc_expected_loop_count = loop_count
