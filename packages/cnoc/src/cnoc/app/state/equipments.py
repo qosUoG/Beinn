@@ -1,6 +1,6 @@
 import importlib
 
-from ...public.params import _cnoc_dict2Params
+from ...public.params import cnoc_dict2Params
 
 from ...public.equipment import EquipmentABC
 
@@ -31,7 +31,7 @@ class Equipments:
 
     @classmethod
     def updateParams(cls, name: str, params: dict):
-        cls.instances[name].instance.params = _cnoc_dict2Params(params)
+        cls.instances[name].instance.params = cnoc_dict2Params(params)
 
         from .experiments import Experiments
 

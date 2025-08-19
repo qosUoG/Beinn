@@ -168,6 +168,7 @@ class WorkspaceController {
     disconnect() {
         if (this.workspace_ws === null) return
         this.workspace_ws.close()
+        this.workspace_ws = new WebSocket(cnoc_url + "close")
         this.path = null
     }
 
