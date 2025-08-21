@@ -20,6 +20,7 @@ async def handler(ws: ServerConnection):
     # Workspace
     if path == "/workspace":
         await workspaceHandler(ws)
+        sys.exit()
     elif path == "/close":
         await ws.close()
         sys.exit()
