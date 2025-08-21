@@ -86,8 +86,9 @@ async def workspaceHandler(ws: ServerConnection):
             if command == "kill":
                 for experiment in Experiments.instances.values():
                     experiment.instance._cnoc_kill()
-
+                await ws.close()
                 time.sleep(0.5)
+
                 sys.exit()
 
             print(f"Unknown command {command}", flush=True)
