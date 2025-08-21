@@ -2,6 +2,7 @@ import asyncio
 import site
 import sys
 import time
+from typing import Any
 from urllib.parse import unquote
 
 from .handlers.chart_handler import chartHandler
@@ -14,6 +15,7 @@ from .handlers.workspace_handler import workspaceHandler
 from websockets import ServerConnection, serve
 
 wss: list[ServerConnection] = []
+task: asyncio.Task[Any] | None = None
 
 
 async def handler(ws: ServerConnection):
@@ -25,11 +27,15 @@ async def handler(ws: ServerConnection):
         await workspaceHandler(ws)
         for _ws in wss:
             await _ws.close()
-        sys.exit()
+
+        assert task is not None
+        task.cancel()
     elif path == "/close":
         for _ws in wss:
             await _ws.close()
-        sys.exit()
+
+        assert task is not None
+        task.cancel()
     elif path.startswith("/chart"):
         await chartHandler(*unquote(path).split("/")[2:], ws)
 
@@ -37,7 +43,8 @@ async def handler(ws: ServerConnection):
 async def _main():
     Foundation.setLoop(asyncio.get_running_loop())
     async with serve(handler, "localhost", 8001) as server:
-        await server.serve_forever()
+        task = asyncio.create_task(server.serve_forever())
+        await task
 
 
 def main():
