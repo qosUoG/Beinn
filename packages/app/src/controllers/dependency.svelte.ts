@@ -155,6 +155,10 @@ class Dependencies {
                 dependency.has_driver = true
     }
 
+    reset() {
+        this.#dependencies.value = []
+    }
+
 
 }
 export const dependency_controller = $state(new Dependencies())

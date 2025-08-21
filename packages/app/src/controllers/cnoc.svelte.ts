@@ -13,6 +13,13 @@ class CnocController extends LogController {
     query_index = -1
     original_query = ""
 
+    reset() {
+        this.command_history = []
+        this.query_list_cache = []
+        this.query_index = -1
+        this.original_query = ""
+    }
+
 
     getEarlierQuery() {
         if (this.query_index < this.query_list_cache.length - 1)

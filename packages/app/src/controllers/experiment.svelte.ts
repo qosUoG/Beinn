@@ -49,6 +49,8 @@ export class ExperimentController extends EEBaseController<Experiment> {
         workspace_controller.sendCommand("experiment:continue", { name })
     }
 
+
+
     get closeable() {
         for (const instance of this.instances_arr)
             if (instance.status !== "completed" && instance.status !== "stopped" && instance.status !== "initial")

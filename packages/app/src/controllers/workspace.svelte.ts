@@ -27,7 +27,7 @@ class WorkspaceController {
     #uvproc: Child | undefined
 
     constructor() {
-        this.workspace_ws = new WebSocket(cnoc_url + "close")
+        new WebSocket(cnoc_url + "close")
     }
 
     #commands: Record<string, (obj: any) => Promise<void> | void> = {}
@@ -167,9 +167,15 @@ class WorkspaceController {
 
     disconnect() {
         if (this.workspace_ws === null) return
+        new WebSocket(cnoc_url + "close")
         this.workspace_ws.close()
-        this.workspace_ws = new WebSocket(cnoc_url + "close")
         this.path = null
+        cnoc_controller.reset()
+        experiment_controller.reset()
+        equipment_controller.reset()
+        dependency_controller.reset()
+        beinn_log_controller.reset()
+
     }
 
     async kill() {
@@ -248,4 +254,4 @@ class WorkspaceController {
 
 }
 
-export const workspace_controller = $state(new WorkspaceController())
+export let workspace_controller = $state(new WorkspaceController())

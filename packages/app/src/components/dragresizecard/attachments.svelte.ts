@@ -93,8 +93,8 @@ export function resize(
     return (e) => {
         const r = {
             resizing: false,
-            h: { w: 0, l: 0, from: null, x: 0 } as { w: number, l: number, from: "left" | "right" | null, x: number },
-            v: { h: 0, t: 0, from: null, y: 0 } as { h: number, t: number, from: "top" | "bottom" | null, y: number },
+            h: { w: 0, l: 0, r: 0, from: null, x: 0 } as { w: number, l: number, r: number, from: "left" | "right" | null, x: number },
+            v: { h: 0, t: 0, b: 0, from: null, y: 0 } as { h: number, t: number, b: number, from: "top" | "bottom" | null, y: number },
         };
         $effect(() => {
 
@@ -104,11 +104,11 @@ export function resize(
 
             const cancel_mousedown = on(e, "mousedown", (m) => {
                 r.resizing = true
-                const { width, height, left, top } = target.getBoundingClientRect();
+                const { width, height, left, top, right, bottom } = target.getBoundingClientRect();
                 const { left: parent_left, top: parent_top } = parent.getBoundingClientRect();
 
-                r.h = { w: width, l: left - parent_left, from: h, x: m.clientX }
-                r.v = { h: height, t: top - parent_top, from: v, y: m.clientY }
+                r.h = { w: width, l: left - parent_left, r: right - parent_left, from: h, x: m.clientX }
+                r.v = { h: height, t: top - parent_top, b: bottom - parent_top, from: v, y: m.clientY }
             })
 
             const cancel_mousemove = on(window, "mousemove", (m) => {
@@ -129,11 +129,21 @@ export function resize(
                         if (width < 400) width = 400
 
                     } else {
-                        left = r.h.l + delta;
-                        width = r.h.w - delta;
+                        const new_left = r.h.l + delta;
+                        const new_width = r.h.w - delta;
 
-                        if (left < 8) left = 8
-                        if (width < 400) width = 400
+                        if (new_left < 8) {
+                            left = 8
+                            width = r.h.r - 8
+                        }
+
+                        else if (new_width < 400) {
+                            left = r.h.r - 400
+                            width = 400
+                        } else {
+                            left = new_left
+                            width = new_width
+                        }
                     }
                 }
                 if (r.v.from) {
@@ -146,11 +156,23 @@ export function resize(
 
 
                     } else {
-                        top = r.v.t + delta;
-                        height = r.v.h - delta;
+                        const new_top = r.v.t + delta;
+                        const new_height = r.v.h - delta;
 
-                        if (top < 8) top = 8
-                        if (height < 250) height = 250
+                        if (new_top < 8) {
+                            top = 8
+                            height = r.v.b - 8
+                        }
+
+                        else if (new_height < 250) {
+                            top = r.v.b - 250
+                            height = 250
+                        } else {
+                            top = new_top
+                            height = new_height
+                        }
+
+
                     }
                 }
 

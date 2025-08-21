@@ -178,5 +178,13 @@ export abstract class EEBaseController<T extends Instance = Instance> {
         this.save_pending_create = Object.keys(save)
         this.save_pending_params = Object.keys(save)
     }
+
+    reset() {
+        this.instances = {}
+        this.imports = []
+        this.temp_module = ""
+        this.temp_cls = ""
+        this.temp_name = ""
+    }
 }
 

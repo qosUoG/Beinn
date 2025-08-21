@@ -1,6 +1,7 @@
 import asyncio
 import site
 import sys
+import time
 from urllib.parse import unquote
 
 from .handlers.chart_handler import chartHandler
@@ -21,6 +22,7 @@ async def handler(ws: ServerConnection):
         await workspaceHandler(ws)
     elif path == "/close":
         await ws.close()
+        time.sleep(0.5)
         sys.exit()
     elif path.startswith("/chart"):
         await chartHandler(*unquote(path).split("/")[2:], ws)
