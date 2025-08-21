@@ -41,7 +41,10 @@ async def _main():
     Foundation.setLoop(asyncio.get_running_loop())
     async with serve(handler, "localhost", 8001) as server:
         Foundation.task = asyncio.create_task(server.serve_forever())
-        await Foundation.task
+        try:
+            await Foundation.task
+        except asyncio.CancelledError:
+            pass
 
 
 def main():
