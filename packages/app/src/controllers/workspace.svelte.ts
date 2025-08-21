@@ -165,9 +165,12 @@ class WorkspaceController {
 
     }
 
-    disconnect() {
+    async disconnect() {
         if (this.workspace_ws === null) return
-        new WebSocket(cnoc_url + "close")
+        this.connection = "connecting"
+        await tick()
+        this.sendCommand("kill", {})
+        await sleep(1000)
         this.workspace_ws.close()
         this.path = null
         cnoc_controller.reset()
@@ -175,7 +178,7 @@ class WorkspaceController {
         equipment_controller.reset()
         dependency_controller.reset()
         beinn_log_controller.reset()
-
+        this.connection = "disconnected"
     }
 
     async kill() {
