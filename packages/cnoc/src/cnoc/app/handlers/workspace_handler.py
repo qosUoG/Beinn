@@ -2,6 +2,7 @@ from contextlib import redirect_stderr, redirect_stdout
 from io import StringIO
 import json
 import sys
+import time
 from traceback import print_tb
 # noqa: F401
 
@@ -85,6 +86,9 @@ async def workspaceHandler(ws: ServerConnection):
             if command == "kill":
                 for experiment in Experiments.instances.values():
                     experiment.instance._cnoc_kill()
+
+                time.sleep(0.5)
+                sys.exit()
 
             print(f"Unknown command {command}", flush=True)
 
