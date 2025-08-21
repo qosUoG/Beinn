@@ -88,8 +88,7 @@ async def workspaceHandler(ws: ServerConnection):
                     experiment.instance._cnoc_kill()
                 await ws.close()
                 time.sleep(0.5)
-
-                sys.exit()
+                break
 
             print(f"Unknown command {command}", flush=True)
 

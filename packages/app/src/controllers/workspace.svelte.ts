@@ -171,7 +171,6 @@ class WorkspaceController {
         await tick()
         this.sendCommand("kill", {})
         await sleep(1000)
-        this.workspace_ws.close()
         this.path = null
         cnoc_controller.reset()
         experiment_controller.reset()
