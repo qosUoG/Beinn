@@ -13,16 +13,22 @@ from .state.foundation import Foundation
 from .handlers.workspace_handler import workspaceHandler
 from websockets import ServerConnection, serve
 
+wss: list[ServerConnection] = []
+
 
 async def handler(ws: ServerConnection):
     path = ws.request.path
+    wss.append(ws)
 
     # Workspace
     if path == "/workspace":
         await workspaceHandler(ws)
+        for _ws in wss:
+            await _ws.close()
         sys.exit()
     elif path == "/close":
-        await ws.close()
+        for _ws in wss:
+            await _ws.close()
         sys.exit()
     elif path.startswith("/chart"):
         await chartHandler(*unquote(path).split("/")[2:], ws)
