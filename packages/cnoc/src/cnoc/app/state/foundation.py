@@ -8,12 +8,8 @@ from websockets import ServerConnection
 
 class Foundation:
     _loop: asyncio.EventLoop
-    _tasks: list[asyncio.Task]
+    task: asyncio.Task[Any]
     workspace_ws: ServerConnection
-
-    @classmethod
-    def crateTask(cls, coro: Coroutine[Any, Any, Any]):
-        cls._tasks.append(asyncio.create_task(coro))
 
     @classmethod
     def getLoop(cls):

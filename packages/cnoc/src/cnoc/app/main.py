@@ -15,7 +15,6 @@ from .handlers.workspace_handler import workspaceHandler
 from websockets import ServerConnection, serve
 
 wss: list[ServerConnection] = []
-task: asyncio.Task[Any] | None = None
 
 
 async def handler(ws: ServerConnection):
@@ -28,14 +27,12 @@ async def handler(ws: ServerConnection):
         for _ws in wss:
             await _ws.close()
 
-        assert task is not None
-        task.cancel()
+        Foundation.task.cancel()
     elif path == "/close":
         for _ws in wss:
             await _ws.close()
 
-        assert task is not None
-        task.cancel()
+        Foundation.task.cancel()
     elif path.startswith("/chart"):
         await chartHandler(*unquote(path).split("/")[2:], ws)
 
@@ -43,8 +40,8 @@ async def handler(ws: ServerConnection):
 async def _main():
     Foundation.setLoop(asyncio.get_running_loop())
     async with serve(handler, "localhost", 8001) as server:
-        task = asyncio.create_task(server.serve_forever())
-        await task
+        Foundation.task = asyncio.create_task(server.serve_forever())
+        await Foundation.task
 
 
 def main():
