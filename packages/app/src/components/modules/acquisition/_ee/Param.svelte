@@ -14,6 +14,7 @@
 
 {#if param.type === "int" || param.type === "float"}
 	<InputField
+		mandatory={param.required}
 		{label}
 		bind:value={param.value}
 		onkeydown={(e: KeyboardEvent) => {
@@ -30,9 +31,13 @@
 			e.preventDefault();
 		}} />
 {:else if param.type === "str"}
-	<ContentEditable {label} bind:value={param.value} />
+	<ContentEditable
+		mandatory={param.required}
+		{label}
+		bind:value={param.value} />
 {:else if param.type === "bool"}
 	<TabSelect
+		mandatory={param.required}
 		{label}
 		bind:value={param.value}
 		items={[
@@ -40,9 +45,14 @@
 			{ key: "False", value: false },
 		]} />
 {:else if param.type === "select.float" || param.type === "select.int" || param.type === "select.str"}
-	<DropSelect {label} bind:value={param.value} options={param.options} />
+	<DropSelect
+		mandatory={param.required}
+		{label}
+		bind:value={param.value}
+		options={param.options} />
 {:else if param.type === "instance.equipment"}
 	<DropSelect
+		mandatory={param.required}
 		{label}
 		bind:value={param.name}
 		options={equipment_controller.selectable_instances} />

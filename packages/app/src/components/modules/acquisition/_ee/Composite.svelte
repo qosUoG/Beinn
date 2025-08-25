@@ -15,7 +15,7 @@
 </script>
 
 <button
-	class=" py-1.5 font-semibold text-left bg-slate-200 frow items-center"
+	class=" py-1.5 underline underline-offset-2 text-left bg-slate-200 frow items-center"
 	onclick={() => {
 		open = !open;
 	}}>

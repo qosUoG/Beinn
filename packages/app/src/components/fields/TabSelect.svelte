@@ -15,7 +15,7 @@
 	} = $props();
 </script>
 
-<div class="frow items-stretch">
+<div class="frow items-center">
 	<Label {label} {mandatory} />
 	<div
 		class="grid flex-grow *:border-l *:border-slate-400"

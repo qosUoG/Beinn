@@ -332,13 +332,13 @@ class InstanceEquipmentParam[T: EquipmentABC](ParamBase):
 
     class DictType(TypedDict):
         type: Literal["instance.equipment"]
-        name: str
+        name: str | None
         required: bool
 
     def toDict(self) -> DictType:
         return {
             "type": self.type,
-            "name": self.name if self.name else "",
+            "name": self.name if self.name else None,
             "required": self.required,
         }
 

@@ -71,7 +71,7 @@
 						<ChevronDown strokeWidth="3px" />
 					{/if}
 				</span>
-				<div class="  font-medium wrapped px-0">Params</div>
+				<div class=" font-extrabold wrapped px-0">Params</div>
 			</button>
 
 			{#if JSON.stringify(ee.params) !== JSON.stringify(ee.temp_params)}

@@ -200,9 +200,19 @@ export abstract class EEBaseController<T extends Instance = Instance> {
 
                 switch (param.type) {
 
-                    case "select.str": if (!(obj[key] as SelectStrParam).options.includes(param.value)) return
-                    case "select.float": if (!(obj[key] as SelectFloatParam).options.includes(param.value as number)) return
-                    case "select.int": if (!(obj[key] as SelectIntParam).options.includes(param.value as number)) return
+                    case "select.str": {
+                        if (!(obj[key] as SelectStrParam).options.includes(param.value)) {
+                            (obj[key] as SelectStrParam).value = (obj[key] as SelectStrParam).options[0]
+                            return
+                        }
+                    }
+                    case "select.float":
+                    case "select.int": {
+                        if (!(obj[key] as SelectFloatParam).options.includes(param.value as number)) {
+                            (obj[key] as SelectFloatParam).value = (obj[key] as SelectFloatParam).options[0]
+                            return
+                        }
+                    }
                     case "instance.equipment": if (!((param as InstanceEquipmentParam).name in equipment_controller.instances)) return
 
                 }

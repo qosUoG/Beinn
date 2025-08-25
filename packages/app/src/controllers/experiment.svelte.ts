@@ -50,7 +50,6 @@ export class ExperimentController extends EEBaseController<Experiment> {
     }
 
 
-
     get closeable() {
         for (const instance of this.instances_arr)
             if (instance.status !== "completed" && instance.status !== "stopped" && instance.status !== "initial")

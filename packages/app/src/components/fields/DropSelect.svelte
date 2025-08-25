@@ -10,17 +10,19 @@
 
 	let {
 		label,
+		mandatory = false,
 		value = $bindable(),
 		options,
 	}: {
 		label: string;
+		mandatory?: boolean;
 		value: T;
 		options: { label: string; value: T }[] | T[];
 	} = $props();
 </script>
 
 <div class="frow items-center">
-	<Label {label} />
+	<Label {label} {mandatory} />
 	<div
 		{@attach clickoutside}
 		class="  flex-grow w-fit border-l-1 border-slate-400 text-center relative box-border h-5">

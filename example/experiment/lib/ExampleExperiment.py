@@ -16,6 +16,17 @@ import pandas as pd
 
 @dataclass
 class ExampleExperiment(experiment.ExperimentABC):
+    class CompositeParamsType(TypedDict):
+        compstrparam: p.StrParam
+        compfloatparam: p.FloatParam
+        compintparam: p.IntParam
+        compboolparam: p.BoolParam
+        compselectstrparam: p.SelectStrParam
+
+        compselectintparam: p.SelectIntParam
+        compselectfloatparam: p.SelectFloatParam
+        compinstanceequipmentparam: p.InstanceEquipmentParam[ExampleEquipment]
+
     class ParamsType(TypedDict):
         strparam: p.StrParam
         floatparam: p.FloatParam
@@ -25,7 +36,7 @@ class ExampleExperiment(experiment.ExperimentABC):
         selectintparam: p.SelectIntParam
         selectfloatparam: p.SelectFloatParam
         instance_equipment_param: p.InstanceEquipmentParam[ExampleEquipment]
-        compositeparam: p.CompositeParam
+        compositeparam: p.CompositeParam["ExampleExperiment.CompositeParamsType"]
 
     params: ParamsType
 
@@ -38,24 +49,26 @@ class ExampleExperiment(experiment.ExperimentABC):
             "floatparam": p.FloatParam(suffix="W"),
             "intparam": p.IntParam(),
             "boolparam": p.BoolParam(False),
-            "select_strparam": p.SelectStrParam(["option1", "option2", "option3"]),
-            "select_intparam": p.SelectIntParam([1, 2, 3]),
-            "select_floatparam": p.SelectFloatParam([1.1, 2.2, 3.3]),
-            "instance_equipmentparam": p.InstanceEquipmentParam[ExampleEquipment](),
+            "selectstrparam": p.SelectStrParam(["option1", "option2", "option3"]),
+            "selectintparam": p.SelectIntParam([1, 2, 3]),
+            "selectfloatparam": p.SelectFloatParam([1.1, 2.2, 3.3]),
+            "instance_equipment_param": p.InstanceEquipmentParam[ExampleEquipment](
+                required=True
+            ),
             "compositeparam": p.CompositeParam(
                 {
-                    "comp_strparam": p.StrParam(),
-                    "comp_floatparam": p.FloatParam(suffix="W"),
-                    "comp_intparam": p.IntParam(),
-                    "comp_boolparam": p.BoolParam(False),
-                    "comp_select_strparam": p.SelectStrParam(
+                    "compstrparam": p.StrParam(),
+                    "compfloatparam": p.FloatParam(suffix="W"),
+                    "compintparam": p.IntParam(),
+                    "compboolparam": p.BoolParam(False),
+                    "compselectstrparam": p.SelectStrParam(
                         ["option1", "option2", "option3"]
                     ),
-                    "comp_select_intparam": p.SelectIntParam([1, 2, 3]),
-                    "comp_select_floatparam": p.SelectFloatParam([1.1, 2.2, 3.3]),
-                    "comp_instance_equipmentparam": p.InstanceEquipmentParam[
+                    "compselectintparam": p.SelectIntParam([1, 2, 3]),
+                    "compselectfloatparam": p.SelectFloatParam([1.1, 2.2, 3.3]),
+                    "compinstanceequipmentparam": p.InstanceEquipmentParam[
                         ExampleEquipment
-                    ](),
+                    ](required=True),
                 },
             ),
         }
