@@ -55,7 +55,7 @@ export abstract class EEBaseController<T extends Instance = Instance> {
                 this.imports = imports
             })
             workspace_controller.registerCallback(`${eetype}:create`, ({ success, instance }: { success: boolean, instance: ConcInstance }) => {
-
+                console.log({ success, instance })
                 if (!success) return
 
                 const temp_instance: Instance = {

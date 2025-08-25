@@ -90,13 +90,6 @@ class WorkspaceController {
         }
 
         success = (await shell({ fn: "uv", cmd: "add git+https://github.com/qosUoG/Beinn#subdirectory=packages/cnoc", cwd: path, logger: beinn_log_controller })).success
-
-        if (!success) {
-            beinn_log_controller.append("FAILED connect to python")
-            return
-        }
-
-        success = (await shell({ fn: "uv", cmd: "sync", cwd: path, logger: beinn_log_controller })).success
         if (!success) {
             beinn_log_controller.append("FAILED connect to python")
             return
@@ -108,6 +101,13 @@ class WorkspaceController {
             beinn_log_controller.append("FAILED connect to python")
             return
         }
+
+        success = (await shell({ fn: "uv", cmd: "sync", cwd: path, logger: beinn_log_controller })).success
+        if (!success) {
+            beinn_log_controller.append("FAILED connect to python")
+            return
+        }
+
         beinn_log_controller.append("Start python as a child process")
         const handler = Command.create(
             "uv", "run cnoc".split(" "), {
@@ -143,6 +143,7 @@ class WorkspaceController {
 
         this.workspace_ws.onmessage = async (event: MessageEvent<string>) => {
             const data = JSON.parse(event.data)
+            console.log(data)
 
             for (const fn of this.#commands[data.command])
                 if (fn) await fn(data.value)
@@ -218,6 +219,7 @@ class WorkspaceController {
     }
 
     registerCallback(command: string, handler: (obj: any) => Promise<void> | void) {
+        if (!(command in this.#commands)) this.#commands[command] = []
         this.#commands[command].push(handler)
 
         return async (callback: (() => Promise<void> | void) | undefined = undefined) => {
