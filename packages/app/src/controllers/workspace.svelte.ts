@@ -30,7 +30,7 @@ class WorkspaceController {
         new WebSocket(cnoc_url + "close")
     }
 
-    #commands: Record<string, (obj: any) => Promise<void> | void> = {}
+    #commands: Record<string, ((obj: any) => Promise<void> | void)[]> = {}
     #onopen: (() => void | Promise<void>)[] = []
     /* 
     Connect to the python workspace
@@ -132,8 +132,8 @@ class WorkspaceController {
             beinn_log_controller.append("Try to load save from " + path + "/.beinn")
             const save = JSON.parse(await readTextFile(path + "/.beinn"))
             dependency_controller.loadSave(save.dependencies)
-            equipment_controller.loadSave(save.equipments)
-            experiment_controller.loadSave(save.experiments)
+            await equipment_controller.loadSave(save.equipments)
+            await experiment_controller.loadSave(save.experiments)
         }
 
         await sleep(2000) // Wait for uv to start
@@ -144,7 +144,9 @@ class WorkspaceController {
         this.workspace_ws.onmessage = async (event: MessageEvent<string>) => {
             const data = JSON.parse(event.data)
 
-            await this.#commands[data.command](data.value)
+            for (const fn of this.#commands[data.command])
+                if (fn) await fn(data.value)
+
         }
 
         this.workspace_ws.onopen = () => {
@@ -158,7 +160,7 @@ class WorkspaceController {
 
         this.workspace_ws.onclose = () => {
             console.log("Workspace WebSocket closed")
-            this.connection = "disconnected"
+
         }
 
         beinn_log_controller.append("END connect to python")
@@ -216,7 +218,12 @@ class WorkspaceController {
     }
 
     registerCallback(command: string, handler: (obj: any) => Promise<void> | void) {
-        this.#commands[command] = handler
+        this.#commands[command].push(handler)
+
+        return async (callback: (() => Promise<void> | void) | undefined = undefined) => {
+            this.#commands[command] = this.#commands[command].filter(fn => fn !== handler)
+            if (callback) await callback()
+        }
     }
 
     sendCommand(command: string, data: any) {

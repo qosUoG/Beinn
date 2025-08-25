@@ -14,7 +14,7 @@ from ...public.params import (
     AllParamTypes,
     CompositeParam,
     InstanceEquipmentParam,
-    _cnoc_params2Dict,
+    cnoc_params2Dict,
 )
 
 from ..state.experiments import Experiments
@@ -68,11 +68,12 @@ def eeImports(eetype: type[ExperimentABC] | type[EquipmentABC], names: list[str]
                 f"Failed to import module {name} from names for {eetype.__name__}: {e}",
                 flush=True,
             )
+            continue
 
         for package in pkgutil.walk_packages(pkg.__path__, pkg.__name__ + "."):
             examinePackage("walk_packages", package.name)
 
-    def onerror(x):
+    def onerror(x: str):
         print(f"Error importing module {x} while walk_packages ")
         _, _, traceback = sys.exc_info()
         print_tb(traceback)
@@ -83,6 +84,8 @@ def eeImports(eetype: type[ExperimentABC] | type[EquipmentABC], names: list[str]
         roots = __file__.split("/")
     elif "\\" in __file__:
         roots = __file__.split("\\")
+    else:
+        roots = [__file__]
     venv_index = roots.index(".venv")
     path = "/".join(roots[:venv_index])
 
@@ -116,21 +119,41 @@ async def create(
     module: str,
     cls: str,
 ):
-    instance = (
-        Equipments.create(name=name, module_str=module, cls_str=cls)
-        if eetype == "equipment"
-        else Experiments.create(name=name, module_str=module, cls_str=cls)
-    )
+    try:
+        instance = (
+            Equipments.create(name=name, module_str=module, cls_str=cls)
+            if eetype == "equipment"
+            else Experiments.create(name=name, module_str=module, cls_str=cls)
+        )
+    except Exception:
+        await ws.send(
+            json.dumps(
+                {
+                    "command": f"{eetype}:create",
+                    "value": {
+                        "success": False,
+                        "instance": {
+                            "module": module,
+                            "cls": cls,
+                            "name": name,
+                        },
+                    },
+                }
+            )
+        )
 
     await ws.send(
         json.dumps(
             {
                 "command": f"{eetype}:create",
                 "value": {
-                    "module": module,
-                    "cls": cls,
-                    "name": name,
-                    "params": _cnoc_params2Dict(instance.instance.params),
+                    "success": True,
+                    "instance": {
+                        "module": module,
+                        "cls": cls,
+                        "name": name,
+                        "params": cnoc_params2Dict(instance.instance.params),  # type: ignore
+                    },
                 },
             }
         )
@@ -139,20 +162,20 @@ async def create(
 
 def putParamsInstance(params: dict[str, AllParamTypes]):
     for k in params.keys():
-        if params[k]._type == CompositeParam._type:
+        if params[k].type == CompositeParam.type:
             putParamsInstance(params[k].children)
             continue
 
         try:
             if (
-                params[k]._type == InstanceEquipmentParam._type
+                params[k].type == InstanceEquipmentParam.type
                 and params[k].name is not None
             ):
                 params[k].instance = Equipments.instances[params[k].name].instance
                 continue
 
             # if (
-            #     params[k]._type == InstanceExperimentParam._type
+            #     params[k].type == InstanceExperimentParam.type
             #     and params[k].name is not None
             # ):
             #     params[k].instance = Experiments.instances[params[k].name].instance
@@ -160,7 +183,7 @@ def putParamsInstance(params: dict[str, AllParamTypes]):
 
         except KeyError:
             print(
-                f"Param {k} of type {params[k]._type} with name {params[k].name} does not exist",
+                f"Param {k} of type {params[k].type} with name {params[k].name} does not exist",
                 flush=True,
             )
 
@@ -181,7 +204,7 @@ async def updateParams(
                     "command": "equipment:update_params",
                     "value": {
                         "name": name,
-                        "params": _cnoc_params2Dict(
+                        "params": cnoc_params2Dict(
                             Equipments.instances[name].instance.params
                         ),
                     },
@@ -199,7 +222,7 @@ async def updateParams(
                     "command": "experiment:update_params",
                     "value": {
                         "name": name,
-                        "params": _cnoc_params2Dict(
+                        "params": cnoc_params2Dict(
                             Experiments.instances[name].instance.params
                         ),
                     },

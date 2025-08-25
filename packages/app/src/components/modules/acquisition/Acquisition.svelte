@@ -8,6 +8,7 @@
 	import Experiments from "./experiment/Experiments.svelte";
 	import { experiment_controller } from "$controllers/experiment.svelte";
 	import { equipment_controller } from "$controllers/equipment.svelte";
+	import { workspace_controller } from "$controllers/workspace.svelte";
 
 	type Page = "Dependency" | "Equipment" | "Experiment" | "Cli" | "Log";
 
@@ -59,9 +60,15 @@
 		)}
 		onclick={() => {
 			page = value;
-			if (value === "Experiment") {
+			if (
+				value === "Experiment" &&
+				workspace_controller.connection === "connected"
+			) {
 				experiment_controller.updateImports();
-			} else if (value === "Equipment") {
+			} else if (
+				value === "Equipment" &&
+				workspace_controller.connection === "connected"
+			) {
 				equipment_controller.updateImports();
 			}
 		}}>{value}</button>

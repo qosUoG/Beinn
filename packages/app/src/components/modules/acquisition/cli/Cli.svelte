@@ -4,7 +4,12 @@
 	import { workspace_controller } from "$controllers/workspace.svelte";
 	import { zeropad } from "$lib/utils";
 	import { stairsArrowDownLeft } from "@lucide/lab";
-	import { Clock, ListVideo, SendHorizontal } from "@lucide/svelte";
+	import {
+		BrushCleaning,
+		Clock,
+		ListVideo,
+		SendHorizontal,
+	} from "@lucide/svelte";
 	import { tick } from "svelte";
 	import type { Attachment } from "svelte/attachments";
 
@@ -78,7 +83,9 @@
 			}}>
 			<Clock />
 		</button>
-
+		<button
+			class="border-red-500 border-1 text-red-500 icon-btn-sm rounded"
+			onclick={cnoc_controller.clearLogs}><BrushCleaning /></button>
 		<button
 			class={cn(
 				" border-white border-1 icon-btn-sm wrapped",

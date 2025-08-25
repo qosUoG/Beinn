@@ -4,16 +4,16 @@
 
 	import { getCurrentWindow } from "@tauri-apps/api/window";
 
-	import Config from "$components/modules/config/Config.svelte";
+	import Acquisition from "$components/modules/acquisition/Acquisition.svelte";
 	import { workspace_controller } from "$controllers/workspace.svelte";
-	import { ChevronsRight } from "@lucide/svelte";
+
 	import Board from "$components/modules/charts/Board.svelte";
 
 	getCurrentWindow().listen("tauri://close-requested", async () => {
 		if (await workspace_controller.kill()) await exit();
 	});
 
-	let open = $state(false);
+	let acquisition_opened = $state(false);
 </script>
 
 <div class="w-screen h-screen fcol max-h-screen max-w-screen">
@@ -21,24 +21,20 @@
 
 	<div class="w-full flex-grow relative">
 		<div class="absolute top-0 left-0 w-full h-full frow min-h-0">
-			{#if open}
-				<Config bind:open />
+			{#if acquisition_opened}
+				<Acquisition bind:open={acquisition_opened} />
 			{/if}
 
 			<Board />
 		</div>
 
-		{#if !open}
+		{#if !acquisition_opened}
 			<button
-				class=" text-white aspect-auto frow items-center pl-2 bg-slate-800 rounded-r h-6 w-fit absolute top-0 left-0"
+				class=" text-white aspect-auto frow items-center bg-slate-800 rounded-r px-2 py-1 w-fit absolute top-0 left-0 [writing-mode:vertical-lr]"
 				onclick={() => {
-					open = true;
+					acquisition_opened = true;
 				}}>
-				Configuration
-
-				<span class="icon-btn-sm text-white">
-					<ChevronsRight />
-				</span>
+				Acquisition
 			</button>
 		{/if}
 	</div>

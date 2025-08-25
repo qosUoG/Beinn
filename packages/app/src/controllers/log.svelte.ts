@@ -26,9 +26,7 @@ export class LogController {
         if (this.#log_entries.value.length > 3000) this.#log_entries.value.shift()
     }
 
-    clearLogs() {
-        this.#log_entries.value = []
-    }
+
 }
 
 export const beinn_log_controller = $state(new LogController())

@@ -2,7 +2,7 @@
 	import { cn } from "$components/utils.svelte";
 	import { beinn_log_controller } from "$controllers/log.svelte";
 	import { zeropad } from "$lib/utils";
-	import { Clock, ListVideo } from "@lucide/svelte";
+	import { BrushCleaning, Clock, ListVideo } from "@lucide/svelte";
 	import type { Attachment } from "svelte/attachments";
 
 	const month_texts = [
@@ -50,6 +50,10 @@
 			}}>
 			<Clock />
 		</button>
+
+		<button
+			class="border-red-500 border-1 text-red-500 icon-btn-sm rounded"
+			onclick={beinn_log_controller.reset}><BrushCleaning /></button>
 
 		<button
 			class={cn(
