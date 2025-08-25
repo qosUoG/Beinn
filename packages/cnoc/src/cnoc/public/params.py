@@ -225,6 +225,7 @@ class FloatParam(ParamBase):
     def __init__(self, default: float = 0.0, suffix: str = "", required: bool = False):
         self.value = default
         self.suffix = suffix
+        super().__init__(required)
 
     class DictType(TypedDict):
         type: Literal["float"]
