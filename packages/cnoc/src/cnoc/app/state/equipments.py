@@ -37,7 +37,7 @@ class Equipments:
 
         for experiment in Experiments.instances.values():
             for param in experiment.instance.params.values():
-                if param._type == "equipment" and param.name == name:
+                if param.type == "equipment" and param.name == name:
                     experiment.instance._cnoc_saveParams()
 
     @classmethod

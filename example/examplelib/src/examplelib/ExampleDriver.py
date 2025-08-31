@@ -51,7 +51,7 @@ class ExampleEquipment(equipment.EquipmentABC):
             "intparam": p.IntParam(),
             "boolparam": p.BoolParam(False),
             "selectstrparam": p.SelectStrParam(["option1", "option2", "option3"]),
-            "selectintparam": p.SelectIntParam([1, 2, 3], 3),
+            "selectintparam": p.SelectIntParam([1, 2, 3], 2),
             "selectfloatparam": p.SelectFloatParam([1.1, 2.2, 3.3]),
             "compositeparam": p.CompositeParam(
                 {
