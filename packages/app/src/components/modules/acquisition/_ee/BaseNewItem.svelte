@@ -28,11 +28,13 @@
 			class="absolute right-0 top-0 flex items-center h-full bg-blue-600 rounded aspect-square justify-center icon-btn-sm text-white"
 			aria-label={`Add ${controller.eetype}`}
 			onclick={() => {
-				controller.create(
-					controller.temp_name,
-					controller.temp_module,
-					controller.temp_cls
-				);
+				controller.create([
+					{
+						name: controller.temp_name,
+						module: controller.temp_module,
+						cls: controller.temp_cls,
+					},
+				]);
 			}}>
 			<Plus />
 		</button>
@@ -62,6 +64,7 @@
 					<div
 						class="bg-white absolute bottom-0 left-0 w-full rounded border">
 						{#each controller.imports as { cls, module }}
+							{console.log($state.snapshot(controller.imports))}
 							<button
 								class={cn(
 									"text-slate-400 wrapped  w-full",

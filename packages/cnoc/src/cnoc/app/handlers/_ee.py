@@ -100,12 +100,9 @@ def imports(
     eetype: Literal["equipment"] | Literal["experiment"],
     packages: list[str],
 ):
-    print(packages, flush=True)
-    return (
-        eeImports(
-            EquipmentABC if eetype == "equipment" else ExperimentABC,
-            packages,
-        ),
+    return eeImports(
+        EquipmentABC if eetype == "equipment" else ExperimentABC,
+        packages,
     )
 
 
