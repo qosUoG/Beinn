@@ -116,6 +116,7 @@ def create(
     eetype: Literal["equipment"] | Literal["experiment"],
     value: list[CreateType],
 ):
+    print("create", flush=True)
     print(value, flush=True)
     res: list[dict[str, Any]] = []
     for v in value:

@@ -106,16 +106,7 @@ export abstract class EEBaseController<T extends Instance = Instance> {
                     beinn_log_controller.append(`ERROR Instance with name ${name} already exists`)
                     continue
                 }
-                res.push(
-                    {
-
-                        name: name,
-                        module: module,
-                        cls: cls,
-                        params: {},
-
-                    }
-                )
+                res.push({ name, module, cls, params: {}, })
             }
         }
         return workspace_controller.sendCommand(`${this.eetype}:create`, res)
