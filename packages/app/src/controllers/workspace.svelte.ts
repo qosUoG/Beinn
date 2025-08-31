@@ -194,7 +194,7 @@ class WorkspaceController {
     }
 
     async kill() {
-        if (this.workspace_ws === null) return
+        if (this.workspace_ws === null) return true
 
         for (const experiment of experiment_controller.instances_arr) {
             if (!experiment.status.endsWith("ing")) continue
