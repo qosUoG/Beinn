@@ -3,6 +3,8 @@ import { readTextFile } from "@tauri-apps/plugin-fs"
 import { parse } from "smol-toml"
 import { beinn_log_controller } from "./log.svelte"
 import { workspace_controller } from "./workspace.svelte"
+import { tick } from "svelte"
+import { sleep } from "$lib/utils"
 
 export type GitSource = {
     type: "git",
@@ -29,6 +31,7 @@ export type Dependency = {
     name: string,
     fullname: string,
     has_driver: boolean,
+    updating: boolean
 }
 
 class Dependencies {
@@ -68,6 +71,7 @@ class Dependencies {
                     name: parsed_dependency,
                     fullname: dependency,
                     has_driver: false,
+                    updating: false,
                 })
 
             else if ("git" in sources[parsed_dependency])
@@ -76,6 +80,7 @@ class Dependencies {
                     fullname: dependency,
                     source: { type: "git", ...(sources[parsed_dependency] as Omit<GitSource, "type">) },
                     has_driver: false,
+                    updating: false,
                 })
             else if ("path" in sources[parsed_dependency])
                 uv_dependencies.push({
@@ -83,6 +88,7 @@ class Dependencies {
                     fullname: dependency,
                     source: { type: "path", ...(sources[parsed_dependency] as Omit<PathSource, "type">) },
                     has_driver: false,
+                    updating: false,
                 })
         }
 
@@ -118,18 +124,29 @@ class Dependencies {
             return
         }
 
+        dependency.updating = true
+        await tick()
+
+
+
         let success = (await shell({ fn: "uv", cmd: `lock --upgrade-package ${name}`, cwd: workspace_controller.path, logger: beinn_log_controller })).success
         if (!success) {
             beinn_log_controller.append(`FAILED update dependency ${name}`)
+
+            dependency.updating = false
             return
         }
 
         success = (await shell({ fn: "uv", cmd: "sync", cwd: workspace_controller.path, logger: beinn_log_controller })).success
         if (!success) {
             beinn_log_controller.append(`FAILED update dependency ${name}`)
+
+            dependency.updating = false
             return
         }
         beinn_log_controller.append(`END update dependency ${name}`)
+
+        dependency.updating = false
 
     }
 
