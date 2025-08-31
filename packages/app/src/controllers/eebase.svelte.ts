@@ -54,9 +54,9 @@ export abstract class EEBaseController<T extends Instance = Instance> {
             workspace_controller.registerCallback(`${eetype}:imports`, (imports: Imports) => {
                 this.imports = imports
             })
-            workspace_controller.registerCallback(`${eetype}:create`, (value: { success: boolean, instance: ConcInstance }[]) => {
-                for (const { success, instance } of value) {
-                    if (!success) continue
+            workspace_controller.registerCallback(`${eetype}:create`, (instances: ConcInstance[]) => {
+                for (const instance of instances) {
+
 
                     const temp_instance: Instance = {
                         ...instance, temp_params: deepCopy(instance.params), param_opens: true, composite_opens: {},
@@ -162,8 +162,8 @@ export abstract class EEBaseController<T extends Instance = Instance> {
 
         })
 
-        const remove_create_callback = workspace_controller.registerCallback(`${this.eetype}:create`, async (creates: { success: boolean, instance: ConcInstance }[]) => {
-            if (!creates.map(({ instance }) => instance.name).includes(save.name)) return
+        const remove_create_callback = workspace_controller.registerCallback(`${this.eetype}:create`, async (instances: ConcInstance[]) => {
+            if (!instances.map(({ name }) => name).includes(save.name)) return
 
             await remove_create_callback()
 

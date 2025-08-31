@@ -131,26 +131,14 @@ def create(
 
             res.append(
                 {
-                    "success": True,
-                    "instance": {
-                        "module": v["module"],
-                        "cls": v["cls"],
-                        "name": v["name"],
-                        "params": cnoc_params2Dict(instance.instance.params),  # type: ignore
-                    },
-                }
+                    "module": v["module"],
+                    "cls": v["cls"],
+                    "name": v["name"],
+                    "params": cnoc_params2Dict(instance.instance.params),  # type: ignore
+                },
             )
         except Exception:
-            res.append(
-                {
-                    "success": False,
-                    "instance": {
-                        "module": v["module"],
-                        "cls": v["cls"],
-                        "name": v["name"],
-                    },
-                }
-            )
+            pass
 
     return res
 
