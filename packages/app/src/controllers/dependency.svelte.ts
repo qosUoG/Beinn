@@ -2,6 +2,7 @@ import { shell } from "$lib/svelte_utils"
 import { readTextFile } from "@tauri-apps/plugin-fs"
 import { parse } from "smol-toml"
 import { beinn_log_controller } from "./log.svelte"
+import { workspace_controller } from "./workspace.svelte"
 
 export type GitSource = {
     type: "git",
@@ -105,6 +106,30 @@ class Dependencies {
 
         beinn_log_controller.append("END delete dependency")
 
+
+    }
+
+    async updateDependency({ name }: { name: string }) {
+
+        beinn_log_controller.append(`BEGIN update dependency ${name}`)
+        const dependency = this.dependencies.find(d => d.name === name)
+        if (dependency === undefined || workspace_controller.path === null) {
+            beinn_log_controller.append("FAILED update dependency")
+            return
+        }
+
+        let success = (await shell({ fn: "uv", cmd: `lock --upgrade-package ${name}`, cwd: workspace_controller.path, logger: beinn_log_controller })).success
+        if (!success) {
+            beinn_log_controller.append(`FAILED update dependency ${name}`)
+            return
+        }
+
+        success = (await shell({ fn: "uv", cmd: "sync", cwd: workspace_controller.path, logger: beinn_log_controller })).success
+        if (!success) {
+            beinn_log_controller.append(`FAILED update dependency ${name}`)
+            return
+        }
+        beinn_log_controller.append(`END update dependency ${name}`)
 
     }
 

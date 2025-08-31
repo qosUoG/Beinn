@@ -62,7 +62,7 @@ class SelectStrParam(ParamBase):
             would be used
         """
         self._options = options
-        self.value = options[0] if value is None else value
+        self.value = value if value is not None and value in options else options[0]
         super().__init__(required)
 
     class DictType(TypedDict):
@@ -98,7 +98,7 @@ class SelectIntParam(ParamBase):
         self, options: list[int], value: int | None = None, required: bool = False
     ):
         self._options = options
-        self.value = options[0] if value is None else value
+        self.value = value if value is not None and value in options else options[0]
         super().__init__(required)
 
     class DictType(TypedDict):
@@ -134,7 +134,7 @@ class SelectFloatParam(ParamBase):
         self, options: list[float], value: float | None = None, required: bool = False
     ):
         self._options = options
-        self.value = options[0] if value is None else value
+        self.value = value if value is not None and value in options else options[0]
         super().__init__(required)
 
     class DictType(TypedDict):

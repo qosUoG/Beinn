@@ -244,6 +244,8 @@ class WorkspaceController {
             return
         }
         const id = crypto.randomUUID()
+        console.log(data)
+        console.log(JSON.stringify({ command, value: data, id }))
         this.workspace_ws.send(JSON.stringify({ command, value: data, id }))
         return id
     }

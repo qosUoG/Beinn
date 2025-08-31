@@ -50,7 +50,7 @@ class ExampleExperiment(experiment.ExperimentABC):
             "intparam": p.IntParam(),
             "boolparam": p.BoolParam(False),
             "selectstrparam": p.SelectStrParam(["option1", "option2", "option3"]),
-            "selectintparam": p.SelectIntParam([1, 2, 3]),
+            "selectintparam": p.SelectIntParam([1, 2, 3], 1),
             "selectfloatparam": p.SelectFloatParam([1.1, 2.2, 3.3]),
             "instance_equipment_param": p.InstanceEquipmentParam[ExampleEquipment](
                 required=True

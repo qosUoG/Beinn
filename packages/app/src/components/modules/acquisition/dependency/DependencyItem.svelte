@@ -4,12 +4,9 @@
 		dependency_controller,
 		type Dependency,
 	} from "$controllers/dependency.svelte";
-	import { equipment_controller } from "$controllers/equipment.svelte";
-	import { experiment_controller } from "$controllers/experiment.svelte";
 	import { beinn_log_controller } from "$controllers/log.svelte";
 	import { workspace_controller } from "$controllers/workspace.svelte";
-	import { Trash2 } from "@lucide/svelte";
-	import { tick } from "svelte";
+	import { ArrowUp, CircleArrowUp, Trash2 } from "@lucide/svelte";
 
 	let { dependency = $bindable() }: { dependency: Dependency } = $props();
 </script>
@@ -19,7 +16,18 @@
 		<div class=" text-slate-950 font-medium wrapped px-0">
 			{dependency.name}
 		</div>
-		<div class=" frow-1">
+		<div class=" frow-2">
+			<button
+				class={cn(
+					"border rounded-full px-1 box-border border-blue-600 text-blue-600 icon-btn-sm"
+				)}
+				onclick={() => {
+					dependency_controller.updateDependency({
+						name: dependency.name,
+					});
+				}}>
+				<ArrowUp />
+			</button>
 			<button
 				class={cn(
 					dependency.has_driver

@@ -100,14 +100,29 @@ export abstract class EEBaseController<T extends Instance = Instance> {
 
     create(temp_instances: { name: string, module: string, cls: string }[]) {
         let res: ConcInstance[] = []
+        console.log({ temp_instances })
         for (const { name, module, cls } of temp_instances) {
+            let found = false
             for (const instance of Object.values(this.instances)) {
                 if (instance.name === name) {
                     beinn_log_controller.append(`ERROR Instance with name ${name} already exists`)
-                    continue
+                    found = true
+                    break
                 }
-                res.push({ name, module, cls, params: {}, })
+
+
             }
+            if (found) continue
+            res.push(
+                {
+
+                    name: name,
+                    module: module,
+                    cls: cls,
+                    params: {},
+
+                }
+            )
         }
         return workspace_controller.sendCommand(`${this.eetype}:create`, res)
     }
@@ -140,7 +155,9 @@ export abstract class EEBaseController<T extends Instance = Instance> {
     }
 
     reload(name: string) {
-        const save = JSON.parse(JSON.stringify({ ...this.instances[name] }))
+        const save: T = JSON.parse(JSON.stringify({ ...this.instances[name] }))
+
+        console.log({ save })
 
         const remove_update_params_callback = workspace_controller.registerCallback(`${this.eetype}:update_params`, async (instances: { name: string, params: Prettify<Instance["params"]> }[]) => {
 
@@ -148,7 +165,8 @@ export abstract class EEBaseController<T extends Instance = Instance> {
                 if (save.name !== name) continue
 
                 await remove_update_params_callback()
-                this.assignTempParams(name, save[name].temp_params)
+                this.assignTempParams(name, save.temp_params)
+                break
             }
 
         })
@@ -158,13 +176,18 @@ export abstract class EEBaseController<T extends Instance = Instance> {
 
             await remove_create_callback()
 
-            if (JSON.stringify(save[save.name].params) ===
-                JSON.stringify(this.instances[save.name].temp_params))
+            if (JSON.stringify(save.params) ===
+                JSON.stringify(this.instances[save.name].params)) {
+                this.assignTempParams(name, save.temp_params)
+                await tick()
+                console.log($state.snapshot(this.instances[save.name].params))
+                await remove_update_params_callback()
                 return
+            }
 
-            this.assignTempParams(save.name, save[save.name].params)
+            this.assignTempParams(save.name, save.params)
             await tick()
-            this.updateParams(save.name)
+            this.updateParams([save.name])
             return
 
 
@@ -182,7 +205,7 @@ export abstract class EEBaseController<T extends Instance = Instance> {
             return
         }
 
-        return workspace_controller.sendCommand(`${this.eetype}:remove`, { name })
+        this.remove([name])
     }
 
 
@@ -216,13 +239,12 @@ export abstract class EEBaseController<T extends Instance = Instance> {
             }
         })
 
-        const remove_create_callback = workspace_controller.registerCallback(`${this.eetype}:create`, async (creates: { success: boolean, instance: ConcInstance }[], id: string) => {
+        const remove_create_callback = workspace_controller.registerCallback(`${this.eetype}:create`, async (instances: ConcInstance[], id: string) => {
             if (id !== request_id.value) return
 
             await remove_create_callback()
 
-            for (const { success, instance } of creates) {
-                if (!success) continue
+            for (const instance of instances) {
 
                 if (JSON.stringify(save[instance.name].params) ===
                     JSON.stringify(this.instances[instance.name].temp_params))
@@ -233,7 +255,7 @@ export abstract class EEBaseController<T extends Instance = Instance> {
             }
 
             await tick()
-            request_id.value = this.updateParams(creates.map(({ instance }) => instance.name)) ?? ""
+            request_id.value = this.updateParams(instances.map(({ name }) => name)) ?? ""
         })
 
         request_id.value = this.create(Object.values(save).map(({ name, module, cls }) => ({ name, module, cls }))) ?? ""
@@ -278,9 +300,9 @@ export abstract class EEBaseController<T extends Instance = Instance> {
             for (const [key, value] of Object.entries(params)) {
                 if (value.type === "composite")
                     for (const [key, deep_value] of Object.entries(value.children))
-                        assignParam(instance.params, key, deep_value)
+                        assignParam(instance.temp_params, key, deep_value)
                 else
-                    assignParam(instance.params, key, value)
+                    assignParam(instance.temp_params, key, value)
 
             }
         }
