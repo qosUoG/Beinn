@@ -96,7 +96,7 @@ def eeImports(eetype: type[ExperimentABC] | type[EquipmentABC], names: list[str]
     return list(res.values())
 
 
-async def imports(
+def imports(
     eetype: Literal["equipment"] | Literal["experiment"],
     packages: list[str],
 ):
@@ -114,7 +114,7 @@ class CreateType(TypedDict):
     cls: str
 
 
-async def create(
+def create(
     eetype: Literal["equipment"] | Literal["experiment"],
     value: list[CreateType],
 ):
@@ -190,7 +190,7 @@ class UpdateParamsType(TypedDict):
     params: dict[str, AllParamTypes]
 
 
-async def updateParams(
+def updateParams(
     eetype: Literal["equipment"] | Literal["experiment"],
     value: list[UpdateParamsType],
 ):
@@ -224,7 +224,7 @@ async def updateParams(
     return res
 
 
-async def remove(
+def remove(
     eetype: Literal["equipment"] | Literal["experiment"],
     names: list[str],
 ):
