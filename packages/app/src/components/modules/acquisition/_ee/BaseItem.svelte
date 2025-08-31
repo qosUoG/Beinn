@@ -3,6 +3,7 @@
 		Check,
 		ChevronDown,
 		ChevronRight,
+		FolderSync,
 		Trash2,
 		Undo,
 	} from "@lucide/svelte";
@@ -37,19 +38,35 @@
 			{ee.name}
 		</div>
 
-		<button
-			aria-label="Remove dependency"
-			class={cn(
-				" icon-btn-sm text-white",
-				deletable
-					? "bg-red-600"
-					: "bg-slate-300 cursor-not-allowed *:cursor-not-allowed **:cursor-not-allowed"
-			)}
-			onclick={() => {
-				if (deletable) controller.remove(ee.name);
-			}}>
-			<Trash2 />
-		</button>
+		<div>
+			<button
+				aria-label={`Reload ${ee.name}`}
+				class={cn(
+					" icon-btn-sm text-white",
+					deletable
+						? "bg-blue-600"
+						: "bg-slate-300 cursor-not-allowed *:cursor-not-allowed **:cursor-not-allowed"
+				)}
+				onclick={() => {
+					if (deletable) controller.reload(ee.name);
+				}}>
+				<FolderSync />
+			</button>
+
+			<button
+				aria-label={`Remove ${ee.name}`}
+				class={cn(
+					" icon-btn-sm text-white",
+					deletable
+						? "bg-red-600"
+						: "bg-slate-300 cursor-not-allowed *:cursor-not-allowed **:cursor-not-allowed"
+				)}
+				onclick={() => {
+					if (deletable) controller.remove([ee.name]);
+				}}>
+				<Trash2 />
+			</button>
+		</div>
 	</div>
 	<div>
 		<div

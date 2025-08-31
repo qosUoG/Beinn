@@ -35,19 +35,19 @@
 				{/if}
 				{#if experiment.status === "initial" || experiment.status === "completed" || experiment.status === "stopped"}
 					{#if JSON.stringify(experiment.params) === JSON.stringify(experiment.temp_params) && Object.values(experiment.params).every( (param) => {
-								if (param.type === "composite") return Object.values(param.children).every((child) => child.type !== "instance.equipment" || (child.required && child.name !== undefined) || child.required === false);
-								console.log(param.type !== "instance.equipment" || param.name !== undefined);
-								return param.type !== "instance.equipment" || param.name !== undefined;
+								if (param.type === "composite") return Object.values(param.children).every((child) => child.type !== "instance.equipment" || (child.required && child.name) || child.required === false);
+
+								return param.type !== "instance.equipment" || (param.required && param.name) || param.required === false;
 							} )}
-						<div class="icon-btn-sm bg-slate-300 text-white">
-							<Play />
-						</div>
-					{:else}
 						<button
 							class="icon-btn-sm bg-green-500 text-white"
 							onclick={() => {
 								experiment_controller.start(experiment.name);
 							}}><Play /></button>
+					{:else}
+						<div class="icon-btn-sm bg-slate-300 text-white">
+							<Play />
+						</div>
 					{/if}
 				{:else if experiment.status === "started" || experiment.status === "running"}
 					<button

@@ -54,37 +54,40 @@ export abstract class EEBaseController<T extends Instance = Instance> {
             workspace_controller.registerCallback(`${eetype}:imports`, (imports: Imports) => {
                 this.imports = imports
             })
-            workspace_controller.registerCallback(`${eetype}:create`, ({ success, instance }: { success: boolean, instance: ConcInstance }) => {
-                console.log({ success, instance })
-                if (!success) return
+            workspace_controller.registerCallback(`${eetype}:create`, (value: { success: boolean, instance: ConcInstance }[]) => {
+                for (const { success, instance } of value) {
+                    if (!success) continue
 
-                const temp_instance: Instance = {
-                    ...instance, temp_params: deepCopy(instance.params), param_opens: true, composite_opens: {},
-                }
+                    const temp_instance: Instance = {
+                        ...instance, temp_params: deepCopy(instance.params), param_opens: true, composite_opens: {},
+                    }
 
-                for (const [key, value] of Object.entries(instance.params))
-                    if (value.type === "composite" && temp_instance.composite_opens[key] === undefined)
-                        temp_instance.composite_opens[key] = false
+                    for (const [key, value] of Object.entries(instance.params))
+                        if (value.type === "composite" && temp_instance.composite_opens[key] === undefined)
+                            temp_instance.composite_opens[key] = false
 
-                this.instances[instance.name] = createFn(temp_instance)
+                    this.instances[instance.name] = createFn(temp_instance)
 
 
-                if (instance.name === this.temp_name && instance.module === this.temp_module && instance.cls === this.temp_cls) {
-                    this.temp_name = ""
-                    this.temp_module = ""
-                    this.temp_cls = ""
+                    if (instance.name === this.temp_name && instance.module === this.temp_module && instance.cls === this.temp_cls) {
+                        this.temp_name = ""
+                        this.temp_module = ""
+                        this.temp_cls = ""
+                    }
                 }
             })
 
 
 
-            workspace_controller.registerCallback(`${eetype}:update_params`, ({ name, params }: { name: string, params: Prettify<Instance["params"]> }) => {
-                this.instances[name].params = params
 
+            workspace_controller.registerCallback(`${eetype}:update_params`, (value: { name: string, params: Prettify<Instance["params"]> }[]) => {
+                for (const { name, params } of value)
+                    this.instances[name].params = params
             })
 
-            workspace_controller.registerCallback(`${eetype}:remove`, (name: string) => {
-                delete this.instances[name]
+            workspace_controller.registerCallback(`${eetype}:remove`, (names: string[]) => {
+                for (const name of names)
+                    delete this.instances[name]
             })
 
         })
@@ -92,45 +95,103 @@ export abstract class EEBaseController<T extends Instance = Instance> {
     }
 
     updateImports() {
-        workspace_controller.sendCommand(`${this.eetype}:imports`, { packages: dependency_controller.has_driver_package_names })
+        return workspace_controller.sendCommand(`${this.eetype}:imports`, dependency_controller.has_driver_package_names)
     }
 
-    create(temp_name: string, temp_module: string, temp_cls: string) {
-        for (const instance of Object.values(this.instances)) {
-            if (instance.name === temp_name) {
-                beinn_log_controller.append(`ERROR Instance with name ${temp_name} already exists`)
-                return
+    create(temp_instances: { name: string, module: string, cls: string }[]) {
+        let res: ConcInstance[] = []
+        for (const { name, module, cls } of temp_instances) {
+            for (const instance of Object.values(this.instances)) {
+                if (instance.name === name) {
+                    beinn_log_controller.append(`ERROR Instance with name ${name} already exists`)
+                    continue
+                }
+                res.push(
+                    {
+
+                        name: name,
+                        module: module,
+                        cls: cls,
+                        params: {},
+
+                    }
+                )
             }
         }
-        const instance: ConcInstance = {
-
-            name: temp_name,
-            module: temp_module,
-            cls: temp_cls,
-            params: {},
-
-        }
-        workspace_controller.sendCommand(`${this.eetype}:create`, instance)
+        return workspace_controller.sendCommand(`${this.eetype}:create`, res)
     }
 
-    updateParams(name: string) {
-        if (!(name in this.instances)) {
-            beinn_log_controller.append(`ERROR Instance with name ${name} does not exist`)
-            return
+    updateParams(names: string[]) {
+        let res: { name: string, params: Record<string, AllParamTypes> }[] = []
+        for (const name of names) {
+            if (!(name in this.instances)) {
+                beinn_log_controller.append(`ERROR Instance with name ${name} does not exist`)
+                return
+            }
+            res.push({
+                name,
+                params: this.instances[name].temp_params
+            })
         }
+        return workspace_controller.sendCommand(`${this.eetype}:update_params`, res)
+    }
 
-        workspace_controller.sendCommand(`${this.eetype}:update_params`, {
-            name,
-            params: this.instances[name].temp_params
+    remove(names: string[]) {
+        let res: string[] = []
+        for (const name of names) {
+            if (!(name in this.instances)) {
+                beinn_log_controller.append(`ERROR Instance with name ${name} does not exist`)
+                continue
+            }
+            res.push(name)
+        }
+        return workspace_controller.sendCommand(`${this.eetype}:remove`, res)
+    }
+
+    reload(name: string) {
+        const save = JSON.parse(JSON.stringify({ ...this.instances[name] }))
+
+        const remove_update_params_callback = workspace_controller.registerCallback(`${this.eetype}:update_params`, async (instances: { name: string, params: Prettify<Instance["params"]> }[]) => {
+
+            for (const { name } of instances) {
+                if (save.name !== name) continue
+
+                await remove_update_params_callback()
+                this.assignTempParams(name, save[name].temp_params)
+            }
+
         })
-    }
 
-    remove(name: string) {
+        const remove_create_callback = workspace_controller.registerCallback(`${this.eetype}:create`, async (creates: { success: boolean, instance: ConcInstance }[]) => {
+            if (!creates.map(({ instance }) => instance.name).includes(save.name)) return
+
+            await remove_create_callback()
+
+            if (JSON.stringify(save[save.name].params) ===
+                JSON.stringify(this.instances[save.name].temp_params))
+                return
+
+            this.assignTempParams(save.name, save[save.name].params)
+            await tick()
+            this.updateParams(save.name)
+            return
+
+
+        })
+
+        const remove_remove_callback = workspace_controller.registerCallback(`${this.eetype}:remove`, async (names: string[]) => {
+            if (!names.includes(save.name)) return
+
+            await remove_remove_callback()
+            this.create([save])
+        })
+
         if (!(name in this.instances)) {
             beinn_log_controller.append(`ERROR Instance with name ${name} does not exist`)
             return
         }
-        workspace_controller.sendCommand(`${this.eetype}:remove`, { name })
+
+        return workspace_controller.sendCommand(`${this.eetype}:remove`, { name })
     }
 
 
@@ -144,53 +205,47 @@ export abstract class EEBaseController<T extends Instance = Instance> {
     }
 
     async loadSave(save: Record<string, Instance>) {
-
-        let save_pending_create: string[] = Object.keys(save)
-        let save_pending_params: string[] = Object.keys(save)
-
-        const save_update_params = async (instance: Instance) => {
-            // Check if params need update
-            if (JSON.stringify(save[instance.name].params) ===
-                JSON.stringify(this.instances[instance.name].temp_params))
-                return
-
-            this.assignTempParams(instance.name, save[instance.name].params)
-            await tick()
-            this.updateParams(instance.name)
-
+        const request_id = {
+            _value: "",
+            get value() {
+                return this._value
+            },
+            set value(value: string) {
+                this._value = value
+            }
         }
 
-        const remove_create_callback = workspace_controller.registerCallback(`${this.eetype}:create`, async ({ success, instance }: { success: boolean, instance: ConcInstance }) => {
-            if (!save_pending_create.includes(instance.name)) return
+        const remove_update_params_callback = workspace_controller.registerCallback(`${this.eetype}:update_params`, async (instances: { name: string, params: Prettify<Instance["params"]> }[], id: string) => {
+            if (id !== request_id.value) return
+            await remove_update_params_callback()
 
-            save_pending_create = save_pending_create.filter(name => name !== instance.name)
-
-            if (save_pending_create.length === 0)
-                await remove_create_callback(
-                    async () => {
-                        for (const save_instance of Object.values(save))
-                            if (save_instance.name in this.instances)
-                                await save_update_params(save_instance)
-                    })
-
-        })
-
-        for (const instance of Object.values(save))
-            this.create(instance.name, instance.module, instance.cls)
-
-        await tick()
-
-        const remove_update_params_callback = workspace_controller.registerCallback(`${this.eetype}:update_params`, async ({ name, params }: { name: string, params: Prettify<Instance["params"]> }) => {
-            if (!save_pending_params.includes(name)) return
-            save_pending_params = save_pending_params.filter(name => name !== name)
-
-
-            this.assignTempParams(name, save[name].temp_params)
-            await tick()
-
-            if (save_pending_params.length === 0)
+            for (const { name } of instances) {
                 await remove_update_params_callback()
+                this.assignTempParams(name, save[name].temp_params)
+            }
         })
+
+        const remove_create_callback = workspace_controller.registerCallback(`${this.eetype}:create`, async (creates: { success: boolean, instance: ConcInstance }[], id: string) => {
+            if (id !== request_id.value) return
+
+            await remove_create_callback()
+
+            for (const { success, instance } of creates) {
+                if (!success) continue
+
+                if (JSON.stringify(save[instance.name].params) ===
+                    JSON.stringify(this.instances[instance.name].temp_params))
+                    return
+
+                this.assignTempParams(instance.name, save[instance.name].params)
+
+            }
+
+            await tick()
+            request_id.value = this.updateParams(creates.map(({ instance }) => instance.name)) ?? ""
+        })
+
+        request_id.value = this.create(Object.values(save).map(({ name, module, cls }) => ({ name, module, cls }))) ?? ""
     }
 
     assignTempParams(name: string, params: Prettify<Instance["params"]>) {

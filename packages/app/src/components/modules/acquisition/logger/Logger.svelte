@@ -53,7 +53,9 @@
 
 		<button
 			class="border-red-500 border-1 text-red-500 icon-btn-sm rounded"
-			onclick={beinn_log_controller.reset}><BrushCleaning /></button>
+			onclick={() => {
+				beinn_log_controller.reset();
+			}}><BrushCleaning /></button>
 
 		<button
 			class={cn(

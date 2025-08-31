@@ -4,10 +4,11 @@ import json
 import pkgutil
 
 
+from struct import pack
 import sys
 
 from traceback import print_tb
-from typing import Literal, TypedDict
+from typing import Any, Literal, TypedDict
 from websockets import ServerConnection
 
 from ...public.params import (
@@ -96,68 +97,64 @@ def eeImports(eetype: type[ExperimentABC] | type[EquipmentABC], names: list[str]
 
 
 async def imports(
-    ws: ServerConnection,
     eetype: Literal["equipment"] | Literal["experiment"],
     packages: list[str],
 ):
-    await ws.send(
-        json.dumps(
-            {
-                "command": f"{eetype}:imports",
-                "value": eeImports(
-                    EquipmentABC if eetype == "equipment" else ExperimentABC, packages
-                ),
-            }
-        )
+    return (
+        eeImports(
+            EquipmentABC if eetype == "equipment" else ExperimentABC,
+            packages,
+        ),
     )
+
+
+class CreateType(TypedDict):
+    name: str
+    module: str
+    cls: str
 
 
 async def create(
-    ws: ServerConnection,
     eetype: Literal["equipment"] | Literal["experiment"],
-    name: str,
-    module: str,
-    cls: str,
+    value: list[CreateType],
 ):
-    try:
-        instance = (
-            Equipments.create(name=name, module_str=module, cls_str=cls)
-            if eetype == "equipment"
-            else Experiments.create(name=name, module_str=module, cls_str=cls)
-        )
-    except Exception:
-        await ws.send(
-            json.dumps(
+    res: list[dict[str, Any]] = []
+    for v in value:
+        try:
+            instance = (
+                Equipments.create(
+                    name=v["name"], module_str=v["module"], cls_str=v["cls"]
+                )
+                if eetype == "equipment"
+                else Experiments.create(
+                    name=v["name"], module_str=v["module"], cls_str=v["cls"]
+                )
+            )
+
+            res.append(
                 {
-                    "command": f"{eetype}:create",
-                    "value": {
-                        "success": False,
-                        "instance": {
-                            "module": module,
-                            "cls": cls,
-                            "name": name,
-                        },
+                    "success": True,
+                    "instance": {
+                        "module": v["module"],
+                        "cls": v["cls"],
+                        "name": v["name"],
+                        "params": cnoc_params2Dict(instance.instance.params),  # type: ignore
                     },
                 }
             )
-        )
-
-    await ws.send(
-        json.dumps(
-            {
-                "command": f"{eetype}:create",
-                "value": {
-                    "success": True,
+        except Exception:
+            res.append(
+                {
+                    "success": False,
                     "instance": {
-                        "module": module,
-                        "cls": cls,
-                        "name": name,
-                        "params": cnoc_params2Dict(instance.instance.params),  # type: ignore
+                        "module": v["module"],
+                        "cls": v["cls"],
+                        "name": v["name"],
                     },
-                },
-            }
-        )
-    )
+                }
+            )
+
+    return res
 
 
 def putParamsInstance(params: dict[str, AllParamTypes]):
@@ -188,72 +185,76 @@ def putParamsInstance(params: dict[str, AllParamTypes]):
             )
 
 
+class UpdateParamsType(TypedDict):
+    name: str
+    params: dict[str, AllParamTypes]
+
+
 async def updateParams(
-    ws: ServerConnection,
     eetype: Literal["equipment"] | Literal["experiment"],
-    name: str,
-    params: dict[str, AllParamTypes],
+    value: list[UpdateParamsType],
 ):
-    if eetype == "equipment":
-        Equipments.updateParams(name=name, params=params)
-        putParamsInstance(Equipments.instances[name].instance.params)
+    res: list[dict[str, Any]] = []
+    for v in value:
+        if eetype == "equipment":
+            Equipments.updateParams(name=v["name"], params=v["params"])
+            putParamsInstance(Equipments.instances[v["name"]].instance.params)
 
-        await ws.send(
-            json.dumps(
+            res.append(
                 {
-                    "command": "equipment:update_params",
-                    "value": {
-                        "name": name,
-                        "params": cnoc_params2Dict(
-                            Equipments.instances[name].instance.params
-                        ),
-                    },
+                    "name": v["name"],
+                    "params": cnoc_params2Dict(
+                        Equipments.instances[v["name"]].instance.params
+                    ),
                 }
             )
-        )
+        elif eetype == "experiment":
+            Experiments.updateParams(name=v["name"], params=v["params"])
+            putParamsInstance(Experiments.instances[v["name"]].instance.params)
 
-    elif eetype == "experiment":
-        Experiments.updateParams(name=name, params=params)
-        putParamsInstance(Experiments.instances[name].instance.params)
-
-        await ws.send(
-            json.dumps(
+            res.append(
                 {
-                    "command": "experiment:update_params",
-                    "value": {
-                        "name": name,
-                        "params": cnoc_params2Dict(
-                            Experiments.instances[name].instance.params
-                        ),
-                    },
+                    "name": v["name"],
+                    "params": cnoc_params2Dict(
+                        Experiments.instances[v["name"]].instance.params
+                    ),
                 }
             )
-        )
+
+    return res
 
 
 async def remove(
-    ws: ServerConnection,
     eetype: Literal["equipment"] | Literal["experiment"],
-    name: str,
+    names: list[str],
 ):
-    if eetype == "equipment":
-        Equipments.remove(name)
-    else:
-        Experiments.remove(name)
+    for name in names:
+        if eetype == "equipment":
+            Equipments.remove(name)
+        else:
+            Experiments.remove(name)
 
-    await ws.send(json.dumps({"command": f"{eetype}:remove", "value": name}))
+    return names
+
+
+async def result(ws: ServerConnection, id: str, command: str, value: Any):
+    await ws.send(json.dumps({"command": command, "value": value, "id": id}))
 
 
 def getEEFn(eetype: Literal["equipment"] | Literal["experiment"]):
     return {
-        f"{eetype}:imports": lambda ws, value: imports(ws, eetype, value["packages"]),
-        f"{eetype}:create": lambda ws, value,: create(
-            ws, eetype, value["name"], value["module"], value["cls"]
+        f"{eetype}:imports": lambda ws, id, value: result(
+            ws, id, f"{eetype}:imports", imports(eetype, value)
         ),
-        f"{eetype}:update_params": lambda ws, value: updateParams(
-            ws, eetype, value["name"], value["params"]
+        f"{eetype}:create": lambda ws, id, value,: result(
+            ws, id, f"{eetype}:create", create(eetype, value)
         ),
-        f"{eetype}:remove": lambda ws, value: remove(ws, eetype, value["name"]),
+        f"{eetype}:update_params": lambda ws, id, value: result(
+            ws, id, f"{eetype}:update_params", updateParams(eetype, value)
+        ),
+        f"{eetype}:remove": lambda ws, id, value: result(
+            ws, id, f"{eetype}:remove", remove(eetype, value)
+        ),
     }
 
 

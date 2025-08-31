@@ -30,7 +30,7 @@ class WorkspaceController {
         new WebSocket(cnoc_url + "close")
     }
 
-    #commands: Record<string, ((obj: any) => Promise<void> | void)[]> = {}
+    #commands: Record<string, ((value: any, id: string) => Promise<void> | void)[]> = {}
     #onopen: (() => void | Promise<void>)[] = []
     /* 
     Connect to the python workspace
@@ -127,13 +127,13 @@ class WorkspaceController {
         await dependency_controller.get_dependencies({ path })
 
         // Get save
+        let save: any | undefined = undefined
         if (await exists(path + "/.beinn")) {
 
             beinn_log_controller.append("Try to load save from " + path + "/.beinn")
-            const save = JSON.parse(await readTextFile(path + "/.beinn"))
+            save = JSON.parse(await readTextFile(path + "/.beinn"))
             dependency_controller.loadSave(save.dependencies)
-            await equipment_controller.loadSave(save.equipments)
-            await experiment_controller.loadSave(save.experiments)
+
         }
 
         await sleep(2000) // Wait for uv to start
@@ -146,7 +146,7 @@ class WorkspaceController {
             console.log(data)
 
             for (const fn of this.#commands[data.command])
-                if (fn) await fn(data.value)
+                if (fn) await fn(data.value, data.id)
 
         }
 
@@ -156,6 +156,16 @@ class WorkspaceController {
             setTimeout(() => {
                 this.connection = "connected"
             }, 2000)
+
+            setTimeout(async () => {
+                if (save) {
+                    await equipment_controller.loadSave(save.equipments)
+                    await experiment_controller.loadSave(save.experiments)
+                }
+
+            })
+
+
 
         }
 
@@ -218,7 +228,7 @@ class WorkspaceController {
         this.#onopen.push(cb)
     }
 
-    registerCallback(command: string, handler: (obj: any) => Promise<void> | void) {
+    registerCallback(command: string, handler: (obj: any, request_id: string) => Promise<void> | void) {
         if (!(command in this.#commands)) this.#commands[command] = []
         this.#commands[command].push(handler)
 
@@ -233,7 +243,9 @@ class WorkspaceController {
             beinn_log_controller.append(`FAILED send command ${command}: workspace is not connection`)
             return
         }
-        this.workspace_ws.send(JSON.stringify({ command, value: data }))
+        const id = crypto.randomUUID()
+        this.workspace_ws.send(JSON.stringify({ command, value: data, id }))
+        return id
     }
 
     async save() {
