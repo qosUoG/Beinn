@@ -26,7 +26,7 @@ async def workspaceHandler(ws: ServerConnection):
             command: str = req["command"]
 
             if command in eeHandlers.keys():
-                await eeHandlers[command](ws, req["value"], req["id"])
+                await eeHandlers[command](ws, req["id"], req["value"])
                 continue
 
             if command.startswith("experiment:"):
