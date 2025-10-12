@@ -4,7 +4,7 @@ import { dependency_controller } from "./dependency.svelte"
 import { beinn_log_controller } from "./log.svelte"
 import type { AllParamTypes, InstanceEquipmentParam, SelectFloatParam, SelectIntParam, SelectStrParam, SimpleParamType } from "./params.svelte"
 import { workspace_controller } from "./workspace.svelte"
-import { equipment_controller } from "./equipment.svelte"
+
 import { shell } from "$lib/svelte_utils"
 import { Command } from "@tauri-apps/plugin-shell"
 
@@ -25,9 +25,9 @@ export type Instance = Prettify<ConcInstance & {
     composite_opens: Record<string, boolean>
 }>
 
-export class EquipmentController<T extends Instance = Instance> {
+export class EquipmentController {
 
-    #equipments = $state<Record<string, T>>({})
+    #equipments = $state<Record<string, Instance>>({})
     get equipment_names() {
         return Object.keys(this.#equipments)
     }
@@ -68,7 +68,7 @@ export class EquipmentController<T extends Instance = Instance> {
         //                 if (value.type === "composite" && temp_instance.composite_opens[key] === undefined)
         //                     temp_instance.composite_opens[key] = false
 
-        //             this.instances[instance.name] = createFn(temp_instance)
+        //             this.#equipments[instance.name] = createFn(temp_instance)
 
 
         //             if (instance.name === this.temp_name && instance.module === this.temp_module && instance.cls === this.temp_cls) {
@@ -84,12 +84,12 @@ export class EquipmentController<T extends Instance = Instance> {
 
         //     workspace_controller.registerCallback(`${eetype}:update_params`, (value: { name: string, params: Prettify<Instance["params"]> }[]) => {
         //         for (const { name, params } of value)
-        //             this.instances[name].params = params
+        //             this.#equipments[name].params = params
         //     })
 
         //     workspace_controller.registerCallback(`${eetype}:remove`, (names: string[]) => {
         //         for (const name of names)
-        //             delete this.instances[name]
+        //             delete this.#equipments[name]
         //     })
 
         // })
@@ -115,66 +115,95 @@ export class EquipmentController<T extends Instance = Instance> {
 
     }
 
-    create() {
-        let res: ConcInstance[] = []
+    async create() {
 
-        for (const { name, module, cls } of this.equipment_instances) {
-            let found = false
-            for (const instance of this.equipment_instances) {
-                if (instance.name !== name) continue
-                
-                beinn_log_controller.append(`ERROR Instance with name ${name} already exists`)
-                found = true
-                break
-            }
-            if (found) continue
-            res.push(
-                {
 
-                    name: name,
-                    module: module,
-                    cls: cls,
-                    params: {},
 
-                }
-            )
+        // Check if equipment with same name already exists
+        if (this.temp_name in this.#equipments) {
+            beinn_log_controller.append(`ERROR Instance with name ${this.temp_name} already exists`)
+            return
         }
-        return workspace_controller.sendCommand(`${this.eetype}:create`, res)
+
+        // Get the default params list of the equipment
+        const res = await Command.create(
+            "uv",
+            ["run", "params", this.temp_module, this.temp_cls]
+            , {
+                encoding: "utf8",
+                cwd: workspace_controller.path!
+            }).execute()
+
+        if (res.code !== 0) {
+            beinn_log_controller.append(`error while creating equipment ${this.temp_name} with module ${this.temp_module} and class ${this.temp_cls}: ${res.stderr}`)
+            return
+        }
+
+        console.log(res.stdout)
+
+        // this.imports = JSON.parse(res.stdout.replaceAll(/'/g, '"')) as Imports
+
+
+
+
+
+        // for (const { name, module, cls } of this.equipment_instances) {
+        //     let found = false
+        //     for (const instance of this.equipment_instances) {
+        //         if (instance.name !== name) continue
+
+        //         beinn_log_controller.append(`ERROR Instance with name ${name} already exists`)
+        //         found = true
+        //         break
+        //     }
+        //     if (found) continue
+        //     res.push(
+        //         {
+
+        //             name: name,
+        //             module: module,
+        //             cls: cls,
+        //             params: {},
+
+        //         }
+        //     )
+        // }
+        // return workspace_controller.sendCommand(`equipment:create`, res)
     }
 
     updateParams(names: string[]) {
         let res: { name: string, params: Record<string, AllParamTypes> }[] = []
         for (const name of names) {
-            if (!(name in this.instances)) {
+            if (!(name in this.#equipments)) {
                 beinn_log_controller.append(`ERROR Instance with name ${name} does not exist`)
                 return
             }
             res.push({
                 name,
-                params: this.instances[name].temp_params
+                params: this.#equipments[name].temp_params
             })
         }
-        return workspace_controller.sendCommand(`${this.eetype}:update_params`, res)
+        return workspace_controller.sendCommand(`equipment:update_params`, res)
     }
 
     remove(names: string[]) {
         let res: string[] = []
         for (const name of names) {
-            if (!(name in this.instances)) {
+            if (!(name in this.#equipments)) {
                 beinn_log_controller.append(`ERROR Instance with name ${name} does not exist`)
                 continue
             }
             res.push(name)
         }
-        return workspace_controller.sendCommand(`${this.eetype}:remove`, res)
+        return workspace_controller.sendCommand(`equipment:remove`, res)
     }
 
     reload(name: string) {
-        const save: T = JSON.parse(JSON.stringify({ ...this.instances[name] }))
+        const save: Instance = JSON.parse(JSON.stringify({ ...this.#equipments[name] }))
 
         console.log({ save })
 
-        const remove_update_params_callback = workspace_controller.registerCallback(`${this.eetype}:update_params`, async (instances: { name: string, params: Prettify<Instance["params"]> }[]) => {
+        const remove_update_params_callback = workspace_controller.registerCallback(`equipment:update_params`, async (instances: { name: string, params: Prettify<Instance["params"]> }[]) => {
 
             for (const { name } of instances) {
                 if (save.name !== name) continue
@@ -186,16 +215,16 @@ export class EquipmentController<T extends Instance = Instance> {
 
         })
 
-        const remove_create_callback = workspace_controller.registerCallback(`${this.eetype}:create`, async (instances: ConcInstance[]) => {
+        const remove_create_callback = workspace_controller.registerCallback(`equipment:create`, async (instances: ConcInstance[]) => {
             if (!instances.map(({ name }) => name).includes(save.name)) return
 
             await remove_create_callback()
 
             if (JSON.stringify(save.params) ===
-                JSON.stringify(this.instances[save.name].params)) {
+                JSON.stringify(this.#equipments[save.name].params)) {
                 this.assignTempParams(name, save.temp_params)
                 await tick()
-                console.log($state.snapshot(this.instances[save.name].params))
+                console.log($state.snapshot(this.#equipments[save.name].params))
                 await remove_update_params_callback()
                 return
             }
@@ -208,14 +237,14 @@ export class EquipmentController<T extends Instance = Instance> {
 
         })
 
-        const remove_remove_callback = workspace_controller.registerCallback(`${this.eetype}:remove`, async (names: string[]) => {
+        const remove_remove_callback = workspace_controller.registerCallback(`equipment:remove`, async (names: string[]) => {
             if (!names.includes(save.name)) return
 
             await remove_remove_callback()
-            this.create([save])
+            // this.create([save])
         })
 
-        if (!(name in this.instances)) {
+        if (!(name in this.#equipments)) {
             beinn_log_controller.append(`ERROR Instance with name ${name} does not exist`)
             return
         }
@@ -227,7 +256,7 @@ export class EquipmentController<T extends Instance = Instance> {
 
     getSave() {
         const res: Record<string, Instance> = {}
-        for (const instance of Object.values(this.instances))
+        for (const instance of Object.values(this.#equipments))
             res[instance.name] = JSON.parse(JSON.stringify({ ...instance }))
 
         return res
@@ -244,7 +273,7 @@ export class EquipmentController<T extends Instance = Instance> {
             }
         }
 
-        const remove_update_params_callback = workspace_controller.registerCallback(`${this.eetype}:update_params`, async (instances: { name: string, params: Prettify<Instance["params"]> }[], id: string) => {
+        const remove_update_params_callback = workspace_controller.registerCallback(`equipment:update_params`, async (instances: { name: string, params: Prettify<Instance["params"]> }[], id: string) => {
             if (id !== request_id.value) return
             await remove_update_params_callback()
 
@@ -254,7 +283,7 @@ export class EquipmentController<T extends Instance = Instance> {
             }
         })
 
-        const remove_create_callback = workspace_controller.registerCallback(`${this.eetype}:create`, async (instances: ConcInstance[], id: string) => {
+        const remove_create_callback = workspace_controller.registerCallback(`equipment:create`, async (instances: ConcInstance[], id: string) => {
             if (id !== request_id.value) return
 
             await remove_create_callback()
@@ -262,7 +291,7 @@ export class EquipmentController<T extends Instance = Instance> {
             for (const instance of instances) {
 
                 if (JSON.stringify(save[instance.name].params) ===
-                    JSON.stringify(this.instances[instance.name].temp_params))
+                    JSON.stringify(this.#equipments[instance.name].temp_params))
                     return
 
                 this.assignTempParams(instance.name, save[instance.name].params)
@@ -273,7 +302,7 @@ export class EquipmentController<T extends Instance = Instance> {
             request_id.value = this.updateParams(instances.map(({ name }) => name)) ?? ""
         })
 
-        request_id.value = this.create(Object.values(save).map(({ name, module, cls }) => ({ name, module, cls }))) ?? ""
+        // request_id.value = this.create(Object.values(save).map(({ name, module, cls }) => ({ name, module, cls }))) ?? ""
     }
 
     assignTempParams(name: string, params: Prettify<Instance["params"]>) {
@@ -296,7 +325,7 @@ export class EquipmentController<T extends Instance = Instance> {
                             return
                         }
                     }
-                    case "instance.equipment": if (!((param as InstanceEquipmentParam).name in equipment_controller.instances)) return
+                    // case "instance.equipment": if (!((param as InstanceEquipmentParam).name in equipment_controller.instances)) return
 
                 }
 
@@ -308,7 +337,7 @@ export class EquipmentController<T extends Instance = Instance> {
         }
 
 
-        for (const instance of Object.values(this.instances)) {
+        for (const instance of Object.values(this.#equipments)) {
             if (instance.name !== name)
                 continue
 
@@ -324,7 +353,7 @@ export class EquipmentController<T extends Instance = Instance> {
     }
 
     reset() {
-        this.instances = {}
+        this.#equipments = {}
         this.imports = []
         this.temp_module = ""
         this.temp_cls = ""
@@ -332,3 +361,4 @@ export class EquipmentController<T extends Instance = Instance> {
     }
 }
 
+export const equipment_controller = $state(new EquipmentController())

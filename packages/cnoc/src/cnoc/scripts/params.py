@@ -1,4 +1,5 @@
 import importlib
+import json
 import sys
 
 
@@ -7,4 +8,4 @@ def main():
     module = importlib.reload(module)
 
     instance = getattr(module, sys.argv[2])()
-    print(instance.params)
+    print(json.dumps(instance.params))

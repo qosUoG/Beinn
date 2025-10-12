@@ -1,7 +1,7 @@
 import { deepCopy, type Prettify } from "$lib/utils"
 import { Chart } from "./charts/charts.svelte"
 import type { ChartConfigs } from "./charts/types"
-import { EEBaseController, type Instance } from "./eebase.svelte"
+import { type Instance } from "./equipment.svelte"
 import { workspace_controller } from "./workspace.svelte"
 
 export type Experiment = Prettify<Instance & {
@@ -31,7 +31,7 @@ export type Experiment = Prettify<Instance & {
 
 
 
-export class ExperimentController extends EEBaseController<Experiment> {
+export class ExperimentController {
 
     start(name: string) {
         workspace_controller.sendCommand("experiment:start", { name })
@@ -59,20 +59,20 @@ export class ExperimentController extends EEBaseController<Experiment> {
     }
 
     constructor() {
-        super("experiment", (instance) => ({
-            ...instance,
-            temp_params: deepCopy(instance.params),
-            status: "initial",
-            charts: {},
-            loop_count: 0,
-            total_time: -1,
-            loop_time: -1,
-            total_time_timer: undefined,
-            loop_time_timer: undefined,
-            total_time_timer_timestamp: 0,
-            loop_time_timer_timestamp: 0,
-            expected_loop_count: -1,
-        }))
+        // super("experiment", (instance) => ({
+        //     ...instance,
+        //     temp_params: deepCopy(instance.params),
+        //     status: "initial",
+        //     charts: {},
+        //     loop_count: 0,
+        //     total_time: -1,
+        //     loop_time: -1,
+        //     total_time_timer: undefined,
+        //     loop_time_timer: undefined,
+        //     total_time_timer_timestamp: 0,
+        //     loop_time_timer_timestamp: 0,
+        //     expected_loop_count: -1,
+        // }))
 
         setTimeout(() => {
 
