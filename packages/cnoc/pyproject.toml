@@ -20,3 +20,4 @@ link-mode = "copy"
 [project.scripts]
 cnoc = "cnoc.app.main:main"
 imports = "cnoc.scripts.imports:main"
+params = "cnoc.scripts.params:main"
