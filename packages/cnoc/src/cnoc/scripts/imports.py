@@ -1,5 +1,6 @@
 import importlib
 import inspect
+import json
 import pkgutil
 import site
 import sys
@@ -93,6 +94,6 @@ def main():
 
     match sys.argv[1]:
         case "equipment":
-            print(eeImports(EquipmentABC, sys.argv[2:]))
+            print(json.dumps(eeImports(EquipmentABC, sys.argv[2:])))
         case "experiment":
-            print(eeImports(ExperimentABC, sys.argv[2:]))
+            print(json.dumps(eeImports(ExperimentABC, sys.argv[2:])))
