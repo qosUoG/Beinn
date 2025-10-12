@@ -2,10 +2,11 @@ import importlib
 import inspect
 import json
 import pkgutil
-import site
 import sys
 from traceback import print_tb
 from typing import TypedDict
+
+from .utils import preloadLocal
 
 
 from ..public.equipment import EquipmentABC
@@ -82,15 +83,7 @@ def eeImports(eetype: type[ExperimentABC] | type[EquipmentABC], names: list[str]
 
 
 def main():
-    roots: list[str]
-    if "/" in __file__:
-        roots = __file__.split("/")
-    elif "\\" in __file__:
-        roots = __file__.split("\\")
-    venv_index = roots.index(".venv")
-    path = "/".join(roots[:venv_index])
-
-    site.addsitedir(path)
+    preloadLocal()
 
     match sys.argv[1]:
         case "equipment":

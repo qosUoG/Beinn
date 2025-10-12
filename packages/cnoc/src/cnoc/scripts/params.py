@@ -2,10 +2,14 @@ import importlib
 import json
 import sys
 
+from .utils import preloadLocal
+
 from ..public.params import cnoc_params2Dict
 
 
 def main():
+    preloadLocal()
+
     module = importlib.import_module(sys.argv[1])
     module = importlib.reload(module)
 

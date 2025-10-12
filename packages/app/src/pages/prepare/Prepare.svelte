@@ -1,7 +1,7 @@
 <script lang="ts">
 	import Dependencies from "./dependency/Dependencies.svelte";
 	import Equipments from "./equipment/Equipments.svelte";
-	import Experiments from "./experiment/Experiments.svelte";
+	import Experiment from "./experiment/Experiment.svelte";
 	import WorkspaceSelect from "./WorkspaceSelect.svelte";
 </script>
 
@@ -11,5 +11,5 @@
 		<Dependencies />
 	</div>
 	<Equipments />
-	<Experiments />
+	<Experiment />
 </div>

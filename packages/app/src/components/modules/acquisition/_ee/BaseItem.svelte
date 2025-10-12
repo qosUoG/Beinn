@@ -16,7 +16,7 @@
 	import type {
 		EEBaseController,
 		Instance,
-	} from "$controllers/eebase.svelte";
+	} from "$controllers/equipment.svelte";
 
 	let {
 		ee = $bindable(),
