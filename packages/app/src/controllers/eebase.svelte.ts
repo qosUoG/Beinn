@@ -99,7 +99,7 @@ export abstract class EEBaseController<T extends Instance = Instance> {
     async updateImports() {
         // const res = await shell({ fn: "uv", cmd: "run imports equipment ".concat(dependency_controller.has_driver_package_names.join(" ")), cwd: workspace_controller.path!, logger: beinn_log_controller })
 
-        const res = await Command.create(
+        const res1 = await Command.create(
             "uv",
             ["run", "imports", this.eetype, ...dependency_controller.has_driver_package_names]
             , {
@@ -107,7 +107,17 @@ export abstract class EEBaseController<T extends Instance = Instance> {
                 cwd: workspace_controller.path!
             }).execute()
 
-        console.log({ res })
+        console.log(res1)
+
+        const res2 = await Command.create(
+            "uv",
+            ["run", "imports", "error"]
+            , {
+                encoding: "utf8",
+                cwd: workspace_controller.path!
+            }).execute()
+
+        console.log(res2)
 
         // return workspace_controller.sendCommand(`${this.eetype}:imports`, dependency_controller.has_driver_package_names)
     }

@@ -91,13 +91,8 @@ def main():
 
     site.addsitedir(path)
 
-    print("hihihihihihi")
-
-    if sys.argv[1] == "error":
-        raise Exception("test exception")
-
     match sys.argv[1]:
         case "equipment":
-            return eeImports(EquipmentABC, sys.argv[2:])
+            print(eeImports(EquipmentABC, sys.argv[2:]))
         case "experiment":
-            return eeImports(ExperimentABC, sys.argv[2:])
+            print(eeImports(ExperimentABC, sys.argv[2:]))
