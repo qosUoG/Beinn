@@ -6,6 +6,7 @@ import type { AllParamTypes, InstanceEquipmentParam, SelectFloatParam, SelectInt
 import { workspace_controller } from "./workspace.svelte"
 import { equipment_controller } from "./equipment.svelte"
 import { shell } from "$lib/svelte_utils"
+import { Command } from "@tauri-apps/plugin-shell"
 
 export type Imports = { module: string, cls: string }[]
 
@@ -96,9 +97,17 @@ export abstract class EEBaseController<T extends Instance = Instance> {
     }
 
     async updateImports() {
-        const res = await shell({ fn: "uv", cmd: "run imports equipment ".concat(dependency_controller.has_driver_package_names.join(" ")), cwd: workspace_controller.path!, logger: beinn_log_controller })
+        // const res = await shell({ fn: "uv", cmd: "run imports equipment ".concat(dependency_controller.has_driver_package_names.join(" ")), cwd: workspace_controller.path!, logger: beinn_log_controller })
 
-        console.log(res)
+        const res = await Command.create(
+            "uv",
+            ["run", "imports", this.eetype, ...dependency_controller.has_driver_package_names]
+            , {
+                encoding: "utf8",
+                cwd: workspace_controller.path!
+            }).execute()
+
+        console.log({ res })
 
         // return workspace_controller.sendCommand(`${this.eetype}:imports`, dependency_controller.has_driver_package_names)
     }
