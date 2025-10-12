@@ -23,6 +23,8 @@
 		"paths": {
 			"$components/*": ["./components/*"],
 			"$lib/*": ["./lib/*"],
+
+			"$pages/*": ["./pages/*"],
 			"$controllers/*": ["./controllers/*"]
 		}
 	},

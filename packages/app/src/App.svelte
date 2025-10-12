@@ -8,6 +8,8 @@
 	import { workspace_controller } from "$controllers/workspace.svelte";
 
 	import Board from "$components/modules/charts/Board.svelte";
+	import { app_controller } from "$controllers/app.svelte";
+	import Prepare from "$pages/prepare/Prepare.svelte";
 
 	getCurrentWindow().listen("tauri://close-requested", async () => {
 		if (await workspace_controller.kill()) await exit();
@@ -19,7 +21,21 @@
 <div class="w-screen h-screen fcol max-h-screen max-w-screen">
 	<Titlebar />
 
-	<div class="w-full flex-grow relative">
+	{#if app_controller.page === "prepare"}
+		<Prepare />
+	{:else if app_controller.page === "execute"}
+		<div class="w-full h-full frow">
+			<div class="w-full h-full frow">Execute</div>
+		</div>
+	{:else if app_controller.page === "analyze"}
+		<!-- <div class="w-full h-full frow">
+			<div class="w-full h-full frow">
+				Analyze
+			</div>
+		</div> -->
+	{/if}
+
+	<!-- <div class="w-full flex-grow relative">
 		<div class="absolute top-0 left-0 w-full h-full frow min-h-0">
 			{#if acquisition_opened}
 				<Acquisition bind:open={acquisition_opened} />
@@ -37,5 +53,5 @@
 				Acquisition
 			</button>
 		{/if}
-	</div>
+	</div> -->
 </div>

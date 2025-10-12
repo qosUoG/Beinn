@@ -5,6 +5,7 @@ import { beinn_log_controller } from "./log.svelte"
 import type { AllParamTypes, InstanceEquipmentParam, SelectFloatParam, SelectIntParam, SelectStrParam, SimpleParamType } from "./params.svelte"
 import { workspace_controller } from "./workspace.svelte"
 import { equipment_controller } from "./equipment.svelte"
+import { shell } from "$lib/svelte_utils"
 
 export type Imports = { module: string, cls: string }[]
 
@@ -94,8 +95,12 @@ export abstract class EEBaseController<T extends Instance = Instance> {
 
     }
 
-    updateImports() {
-        return workspace_controller.sendCommand(`${this.eetype}:imports`, dependency_controller.has_driver_package_names)
+    async updateImports() {
+        const res = await shell({ fn: "uv", cmd: "run imports equipment ".concat(dependency_controller.has_driver_package_names.join(" ")), cwd: workspace_controller.path!, logger: beinn_log_controller })
+
+        console.log(res)
+
+        // return workspace_controller.sendCommand(`${this.eetype}:imports`, dependency_controller.has_driver_package_names)
     }
 
     create(temp_instances: { name: string, module: string, cls: string }[]) {

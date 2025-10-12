@@ -5,9 +5,7 @@ description = "Add your description here"
 readme = "README.md"
 authors = [{ name = "harrylaulau", email = "dev+github@harrylaulau.me" }]
 requires-python = ">=3.13"
-dependencies = [
- "websockets>=15.0",
-]
+dependencies = ["pandas>=2.3.3", "websockets>=15.0"]
 
 [build-system]
 requires = ["hatchling"]
@@ -21,3 +19,4 @@ link-mode = "copy"
 
 [project.scripts]
 cnoc = "cnoc.app.main:main"
+imports = "cnoc.scripts.imports:main"

@@ -43,7 +43,7 @@ export default defineConfig({
     alias: {
 
       $components: path.resolve("./src/components"),
-
+      $pages: path.resolve("./src/pages"),
 
       $lib: path.resolve("./src/lib"),
 

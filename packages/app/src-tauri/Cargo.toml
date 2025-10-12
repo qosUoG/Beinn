@@ -25,12 +25,12 @@ tauri = { version = "2.8.2", features = ["devtools"] }
 tauri-plugin-log = "2.6.0"
 tauri-plugin-shell = "2"
 tauri-plugin-fs = "2.4.2"
-tauri-plugin-dialog = "2.3.3"
+tauri-plugin-dialog = "2.4.0"
 tauri-plugin-decorum = { git = "https://github.com/clearlysid/tauri-plugin-decorum.git", branch = "main" }
 tauri-plugin-persisted-scope = "2.3.2"
 tauri-plugin-http = "2.5.2"
-tauri-plugin-os = "2"
-tauri-plugin-process = "2"
+tauri-plugin-os = "2.3.1"
+tauri-plugin-process = "2.3.0"
 tauri-plugin-store = "2.4.0"
 fix-path-env = { git = "https://github.com/tauri-apps/fix-path-env-rs", branch = "dev" }
 

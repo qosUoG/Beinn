@@ -8,7 +8,7 @@
 		"baseUrl": "src",
 		"paths": {
 			"$components/*": ["./components/*"],
-
+			"$pages/*": ["./pages/*"],
 			"$lib/*": ["./lib/*"],
 
 			"$controllers/*": ["./controllers/*"]

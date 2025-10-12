@@ -4,15 +4,10 @@
 	import { load, type Store } from "@tauri-apps/plugin-store";
 	import { homeDir } from "@tauri-apps/api/path";
 	import { workspace_controller } from "$controllers/workspace.svelte";
-	import {
-		Ban,
-		Check,
-		Cross,
-		FolderOpen,
-		Loader,
-		Save,
-	} from "@lucide/svelte";
+
 	import { experiment_controller } from "$controllers/experiment.svelte";
+	import { cn } from "$components/utils.svelte";
+	import { app_controller } from "$controllers/app.svelte";
 
 	async function folderSearchHandler() {
 		const path = await open({
@@ -45,47 +40,36 @@
 </script>
 
 <div class="h-[40px] frow w-full justify-center py-2">
-	<div class="frow-4 z-1000">
-		<div class="frow-1">
-			<div class=" wrapped bg-slate-200 title">Workspace</div>
-			<div class="wrapped rounded bg-slate-200 w-96 min-w-12 h-[24px]">
-				<div class="text-nowrap w-full overflow-x-scroll">
-					{workspace_controller.path}
-				</div>
-			</div>
-			{#if workspace_controller.connection === "connecting"}
-				<div class="icon-btn-sm bg-slate-200">
-					<div class="animate-pulse">
-						<Loader />
-					</div>
-				</div>
-			{:else if workspace_controller.connection === "disconnected"}
-				<button class="icon-btn-sm slate" onclick={folderSearchHandler}
-					><FolderOpen /></button>
-			{:else if experiment_controller.closeable}
-				<button class="icon-btn-sm slate" onclick={closeHandler}
-					><Ban /></button>
-			{:else}
-				<div class="icon-btn-sm bg-slate-200 text-white">
-					<Ban />
-				</div>
-			{/if}
-			{#if workspace_controller.save_status === "saving"}
-				<div class="icon-btn-sm bg-slate-200 text-white">
-					<Save />
-				</div>
-			{:else if workspace_controller.save_status === "success"}
-				<div class="icon-btn-sm green">
-					<Check />
-				</div>
-			{:else if workspace_controller.save_status === "fail"}
-				<div class="icon-btn-sm red">
-					<Cross />
-				</div>
-			{:else}
-				<button class="icon-btn-sm slate" onclick={saveHandler}
-					><Save /></button>
-			{/if}
-		</div>
+	<div class="frow z-1000">
+		<button
+			class={cn(
+				"px-2 text-center rounded-l",
+				app_controller.page === "prepare"
+					? "bg-slate-500 text-white"
+					: "bg-slate-200"
+			)}
+			onclick={() => {
+				app_controller.page = "prepare";
+			}}>Preparation</button>
+		<button
+			class={cn(
+				"px-2 text-center ",
+				app_controller.page === "execute"
+					? "bg-slate-500 text-white"
+					: "bg-slate-200"
+			)}
+			onclick={() => {
+				app_controller.page = "execute";
+			}}>Experiment</button>
+		<button
+			class={cn(
+				"px-2 text-center rounded-r",
+				app_controller.page === "analyze"
+					? "bg-slate-500 text-white"
+					: "bg-slate-200"
+			)}
+			onclick={() => {
+				app_controller.page = "analyze";
+			}}>Analysis</button>
 	</div>
 </div>

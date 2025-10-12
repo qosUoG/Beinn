@@ -32,6 +32,62 @@ class WorkspaceController {
 
     #commands: Record<string, ((value: any, id: string) => Promise<void> | void)[]> = {}
     #onopen: (() => void | Promise<void>)[] = []
+
+    async select(path: string) {
+        const pyproject_exists = await exists(path + "/pyproject.toml")
+        const dir_empty = (await readDir(path)).length === 0
+
+        // Not empty directory without pyproject.toml
+        if (!pyproject_exists && !dir_empty) {
+            beinn_log_controller.append(`${path} is not empty and does not contain pyproject.toml`)
+
+            const confirmation = await confirm(
+                `${path} is not empty. Are you sure to setup workspace here?`,
+                { title: 'Directory Not Empty', kind: 'warning' }
+            );
+
+            // Abort if user chooses not to
+            if (!confirmation) {
+                beinn_log_controller.append("user aborted select workspace")
+                return
+            }
+        }
+
+        // Empty directory
+        if (dir_empty) {
+            await shell({ fn: "uv", cmd: "init", cwd: path, logger: beinn_log_controller })
+
+        }
+
+        // Update the path
+        this.path = path
+        await tick()
+
+        // Update pyproject.toml
+        beinn_log_controller.append("Upsert 'link-mode: copy' to pyproject.toml")
+        const parsed = parse(await readTextFile(path + "/pyproject.toml")) as any;
+        if (parsed.tool === undefined) parsed.tool = {}
+        if (parsed.tool.uv === undefined) parsed.tool.uv = {}
+        if (parsed.tool.uv["link-mode"] === undefined) parsed.tool.uv["link-mode"] = "copy"
+        await writeTextFile(path + "/pyproject.toml", stringify(parsed))
+
+        beinn_log_controller.append("Install required dependencies")
+        await shell({ fn: "uv", cmd: "add pandas tables numpy", cwd: path, logger: beinn_log_controller })
+
+        beinn_log_controller.append("Install cnoc")
+        await shell({ fn: "uv", cmd: "add git+https://github.com/qosUoG/Beinn#subdirectory=packages/cnoc", cwd: path, logger: beinn_log_controller })
+
+        // In case cnoc is already installed and stale
+        await shell({ fn: "uv", cmd: "lock --upgrade-package cnoc", cwd: path, logger: beinn_log_controller })
+
+        await shell({ fn: "uv", cmd: "sync", cwd: path, logger: beinn_log_controller })
+
+        await dependency_controller.get_dependencies({ path })
+
+
+    }
+
+
     /* 
     Connect to the python workspace
     */
