@@ -7,6 +7,7 @@
 	import Label from "$components/fields/Label.svelte";
 
 	import { cn, getClickOutsideAttachment } from "$components/utils.svelte";
+	import { experiment_controller } from "$controllers/experiment.svelte";
 
 	let open = $state(false);
 
@@ -15,16 +16,23 @@
 	});
 </script>
 
-<div class="bg-slate-50 rounded p-1 pb-2 fcol h-[125px]">
+<div class="bg-white rounded p-1 pb-2 fcol h-[125px]">
 	<div class="title text-center wrapped relative mb-1">
 		New Equipment
-		<button
-			class="absolute right-0 top-0 flex items-center h-full bg-blue-600 rounded aspect-square justify-center icon-btn-sm text-white"
-			onclick={() => {
-				equipment_controller.getParams();
-			}}>
-			<Plus />
-		</button>
+		{#if experiment_controller.closeable}
+			<button
+				class="absolute right-0 top-0 flex items-center h-full bg-blue-600 rounded aspect-square justify-center icon-btn-sm text-white"
+				onclick={() => {
+					equipment_controller.getParams();
+				}}>
+				<Plus />
+			</button>
+		{:else}
+			<span
+				class="absolute right-0 top-0 flex items-center h-full bg-slate-300 rounded aspect-square justify-center icon-btn-sm text-white">
+				<Plus />
+			</span>
+		{/if}
 	</div>
 
 	<div

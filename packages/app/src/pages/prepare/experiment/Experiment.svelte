@@ -1,24 +1,12 @@
 <script lang="ts">
-	import { Check, ChevronDown, ChevronRight } from "@lucide/svelte";
-	import InputField from "$components/fields/InputField.svelte";
+	import { ChevronDown, ChevronRight } from "@lucide/svelte";
 
-	import Label from "$components/fields/Label.svelte";
-	import { EquipmentController } from "$controllers/equipment.svelte";
-	import { cn, getClickOutsideAttachment } from "$components/utils.svelte";
+	import { cn } from "$components/utils.svelte";
 
-	import {
-		experiment_controller,
-		type ExperimentController,
-	} from "$controllers/experiment.svelte";
+	import { experiment_controller } from "$controllers/experiment.svelte";
 	import ExperimentSelector from "./ExperimentSelector.svelte";
 	import Composite from "../_ee/Composite.svelte";
 	import Param from "../_ee/Param.svelte";
-
-	let open = $state(false);
-
-	const clickoutside = getClickOutsideAttachment(() => {
-		open = false;
-	});
 </script>
 
 <div class=" fcol-2 min-h-0 h-full bg-slate-200 rounded p-2">
@@ -54,7 +42,7 @@
 
 			{#if experiment_controller.param_opens}
 				<div
-					class="fcol *:border-b-1 *:border-slate-400 border-2 border-t-0 border-slate-800">
+					class="fcol *:border-b-1 *:border-slate-400 border-2 border-t-0 border-slate-800 bg-white">
 					{#each Object.keys(experiment_controller.params) as key}
 						{#if experiment_controller.params[key].type === "composite"}
 							<Composite

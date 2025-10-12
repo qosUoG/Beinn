@@ -11,7 +11,7 @@
 		<div
 			class="fcol-2 overflow-y-scroll scrollbar-slate-400 -mr-2 flex-grow pb-8">
 			{#each equipment_controller.equipment_instances as equipment}
-				<EquipmentItem bind:equipment deletable={true} />
+				<EquipmentItem bind:equipment />
 			{/each}
 		</div>
 	</div>

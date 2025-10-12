@@ -55,7 +55,7 @@
 		mandatory={param.required}
 		{label}
 		bind:value={param.name}
-		options={equipment_controller.selectable_instances} />
+		options={equipment_controller.equipment_names} />
 	<!-- {:else if param.type === "instance.experiment"} -->
 
 	<!-- <DropSelect

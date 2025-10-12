@@ -4,10 +4,7 @@
 		type Equipment,
 	} from "$controllers/equipment.svelte";
 
-	let {
-		equipment = $bindable(),
-		deletable,
-	}: { equipment: Equipment; deletable: boolean } = $props();
+	let { equipment = $bindable() }: { equipment: Equipment } = $props();
 
 	import {
 		ChevronDown,
@@ -19,11 +16,12 @@
 	import Composite from "../_ee/Composite.svelte";
 
 	import { cn } from "$components/utils.svelte";
+	import { experiment_controller } from "$controllers/experiment.svelte";
 </script>
 
-<div class="bg-slate-50 rounded fcol-1 p-1">
+<div class="bg-white rounded fcol-1 p-1">
 	<div class="flex items-center w-full justify-between">
-		{#if deletable}
+		{#if experiment_controller.closeable}
 			<input
 				class="  font-light text-slate-950 flex items-center px-1 text-sm"
 				bind:value={equipment.name} />
@@ -38,12 +36,13 @@
 				aria-label={`Reload ${equipment.name}`}
 				class={cn(
 					" icon-btn-sm text-white ",
-					deletable
+					experiment_controller.closeable
 						? "bg-blue-600"
 						: "bg-slate-300 cursor-not-allowed *:cursor-not-allowed **:cursor-not-allowed"
 				)}
 				onclick={() => {
-					if (deletable) equipment_controller.reload(equipment.name);
+					if (experiment_controller.closeable)
+						equipment_controller.reload(equipment.name);
 				}}>
 				<FolderSync />
 			</button>
@@ -52,12 +51,13 @@
 				aria-label={`Remove ${equipment.name}`}
 				class={cn(
 					" icon-btn-sm text-white ",
-					deletable
+					experiment_controller.closeable
 						? "bg-red-600"
 						: "bg-slate-300 cursor-not-allowed *:cursor-not-allowed **:cursor-not-allowed"
 				)}
 				onclick={() => {
-					if (deletable) equipment_controller.remove(equipment.name);
+					if (experiment_controller.closeable)
+						equipment_controller.remove(equipment.name);
 				}}>
 				<Trash2 />
 			</button>

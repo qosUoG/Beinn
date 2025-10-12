@@ -114,19 +114,17 @@ export class EquipmentController extends EEBaseController {
             ...JSON.parse(res.stdout) as ConcInstance, param_opens: true, composite_opens: {}, name: this.temp_name
         }
 
-
         for (const [key, value] of Object.entries(equipment.params))
             if (value.type === "composite" && equipment.composite_opens[key] === undefined)
                 equipment.composite_opens[key] = true
 
+        this.#equipments[equipment.name] = equipment
 
         if (equipment.module === this.temp_module && equipment.cls === this.temp_cls) {
             this.temp_name = ""
             this.temp_module = ""
             this.temp_cls = ""
         }
-
-        this.#equipments[this.temp_name] = equipment
     }
 
     // updateParams(names: string[]) {

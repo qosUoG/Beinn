@@ -10,6 +10,7 @@
 	import { Plus } from "@lucide/svelte";
 	import InputField from "$components/fields/InputField.svelte";
 	import TabSelect from "$components/fields/TabSelect.svelte";
+	import { experiment_controller } from "$controllers/experiment.svelte";
 
 	let source: DependencySource = $state({
 		type: "pip",
@@ -17,46 +18,54 @@
 	});
 </script>
 
-<div class="bg-slate-50 rounded p-1 pb-2 fcol h-[125px]">
+<div class="bg-white rounded p-1 pb-2 fcol h-[125px]">
 	<div class="title text-center wrapped relative mb-1">
 		New Dependency
-		<button
-			class="absolute right-0 top-0 flex items-center h-full bg-blue-600 rounded aspect-square justify-center icon-btn-sm text-white"
-			aria-label="Add dependency"
-			onclick={async () => {
-				if (!workspace_controller.path) {
-					beinn_log_controller.append(
-						"Cannot add dependency: No workspace path set."
-					);
-					return;
-				}
-				await dependency_controller.installDependency({
-					path: workspace_controller.path,
-					source,
-				});
-				switch (source.type) {
-					case "pip":
-						source = { type: "pip", package: "" };
-						break;
-					case "git":
-						source = {
-							type: "git",
-							git: "",
-							branch: "",
-							subdirectory: "",
-						};
-						break;
-					case "path":
-						source = {
-							type: "path",
-							path: "",
-							editable: source.editable,
-						};
-						break;
-				}
-			}}>
-			<Plus />
-		</button>
+
+		{#if experiment_controller.closeable}
+			<button
+				class="absolute right-0 top-0 flex items-center h-full bg-blue-600 rounded aspect-square justify-center icon-btn-sm text-white"
+				aria-label="Add dependency"
+				onclick={async () => {
+					if (!workspace_controller.path) {
+						beinn_log_controller.append(
+							"Cannot add dependency: No workspace path set."
+						);
+						return;
+					}
+					await dependency_controller.installDependency({
+						path: workspace_controller.path,
+						source,
+					});
+					switch (source.type) {
+						case "pip":
+							source = { type: "pip", package: "" };
+							break;
+						case "git":
+							source = {
+								type: "git",
+								git: "",
+								branch: "",
+								subdirectory: "",
+							};
+							break;
+						case "path":
+							source = {
+								type: "path",
+								path: "",
+								editable: source.editable,
+							};
+							break;
+					}
+				}}>
+				<Plus />
+			</button>
+		{:else}
+			<span
+				class="absolute right-0 top-0 flex items-center h-full bg-slate-300 rounded aspect-square justify-center icon-btn-sm text-white">
+				<Plus />
+			</span>
+		{/if}
 	</div>
 	{#snippet typeBoilerPlate(type: "pip" | "git" | "path")}
 		<button

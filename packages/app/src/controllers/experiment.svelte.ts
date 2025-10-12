@@ -7,11 +7,13 @@ import type { ChartConfigs } from "./charts/types"
 import { workspace_controller } from "./workspace.svelte"
 import { beinn_log_controller } from "./log.svelte"
 import type { AllParamTypes } from "./params.svelte"
+import { tick } from "svelte"
 
 
 
 
 export class ExperimentController extends EEBaseController {
+
 
     module: string = $state("")
     cls: string = $state("")
@@ -45,29 +47,25 @@ export class ExperimentController extends EEBaseController {
 
     expected_loop_count: number = $state(-1)
 
-    start(name: string) {
-        workspace_controller.sendCommand("experiment:start", { name })
+    start() {
+        workspace_controller.sendCommand("start", {})
     }
 
-    pause(name: string) {
-        workspace_controller.sendCommand("experiment:pause", { name })
+    pause() {
+        workspace_controller.sendCommand("pause", {})
     }
 
-    stop(name: string) {
-        workspace_controller.sendCommand("experiment:stop", { name })
+    stop() {
+        workspace_controller.sendCommand("stop", {})
     }
 
-    continue(name: string) {
-        workspace_controller.sendCommand("experiment:continue", { name })
+    continue() {
+        workspace_controller.sendCommand("continue", {})
     }
 
 
     get closeable() {
-
-        if (this.status !== "completed" && this.status !== "stopped" && this.status !== "initial")
-            return false
-
-        return true
+        return !(this.status !== "completed" && this.status !== "stopped" && this.status !== "initial" && this.status !== "undefined")
     }
 
     constructor() {
@@ -196,16 +194,23 @@ export class ExperimentController extends EEBaseController {
             }).execute()
 
         if (res.code !== 0) {
-            beinn_log_controller.append(`error while creating equipment with module ${this.module} and class ${this.cls}: ${res.stderr}`)
+            beinn_log_controller.append(`error while creating experiment with module ${this.module} and class ${this.cls}: ${res.stderr}`)
             return
         }
-
-        console.log(res.stdout)
-
         const instance = JSON.parse(res.stdout) as ConcInstance
+
+        this.composite_opens = {}
+        await tick()
+
+        for (const [key, value] of Object.entries(instance.params))
+            if (value.type === "composite" && this.composite_opens[key] === undefined)
+                this.composite_opens[key] = true
 
         this.params = instance.params
         this.status = "initial"
+
+        await tick()
+
     }
 
 

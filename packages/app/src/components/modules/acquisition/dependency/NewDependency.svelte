@@ -17,7 +17,7 @@
 	});
 </script>
 
-<div class="bg-slate-50 rounded p-1 pb-2 fcol h-[125px]">
+<div class="bg-white rounded p-1 pb-2 fcol h-[125px]">
 	<div class="title text-center wrapped relative mb-1">
 		New Dependency
 		<button
