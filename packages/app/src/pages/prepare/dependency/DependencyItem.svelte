@@ -4,67 +4,97 @@
 		dependency_controller,
 		type Dependency,
 	} from "$controllers/dependency.svelte";
-	import { beinn_log_controller } from "$controllers/log.svelte";
+	import { equipment_controller } from "$controllers/equipment.svelte";
+	import { experiment_controller } from "$controllers/experiment.svelte";
 	import { workspace_controller } from "$controllers/workspace.svelte";
-	import { ArrowUp, Loader, Trash2 } from "@lucide/svelte";
+	import { ArrowUp, LoaderCircle, Trash2 } from "@lucide/svelte";
+	import { tick } from "svelte";
 
 	let { dependency = $bindable() }: { dependency: Dependency } = $props();
+
+	async function update() {
+		await dependency_controller.update({
+			name: dependency.name,
+		});
+		await dependency_controller.save();
+		await tick();
+		await Promise.all([
+			equipment_controller.updateImports(),
+			experiment_controller.updateImports(),
+		]);
+	}
+
+	async function uninstall() {
+		await dependency_controller.uninstall({
+			name: dependency.name,
+			path: workspace_controller.path!,
+		});
+		await dependency_controller.save();
+		await tick();
+		await Promise.all([
+			equipment_controller.updateImports(),
+			experiment_controller.updateImports(),
+		]);
+	}
+
+	async function toggleDriver() {
+		await dependency_controller.toggleDriver(dependency.name);
+		await dependency_controller.save();
+		await tick();
+		await Promise.all([
+			equipment_controller.updateImports(),
+			experiment_controller.updateImports(),
+		]);
+	}
 </script>
 
 <div class="bg-white rounded p-1 fcol-1">
 	<div class="flex items-center w-full justify-between">
-		<div class="  font-medium border-l-3 border-slate-400 pl-1">
+		<div
+			class="  font-medium border-l-3 border-slate-400 pl-1 min-h-6 flex items-center">
 			{dependency.name}
 		</div>
-		<div class=" frow-2">
-			{#if dependency.updating}
-				<div
-					class="icon-btn-sm text-slate-400 rounded-full px-1 border box-border border-slate-400">
-					<Loader />
-				</div>
-			{:else}
+		{#if experiment_controller.editable}
+			<div class=" frow-2">
+				{#if dependency.updating}
+					<div class="icon-btn-sm bg-blue-600">
+						<div class="text-white animate-spin">
+							<LoaderCircle />
+						</div>
+					</div>
+				{:else}
+					<button
+						class={cn("icon-btn-sm text-white bg-blue-600")}
+						onclick={update}>
+						<ArrowUp />
+					</button>
+				{/if}
 				<button
 					class={cn(
-						"border rounded-full px-1 box-border border-blue-600 text-blue-600 icon-btn-sm"
+						dependency.has_driver
+							? " border-green-600 text-white bg-green-600"
+							: "border-slate-500 text-slate-500 line-through",
+						"border rounded px-1 box-border"
 					)}
-					onclick={() => {
-						dependency_controller.updateDependency({
-							name: dependency.name,
-						});
-					}}>
-					<ArrowUp />
+					onclick={toggleDriver}>
+					Driver / Script
 				</button>
-			{/if}
-			<button
-				class={cn(
-					dependency.has_driver
-						? "bg-green-600 border-green-600 text-white"
-						: "text-slate-600 border-slate-600 line-through",
-					"border rounded px-1 box-border"
-				)}
-				onclick={() => {
-					dependency.has_driver = !dependency.has_driver;
-				}}>
-				Driver / Script
-			</button>
-			<button
-				aria-label="Remove dependency"
-				class="bg-red-600 icon-btn-sm text-white"
-				onclick={async () => {
-					if (!workspace_controller.path) {
-						beinn_log_controller.append(
-							"Cannot uninstall dependency: No workspace connected."
-						);
-						return;
-					}
-					dependency_controller.uninstallDependency({
-						name: dependency.name,
-						path: workspace_controller.path,
-					});
-				}}>
-				<Trash2 />
-			</button>
-		</div>
+				{#if !dependency.uninstalling}
+					<button
+						aria-label="Remove dependency"
+						class="bg-red-600 icon-btn-sm text-white"
+						onclick={uninstall}>
+						<Trash2 />
+					</button>
+				{:else}
+					<div class="bg-red-600 icon-btn-sm text-white">
+						<div class="text-white animate-spin">
+							<LoaderCircle />
+						</div>
+					</div>
+				{/if}
+			</div>
+		{/if}
 	</div>
 	<div class="fcol gap-0.5">
 		{#if dependency.source.type === "git"}

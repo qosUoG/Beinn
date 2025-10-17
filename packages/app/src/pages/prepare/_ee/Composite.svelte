@@ -7,10 +7,12 @@
 		label,
 		params = $bindable(),
 		open = $bindable(),
+		saveFn,
 	}: {
 		label: string;
 		params: CompositeParam["children"];
 		open: boolean;
+		saveFn: () => Promise<void>;
 	} = $props();
 </script>
 
@@ -31,6 +33,6 @@
 
 {#if open}
 	{#each Object.keys(params) as key}
-		<Param label={key} bind:param={params[key]} />
+		<Param label={key} bind:param={params[key]} {saveFn} />
 	{/each}
 {/if}

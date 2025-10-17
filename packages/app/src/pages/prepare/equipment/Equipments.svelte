@@ -5,14 +5,16 @@
 	import NewEquipment from "./NewEquipment.svelte";
 </script>
 
-<div class="justify-between fcol-2 min-h-0 h-full bg-slate-200 rounded p-2">
-	<div class="fcol-2">
+<div class="justify-between fcol-2 min-h-0 flex-grow bg-slate-200 rounded p-2">
+	<div class="fcol-2 flex-grow min-h-0">
 		<div class="title">Equipment</div>
 		<div
 			class="fcol-2 overflow-y-scroll scrollbar-slate-400 -mr-2 flex-grow pb-8">
-			{#each equipment_controller.equipment_instances as equipment}
-				<EquipmentItem bind:equipment />
-			{/each}
+			{#if workspace_controller.status === "ready"}
+				{#each equipment_controller.equipment_instances as equipment}
+					<EquipmentItem bind:equipment />
+				{/each}
+			{/if}
 		</div>
 	</div>
 	<NewEquipment />

@@ -6,58 +6,62 @@
 		type DependencySource,
 	} from "$controllers/dependency.svelte";
 	import { workspace_controller } from "$controllers/workspace.svelte";
-	import { beinn_log_controller } from "$controllers/log.svelte";
 	import { Plus } from "@lucide/svelte";
 	import InputField from "$components/fields/InputField.svelte";
 	import TabSelect from "$components/fields/TabSelect.svelte";
 	import { experiment_controller } from "$controllers/experiment.svelte";
+	import { equipment_controller } from "$controllers/equipment.svelte";
+	import { tick } from "svelte";
 
 	let source: DependencySource = $state({
 		type: "pip",
 		package: "",
 	});
+
+	async function install() {
+		await dependency_controller.install({
+			path: workspace_controller.path!,
+			source,
+		});
+		switch (source.type) {
+			case "pip":
+				source = { type: "pip", package: "" };
+				break;
+			case "git":
+				source = {
+					type: "git",
+					git: "",
+					branch: "",
+					subdirectory: "",
+				};
+				break;
+			case "path":
+				source = {
+					type: "path",
+					path: "",
+					editable: source.editable,
+				};
+				break;
+		}
+
+		await dependency_controller.save();
+		await tick();
+		await Promise.all([
+			equipment_controller.updateImports(),
+			experiment_controller.updateImports(),
+		]);
+	}
 </script>
 
-<div class="bg-white rounded p-1 pb-2 fcol h-[125px]">
+<div class="bg-white rounded p-1 pb-2 fcol min-h-[125px]">
 	<div class="title text-center wrapped relative mb-1">
 		New Dependency
 
-		{#if experiment_controller.closeable}
+		{#if experiment_controller.editable}
 			<button
 				class="absolute right-0 top-0 flex items-center h-full bg-blue-600 rounded aspect-square justify-center icon-btn-sm text-white"
 				aria-label="Add dependency"
-				onclick={async () => {
-					if (!workspace_controller.path) {
-						beinn_log_controller.append(
-							"Cannot add dependency: No workspace path set."
-						);
-						return;
-					}
-					await dependency_controller.installDependency({
-						path: workspace_controller.path,
-						source,
-					});
-					switch (source.type) {
-						case "pip":
-							source = { type: "pip", package: "" };
-							break;
-						case "git":
-							source = {
-								type: "git",
-								git: "",
-								branch: "",
-								subdirectory: "",
-							};
-							break;
-						case "path":
-							source = {
-								type: "path",
-								path: "",
-								editable: source.editable,
-							};
-							break;
-					}
-				}}>
+				onclick={install}>
 				<Plus />
 			</button>
 		{:else}

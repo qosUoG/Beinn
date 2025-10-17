@@ -8,6 +8,7 @@
 
 	import { cn, getClickOutsideAttachment } from "$components/utils.svelte";
 	import { experiment_controller } from "$controllers/experiment.svelte";
+	import { tick } from "svelte";
 
 	let open = $state(false);
 
@@ -16,14 +17,27 @@
 	});
 </script>
 
-<div class="bg-white rounded p-1 pb-2 fcol h-[125px]">
+<div class="bg-white rounded p-1 pb-2 fcol min-h-[125px]">
 	<div class="title text-center wrapped relative mb-1">
 		New Equipment
-		{#if experiment_controller.closeable}
+		{#if experiment_controller.editable}
 			<button
 				class="absolute right-0 top-0 flex items-center h-full bg-blue-600 rounded aspect-square justify-center icon-btn-sm text-white"
-				onclick={() => {
-					equipment_controller.getParams();
+				onclick={async () => {
+					const success = await equipment_controller.create(
+						equipment_controller.temp
+					);
+
+					await tick();
+
+					if (success) {
+						equipment_controller.temp = {
+							name: "",
+							module: "",
+							cls: "",
+						};
+						await equipment_controller.save();
+					}
 				}}>
 				<Plus />
 			</button>
@@ -39,13 +53,13 @@
 		class="fcol *:border-1 *:border-slate-400 *:border-b-0 last:border-b-1 last:border-b-slate-400">
 		<InputField
 			label="name"
-			bind:value={equipment_controller.temp_name}
+			bind:value={equipment_controller.temp.name}
 			mandatory
 			placeholder="Unique, alphanumeric characters only"
 			onkeydown={(e: KeyboardEvent) => {
 				if (
 					!/[a-zA-Z0-9_]/.test(e.key) ||
-					(equipment_controller.temp_name.length === 0 &&
+					(equipment_controller.temp.name.length === 0 &&
 						/[0-9]/.test(e.key))
 				)
 					e.preventDefault();
@@ -60,29 +74,26 @@
 					<div
 						class="bg-white absolute bottom-0 left-0 w-full rounded border">
 						{#each equipment_controller.imports as { cls, module }}
-							{console.log(
-								$state.snapshot(equipment_controller.imports)
-							)}
 							<button
 								class={cn(
 									"text-slate-400 wrapped  w-full",
-									equipment_controller.temp_cls === cls &&
-										equipment_controller.temp_module ===
+									equipment_controller.temp.cls === cls &&
+										equipment_controller.temp.module ===
 											module
 										? "bg-slate-700 text-slate-500"
 										: "hover:bg-slate-300"
 								)}
 								onclick={() => {
-									equipment_controller.temp_cls = cls;
-									equipment_controller.temp_module = module;
+									equipment_controller.temp.cls = cls;
+									equipment_controller.temp.module = module;
 									open = false;
 								}}>
 								from
 								<span
 									class={cn(
 										" font-semibold",
-										equipment_controller.temp_cls === cls &&
-											equipment_controller.temp_module ===
+										equipment_controller.temp.cls === cls &&
+											equipment_controller.temp.module ===
 												module
 											? "text-white"
 											: "text-slate-950"
@@ -93,8 +104,8 @@
 								<span
 									class={cn(
 										" font-semibold",
-										equipment_controller.temp_cls === cls &&
-											equipment_controller.temp_module ===
+										equipment_controller.temp.cls === cls &&
+											equipment_controller.temp.module ===
 												module
 											? "text-white"
 											: "text-slate-950"
@@ -116,17 +127,16 @@
 				<button
 					class="w-full"
 					onclick={() => {
-						equipment_controller.updateImports();
 						open = true;
 					}}>
-					{#if equipment_controller.temp_cls && equipment_controller.temp_module}
+					{#if equipment_controller.temp.cls && equipment_controller.temp.module}
 						from
 						<span class="text-slate-950 font-semibold">
-							{equipment_controller.temp_module}
+							{equipment_controller.temp.module}
 						</span>
 						import
 						<span class="text-slate-950 font-semibold">
-							{equipment_controller.temp_cls}
+							{equipment_controller.temp.cls}
 						</span>
 					{:else}
 						<span class="text-slate-400 italic"

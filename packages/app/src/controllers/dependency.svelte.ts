@@ -1,10 +1,9 @@
-import { shell } from "$lib/svelte_utils"
-import { readTextFile } from "@tauri-apps/plugin-fs"
+import { shell } from "$lib/utils"
+import { exists, readTextFile, writeTextFile } from "@tauri-apps/plugin-fs"
 import { parse } from "smol-toml"
-import { beinn_log_controller } from "./log.svelte"
+
 import { workspace_controller } from "./workspace.svelte"
 import { tick } from "svelte"
-import { sleep } from "$lib/utils"
 
 export type GitSource = {
     type: "git",
@@ -31,15 +30,21 @@ export type Dependency = {
     name: string,
     fullname: string,
     has_driver: boolean,
-    updating: boolean
+    updating: boolean,
+    uninstalling: boolean
+}
+
+export type DependencySave = {
+    source: DependencySource
+    name: string,
+    fullname: string,
+    has_driver: boolean
 }
 
 class Dependencies {
 
-    #dependencies: { value: Dependency[] } = $state({ value: [] })
-    get dependencies() {
-        return this.#dependencies.value
-    }
+    dependencies: Dependency[] = $state([])
+
 
     get has_driver_package_names() {
         return this.dependencies.filter(d => d.has_driver).map(d => d.name)
@@ -49,8 +54,8 @@ class Dependencies {
     Update list of dependencies
     */
 
-    async get_dependencies({ path }: { path: string }) {
-        beinn_log_controller.append("BEGIN GET DEPENDENCIES")
+    async readPyprojectToml({ path }: { path: string }) {
+
 
         const uv_dependencies: Dependency[] = []
 
@@ -72,6 +77,7 @@ class Dependencies {
                     fullname: dependency,
                     has_driver: false,
                     updating: false,
+                    uninstalling: false,
                 })
 
             else if ("git" in sources[parsed_dependency])
@@ -81,6 +87,7 @@ class Dependencies {
                     source: { type: "git", ...(sources[parsed_dependency] as Omit<GitSource, "type">) },
                     has_driver: false,
                     updating: false,
+                    uninstalling: false,
                 })
             else if ("path" in sources[parsed_dependency])
                 uv_dependencies.push({
@@ -89,116 +96,92 @@ class Dependencies {
                     source: { type: "path", ...(sources[parsed_dependency] as Omit<PathSource, "type">) },
                     has_driver: false,
                     updating: false,
+                    uninstalling: false,
                 })
         }
 
-        this.#dependencies.value = uv_dependencies
-
-        beinn_log_controller.append("END GET_DEPENDENCIES")
-    }
-
-    async uninstallDependency({ name, path }: { name: string, path: string }) {
-        beinn_log_controller.append("BEGIN delete dependency")
-
-        beinn_log_controller.append("Removing " + name + " from the workspace")
-
-        const { success } = await shell({ fn: "uv", cmd: "remove " + name, cwd: path, logger: beinn_log_controller })
-        if (!success) {
-            beinn_log_controller.append("FAILED delete dependency")
-            return
-        }
-        // Refresh the dependencies
-        await this.get_dependencies({ path })
-
-        beinn_log_controller.append("END delete dependency")
-
+        this.dependencies = uv_dependencies
 
     }
 
-    async updateDependency({ name }: { name: string }) {
-
-        beinn_log_controller.append(`BEGIN update dependency ${name}`)
-        const dependency = this.dependencies.find(d => d.name === name)
-        if (dependency === undefined || workspace_controller.path === null) {
-            beinn_log_controller.append("FAILED update dependency")
-            return
-        }
-
-        dependency.updating = true
+    async uninstall({ name, path }: { name: string, path: string }) {
+        this.dependencies.find(d => d.name === name)!.uninstalling = true
         await tick()
 
-
-
-        let success = (await shell({ fn: "uv", cmd: `lock --upgrade-package ${name}`, cwd: workspace_controller.path, logger: beinn_log_controller })).success
-        if (!success) {
-            beinn_log_controller.append(`FAILED update dependency ${name}`)
-
-            dependency.updating = false
-            return
-        }
-
-        success = (await shell({ fn: "uv", cmd: "sync", cwd: workspace_controller.path, logger: beinn_log_controller })).success
-        if (!success) {
-            beinn_log_controller.append(`FAILED update dependency ${name}`)
-
-            dependency.updating = false
-            return
-        }
-        beinn_log_controller.append(`END update dependency ${name}`)
-
-        dependency.updating = false
-
+        await shell({ fn: "uv", cmd: "remove " + name, cwd: path, description: `Uninstalling ${name}` })
+        // Refresh the dependencies
+        await this.readPyprojectToml({ path })
     }
 
-    async installDependency({ path, source }: { path: string, source: DependencySource }) {
-        beinn_log_controller.append("BEGIN install dependency")
+    async update({ name }: { name: string }) {
+        const dependency = this.dependencies.find(d => d.name === name)!
+        dependency.updating = true
 
-        beinn_log_controller.append("Installing dependency of " + source.type + " type")
+        await tick()
 
-        let success = true
+        await shell({ fn: "uv", cmd: `lock --upgrade-package ${name}`, cwd: workspace_controller.path!, description: `Updating dependency ${name}` })
 
+        await shell({ fn: "uv", cmd: "sync", cwd: workspace_controller.path!, description: `Syncing dependency ${name}` })
+
+        dependency.updating = false
+    }
+
+    async install({ path, source }: { path: string, source: DependencySource }) {
         switch (source.type) {
             case "git": {
-                success = (await shell({ fn: "uv", cmd: `add git+${source.git}${source.subdirectory !== "" ? "#subdirectory=" + source.subdirectory : ""}${source.branch !== "" ? " --branch " + source.branch : ""}`, cwd: path, logger: beinn_log_controller })).success
+                await shell({
+                    fn: "uv",
+                    cmd: `add git+${source.git}${source.subdirectory !== "" ? "#subdirectory=" + source.subdirectory : ""}${source.branch !== "" ? " --branch " + source.branch : ""}`,
+                    cwd: path,
+                    description: "Installing git dependency",
+                })
                 break
             }
 
             case "path": {
-                success = (await shell({ fn: "uv", cmd: `add ${source.path}${source.editable ? "--editable" : ""}`, cwd: path, logger: beinn_log_controller })).success
+                await shell({ fn: "uv", cmd: `add ${source.path}${source.editable ? "--editable" : ""}`, cwd: path, description: "Installing local dependency" })
                 break
             }
             case "pip": {
-                success = (await shell({ fn: "uv", cmd: `add ${source.package}`, cwd: path, logger: beinn_log_controller })).success
+                await shell({ fn: "uv", cmd: `add ${source.package}`, cwd: path, description: `Installing pip dependency ${source.package}` })
                 break
             }
         }
 
-        if (!success) {
-            beinn_log_controller.append("FAILED install dependency")
-            return
-        }
-
         // Refresh the dependencies
-        await this.get_dependencies({ path })
-        beinn_log_controller.append("END install dependency")
+        await this.readPyprojectToml({ path })
+
     }
 
 
 
-    getSave() {
-        return {
-            has_driver_package_names: this.has_driver_package_names
+    async save() {
+        await writeTextFile(workspace_controller.path! + "/.beinn/dependencies.json",
+            JSON.stringify(this.dependencies.map(({ source, name, fullname, has_driver }) => ({
+                source, name, fullname, has_driver,
+            }))))
+    }
+
+    async loadSave(path: string) {
+        if (!await exists(path + "/.beinn/dependencies.json")) return
+        const save = JSON.parse(await readTextFile(path + "/.beinn/dependencies.json")) as DependencySave[]
+
+        for (const s of save) {
+            const dependency = this.dependencies.find(d => d.name === s.name)
+            if (s.has_driver && dependency !== undefined)
+                dependency.has_driver = true
         }
     }
 
-    loadSave({ has_driver_package_names }: { has_driver_package_names: string[] }) {
-        for (const dependency of this.dependencies)
-            if (has_driver_package_names.includes(dependency.name))
-                dependency.has_driver = true
+    async toggleDriver(name: string) {
+        const dependency = this.dependencies.find(d => d.name === name)
+        if (dependency === undefined) return
+        dependency.has_driver = !dependency.has_driver
+
     }
 
     reset() {
-        this.#dependencies.value = []
+        this.dependencies = []
     }
 
 

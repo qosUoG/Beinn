@@ -1,5 +1,6 @@
 <script lang="ts" generics="T extends string | number">
 	import { cn, getClickOutsideAttachment } from "$components/utils.svelte";
+	import { tick } from "svelte";
 	import Label from "./Label.svelte";
 
 	let open = $state(false);
@@ -17,7 +18,7 @@
 		label: string;
 		mandatory?: boolean;
 		value: T;
-		options: { label: string; value: T }[] | T[];
+		options: T[];
 	} = $props();
 </script>
 
@@ -34,22 +35,15 @@
 						<button
 							class={cn(
 								"  w-full py-0.5 px-1",
-								value === option ||
-									(typeof option === "object" &&
-										"value" in option &&
-										option.value === value)
+								value === option
 									? "bg-slate-700 text-white"
 									: "hover:bg-slate-300"
 							)}
 							onclick={() => {
-								if (typeof option !== "object") value = option;
-								else value = option.value;
-
+								value = option;
 								open = false;
 							}}>
-							{typeof options[0] !== "object"
-								? option
-								: (option as { label: string; value: T }).value}
+							{option}
 						</button>
 					{:else}
 						<button
@@ -68,11 +62,7 @@
 			onclick={() => {
 				open = true;
 			}}>
-			{typeof options[0] !== "object"
-				? value
-				: (options as { label: string; value: T }[]).find(
-						({ value: val }) => value === val
-					)?.label}
+			{value}
 		</button>
 	</div>
 </div>

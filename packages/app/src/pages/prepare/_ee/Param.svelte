@@ -5,18 +5,32 @@
 	import TabSelect from "$components/fields/TabSelect.svelte";
 	import { equipment_controller } from "$controllers/equipment.svelte";
 	import type { SimpleParamType } from "$controllers/params.svelte";
+	import { tick } from "svelte";
 
 	let {
 		label,
 		param = $bindable(),
-	}: { label: string; param: SimpleParamType } = $props();
+		saveFn,
+	}: {
+		label: string;
+		param: SimpleParamType;
+		saveFn: () => Promise<void>;
+	} = $props();
 </script>
 
 {#if param.type === "int" || param.type === "float"}
 	<InputField
 		mandatory={param.required}
 		{label}
-		bind:value={param.value}
+		bind:value={
+			() => param.value,
+			(v: string | number) => {
+				if (param.type === "int") param.value = parseInt(v as string);
+				else param.value = parseFloat(v as string);
+
+				saveFn();
+			}
+		}
 		onkeydown={(e: KeyboardEvent) => {
 			if (
 				e.key === "Backspace" ||
@@ -34,12 +48,24 @@
 	<ContentEditable
 		mandatory={param.required}
 		{label}
-		bind:value={param.value} />
+		bind:value={
+			() => param.value,
+			(v: string) => {
+				param.value = v;
+				saveFn();
+			}
+		} />
 {:else if param.type === "bool"}
 	<TabSelect
 		mandatory={param.required}
 		{label}
-		bind:value={param.value}
+		bind:value={
+			() => param.value,
+			(v: boolean) => {
+				param.value = v;
+				saveFn();
+			}
+		}
 		items={[
 			{ key: "True", value: true },
 			{ key: "False", value: false },
@@ -48,13 +74,25 @@
 	<DropSelect
 		mandatory={param.required}
 		{label}
-		bind:value={param.value}
+		bind:value={
+			() => param.value,
+			(v) => {
+				param.value = v;
+				saveFn();
+			}
+		}
 		options={param.options} />
 {:else if param.type === "instance.equipment"}
 	<DropSelect
 		mandatory={param.required}
 		{label}
-		bind:value={param.name}
+		bind:value={
+			() => param.value,
+			(v) => {
+				param.value = v;
+				saveFn();
+			}
+		}
 		options={equipment_controller.equipment_names} />
 	<!-- {:else if param.type === "instance.experiment"} -->
 

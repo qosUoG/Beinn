@@ -1,15 +1,7 @@
 <script lang="ts">
 	import { open } from "@tauri-apps/plugin-dialog";
-	import { experiment_controller } from "$controllers/experiment.svelte";
 	import { workspace_controller } from "$controllers/workspace.svelte";
-	import {
-		Ban,
-		Check,
-		Cross,
-		FolderOpen,
-		Loader,
-		Save,
-	} from "@lucide/svelte";
+	import { FolderOpen, LoaderCircle } from "@lucide/svelte";
 
 	import { load, type Store } from "@tauri-apps/plugin-store";
 
@@ -29,19 +21,7 @@
 			defaultPath: (await getSavedWorkspacePath()) ?? (await homeDir()),
 		});
 
-		if (path) await workspace_controller.select(path);
-	}
-
-	async function saveHandler() {
-		await workspace_controller.save();
-
-		setTimeout(() => {
-			workspace_controller.save_status = "normal";
-		}, 2000);
-	}
-
-	function closeHandler() {
-		workspace_controller.disconnect();
+		if (path) await workspace_controller.loadWorkspace(path);
 	}
 </script>
 
@@ -58,48 +38,15 @@
 			</div>
 		{/if}
 	</div>
-	<button class="icon-btn-sm slate" onclick={folderSearchHandler}
-		><FolderOpen /></button>
-</div>
-
-<!-- <div class="frow-1">
-	<div class=" wrapped bg-slate-200 title">Workspace</div>
-	<div class="wrapped rounded bg-slate-200 w-96 min-w-12 h-[24px]">
-		<div class="text-nowrap w-full overflow-x-scroll">
-			{workspace_controller.path}
-		</div>
-	</div>
-	{#if workspace_controller.connection === "connecting"}
-		<div class="icon-btn-sm bg-slate-200">
-			<div class="animate-pulse">
-				<Loader />
+	{#if workspace_controller.status === "loading"}
+		<div class="icon-btn-sm bg-slate-500">
+			<div class="  animate-spin text-slate-50">
+				<LoaderCircle />
 			</div>
 		</div>
-	{:else if workspace_controller.connection === "disconnected"}
-		<button class="icon-btn-sm slate" onclick={folderSearchHandler}
-			><FolderOpen /></button>
-	{:else if experiment_controller.closeable}
-		<button class="icon-btn-sm slate" onclick={closeHandler}
-			><Ban /></button>
 	{:else}
-		<div class="icon-btn-sm bg-slate-200 text-white">
-			<Ban />
-		</div>
+		<button
+			class="icon-btn-sm bg-slate-500 text-slate-50"
+			onclick={folderSearchHandler}><FolderOpen /></button>
 	{/if}
-	{#if workspace_controller.save_status === "saving"}
-		<div class="icon-btn-sm bg-slate-200 text-white">
-			<Save />
-		</div>
-	{:else if workspace_controller.save_status === "success"}
-		<div class="icon-btn-sm green">
-			<Check />
-		</div>
-	{:else if workspace_controller.save_status === "fail"}
-		<div class="icon-btn-sm red">
-			<Cross />
-		</div>
-	{:else}
-		<button class="icon-btn-sm slate" onclick={saveHandler}
-			><Save /></button>
-	{/if}
-</div> -->
+</div>

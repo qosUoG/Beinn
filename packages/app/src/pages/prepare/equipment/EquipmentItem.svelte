@@ -1,15 +1,13 @@
 <script lang="ts">
-	import {
-		equipment_controller,
-		type Equipment,
-	} from "$controllers/equipment.svelte";
+	import { equipment_controller } from "$controllers/equipment.svelte";
 
-	let { equipment = $bindable() }: { equipment: Equipment } = $props();
+	let { equipment = $bindable() }: { equipment: Instance } = $props();
 
 	import {
 		ChevronDown,
 		ChevronRight,
 		FolderSync,
+		LoaderCircle,
 		Trash2,
 	} from "@lucide/svelte";
 	import Param from "../_ee/Param.svelte";
@@ -17,14 +15,23 @@
 
 	import { cn } from "$components/utils.svelte";
 	import { experiment_controller } from "$controllers/experiment.svelte";
+	import ParamList from "../_ee/ParamList.svelte";
+	import { workspace_controller } from "$controllers/workspace.svelte";
+	import type { Instance } from "$controllers/_ee.svelte";
 </script>
 
 <div class="bg-white rounded fcol-1 p-1">
 	<div class="flex items-center w-full justify-between">
-		{#if experiment_controller.closeable}
+		{#if experiment_controller.editable}
 			<input
 				class="  font-light text-slate-950 flex items-center px-1 text-sm"
-				bind:value={equipment.name} />
+				bind:value={
+					() => equipment.name,
+					(v: string) => {
+						equipment.name = v;
+						equipment_controller.save();
+					}
+				} />
 		{:else}<div
 				class="  font-light text-slate-950 flex items-center px-1 text-sm">
 				{equipment.name}
@@ -32,31 +39,37 @@
 		{/if}
 
 		<div class="frow-1">
-			<button
-				aria-label={`Reload ${equipment.name}`}
-				class={cn(
-					" icon-btn-sm text-white ",
-					experiment_controller.closeable
-						? "bg-blue-600"
-						: "bg-slate-300 cursor-not-allowed *:cursor-not-allowed **:cursor-not-allowed"
-				)}
-				onclick={() => {
-					if (experiment_controller.closeable)
-						equipment_controller.reload(equipment.name);
-				}}>
-				<FolderSync />
-			</button>
+			{#if equipment.reloading}
+				<div class="icon-btn-sm bg-blue-600">
+					<div class="text-white animate-spin">
+						<LoaderCircle />
+					</div>
+				</div>
+			{:else}
+				<button
+					aria-label={`Reload ${equipment.name}`}
+					class={cn(
+						" icon-btn-sm text-white ",
+						experiment_controller.editable
+							? "bg-blue-600"
+							: "bg-slate-300 cursor-not-allowed *:cursor-not-allowed **:cursor-not-allowed"
+					)}
+					onclick={() => {
+						if (experiment_controller.editable) equipment.reload();
+					}}>
+					<FolderSync />
+				</button>{/if}
 
 			<button
 				aria-label={`Remove ${equipment.name}`}
 				class={cn(
 					" icon-btn-sm text-white ",
-					experiment_controller.closeable
+					experiment_controller.editable
 						? "bg-red-600"
 						: "bg-slate-300 cursor-not-allowed *:cursor-not-allowed **:cursor-not-allowed"
 				)}
 				onclick={() => {
-					if (experiment_controller.closeable)
+					if (experiment_controller.editable)
 						equipment_controller.remove(equipment.name);
 				}}>
 				<Trash2 />
@@ -87,20 +100,12 @@
 			</button>
 		</div>
 
-		{#if equipment.param_opens}
-			<div
-				class="fcol *:border-b-1 *:border-slate-400 border-2 border-t-0 border-slate-800">
-				{#each Object.keys(equipment.params) as key}
-					{#if equipment.params[key].type === "composite"}
-						<Composite
-							label={key}
-							bind:open={equipment.composite_opens[key]}
-							bind:params={equipment.params[key].children} />
-					{:else}
-						<Param label={key} bind:param={equipment.params[key]} />
-					{/if}
-				{/each}
-			</div>
-		{/if}
+		<ParamList
+			param_opens={equipment.param_opens}
+			bind:composite_opens={equipment.composite_opens}
+			bind:params={equipment.params}
+			saveFn={async () => {
+				await equipment_controller.save();
+			}} />
 	</div>
 </div>

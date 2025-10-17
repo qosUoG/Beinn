@@ -4,7 +4,7 @@
 		dependency_controller,
 		type Dependency,
 	} from "$controllers/dependency.svelte";
-	import { beinn_log_controller } from "$controllers/log.svelte";
+	// import { beinn_log_controller } from "$controllers/log.svelte";
 	import { workspace_controller } from "$controllers/workspace.svelte";
 	import { ArrowUp, Loader, Trash2 } from "@lucide/svelte";
 

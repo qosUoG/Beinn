@@ -5,64 +5,58 @@
 
 	import { experiment_controller } from "$controllers/experiment.svelte";
 	import ExperimentSelector from "./ExperimentSelector.svelte";
-	import Composite from "../_ee/Composite.svelte";
-	import Param from "../_ee/Param.svelte";
+
+	import ParamList from "../_ee/ParamList.svelte";
+	import { workspace_controller } from "$controllers/workspace.svelte";
 </script>
 
-<div class=" fcol-2 min-h-0 h-full bg-slate-200 rounded p-2">
+<div class="justify-between fcol-2 min-h-0 flex-grow bg-slate-200 rounded p-2">
 	<div class="title">Experiment</div>
 
-	<ExperimentSelector />
+	{#if workspace_controller.status === "ready"}
+		<ExperimentSelector />
 
-	{#if experiment_controller.status !== "undefined"}
-		<div>
+		{#if experiment_controller.experiment}
 			<div
-				class={cn(
-					"grid grid-cols-2 border-2 border-slate-800 bg-slate-300 rounded-t p-0.5",
-					experiment_controller.param_opens ? "" : "rounded-b"
-				)}>
-				<button
-					class={cn(
-						"frow items-center   pr-4 rounded-tr rounded-tl h-full"
-					)}
-					onclick={() => {
-						experiment_controller.param_opens =
-							!experiment_controller.param_opens;
-					}}>
-					<span class="h-3">
-						{#if !experiment_controller.param_opens}
-							<ChevronRight strokeWidth="3px" />
-						{:else}
-							<ChevronDown strokeWidth="3px" />
-						{/if}
-					</span>
-					<div class="  wrapped px-0">Params</div>
-				</button>
-			</div>
-
-			{#if experiment_controller.param_opens}
+				class=" overflow-y-scroll scrollbar-slate-400 -mr-2 flex-grow pb-8">
 				<div
-					class="fcol *:border-b-1 *:border-slate-400 border-2 border-t-0 border-slate-800 bg-white">
-					{#each Object.keys(experiment_controller.params) as key}
-						{#if experiment_controller.params[key].type === "composite"}
-							<Composite
-								label={key}
-								bind:open={
-									experiment_controller.composite_opens[key]
-								}
-								bind:params={
-									experiment_controller.params[key].children
-								} />
-						{:else}
-							<Param
-								label={key}
-								bind:param={
-									experiment_controller.params[key]
-								} />
-						{/if}
-					{/each}
+					class={cn(
+						"grid grid-cols-2 border-2 border-slate-800 bg-slate-300 rounded-t p-0.5",
+						experiment_controller.experiment.param_opens
+							? ""
+							: "rounded-b"
+					)}>
+					<button
+						class={cn(
+							"frow items-center   pr-4 rounded-tr rounded-tl h-full"
+						)}
+						onclick={() => {
+							experiment_controller.experiment!.param_opens =
+								!experiment_controller.experiment!.param_opens;
+						}}>
+						<span class="h-3">
+							{#if !experiment_controller.experiment.param_opens}
+								<ChevronRight strokeWidth="3px" />
+							{:else}
+								<ChevronDown strokeWidth="3px" />
+							{/if}
+						</span>
+						<div class="  wrapped px-0">Params</div>
+					</button>
 				</div>
-			{/if}
-		</div>
+				<div class="bg-white">
+					<ParamList
+						param_opens={experiment_controller.experiment
+							.param_opens}
+						bind:composite_opens={
+							experiment_controller.experiment.composite_opens
+						}
+						bind:params={experiment_controller.experiment.params}
+						saveFn={experiment_controller.save.bind(
+							experiment_controller
+						)} />
+				</div>
+			</div>
+		{/if}
 	{/if}
 </div>

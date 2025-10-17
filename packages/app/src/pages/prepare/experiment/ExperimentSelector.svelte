@@ -12,7 +12,7 @@
 	});
 </script>
 
-{#if workspace_controller.path}
+{#if workspace_controller.status === "ready"}
 	<div class="frow items-center bg-white rounded min-h-[24px]">
 		<div
 			{@attach clickoutside}
@@ -30,11 +30,18 @@
 									: "hover:bg-slate-300"
 							)}
 							onclick={async () => {
-								experiment_controller.cls = cls;
+								if (
+									experiment_controller.cls === cls &&
+									experiment_controller.module === module
+								)
+									return;
+
 								experiment_controller.module = module;
-								await tick();
-								experiment_controller.getParams();
+								experiment_controller.cls = cls;
+
 								open = false;
+								await tick();
+								await experiment_controller.loadExperiment();
 							}}>
 							from
 							<span
@@ -70,11 +77,10 @@
 					{/each}
 				</div>
 			{/if}
-			{#if experiment_controller.closeable}
+			{#if experiment_controller.editable}
 				<button
 					class="w-full"
 					onclick={() => {
-						experiment_controller.updateImports();
 						open = true;
 					}}>
 					{#if experiment_controller.cls && experiment_controller.module}
@@ -110,14 +116,14 @@
 			{/if}
 		</div>
 
-		{#if experiment_controller.status !== "undefined"}
-			{#if !experiment_controller.closeable}
+		{#if experiment_controller.experiment}
+			{#if experiment_controller.editable}
 				<span class=" icon-btn-sm text-slate-400">
-					<PencilOff />
+					<Pencil />
 				</span>
 			{:else}
 				<span class=" icon-btn-sm">
-					<Pencil />
+					<PencilOff />
 				</span>
 			{/if}
 		{/if}

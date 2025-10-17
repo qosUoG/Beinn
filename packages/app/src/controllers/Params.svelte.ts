@@ -49,7 +49,7 @@ export interface BoolParam {
 
 export interface InstanceEquipmentParam {
     type: "instance.equipment"
-    name: string
+    value: string
     required: boolean
 }
 
