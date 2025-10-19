@@ -8,9 +8,9 @@
 		Undo,
 	} from "@lucide/svelte";
 	import Param from "../_ee/Param.svelte";
-	import Composite from "../_ee/Composite.svelte";
+	import C./Param.svelteee/Composite.svelte";
 
-	import type { Snippet } from "svelte";
+	im./Composite.svelterom "svelte";
 	import { cn } from "$components/utils.svelte";
 	import { deepCopy } from "$lib/utils";
 	import type {

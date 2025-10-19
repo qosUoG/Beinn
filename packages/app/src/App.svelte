@@ -1,18 +1,18 @@
 <script lang="ts">
-	import Titlebar from "$components/modules/titlebar/Titlebar.svelte";
+	import Titlebar from "modules/Titlebar.svelte";
 	import { exit } from "@tauri-apps/plugin-process";
 
 	import { getCurrentWindow } from "@tauri-apps/api/window";
 
-	import Acquisition from "$components/modules/acquisition/Acquisition.svelte";
+	import Acquisition from "modules/acquisition/Acquisition.svelte";
 	import { workspace_controller } from "$controllers/workspace.svelte";
 
-	import Board from "$components/modules/charts/Board.svelte";
+	import Board from "$pages/experiment/Board.svelte";
 	import { app_controller } from "$controllers/app.svelte";
 	import Prepare from "$pages/prepare/Prepare.svelte";
 
 	getCurrentWindow().listen("tauri://close-requested", async () => {
-		if (await workspace_controller.kill()) await exit();
+		// if (await workspace_controller.kill()) await exit();
 	});
 
 	let acquisition_opened = $state(false);

@@ -10,7 +10,7 @@
 			"$components/*": ["./components/*"],
 			"$pages/*": ["./pages/*"],
 			"$lib/*": ["./lib/*"],
-
+			"$modules/*": ["./modules/*"],
 			"$controllers/*": ["./controllers/*"]
 		}
 	}

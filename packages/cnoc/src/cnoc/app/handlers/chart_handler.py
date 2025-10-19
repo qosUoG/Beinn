@@ -8,9 +8,7 @@ from ..state.experiments import Experiments
 async def chartHandler(experiment_name: str, chart_name: str, ws: ServerConnection):
     # Subscribe websocket to chart stream
     (subscription, unsubscribe, setRate, getRate) = (
-        Experiments.instances[experiment_name]
-        .instance._cnoc_charts[chart_name]
-        ._cnoc_subscribe(ws)
+        Experiments.instances[experiment_name].instance.charts[chart_name].subscribe(ws)
     )
 
     if subscription is None:

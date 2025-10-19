@@ -12,9 +12,7 @@ example/examplelib.
         contextmanager is blocking.
 """
 
-from abc import ABC
-
-from threading import RLock
+from abc import ABC, abstractmethod
 
 
 class EquipmentABC(ABC):
@@ -27,21 +25,6 @@ class EquipmentABC(ABC):
         a dictionary of parameters accessible by the equipment driver
 
     """
-
-    def __init__(self):
-        """
-        No parameters shall be passed to the __init__ function.
-
-        Implementation of drivers shall also make sure to instantiate the
-        self.params attribute as well.
-
-        To be type safe, implementors may also define a params type specific
-        to the equipment driver. Detail please refer to example/examplelib
-        """
-        # from .params import Params
-
-        # self.params: Params
-        self.lock = RLock()
 
     # def _cnoc_interpret(self, code: str, name: str):
     #     with self.lock:
@@ -65,6 +48,7 @@ class EquipmentABC(ABC):
     #         except Exception as e:
     #             print(e, flush=True)
 
+    @abstractmethod
     def cleanup(self):
         """
         Perform any clean up if needed
@@ -72,7 +56,5 @@ class EquipmentABC(ABC):
         This method would run when the workspace is closed. Users may perform
         any clean up in this method. Please be aware the equipment might be in any state
         when entering this function
-
-        It is optional to implement this method.
         """
-        pass
+        raise NotImplementedError

@@ -325,70 +325,39 @@ class InstanceEquipmentParam[T: EquipmentABC](ParamBase):
 
     type: Literal["instance.equipment"] = "instance.equipment"
 
-    def __init__(self, name: str | None = None, required: bool = False):
-        self.name = name
+    def __init__(self, required: bool = False):
+        self.value: str | None = None
         self.instance: T | None = None
         super().__init__(required)
 
     class DictType(TypedDict):
         type: Literal["instance.equipment"]
-        name: str | None
+        value: str | None
         required: bool
 
     def toDict(self) -> DictType:
         return {
             "type": self.type,
-            "name": self.name if self.name else None,
+            "value": self.value if self.value else None,
             "required": self.required,
         }
 
     @classmethod
-    def fromDict(cls, data: DictType):
+    def fromDict(cls, data: DictType, equipments: dict[str, EquipmentABC]):
         if data["type"] != cls.type:
             raise ValueError(f"Invalid type {data['type']} for {cls.type}")
-        return cls(data["name"], data["required"])
+        param = cls(data["required"])
+        if data["value"] is not None:
+            param.value = data["value"]
+            param.instance = equipments[data["value"]]
+
+        return param
 
     def toSave(self) -> dict[str, Any]:
         return {
-            "name": self.name,
-            "params": cnoc_params2Dict(self.instance.params)  # type: ignore
-            if self.instance
-            else None,
+            "value": self.value,
+            "params": params2Dict(self.instance.params) if self.instance else None,
         }
-
-
-# class InstanceExperimentParam[T: ExperimentABC]:
-#     """
-#     param type with instance inheriting ExperimentABC type
-
-#     NOTE THAT this param type is not being supported yet. This
-#     will be intended for playlist feature.
-
-#     Examples of utilizing the param please refer to examples
-
-#     Attributes
-#     ----------
-#     instance : [T : ExperimentABC]
-#         The wrapper class of the experiment that implements the protocol
-#     """
-
-#     type = "instance.experiment"
-
-#     def __init__(self, name: str | None = None):
-#         self.name = name
-#         self.instance: T | None = None
-
-#     def toDict(self):
-#         return {
-#             "type": self.type,
-#             "name": self.name,
-#         }
-
-#     @classmethod
-#     def fromDict(cls, data: dict):
-#         if data["type"] != cls.type:
-#             raise ValueError(f"Invalid type {data['type']} for {cls.type}")
-#         return cls(data["name"])
 
 
 type _SimpleParamType = (
@@ -400,7 +369,6 @@ type _SimpleParamType = (
     | StrParam
     | BoolParam
     | InstanceEquipmentParam[EquipmentABC]
-    # | InstanceExperimentParam[ExperimentABC]
 )
 
 
@@ -417,32 +385,32 @@ class CompositeParam[T]:
     def toDict(self) -> DictType:
         return {
             "type": self.type,
-            "children": {k: v.toDict() for k, v in self.children.items()},  # type: ignore
+            "children": {k: v.toDict() for k, v in self.children.items()},
         }
 
     @classmethod
-    def fromDict(cls, data: DictType):  # type: ignore
+    def fromDict(cls, data: DictType):
         if data["type"] != cls.type:
             raise ValueError(f"Invalid type {data['type']} for {cls.type}")
 
-        children: Params = {}  # type: ignore
-        for k, v in data["children"].items():  # type: ignore
-            for tp in _param_type_arr:  # type: ignore
-                if v["type"] == tp.type:  # type: ignore
-                    children[k] = tp.fromDict(v)  # type: ignore
+        children: Params = {}
+        for k, v in data["children"].items():
+            for tp in _param_type_arr:
+                if v["type"] == tp.type:
+                    children[k] = tp.fromDict(v)
                     break
 
-        return CompositeParam(children)  # type: ignore
+        return CompositeParam(children)
 
-    def toSave(self):  # type: ignore
-        return {k: v.toSave() for k, v in self.children.items()}  # type: ignore
+    def toSave(self):
+        return {k: v.toSave() for k, v in self.children.items()}
 
 
 type AllParamTypes = _SimpleParamType | CompositeParam[_SimpleParamType]
 type Params = dict[str, AllParamTypes]
 
 
-_param_type_arr = [  # type: ignore
+_param_type_arr = [
     SelectStrParam,
     SelectIntParam,
     SelectFloatParam,
@@ -451,19 +419,18 @@ _param_type_arr = [  # type: ignore
     StrParam,
     BoolParam,
     InstanceEquipmentParam[EquipmentABC],
-    # InstanceExperimentParam[ExperimentABC],
     CompositeParam,
 ]
 
 
-def cnoc_params2Dict(params: Params) -> dict[str, Any]:
+def params2Dict(params: Params) -> dict[str, Any]:
     """
     Convert the params to a dictionary representation
     """
     return {k: v.toDict() for k, v in params.items()}
 
 
-def cnoc_dict2Params(data: dict[str, Any]) -> Params:
+def dict2Params(data: dict[str, Any]) -> Params:
     """
     Convert the dictionary representation back to Params
     However this function does not set the instance of the params,
@@ -471,17 +438,17 @@ def cnoc_dict2Params(data: dict[str, Any]) -> Params:
     """
     params: Params = {}
     for k, v in data.items():
-        if v["type"] == CompositeParam.type:  # type: ignore
-            params[k] = CompositeParam.fromDict(v)  # type: ignore
+        if v["type"] == CompositeParam.type:
+            params[k] = CompositeParam.fromDict(v)
             continue
 
-        for tp in _param_type_arr:  # type: ignore
-            if v["type"] == tp.type:  # type: ignore
-                params[k] = tp.fromDict(v)  # type: ignore
+        for tp in _param_type_arr:
+            if v["type"] == tp.type:
+                params[k] = tp.fromDict(v)
                 break
 
     return params
 
 
-def cnoc_params2Save(params: Params) -> dict[str, Any]:
+def params2Save(params: Params) -> dict[str, Any]:
     return {k: v.toSave() for k, v in params.items()}

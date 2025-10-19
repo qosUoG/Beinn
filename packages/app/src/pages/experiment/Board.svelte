@@ -5,9 +5,9 @@
 </script>
 
 <div class="bg-slate-300 flex-grow rounded-t relative" bind:this={parent}>
-	{#each experiment_controller.instances_arr as experiment}
-		{#each Object.values(experiment.charts) as chart}
+	{#if experiment_controller.experiment}
+		{#each Object.values(experiment_controller.experiment.charts) as chart}
 			<Chart bind:chart bind:parent />
 		{/each}
-	{/each}
+	{/if}
 </div>

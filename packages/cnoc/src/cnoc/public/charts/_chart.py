@@ -25,25 +25,44 @@ class ChartBuf:
 
 class ChartABC(ABC):
     def __init__(self):
-        self._cnoc_bufs: dict[ServerConnection, ChartBuf] = {}
-        self._cnoc_history = bytes()
-        self._cnoc_lock = Lock()
-        self._cnoc_should_stop = Event()
+        self._bufs: dict[ServerConnection, ChartBuf] = {}
+        self._history = bytes()
+        self._lock = Lock()
+        self._should_stop = Event()
         self._frames_history = bytes()
 
         self.title: str
 
-    def _cnoc_stopChart(self):
-        self._cnoc_should_stop.set()
+    @abstractmethod
+    def getConfig(self) -> dict[str, Any]:
+        raise NotImplementedError
 
-    def _cnoc_subscribe(self, ws: ServerConnection):
-        self._cnoc_bufs[ws] = ChartBuf()
+    @abstractmethod
+    def plot(self, frame: dict[str, float]):
+        """
+        When implementing this method, one must call _plot to ensure the frame is actually stored
+        """
+        raise NotImplementedError
+
+    def _plot(self, encoded: bytes) -> None:
+        with self._lock:
+            # Make sure to have a copy
+            self._frames_history += encoded
+            # buf and frames history shares a lock such that the history is fetched at the same time as the buf list is modified
+            for buf in self._bufs.values():
+                buf.appendFrame(encoded)
+
+    def close(self):
+        self._should_stop.set()
+
+    def subscribe(self, ws: ServerConnection):
+        self._bufs[ws] = ChartBuf()
 
         # Shares the frames history lock such that make sure the buf gets a history right at the moment of creation, such that
-        with self._cnoc_lock:
+        with self._lock:
             frames_history = self._frames_history
             buf = ChartBuf()
-            self._cnoc_bufs[ws] = buf
+            self._bufs[ws] = buf
 
         async def subscription():
             # First yield frames available before subscription
@@ -54,38 +73,19 @@ class ChartABC(ABC):
                 await asyncio.sleep(1 / buf.rate)
                 yield buf.toOwnedFrames()
 
-                if self._cnoc_should_stop.is_set():
+                if self._should_stop.is_set():
                     break
 
             # Flush remaining frames
             yield buf.toOwnedFrames()
 
         def unsubscribe():
-            del self._cnoc_bufs[ws]
+            del self._bufs[ws]
 
         def setRate(rate: int):
-            self._cnoc_bufs[ws].rate = rate
+            self._bufs[ws].rate = rate
 
         def getRate():
-            return self._cnoc_bufs[ws].rate
+            return self._bufs[ws].rate
 
         return (subscription, unsubscribe, setRate, getRate)
-
-    @abstractmethod
-    def getConfig(self) -> dict[str, Any]:
-        raise NotImplementedError
-
-    @abstractmethod
-    def plot(self, frame: dict[str, float]):
-        """
-        When implementing this method, one must call _abc_plot to ensure the frame is actually stored
-        """
-        raise NotImplementedError
-
-    def _cnoc_plot(self, encoded: bytes) -> None:
-        with self._cnoc_lock:
-            # Make sure to have a copy
-            self._frames_history += encoded
-            # buf and frames history shares a lock such that the history is fetched at the same time as the buf list is modified
-            for buf in self._cnoc_bufs.values():
-                buf.appendFrame(encoded)

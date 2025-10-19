@@ -44,6 +44,7 @@ export default defineConfig({
 
       $components: path.resolve("./src/components"),
       $pages: path.resolve("./src/pages"),
+      $modules: path.resolve("./src/modules"),
 
       $lib: path.resolve("./src/lib"),
 

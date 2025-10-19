@@ -9,8 +9,50 @@ import type { AllParamTypes } from "./params.svelte"
 import { tick } from "svelte"
 import { exists, readTextFile, writeTextFile } from "@tauri-apps/plugin-fs"
 
+class Clock {
+    milliseconds: number = $state(0)
+    timer: Timer | undefined = undefined
+    past_now: number = 0
+
+    start() {
+        this.past_now = Date.now()
+        this.timer = setInterval(() => {
+            const now = Date.now()
+            this.milliseconds = now - this.past_now
+            this.past_now = now
+        }, 500)
+    }
+
+    stop() {
+        if (this.timer === undefined) return
+        this.clearTimer()
+        this.milliseconds = Date.now() - this.past_now
+
+    }
+
+    clearTimer() {
+        if (this.timer === undefined) return
+
+        clearInterval(this.timer)
+        this.timer = undefined
+    }
+
+    reset() {
+        this.milliseconds = 0
+        this.clearTimer()
+    }
+}
+
+class PyProcess {
+    constructor() {
+        const command = Command.create("uv", "run experiment", { cwd: workspace_controller.path! })
+    }
+}
+class PyRuntime {
+    ws: WebSocket | undefined = undefined
 
 
+}
 
 export class Experiment extends Instance {
 
@@ -18,7 +60,7 @@ export class Experiment extends Instance {
         super(module, cls)
     }
 
-    status:
+    state:
         "ready" |
         "starting" |
         "looping" |
@@ -27,17 +69,15 @@ export class Experiment extends Instance {
         "stopping" = $state("ready")
 
     charts: Record<string, Chart> = $state({})
-    loop_count: number = $state(0)
 
-    total_time: number = $state(-1)
-    total_time_timer: Timer | undefined = $state(undefined)
-    total_time_timer_timestamp: number = $state(0)
-
-    loop_time: number = $state(-1)
-    loop_time_timer: Timer | undefined = $state(undefined)
-    loop_time_timer_timestamp: number = $state(0)
-
+    current_loop_count: number = $state(0)
     expected_loop_count: number = $state(-1)
+
+    total_time_clock: Clock = $state(new Clock())
+    loop_time_clock: Clock = $state(new Clock())
+
+
+
 
     start() {
         // workspace_controller.sendCommand("start", {})
@@ -57,13 +97,6 @@ export class Experiment extends Instance {
 
 
 
-
-
-
-    // constructor() {
-    //     super("experiment");
-
-    // setTimeout(() => {
 
 
     //     workspace_controller.registerCallback("experiment:status", ({ name, status }: { name: string, status: "started" | "loop_start" | "paused" | "stopped" | "completed" }) => {
@@ -173,7 +206,7 @@ export class Experiment extends Instance {
     //     })
 
     // })
-    // }
+
 
 
 
@@ -188,7 +221,7 @@ export class ExperimentController extends EEBaseController {
     experiment: Experiment | undefined = $state(undefined)
 
     get editable() {
-        return this.experiment === undefined || this.experiment.status === "ready"
+        return this.experiment === undefined || this.experiment.state === "ready"
     }
 
     constructor() { super("experiment") }
