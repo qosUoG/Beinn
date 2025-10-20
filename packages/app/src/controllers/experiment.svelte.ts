@@ -86,6 +86,7 @@ export class Experiment extends Instance {
 
 
     async start() {
+        new WebSocket("ws://localhost:8080/close")
         this.state = "starting"
         const handler = Command.create("uv", ["run", "experiment"], { cwd: workspace_controller.path! })
 

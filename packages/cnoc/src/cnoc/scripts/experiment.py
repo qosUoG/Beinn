@@ -84,6 +84,10 @@ async def handler(ws: ServerConnection):
     elif path.startswith("/chart"):
         await chartHandler(*unquote(path).split("/")[1], ws)
 
+    elif path == "/close":
+        await ws.close()
+        App.task.cancel()
+
 
 async def _main():
     preloadLocal()

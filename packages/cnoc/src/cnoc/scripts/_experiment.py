@@ -148,6 +148,7 @@ class App:
     async def _runner_wrapper(cls):
         await asyncio.to_thread(cls._runner)
         await cls.ws.close()
+        cls.task.cancel()
 
     # All following methods are called from the runner thread
     @classmethod
