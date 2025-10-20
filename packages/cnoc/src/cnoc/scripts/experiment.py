@@ -58,18 +58,20 @@ async def chartHandler(chart_name: str, ws: ServerConnection):
 
 async def experimentHandler(ws: ServerConnection):
     # print("ws:loaded", flush=True)
-
-    for message in ws:
-        res = json.loads(message)
-        match res["command"]:
-            case "start":
-                await App.state.start(res["value"], ws)
-            case "pause":
-                App.state.pause()
-            case "stop":
-                App.state.stop()
-            case "continue":
-                App.state.cont()
+    try:
+        for message in ws:
+            res = json.loads(message)
+            match res["command"]:
+                case "start":
+                    await App.state.start(res["value"], ws)
+                case "pause":
+                    App.state.pause()
+                case "stop":
+                    App.state.stop()
+                case "continue":
+                    App.state.cont()
+    except ConnectionClosed:
+        App.task.cancel()
 
 
 async def handler(ws: ServerConnection):
@@ -86,10 +88,10 @@ async def handler(ws: ServerConnection):
 async def _main():
     preloadLocal()
     async with serve(handler, "localhost", 8080) as server:
-        task = server.serve_forever()
+        App.task = server.serve_forever()
         print("ws:loaded", flush=True)
         try:
-            await task
+            await App.task
         except asyncio.CancelledError:
             pass
 

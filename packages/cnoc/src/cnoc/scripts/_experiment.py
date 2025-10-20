@@ -71,6 +71,8 @@ class Payload(TypedDict):
 
 
 class App:
+    task: asyncio.Task
+
     equipments: dict[str, EquipmentABC] = {}
     manager: Manager = Manager()
 
