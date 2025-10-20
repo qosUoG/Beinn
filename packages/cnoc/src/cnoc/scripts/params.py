@@ -4,7 +4,7 @@ import sys
 
 from .utils import preloadLocal
 
-from ..public.params import cnoc_params2Dict
+from ..public.params import params2Dict
 
 
 def main():
@@ -20,7 +20,7 @@ def main():
             {
                 "module": sys.argv[1],
                 "cls": sys.argv[2],
-                "params": cnoc_params2Dict(instance.params),  # type: ignore
+                "params": params2Dict(instance.params),  # type: ignore
             }
         )
     )

@@ -1,10 +1,9 @@
 <script lang="ts">
-	import Titlebar from "modules/Titlebar.svelte";
+	import Titlebar from "$modules/Titlebar.svelte";
 	import { exit } from "@tauri-apps/plugin-process";
 
 	import { getCurrentWindow } from "@tauri-apps/api/window";
 
-	import Acquisition from "modules/acquisition/Acquisition.svelte";
 	import { workspace_controller } from "$controllers/workspace.svelte";
 
 	import Board from "$pages/experiment/Board.svelte";
