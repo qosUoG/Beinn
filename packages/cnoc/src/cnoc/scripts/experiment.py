@@ -86,7 +86,11 @@ async def handler(ws: ServerConnection):
 async def _main():
     preloadLocal()
     async with serve(handler, "localhost", 8080) as server:
-        await server.serve_forever()
+        task = server.serve_forever()
+        try:
+            await task
+        except asyncio.CancelledError:
+            pass
 
 
 def main():

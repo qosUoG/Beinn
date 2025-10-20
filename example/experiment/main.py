@@ -1,22 +1,64 @@
+import asyncio
 import sys
 from threading import Thread
 from time import sleep
 
 
-def t():
-    while True:
-        sleep(0.5)
-        print("Hello")
+global x, task
+x = 0
 
 
-def main():
-    thread = Thread(target=t)
-    thread.start()
+def tt():
     sleep(2)
-    print("Killing")
+    print("ended tt")
+    global x
+    x = 1
 
-    sys.exit()
+
+async def t():
+    global x
+    print("t")
+    await asyncio.to_thread(tt)
+    print(x)
+    x = 2
+    print("t ended")
+    # print("ended", flush=True)
+    # sys.exit()
+
+
+def done(_: asyncio.Task):
+    global task, x
+    print(task.done())
+    print("done", x)
+    # sys.exit()
+
+
+async def parallel():
+    global x
+    print("parallel", x)
+    await asyncio.sleep(1)
+    print("parallel", x)
+    await asyncio.sleep(1)
+    print("parallel", x)
+    await asyncio.sleep(1)
+    print("parallel", x)
+
+
+async def separate():
+    global task
+    task = asyncio.create_task(t())
+    task.add_done_callback(done)
+    print("main", x)
+
+    # await asyncio.gather(parallel())
+
+
+async def main():
+    global task
+    await separate()
+    await asyncio.gather(task)
 
 
 if __name__ == "__main__":
-    main()
+    asyncio.run(main())
+    sleep(3)

@@ -9,7 +9,7 @@ from typing import Any, Coroutine, TypedDict
 
 from websockets import ServerConnection
 
-from packages.cnoc.src.cnoc.public.exceptions import ExperimentCompleted
+from ..public.exceptions import ExperimentEnded
 
 from ..public.params import dict2Params
 
@@ -33,13 +33,24 @@ class State:
         self.should_run.clear()
 
     def stop(self):
-        self.should_run.set()
         with self._lock:
             self._should_stop = True
+        self.should_run.set()
 
     def cont(self):
         with self._lock:
             self._should_stop = False
+        self.should_run.set()
+
+    def shouldStop(self):
+        with self._lock:
+            if self.should_run.is_set() and self._should_stop:
+                return True
+
+        if not self.should_run.is_set():
+            return True
+
+        return False
 
     @property
     def should_stop(self):
@@ -70,8 +81,8 @@ class App:
     state: State = State()
 
     @classmethod
-    def flush(cls):
-        print(end=None, flush=True)
+    def _flush(cls):
+        print(end=None, _flush=True)
 
     @classmethod
     async def sendJson(cls, data: dict[str, Any]):
@@ -114,7 +125,7 @@ class App:
         await cls._initiate_experiment()
 
         # Run the experiment loops
-        asyncio.create_task(asyncio.to_thread(cls._runner_wrapper))
+        asyncio.create_task(cls._runner_wrapper())
 
     @classmethod
     async def _initiate_experiment(cls):
@@ -132,72 +143,66 @@ class App:
         cls.state.should_run.set()
 
     @classmethod
-    def _runner_wrapper(cls):
+    async def _runner_wrapper(cls):
+        await asyncio.to_thread(cls._runner)
+        await cls.ws.close()
+
+    # All following methods are called from the runner thread
+    @classmethod
+    def _runner(cls):
         try:
-            cls._runner()
-            cls.flush()
+            loop_count = -1
+            while True:
+                # Wait until the running event is set in each loop
+                cls.state.should_run.wait()
+
+                # Stop the experiment is the stop event is set
+                if cls.state.should_stop:
+                    cls._ended_event()
+                    return
+
+                # Loop the experiment once with the newest index
+                loop_count += 1
+                try:
+                    cls._loop_start_event(loop_count)
+                    cls.experiment.loop(
+                        loop_count,
+                        cls.state.shouldStop,
+                    )
+                    cls._flush()
+
+                except ExperimentEnded:
+                    cls._ended_event()
+                    return
+
+                # Pause the loop
+                if not cls.state.should_run.is_set():
+                    # Decrement to exclude the previous loop index
+                    loop_count -= 1
+                    cls._paused_event()
 
         except Exception as e:
             print(f"{type(e).__name__} in experiment: {e}", flush=True)
-            _, _, traceback = sys.exc_info()
-            print_tb(traceback)
-            cls.flush()
-
-            cls._close()
-            cls.flush()
-
-            cls.runCoroThreadsafe(cls.sendJson({"event": "stopped"}))
+            print_tb(sys.exc_info()[2])
+            cls._flush()
+            cls._ended_event()
             return
 
-    def _runner(cls):
-        loop_count = -1
-        while True:
-            # Wait until the running event is set in each loop
-            cls.state.should_run.wait()
-
-            # Stop the experiment is the stop event is set
-            if cls.state.should_stop:
-                # self._cnoc_experiment.cleanup()
-                cls.state.should_run.clear()
-
-                cls._close()
-                cls.flush()
-
-                cls.runCoroThreadsafe(cls.sendJson({"event": "stopped"}))
-                return
-
-            # Loop the experiment once with the newest index
-            loop_count += 1
-            cont = cls._loop(loop_count)
-
-            if not cont:
-                return
-
-            # Pause the loop
-            if not cls.state.should_run.is_set():
-                # Decrement to exclude the previous loop index
-                loop_count -= 1
-
-                cls.runCoroThreadsafe(cls.sendJson({"event": "paused"}))
+    @classmethod
+    def _ended_event(cls):
+        cls._close()
+        cls._flush()
+        cls.runCoroThreadsafe(cls.sendJson({"event": "ended"}))
 
     @classmethod
-    def _loop(cls, index: int):
-        try:
-            cls.runCoroThreadsafe(
-                cls.sendJson({"event": "loop_start", "loop_count": index})
-            )
-            cls.experiment.loop(index)
+    def _paused_event(cls):
+        cls.runCoroThreadsafe(cls.sendJson({"event": "paused"}))
 
-            cls.flush()
-
-            return True
-
-        except ExperimentCompleted:
-            cls._close()
-
-            cls.runCoroThreadsafe(cls.sendJson({"event": "completed"}))
-
-            return False
+    @classmethod
+    def _loop_start_event(cls, index: int):
+        cls.runCoroThreadsafe(
+            cls.sendJson({"event": "loop_start", "loop_count": index})
+        )
 
     @classmethod
     def _close(cls):

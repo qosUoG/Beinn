@@ -11,5 +11,5 @@ This module provides exception useful for user when writing experiment class
 """
 
 
-class ExperimentCompleted(Exception):
+class ExperimentEnded(Exception):
     pass

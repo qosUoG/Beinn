@@ -9,6 +9,7 @@ example/examplelib.
 """
 
 from abc import ABC, abstractmethod
+from typing import Callable
 from .manager import Manager
 
 
@@ -28,7 +29,7 @@ class ExperimentABC(ABC):
         raise NotImplementedError
 
     @abstractmethod
-    def loop(self, index: int) -> None:
+    def loop(self, index: int, shouldStop: Callable[[], bool]) -> None:
         raise NotImplementedError
 
     @abstractmethod
