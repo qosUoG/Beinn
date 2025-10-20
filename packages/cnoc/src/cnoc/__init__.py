@@ -1,4 +1,4 @@
-from .public import charts, params, exceptions, equipment, experiment, saver
+from .public import charts, params, exceptions, equipment, experiment, saver, manager
 
 __all__ = [
     "equipment",
@@ -7,4 +7,5 @@ __all__ = [
     "params",
     "charts",
     "saver",
+    "manager",
 ]

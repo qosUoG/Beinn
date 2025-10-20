@@ -2,7 +2,7 @@ from dataclasses import dataclass
 
 
 import random
-from typing import TypedDict, override
+from typing import Callable, TypedDict, override
 
 
 import time
@@ -78,7 +78,7 @@ class ExampleExperiment(experiment.ExperimentABC):
         # This should be all of the __init__ code. For instantiation of params from the final params list, or turning on equipment, initializing equipment etc, define in the start method
 
     @override
-    def start(self) -> int:
+    def start(self, manager: Manager) -> int:
         # # You may interact with the equipment here to do initialization
         # self.params["instance_equipment_param"].instance.echo("hellow world")
         # self.params["instance_equipment_param"].instance.power = 10
@@ -116,7 +116,7 @@ class ExampleExperiment(experiment.ExperimentABC):
         self.cnocExpectedLoopCount(10)
 
     @override
-    def loop(self, index: int):
+    def loop(self, index: int, shouldStop: Callable[[], bool]):
         # # In each loop, perform measurements
 
         # # set the power of the equipment
