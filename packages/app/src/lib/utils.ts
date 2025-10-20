@@ -32,7 +32,7 @@ export async function shell({ fn, cmd, description, cwd }:
     { fn: string, cmd: string | string[], description: string, cwd: string }) {
     const entry = log_controller.appendShell({
         cwd,
-        command: typeof cmd === "string" ? cmd : cmd.join(" "),
+        command: fn + " " + (typeof cmd === "string" ? cmd : cmd.join(" ")),
         description,
         std: [],
         err: "",

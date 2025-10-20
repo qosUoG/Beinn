@@ -1,5 +1,5 @@
 <script lang="ts">
-	import Titlebar from "$modules/Titlebar.svelte";
+	import Titlebar from "$modules/titlebar/Titlebar.svelte";
 	import { exit } from "@tauri-apps/plugin-process";
 
 	import { getCurrentWindow } from "@tauri-apps/api/window";
