@@ -57,7 +57,7 @@ async def chartHandler(chart_name: str, ws: ServerConnection):
 
 
 async def experimentHandler(ws: ServerConnection):
-    print("ws:loaded", flush=True)
+    # print("ws:loaded", flush=True)
 
     for message in ws:
         res = json.loads(message)
@@ -87,6 +87,7 @@ async def _main():
     preloadLocal()
     async with serve(handler, "localhost", 8080) as server:
         task = server.serve_forever()
+        print("ws:loaded", flush=True)
         try:
             await task
         except asyncio.CancelledError:
