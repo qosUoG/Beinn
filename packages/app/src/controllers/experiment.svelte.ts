@@ -8,7 +8,21 @@ import { workspace_controller } from "./workspace.svelte"
 import type { AllParamTypes } from "./params.svelte"
 import { tick } from "svelte"
 import { exists, readTextFile, writeTextFile } from "@tauri-apps/plugin-fs"
+import { equipment_controller } from "./equipment.svelte"
 
+type ExperimentEvent = {
+    event: "started"
+    expected_loop_count: number
+    chart_configs: Record<string, ChartConfigs>
+    saver_configs: string[]
+} | {
+    event: "loop_start"
+    loop_count: number
+} | {
+    event: "paused"
+} | {
+    event: "ended"
+}
 class Clock {
     milliseconds: number = $state(0)
     timer: Timer | undefined = undefined
@@ -42,18 +56,6 @@ class Clock {
         this.clearTimer()
     }
 }
-
-class PyProcess {
-    constructor() {
-        const command = Command.create("uv", "run experiment", { cwd: workspace_controller.path! })
-    }
-}
-class PyRuntime {
-    ws: WebSocket | undefined = undefined
-
-
-}
-
 export class Experiment extends Instance {
 
     constructor(module: string, cls: string) {
@@ -76,23 +78,102 @@ export class Experiment extends Instance {
     total_time_clock: Clock = $state(new Clock())
     loop_time_clock: Clock = $state(new Clock())
 
+    loop_count: number = $state(0)
+
+    ws: WebSocket | undefined = undefined
+
+    log: string[] = $state([])
 
 
+    async start() {
+        this.state = "starting"
+        const handler = Command.create("uv", ["run", "experiment"], { cwd: workspace_controller.path! })
 
-    start() {
-        // workspace_controller.sendCommand("start", {})
+
+        handler.stdout.on("data", (line) => {
+            if (line.startsWith("ws:loaded")) {
+                this.startWebsocket()
+                console.log("started")
+                return
+            }
+            console.log(line)
+            this.log.push(line)
+        })
+        handler.stderr.on("data", (line) => this.log.push(line))
+
+        const p = new Promise((resolve) => {
+            handler.on("close", resolve)
+            handler.on("error", resolve)
+        })
+
+        await handler.spawn()
+        await p
     }
 
     pause() {
-        // workspace_controller.sendCommand("pause", {})
+        this.state = "pausing"
+        this.ws!.send(JSON.stringify({ event: "pause" }))
     }
 
     stop() {
-        // workspace_controller.sendCommand("stop", {})
+        this.state = "stopping"
+        this.ws!.send(JSON.stringify({ event: "stop" }))
     }
 
     continue() {
-        // workspace_controller.sendCommand("continue", {})
+        this.ws!.send(JSON.stringify({ event: "continue" }))
+    }
+
+    startWebsocket() {
+        this.ws = new WebSocket("ws://localhost:8080/experiment")
+
+        this.ws.onopen = () => {
+            this.ws!.send(JSON.stringify({
+                event: "start",
+                value: {
+                    equipments: Object.values(equipment_controller.equipment_instances).map(e => ({
+                        name: e.name,
+                        module: e.module,
+                        cls: e.cls,
+                        params: e.params,
+                    })),
+                    experiment: {
+                        module: this.module,
+                        cls: this.cls,
+                        params: this.params,
+                    },
+                }
+            }))
+        }
+
+        this.ws.onmessage = (e) => {
+            const data = JSON.parse(e.data) as ExperimentEvent
+            switch (data.event) {
+                case "started":
+                    this.expected_loop_count = data.expected_loop_count
+
+                    for (const config of Object.values(data.chart_configs)) {
+
+                        if (this.charts[config.title] !== undefined) {
+                            this.charts[config.title].reset()
+                            return
+                        }
+                        const chart = new Chart(config, config.title)
+                        this.charts[config.title] = chart
+                    }
+                    break
+                case "loop_start":
+                    this.state = "looping"
+                    this.current_loop_count = data.loop_count
+                    break
+                case "paused":
+                    this.state = "paused"
+                    break
+                case "ended":
+                    this.state = "ready"
+                    break
+            }
+        }
     }
 
 

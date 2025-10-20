@@ -33,6 +33,7 @@ export class Instance {
     params: Record<string, AllParamTypes> = $state({})
 
     name: string
+    temp_name: string
 
     param_opens: boolean = $state(true)
     composite_opens: Record<string, boolean> = $state({})
@@ -43,6 +44,7 @@ export class Instance {
         this.module = $state(module)
         this.cls = $state(cls)
         this.name = $state(name)
+        this.temp_name = $state(name)
     }
 
     async initialize() {

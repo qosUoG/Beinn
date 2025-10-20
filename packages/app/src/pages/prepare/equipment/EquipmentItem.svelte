@@ -10,26 +10,73 @@
 		LoaderCircle,
 		Trash2,
 	} from "@lucide/svelte";
-	import Param from "../_ee/Param.svelte";
-	import Composite from "../_ee/Composite.svelte";
 
 	import { cn } from "$components/utils.svelte";
 	import { experiment_controller } from "$controllers/experiment.svelte";
 	import ParamList from "../_ee/ParamList.svelte";
-	import { workspace_controller } from "$controllers/workspace.svelte";
+
 	import type { Instance } from "$controllers/_ee.svelte";
+	import { tick } from "svelte";
 </script>
 
 <div class="bg-white rounded fcol-1 p-1">
 	<div class="flex items-center w-full justify-between">
 		{#if experiment_controller.editable}
 			<input
-				class="  font-light text-slate-950 flex items-center px-1 text-sm"
+				autocomplete="off"
+				autocorrect="off"
+				autocapitalize="off"
+				spellcheck="false"
+				class={cn(
+					"  font-light text-slate-950 flex items-center px-1 text-sm",
+					equipment.name === equipment.temp_name ? "" : "text-red-500"
+				)}
 				bind:value={
-					() => equipment.name,
-					(v: string) => {
-						equipment.name = v;
-						equipment_controller.save();
+					() => equipment.temp_name,
+					(value) => {
+						equipment.temp_name = value;
+
+						// Assign to name as well if not already used
+						if (
+							equipment_controller.equipment_names.includes(value)
+						)
+							return;
+
+						const old_name = equipment.name;
+						equipment.name = value;
+
+						tick().then(() => {
+							equipment_controller.save();
+
+							// Change equipment name in experiment params
+							if (experiment_controller.experiment === undefined)
+								return;
+
+							for (const param of Object.values(
+								experiment_controller.experiment.params
+							)) {
+								if (
+									param.type === "instance.equipment" &&
+									param.value === old_name
+								)
+									param.value = value;
+								else if (param.type === "composite") {
+									for (const p of Object.values(
+										param.children
+									)) {
+										if (
+											p.type === "instance.equipment" &&
+											p.value === old_name
+										)
+											p.value = value;
+									}
+								}
+							}
+
+							tick().then(() => {
+								experiment_controller.save();
+							});
+						});
 					}
 				} />
 		{:else}<div

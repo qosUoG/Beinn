@@ -5,7 +5,7 @@
 	import WorkspaceSelect from "./WorkspaceSelect.svelte";
 </script>
 
-<div class="grid grid-cols-3 gap-4 p-2 h-[calc(100vh-40px)] pt-0">
+<div class="grid grid-cols-3 gap-4 p-2 flex-grow pt-0 min-h-0">
 	<div class="fcol-2 min-h-0">
 		<WorkspaceSelect />
 		<Dependencies />

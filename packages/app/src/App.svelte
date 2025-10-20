@@ -6,7 +6,7 @@
 
 	import { workspace_controller } from "$controllers/workspace.svelte";
 
-	import Board from "$pages/experiment/Board.svelte";
+	import Acquisition from "$pages/acquisition/Acquisition.svelte";
 	import { app_controller } from "$controllers/app.svelte";
 	import Prepare from "$pages/prepare/Prepare.svelte";
 
@@ -23,9 +23,7 @@
 	{#if app_controller.page === "prepare"}
 		<Prepare />
 	{:else if app_controller.page === "execute"}
-		<div class="w-full h-full frow">
-			<div class="w-full h-full frow">Execute</div>
-		</div>
+		<Acquisition />
 	{:else if app_controller.page === "analyze"}
 		<!-- <div class="w-full h-full frow">
 			<div class="w-full h-full frow">

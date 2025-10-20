@@ -27,7 +27,7 @@
 			)}
 			onclick={() => {
 				app_controller.page = "execute";
-			}}>Experiment</button>
+			}}>Acquisition</button>
 	</div>
 
 	<button
