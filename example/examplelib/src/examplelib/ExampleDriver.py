@@ -1,6 +1,6 @@
 import math
 from random import random
-from typing import TypedDict
+from typing import TypedDict, override
 from cnoc import params as p, equipment
 
 """
@@ -136,3 +136,7 @@ class ExampleEquipment(equipment.EquipmentABC):
 
     def measureTemp(self):
         return random() * 100 * self._power
+
+    @override
+    def cleanup(self):
+        pass

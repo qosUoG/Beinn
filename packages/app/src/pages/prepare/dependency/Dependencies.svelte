@@ -18,5 +18,7 @@
 		</div>
 	</div>
 
-	<NewDependency />
+	{#if workspace_controller.status === "ready"}
+		<NewDependency />
+	{/if}
 </div>

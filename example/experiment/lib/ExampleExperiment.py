@@ -152,6 +152,7 @@ class ExampleExperiment(experiment.ExperimentABC):
         # if index % 100 == 0:
         #     print(index)
 
-    def stop(self):
+    @override
+    def cleanup(self):
         # define code here for clean up, for example switching off some equipment etc
-        print("stopped!")
+        pass

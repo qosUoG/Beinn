@@ -17,5 +17,7 @@
 			{/if}
 		</div>
 	</div>
-	<NewEquipment />
+	{#if workspace_controller.status === "ready"}
+		<NewEquipment />
+	{/if}
 </div>
