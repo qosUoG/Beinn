@@ -71,6 +71,7 @@ async def experimentHandler(ws: ServerConnection):
                 case "continue":
                     App.state.cont()
     except ConnectionClosed:
+        App.state.stop()
         App.task.cancel()
 
 

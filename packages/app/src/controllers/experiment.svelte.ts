@@ -148,6 +148,7 @@ export class Experiment extends Instance {
         }
 
         this.ws.onmessage = (e) => {
+            console.log(e.data)
             const data = JSON.parse(e.data) as ExperimentEvent
             switch (data.event) {
                 case "started":
