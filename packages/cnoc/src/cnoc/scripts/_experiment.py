@@ -2,7 +2,7 @@ import asyncio
 import importlib
 import json
 import sys
-from threading import Lock
+from threading import Lock, Thread
 from threading import Event
 from traceback import print_tb
 from typing import Any, Coroutine, TypedDict
@@ -127,7 +127,7 @@ class App:
         await cls._initiate_experiment()
 
         # Run the experiment loops
-        asyncio.create_task(cls._runner_wrapper())
+        Thread(target=cls._runner_wrapper).start()
 
     @classmethod
     async def _initiate_experiment(cls):
@@ -145,9 +145,9 @@ class App:
         cls.state.should_run.set()
 
     @classmethod
-    async def _runner_wrapper(cls):
-        await asyncio.to_thread(cls._runner)
-        await cls.ws.close()
+    def _runner_wrapper(cls):
+        cls._runner()
+        cls.ws.close()
         cls.task.cancel()
 
     # All following methods are called from the runner thread

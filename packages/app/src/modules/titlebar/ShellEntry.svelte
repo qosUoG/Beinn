@@ -11,7 +11,7 @@
 	} from "@lucide/svelte";
 	let { entry }: { entry: ShellEntry } = $props();
 
-	let open = $state(true);
+	let open = $state(false);
 
 	let error = $derived(
 		entry.code === null || entry.code > 0 || entry.err !== ""
@@ -80,7 +80,6 @@
 					{/each}
 				</div>
 			</div>
-			<div>{entry.code}</div>
 		</div>
 	{/if}
 </div>

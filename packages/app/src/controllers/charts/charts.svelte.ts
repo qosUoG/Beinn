@@ -17,7 +17,7 @@ export class Chart<T extends ChartConfigs = ChartConfigs> {
         this.worker.postMessage({ command: "resize", payload: { width, height } } satisfies ChartMessages)
     }
 
-    #hideChart() {
+    hide() {
         this.worker.postMessage({ command: "hide" } satisfies ChartMessages)
     }
 
@@ -62,7 +62,7 @@ export class Chart<T extends ChartConfigs = ChartConfigs> {
     set showing(value: boolean) {
         this.#showing = value
         if (value === false) {
-            this.#hideChart()
+            this.hide()
             return
         }
         // reset the chart
@@ -103,6 +103,8 @@ export class Chart<T extends ChartConfigs = ChartConfigs> {
 
         this.worker.postMessage({ command: "set_canvas", payload: { canvas, width: this.#width - 16, height: this.#height - 48 } } satisfies ChartMessages, [canvas])
     }
+
+
 
     reset() {
         this.worker.postMessage({ command: "reset" } satisfies ChartMessages)

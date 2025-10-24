@@ -2,7 +2,7 @@
 	import DragResizeCard from "$components/dragresizecard/DragResizeCard.svelte";
 	import type { Chart } from "$controllers/charts/charts.svelte";
 	import { Circle, CircleSlash2, Eye, EyeOff } from "@lucide/svelte";
-	import { untrack } from "svelte";
+	import { onMount, untrack } from "svelte";
 
 	let {
 		chart = $bindable(),
@@ -10,10 +10,12 @@
 	}: { chart: Chart; parent: HTMLElement } = $props();
 
 	let canvas: HTMLCanvasElement | undefined = $state(undefined);
-	$effect(() => {
-		untrack(() => {
-			if (canvas) chart.setCanvas(canvas.transferControlToOffscreen());
-		});
+
+	onMount(() => {
+		if (canvas) chart.setCanvas(canvas.transferControlToOffscreen());
+		return () => {
+			chart.hide();
+		};
 	});
 
 	let target: HTMLDivElement | undefined = $state(undefined);

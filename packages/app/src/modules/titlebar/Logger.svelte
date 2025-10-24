@@ -55,10 +55,10 @@
 
 {#if show_log}
 	<div
-		class="h-screen w-screen backdrop-blur absolute top-0 left-0 z-10000 flex items-center justify-center">
+		class="h-screen w-screen backdrop-blur-lg absolute top-0 left-0 z-10000 flex items-center justify-center">
 		<div
 			{@attach clickoutside}
-			class="bg-white rounded w-144 h-3/4 p-4 fcol-2 overflow-scroll">
+			class="bg-white scrollbar-slate-600 rounded w-144 h-3/4 p-4 fcol-2 overflow-y-scroll">
 			{#each log_controller.log_entries as entry}
 				{#if entry.type === "shell"}
 					<ShellEntry {entry} />

@@ -8,7 +8,7 @@ from typing import Callable, TypedDict, override
 import time
 
 
-from cnoc import charts, exceptions, params as p, experiment, saver
+from cnoc import charts, exceptions, params as p, experiment, saver, manager
 
 from examplelib.ExampleDriver import ExampleEquipment
 import pandas as pd
@@ -78,7 +78,7 @@ class ExampleExperiment(experiment.ExperimentABC):
         # This should be all of the __init__ code. For instantiation of params from the final params list, or turning on equipment, initializing equipment etc, define in the start method
 
     @override
-    def start(self, manager: Manager) -> int:
+    def start(self, manager: manager.Manager) -> int:
         # # You may interact with the equipment here to do initialization
         # self.params["instance_equipment_param"].instance.echo("hellow world")
         # self.params["instance_equipment_param"].instance.power = 10
@@ -94,10 +94,10 @@ class ExampleExperiment(experiment.ExperimentABC):
             y_names=["temperature"],
             mode="append",
         )
-        self.cnocCreateChart(self.scatter_plot)
+        manager.createChart(self.scatter_plot)
         self.saver = saver.Saver(path="data.h5")
 
-        self.cnocCreateSaver(self.saver)
+        manager.createSaver(self.saver)
 
         # self.xyplot2: XY = manager.createChart(
         #     XY,
@@ -113,7 +113,7 @@ class ExampleExperiment(experiment.ExperimentABC):
         #     XYFloatSaver.kwargs(title="ExampleSqlSaver", y_names=["temperature"]),
         # )
 
-        self.cnocExpectedLoopCount(10)
+        manager.expected_loop_count = 10
 
     @override
     def loop(self, index: int, shouldStop: Callable[[], bool]):
@@ -148,7 +148,7 @@ class ExampleExperiment(experiment.ExperimentABC):
         # print("saved")
 
         if index >= 9:
-            raise exceptions.ExperimentCompleted
+            raise exceptions.ExperimentEnded
         # if index % 100 == 0:
         #     print(index)
 
