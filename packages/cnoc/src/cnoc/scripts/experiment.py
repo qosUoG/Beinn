@@ -61,7 +61,7 @@ async def experimentHandler(ws: ServerConnection):
     try:
         async for message in ws:
             res = json.loads(message)
-            match res["command"]:
+            match res["event"]:
                 case "start":
                     await App.state.start(res["value"], ws)
                 case "pause":
