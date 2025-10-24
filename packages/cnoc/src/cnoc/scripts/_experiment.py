@@ -140,6 +140,8 @@ class App:
             print_tb(sys.exc_info()[2])
             cls._flush()
             await cls.sendJson({"event": "ended"})
+            cls.ws.close()
+            cls.task.cancel()
             return
         # send started
         await cls.sendJson(
