@@ -389,7 +389,7 @@ class CompositeParam[T]:
         }
 
     @classmethod
-    def fromDict(cls, data: DictType):
+    def fromDict(cls, data: DictType, equipments: dict[str, EquipmentABC]):
         if data["type"] != cls.type:
             raise ValueError(f"Invalid type {data['type']} for {cls.type}")
 
@@ -397,7 +397,12 @@ class CompositeParam[T]:
         for k, v in data["children"].items():
             for tp in _param_type_arr:
                 if v["type"] == tp.type:
-                    children[k] = tp.fromDict(v)
+                    children[k] = (
+                        tp.fromDict(v, equipments)
+                        if tp.type == "instance.equipment"
+                        else tp.fromDict(v)
+                    )
+
                     break
 
         return CompositeParam(children)
@@ -430,7 +435,7 @@ def params2Dict(params: Params) -> dict[str, Any]:
     return {k: v.toDict() for k, v in params.items()}
 
 
-def dict2Params(data: dict[str, Any]) -> Params:
+def dict2Params(data: dict[str, Any], equipments: dict[str, EquipmentABC]) -> Params:
     """
     Convert the dictionary representation back to Params
     However this function does not set the instance of the params,
@@ -444,7 +449,11 @@ def dict2Params(data: dict[str, Any]) -> Params:
 
         for tp in _param_type_arr:
             if v["type"] == tp.type:
-                params[k] = tp.fromDict(v)
+                params[k] = (
+                    tp.fromDict(v, equipments)
+                    if tp.type == "instance.equipment"
+                    else tp.fromDict(v)
+                )
                 break
 
     return params
