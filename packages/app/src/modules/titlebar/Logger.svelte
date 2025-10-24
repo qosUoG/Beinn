@@ -11,7 +11,7 @@
 		];
 	});
 
-	let show_log = $state(true);
+	let show_log = $state(false);
 
 	const clickoutside = getClickOutsideAttachment(() => {
 		show_log = false;

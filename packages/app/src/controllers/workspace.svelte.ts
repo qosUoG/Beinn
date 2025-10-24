@@ -49,7 +49,7 @@ class WorkspaceController {
         await shell({ fn: "uv", cmd: "add git+https://github.com/qosUoG/Beinn#subdirectory=packages/cnoc", cwd: path, description: "Installing cnoc" })
 
         // In case cnoc is already installed and stale
-        await shell({ fn: "uv", cmd: "lock --upgrade-package cnoc", cwd: path, description: "Updating cnoc" })
+        // await shell({ fn: "uv", cmd: "lock --upgrade-package cnoc", cwd: path, description: "Updating cnoc" })
 
         await shell({ fn: "uv", cmd: "sync", cwd: path, description: "Syncing uv" })
 

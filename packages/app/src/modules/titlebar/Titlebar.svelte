@@ -1,11 +1,7 @@
 <script lang="ts">
-	import { type Store } from "@tauri-apps/plugin-store";
 	import { cn } from "$components/utils.svelte";
 	import { app_controller } from "$controllers/app.svelte";
-	import { log_controller } from "$controllers/log.svelte";
 	import Logger from "./Logger.svelte";
-
-	let store: Store;
 </script>
 
 <div class="min-h-[40px] frow-4 py-2 m-auto justify-between w-1/2">
