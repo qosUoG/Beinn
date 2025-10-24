@@ -93,7 +93,7 @@ async def handler(ws: ServerConnection):
 async def _main():
     preloadLocal()
     async with serve(handler, "localhost", 8080) as server:
-        App.task = server.serve_forever()
+        App.task = asyncio.create_task(server.serve_forever())
         print("ws:loaded", flush=True)
         try:
             await App.task
