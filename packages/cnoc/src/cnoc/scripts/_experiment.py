@@ -133,7 +133,14 @@ class App:
 
     @classmethod
     async def _initiate_experiment(cls):
-        await asyncio.to_thread(lambda: cls.experiment.start(cls.manager))
+        try:
+            await asyncio.to_thread(lambda: cls.experiment.start(cls.manager))
+        except Exception as e:
+            print(f"Error starting experiment: {e}", flush=True)
+            print_tb(sys.exc_info()[2])
+            cls._flush()
+            await cls.sendJson({"event": "ended"})
+            return
         # send started
         await cls.sendJson(
             {
