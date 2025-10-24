@@ -446,7 +446,7 @@ def dict2Params(data: dict[str, Any], equipments: dict[str, EquipmentABC]) -> Pa
     params: Params = {}
     for k, v in data.items():
         if v["type"] == CompositeParam.type:
-            params[k] = CompositeParam.fromDict(v)
+            params[k] = CompositeParam.fromDict(v, equipments)
             continue
 
         for tp in _param_type_arr:
