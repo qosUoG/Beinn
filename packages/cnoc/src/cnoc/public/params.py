@@ -348,6 +348,8 @@ class InstanceEquipmentParam[T: EquipmentABC](ParamBase):
             raise ValueError(f"Invalid type {data['type']} for {cls.type}")
         param = cls(data["required"])
         if data["value"] is not None:
+            if data["value"] not in equipments:
+                raise ValueError(f"Equipment {data['value']} not found.")
             param.value = data["value"]
             param.instance = equipments[data["value"]]
 

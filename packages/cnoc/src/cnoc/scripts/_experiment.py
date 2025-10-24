@@ -118,10 +118,12 @@ class App:
 
         # Set all equipment params
         for e in equipments_payload:
-            cls.equipments[e["name"]].params = dict2Params(e["params"])
+            cls.equipments[e["name"]].params = dict2Params(e["params"], cls.equipments)
 
         # Set experiment params
-        cls.experiment.params = dict2Params(experiment_payload["params"])
+        cls.experiment.params = dict2Params(
+            experiment_payload["params"], cls.equipments
+        )
 
         # Run experiment start function
         await cls._initiate_experiment()
