@@ -100,7 +100,10 @@ export class Experiment extends Instance {
             console.log(line)
             this.log.push(line)
         })
-        handler.stderr.on("data", (line) => this.log.push(line))
+        handler.stderr.on("data", (line) => {
+            console.log(line)
+            this.log.push(line)
+        })
 
         const p = new Promise((resolve) => {
             handler.on("close", resolve)

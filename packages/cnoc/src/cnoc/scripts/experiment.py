@@ -59,7 +59,7 @@ async def chartHandler(chart_name: str, ws: ServerConnection):
 async def experimentHandler(ws: ServerConnection):
     # print("ws:loaded", flush=True)
     try:
-        for message in ws:
+        async for message in ws:
             res = json.loads(message)
             match res["command"]:
                 case "start":
