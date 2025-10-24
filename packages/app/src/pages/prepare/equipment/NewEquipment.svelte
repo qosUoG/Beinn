@@ -72,15 +72,16 @@
 				class=" py-0.5 px-1 flex-grow w-fit border-l-1 border-slate-400 text-center relative">
 				{#if open}
 					<div
-						class="bg-white absolute bottom-0 left-0 w-full rounded border">
+						class=" absolute bottom-0 left-0 w-full bg-slate-200 border">
 						{#each equipment_controller.imports as { cls, module }}
+							{@const selected =
+								equipment_controller.temp.cls === cls &&
+								equipment_controller.temp.module === module}
 							<button
 								class={cn(
 									"text-slate-400 wrapped  w-full",
-									equipment_controller.temp.cls === cls &&
-										equipment_controller.temp.module ===
-											module
-										? "bg-slate-700 text-slate-500"
+									selected
+										? "bg-slate-700 text-slate-300"
 										: "hover:bg-slate-300"
 								)}
 								onclick={() => {
@@ -92,9 +93,7 @@
 								<span
 									class={cn(
 										" font-semibold",
-										equipment_controller.temp.cls === cls &&
-											equipment_controller.temp.module ===
-												module
+										selected
 											? "text-white"
 											: "text-slate-950"
 									)}>
@@ -104,9 +103,7 @@
 								<span
 									class={cn(
 										" font-semibold",
-										equipment_controller.temp.cls === cls &&
-											equipment_controller.temp.module ===
-												module
+										selected
 											? "text-white"
 											: "text-slate-950"
 									)}>

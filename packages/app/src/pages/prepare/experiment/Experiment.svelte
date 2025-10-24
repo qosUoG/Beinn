@@ -1,5 +1,10 @@
 <script lang="ts">
-	import { ChevronDown, ChevronRight } from "@lucide/svelte";
+	import {
+		ChevronDown,
+		ChevronRight,
+		FolderSync,
+		LoaderCircle,
+	} from "@lucide/svelte";
 
 	import { cn } from "$components/utils.svelte";
 
@@ -11,7 +16,32 @@
 </script>
 
 <div class="justify-between fcol-2 min-h-0 flex-grow bg-slate-200 rounded p-2">
-	<div class="title">Experiment</div>
+	<div class="frow justify-between items-center">
+		<div class="title">Experiment</div>
+		{#if experiment_controller.experiment}
+			{#if experiment_controller.experiment.reloading}
+				<div class="icon-btn-sm bg-blue-600">
+					<div class="text-white animate-spin">
+						<LoaderCircle />
+					</div>
+				</div>
+			{:else}
+				<button
+					aria-label={`Reload ${experiment_controller.experiment.name}`}
+					class={cn(
+						" icon-btn-sm text-white ",
+						experiment_controller.editable
+							? "bg-blue-600"
+							: "bg-slate-300 cursor-not-allowed *:cursor-not-allowed **:cursor-not-allowed"
+					)}
+					onclick={() => {
+						if (experiment_controller.editable)
+							experiment_controller.experiment!.reload();
+					}}>
+					<FolderSync />
+				</button>{/if}
+		{/if}
+	</div>
 
 	{#if workspace_controller.status === "ready"}
 		<ExperimentSelector />

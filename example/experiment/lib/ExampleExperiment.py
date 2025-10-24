@@ -95,7 +95,7 @@ class ExampleExperiment(experiment.ExperimentABC):
             mode="append",
         )
         manager.createChart(self.scatter_plot)
-        self.saver = saver.Saver(path="data.h5")
+        self.saver = saver.Saver("data.h5", self.params)
 
         manager.createSaver(self.saver)
 

@@ -158,7 +158,7 @@ class App:
     @classmethod
     def _runner_wrapper(cls):
         cls._runner()
-        cls.ws.close()
+        cls.runCoroThreadsafe(cls.ws.close())
         cls.task.cancel()
 
     # All following methods are called from the runner thread

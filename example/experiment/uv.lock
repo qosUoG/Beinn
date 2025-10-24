@@ -70,7 +70,7 @@ wheels = [
 [[package]]
 name = "cnoc"
 version = "0.1.0"
-source = { git = "https://github.com/qosUoG/Beinn?subdirectory=packages%2Fcnoc#848b13acab7792b1c20829a2e1b731c67c677991" }
+source = { git = "https://github.com/qosUoG/Beinn?subdirectory=packages%2Fcnoc#3132a04f35ad1cfc5c0d104f868fc4aab7946447" }
 dependencies = [
     { name = "pandas" },
     { name = "websockets" },
