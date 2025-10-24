@@ -95,13 +95,13 @@ class App:
         asyncio.run_coroutine_threadsafe(coro, cls.loop)
 
     @classmethod
-    async def start(cls, res: dict[str, Any], ws: ServerConnection):
+    async def start(cls, res: Payload, ws: ServerConnection):
         cls.ws = ws
         cls.loop = asyncio.get_running_loop()
         # Load equipment and experiment
-        payload: Payload = res["value"]
-        equipments_payload = payload["equipments"]
-        experiment_payload = payload["experiment"]
+
+        equipments_payload = res["equipments"]
+        experiment_payload = res["experiment"]
 
         # Load all equipment
         for e in equipments_payload:
