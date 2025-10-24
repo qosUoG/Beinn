@@ -195,8 +195,6 @@ class App:
     def _ended_event(cls):
         cls._close()
         cls._flush()
-        cls.state.stop()
-        cls.state.should_run.clear()
         cls.runCoroThreadsafe(cls.sendJson({"event": "ended"}))
 
     @classmethod
