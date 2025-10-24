@@ -84,7 +84,7 @@ class App:
 
     @classmethod
     def _flush(cls):
-        print(end=None, _flush=True)
+        print(end=None, flush=True)
 
     @classmethod
     async def sendJson(cls, data: dict[str, Any]):
