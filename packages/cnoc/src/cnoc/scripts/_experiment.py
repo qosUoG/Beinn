@@ -151,7 +151,7 @@ class App:
                 "chart_configs": {
                     k: v.getConfig() for k, v in cls.manager._charts.items()
                 },
-                "saver_configs": [s.path for s in cls.manager._savers],
+                "saver_configs": [s._saver.path for s in cls.manager._savers],
             }
         )
 
