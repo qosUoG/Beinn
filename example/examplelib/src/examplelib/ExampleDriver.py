@@ -1,7 +1,8 @@
 import math
 from random import random
 from typing import TypedDict, override
-from cnoc import params as p, equipment
+from cnoc import EquipmentABC, P, p
+
 
 """
 @dataclass decorator allow us to type hint the type of the class,
@@ -16,26 +17,26 @@ For class attribute, one must wrap the type with ClassVar like "equipment_pi",
 """
 
 
-class ExampleEquipment(equipment.EquipmentABC):
+class ExampleEquipment(EquipmentABC):
     class CompositeParamsType(TypedDict):
-        compstrparam: p.StrParam
-        compfloatparam: p.FloatParam
-        compintparam: p.IntParam
-        compboolparam: p.BoolParam
-        compselectstrparam: p.SelectStrParam
+        compstrparam: P.Str
+        compfloatparam: P.Float
+        compintparam: P.Int
+        compbool: P.Bool
+        compselectstr: P.SelectStr
 
-        compselectintparam: p.SelectIntParam
-        compselectfloatparam: p.SelectFloatParam
+        compselectint: P.SelectInt
+        compselectfloat: P.SelectFloat
 
-    class ParamsType(TypedDict):
-        strparam: p.StrParam
-        floatparam: p.FloatParam
-        intparam: p.IntParam
-        boolparam: p.BoolParam
-        selectstrparam: p.SelectStrParam
-        selectintparam: p.SelectIntParam
-        selectfloatparam: p.SelectFloatParam
-        compositeparam: p.CompositeParam["ExampleEquipment.CompositeParamsType"]
+    class ParamsType(TypedDict, total=False):
+        str: P.Str
+        float: P.Float
+        int: P.Int
+        bool: P.Bool
+        selectstr: P.SelectStr
+        selectint: P.SelectInt
+        selectfloat: P.SelectFloat
+        composite: P.Composite["ExampleEquipment.CompositeParamsType"]
 
     # These are class attributes instead of instance attributes
     # While you may acquire it through the instance, it maybe easily mixed up

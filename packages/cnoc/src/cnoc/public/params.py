@@ -16,7 +16,7 @@ type Int = IntParam
 type Float = FloatParam
 type Str = StrParam
 type Equipment = InstanceEquipmentParam[EquipmentABC]
-type Composite = CompositeParam
+type Composite[ChildType] = CompositeParam[ChildType]
 type SelectStr = SelectStrParam
 type SelectInt = SelectIntParam
 type SelectFloat = SelectFloatParam
@@ -58,7 +58,7 @@ class p:
     def composite(cls, children: dict[str, AllParams]):
         return CompositeParam(children)
 
-    class Select:
+    class select:
         @classmethod
         def str(
             cls, options: list[str], value: str | None = None, required: bool = False
