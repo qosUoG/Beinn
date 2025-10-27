@@ -11,7 +11,17 @@ from ._params import (
     StrParam,
 )
 
-type TParam = (
+type Bool = BoolParam
+type Int = IntParam
+type Float = FloatParam
+type Str = StrParam
+type Equipment = InstanceEquipmentParam[EquipmentABC]
+type Composite = CompositeParam
+type SelectStr = SelectStrParam
+type SelectInt = SelectIntParam
+type SelectFloat = SelectFloatParam
+
+type AllParams = (
     SelectStrParam
     | SelectFloatParam
     | SelectIntParam
@@ -23,46 +33,46 @@ type TParam = (
 )
 
 
-class Param:
+class p:
     @classmethod
-    def Int(cls, default: int = 0, suffix: str = "", required: bool = False):
+    def int(cls, default: int = 0, suffix: str = "", required: bool = False):
         return IntParam(default, suffix, required)
 
     @classmethod
-    def Float(cls, default: float = 0.0, suffix: str = "", required: bool = False):
+    def float(cls, default: float = 0.0, suffix: str = "", required: bool = False):
         return FloatParam(default, suffix, required)
 
     @classmethod
-    def Str(cls, default: str = "", required: bool = False):
+    def str(cls, default: str = "", required: bool = False):
         return StrParam(default, required)
 
     @classmethod
-    def Bool(cls, default: bool = False, required: bool = False):
+    def boolean(cls, default: bool = False, required: bool = False):
         return BoolParam(default, required)
 
     @classmethod
-    def Equipment(cls, required: bool = False):
+    def equipment(cls, required: bool = False):
         return InstanceEquipmentParam(required)
 
     @classmethod
-    def Composite(cls, children: dict[str, TParam]):
+    def composite(cls, children: dict[str, AllParams]):
         return CompositeParam(children)
 
     class Select:
         @classmethod
-        def Str(
+        def str(
             cls, options: list[str], value: str | None = None, required: bool = False
         ):
             return SelectStrParam(options, value, required)
 
         @classmethod
-        def Int(
+        def int(
             cls, options: list[int], value: int | None = None, required: bool = False
         ):
             return SelectIntParam(options, value, required)
 
         @classmethod
-        def Float(
+        def float(
             cls,
             options: list[float],
             value: float | None = None,
