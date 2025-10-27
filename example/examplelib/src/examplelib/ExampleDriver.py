@@ -47,24 +47,24 @@ class ExampleEquipment(EquipmentABC):
         super().__init__()
         # Default params list
         self.params: ExampleEquipment.ParamsType = {
-            "strparam": p.StrParam(),
-            "floatparam": p.FloatParam(suffix="W"),
-            "intparam": p.IntParam(),
-            "boolparam": p.BoolParam(False),
-            "selectstrparam": p.SelectStrParam(["option1", "option2", "option3"]),
-            "selectintparam": p.SelectIntParam([1, 2, 3], 2),
-            "selectfloatparam": p.SelectFloatParam([1.1, 2.2, 3.3]),
-            "compositeparam": p.CompositeParam(
+            "strparam": p.str(),
+            "floatparam": p.float(suffix="W"),
+            "intparam": p.int(),
+            "boolparam": p.boolean(False),
+            "selectstrparam": p.select.str(["option1", "option2", "option3"]),
+            "selectintparam": p.select.int([1, 2, 3], 2),
+            "selectfloatparam": p.select.float([1.1, 2.2, 3.3]),
+            "compositeparam": p.composite(
                 {
-                    "compstrparam": p.StrParam(),
-                    "compfloatparam": p.FloatParam(suffix="W"),
-                    "compintparam": p.IntParam(),
-                    "compboolparam": p.BoolParam(False),
-                    "compselectstrparam": p.SelectStrParam(
+                    "compstrparam": p.str(),
+                    "compfloatparam": p.float(suffix="W"),
+                    "compintparam": p.int(),
+                    "compboolparam": p.boolean(False),
+                    "compselectstrparam": p.select.str(
                         ["option1", "option2", "option3"]
                     ),
-                    "compselectintparam": p.SelectIntParam([1, 2, 3]),
-                    "compselectfloatparam": p.SelectFloatParam([1.1, 2.2, 3.3]),
+                    "compselectintparam": p.select.int([1, 2, 3]),
+                    "compselectfloatparam": p.select.float([1.1, 2.2, 3.3]),
                 },
             ),
         }
