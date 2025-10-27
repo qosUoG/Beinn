@@ -84,6 +84,8 @@ export class Experiment extends Instance {
 
     log: string[] = $state([])
 
+    note: string = $state("")
+
 
     async start() {
         new WebSocket("ws://localhost:8080/close")
@@ -126,6 +128,11 @@ export class Experiment extends Instance {
 
     continue() {
         this.ws!.send(JSON.stringify({ event: "continue" }))
+    }
+
+    saveNote(note: string) {
+        this.ws!.send(JSON.stringify({ event: "save_note", value: note }))
+        this.note = note
     }
 
     startWebsocket() {

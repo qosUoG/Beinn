@@ -82,6 +82,8 @@ class App:
 
     state: State = State()
 
+    experiment_lock: Lock = Lock()
+
     @classmethod
     def _flush(cls):
         print(end=None, flush=True)
@@ -93,6 +95,13 @@ class App:
     @classmethod
     def runCoroThreadsafe(cls, coro: Coroutine[Any, Any, None]):
         asyncio.run_coroutine_threadsafe(coro, cls.loop)
+
+    @classmethod
+    def saveNote(cls, note: str):
+        with cls.experiment_lock:
+            if cls.manager._savers:
+                for saver in cls.manager._savers:
+                    saver._saver.saveNote(note)
 
     @classmethod
     async def start(cls, res: Payload, ws: ServerConnection):
@@ -133,31 +142,32 @@ class App:
 
     @classmethod
     def inititate(cls):
-        try:
-            cls.experiment.start(cls.manager)
-        except Exception as e:
-            print(f"Error starting experiment: {e}", flush=True)
-            print_tb(sys.exc_info()[2])
-            cls._flush()
-            cls.runCoroThreadsafe(cls.sendJson({"event": "ended"}))
-            cls.ws.close()
-            cls.task.cancel()
-            return
-        # send started
-        cls.runCoroThreadsafe(
-            cls.sendJson(
-                {
-                    "event": "started",
-                    "expected_loop_count": cls.manager.expected_loop_count,
-                    "chart_configs": {
-                        k: v.getConfig() for k, v in cls.manager._charts.items()
-                    },
-                    "saver_configs": [s._saver.path for s in cls.manager._savers],
-                }
+        with cls.experiment_lock:
+            try:
+                cls.experiment.start(cls.manager)
+            except Exception as e:
+                print(f"Error starting experiment: {e}", flush=True)
+                print_tb(sys.exc_info()[2])
+                cls._flush()
+                cls.runCoroThreadsafe(cls.sendJson({"event": "ended"}))
+                cls.ws.close()
+                cls.task.cancel()
+                return
+            # send started
+            cls.runCoroThreadsafe(
+                cls.sendJson(
+                    {
+                        "event": "started",
+                        "expected_loop_count": cls.manager.expected_loop_count,
+                        "chart_configs": {
+                            k: v.getConfig() for k, v in cls.manager._charts.items()
+                        },
+                        "saver_configs": [s._saver.path for s in cls.manager._savers],
+                    }
+                )
             )
-        )
 
-        cls.state.should_run.set()
+            cls.state.should_run.set()
 
     # All following methods are called from the runner thread
 
@@ -184,10 +194,11 @@ class App:
                 loop_count += 1
                 try:
                     cls._loop_start_event(loop_count)
-                    cls.experiment.loop(
-                        loop_count,
-                        cls.state.shouldStop,
-                    )
+                    with cls.experiment_lock:
+                        cls.experiment.loop(
+                            loop_count,
+                            cls.state.shouldStop,
+                        )
                     cls._flush()
 
                 except ExperimentEnded:
@@ -229,6 +240,6 @@ class App:
         for chart in cls.manager._charts.values():
             chart.close()
         for saver in cls.manager._savers:
-            saver.close()
+            saver._saver.close()
         for e in cls.equipments.values():
             e.cleanup()

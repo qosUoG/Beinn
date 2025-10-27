@@ -33,7 +33,10 @@ class Saver:
         self._attrs.metadata = self._metadata
 
     def saveNote(self, note: str):
+        if not hasattr(self, "_attrs"):
+            self._attrs = self._store.get_storer(f"pid{self._key}").attrs
         self._metadata["note"] = note
+        self._attrs.metadata = self._metadata
 
     def close(self):
         self._store.close()
