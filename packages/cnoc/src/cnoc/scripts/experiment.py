@@ -72,6 +72,11 @@ async def experimentHandler(ws: ServerConnection):
                     App.state.cont()
                 case "save_note":
                     App.saveNote(res["value"])
+                case "interpret":
+                    if "name" in res["value"]:
+                        App.interpret(res["value"]["command"], res["value"]["name"])
+                    else:
+                        App.interpret(res["value"]["command"])
     except ConnectionClosed:
         App.state.stop()
         App.task.cancel()

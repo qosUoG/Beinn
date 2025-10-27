@@ -13,7 +13,7 @@
 </script>
 
 {#if experiment_controller.experiment}
-	<div class="bg-white rounded w-128">
+	<div class="bg-white rounded w-128 min-w-128">
 		<div class="fcol-2 border-2 border-slate-800 rounded p-1">
 			<div class="grid grid-cols-4 gap-2">
 				<div class="frow-1 items-center">

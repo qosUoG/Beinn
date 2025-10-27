@@ -1,5 +1,7 @@
 import asyncio
+from contextlib import redirect_stderr, redirect_stdout
 import importlib
+from io import StringIO
 import json
 import sys
 from threading import Lock, Thread
@@ -102,6 +104,47 @@ class App:
             if cls.manager._savers:
                 for saver in cls.manager._savers:
                     saver._saver.saveNote(note)
+
+    @classmethod
+    def interpret(cls, command: str, name: str | None = None):
+        try:
+            if name is not None:
+                command = command.replace(name, f"cls.equipments['{name}']")
+
+        except KeyError:
+            print(f"{name} is not found in the list of equipments", flush=True)
+            return
+        except Exception as e:
+            print(e, flush=True)
+            return
+
+        try:
+            with cls.experiment_lock:
+                print(
+                    f"{eval(command, globals=globals())}",
+                    flush=True,
+                )
+            return
+
+        except SyntaxError:
+            pass
+        except Exception as e:
+            print(e, flush=True)
+            return
+
+        try:
+            with cls.experiment_lock:
+                f = StringIO()
+
+                with redirect_stdout(f):
+                    with redirect_stderr(sys.stdout):
+                        exec(command, globals=globals())
+
+            return
+
+        except Exception as e:
+            print(e, flush=True)
+            return
 
     @classmethod
     async def start(cls, res: Payload, ws: ServerConnection):

@@ -32,7 +32,7 @@
 					SHELL
 				</div>
 				<div
-					class="text-ellipsis overflow-hidden w-[212px] whitespace-nowrap">
+					class="text-ellipsis overflow-hidden w-[212px] whitespace-nowrap text-left">
 					{entry.description}
 				</div>
 			</div>
@@ -43,7 +43,7 @@
 					ERROR
 				</div>
 				<div
-					class="text-ellipsis overflow-hidden w-[212px] whitespace-nowrap">
+					class="text-ellipsis overflow-hidden w-[212px] whitespace-nowrap text-left">
 					{entry.message}
 				</div>
 			</div>

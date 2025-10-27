@@ -9,6 +9,7 @@ import type { AllParamTypes } from "./params.svelte"
 import { tick } from "svelte"
 import { exists, readTextFile, writeTextFile } from "@tauri-apps/plugin-fs"
 import { equipment_controller } from "./equipment.svelte"
+import { Cli } from "./cli.svelte"
 
 type ExperimentEvent = {
     event: "started"
@@ -56,6 +57,8 @@ class Clock {
         this.clearTimer()
     }
 }
+
+
 export class Experiment extends Instance {
 
     constructor(module: string, cls: string) {
@@ -82,9 +85,11 @@ export class Experiment extends Instance {
 
     ws: WebSocket | undefined = undefined
 
-    log: string[] = $state([])
+    note: string | undefined = $state(undefined)
+    sidetab_showing: "cli" | "notes" = $state("cli")
 
-    note: string = $state("")
+    cli: Cli = $state(new Cli())
+
 
 
     async start() {
@@ -100,11 +105,11 @@ export class Experiment extends Instance {
                 return
             }
             console.log(line)
-            this.log.push(line)
+            this.cli.logs.append(line)
         })
         handler.stderr.on("data", (line) => {
             console.log(line)
-            this.log.push(line)
+            this.cli.logs.append(line)
         })
 
         const p = new Promise((resolve) => {
@@ -135,6 +140,22 @@ export class Experiment extends Instance {
         this.note = note
     }
 
+    interpret() {
+        if (this.cli.command === "") return
+
+        const command = this.cli.record();
+
+        // Check if the command is an equipment code
+        for (const name of equipment_controller.equipment_names) {
+            if (command.match(name)) {
+                this.ws!.send(JSON.stringify({ event: "interpret", value: { command, name } }))
+                return
+            }
+        }
+
+        this.ws!.send(JSON.stringify({ event: "interpret", value: { command } }))
+    }
+
     startWebsocket() {
         this.ws = new WebSocket("ws://localhost:8080/experiment")
 
@@ -158,7 +179,7 @@ export class Experiment extends Instance {
         }
 
         this.ws.onmessage = (e) => {
-            console.log(e.data)
+
             const data = JSON.parse(e.data) as ExperimentEvent
             switch (data.event) {
                 case "started":
@@ -173,6 +194,9 @@ export class Experiment extends Instance {
                         const chart = new Chart(config)
                         this.charts[config.title] = chart
                     }
+
+                    if (data.saver_configs.length > 0)
+                        this.note = ""
                     break
                 case "loop_start":
                     this.state = "looping"

@@ -1,6 +1,6 @@
 <script lang="ts">
 	import { cn } from "$components/utils.svelte";
-	import { cnoc_controller } from "$controllers/cnoc.svelte";
+	import { cnoc_controller } from "$controllers/cli.svelte";
 	import { workspace_controller } from "$controllers/workspace.svelte";
 	import { zeropad } from "$lib/utils";
 	import { stairsArrowDownLeft } from "@lucide/lab";
