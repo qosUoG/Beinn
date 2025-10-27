@@ -50,7 +50,7 @@ class ExampleExperiment(ExperimentABC):
             "selectstrparam": p.select.str(["option1", "option2", "option3"]),
             "selectintparam": p.select.int([1, 2, 3], 1),
             "selectfloatparam": p.select.float([1.1, 2.2, 3.3]),
-            "instance_equipment_param": p.equipment[ExampleEquipment](required=True),
+            "instance_equipment_param": p.equipment(required=True),
             "compositeparam": p.composite(
                 {
                     "compstrparam": p.str(),
@@ -62,9 +62,7 @@ class ExampleExperiment(ExperimentABC):
                     ),
                     "compselectintparam": p.select.int([1, 2, 3]),
                     "compselectfloatparam": p.select.float([1.1, 2.2, 3.3]),
-                    "compinstanceequipmentparam": p.equipment[ExampleEquipment](
-                        required=True
-                    ),
+                    "compinstanceequipmentparam": p.equipment(required=True),
                 },
             ),
         }
