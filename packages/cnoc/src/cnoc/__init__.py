@@ -1,7 +1,8 @@
 from .public.equipment import EquipmentABC
 from .public import exceptions
 from .public.experiment import ExperimentABC
-from .public import params
+from .public import params as P
+from .public.params import p
 from .public.manager import Manager
 from .public import charts
 from .public.saver import Saver
@@ -13,6 +14,7 @@ __all__ = [
     "exceptions",
     "ExperimentABC",
     "Manager",
-    "params",
+    "P",
+    "p",
     "Saver",
 ]
