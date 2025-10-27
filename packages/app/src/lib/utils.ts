@@ -2,7 +2,7 @@
 import { log_controller, type ShellEntry } from "$controllers/log.svelte"
 import { Command } from "@tauri-apps/plugin-shell"
 
-export const cnoc_url = "ws://localhost:8001/"
+export const cnoc_url = "ws://localhost:8080/"
 
 export type Prettify<T> = {
     [K in keyof T]: T[K];

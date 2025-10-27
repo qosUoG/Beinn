@@ -4,7 +4,7 @@ import sys
 
 from .utils import preloadLocal
 
-from ..public.params import params2Dict
+from ..public._params import params2Dict
 
 
 def main():

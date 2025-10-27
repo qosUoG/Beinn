@@ -17,9 +17,13 @@ export class Chart<T extends ChartConfigs = ChartConfigs> {
         this.worker.postMessage({ command: "resize", payload: { width, height } } satisfies ChartMessages)
     }
 
-    hide() {
-        this.worker.postMessage({ command: "hide" } satisfies ChartMessages)
+    destroy() {
+        this.worker.postMessage({ command: "destroy" } satisfies ChartMessages)
     }
+
+    // hide() {
+    //     this.worker.postMessage({ command: "hide" } satisfies ChartMessages)
+    // }
 
 
     #is_drawing_points = $state(false)
@@ -54,24 +58,23 @@ export class Chart<T extends ChartConfigs = ChartConfigs> {
 
     config: T
 
-    #showing = $state(true)
+    // #showing = $state(true)
 
-    get showing() {
-        return this.#showing
-    }
-    set showing(value: boolean) {
-        this.#showing = value
-        if (value === false) {
-            this.hide()
-            return
-        }
-        // reset the chart
-        this.reset()
-    }
+    // get showing() {
+    //     return this.#showing
+    // }
+    // set showing(value: boolean) {
+    //     this.#showing = value
+    //     if (value === false) {
+    //         this.hide()
+    //         return
+    //     }
+    //     // reset the chart
+    //     this.reset()
+    // }
 
 
-    constructor(config: T, experiment_name: string
-    ) {
+    constructor(config: T) {
         this.config = config
         switch (config.type) {
             case "chart:scatter": {
@@ -94,7 +97,7 @@ export class Chart<T extends ChartConfigs = ChartConfigs> {
         this.worker.postMessage({
             command: "instantiate",
             payload: {
-                experiment_name, config
+                config
             }
         } satisfies ChartMessages)
     }

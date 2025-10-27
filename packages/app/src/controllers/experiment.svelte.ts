@@ -163,7 +163,7 @@ export class Experiment extends Instance {
                             this.charts[config.title].reset()
                             return
                         }
-                        const chart = new Chart(config, config.title)
+                        const chart = new Chart(config)
                         this.charts[config.title] = chart
                     }
                     break

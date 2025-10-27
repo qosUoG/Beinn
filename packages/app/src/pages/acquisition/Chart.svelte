@@ -2,21 +2,12 @@
 	import DragResizeCard from "$components/dragresizecard/DragResizeCard.svelte";
 	import type { Chart } from "$controllers/charts/charts.svelte";
 	import { Circle, CircleSlash2, Eye, EyeOff } from "@lucide/svelte";
-	import { onMount, untrack } from "svelte";
+	import ChartCanvas from "./ChartCanvas.svelte";
 
 	let {
 		chart = $bindable(),
 		parent = $bindable(),
 	}: { chart: Chart; parent: HTMLElement } = $props();
-
-	let canvas: HTMLCanvasElement | undefined = $state(undefined);
-
-	onMount(() => {
-		if (canvas) chart.setCanvas(canvas.transferControlToOffscreen());
-		return () => {
-			chart.hide();
-		};
-	});
 
 	let target: HTMLDivElement | undefined = $state(undefined);
 </script>
@@ -44,7 +35,7 @@
 			{chart.config.title}
 		</div>
 		<div>
-			<button
+			<!-- <button
 				class="icon-btn-sm bg-gray-400 rounded text-gray-100"
 				onclick={() => {
 					if (!chart.showing && target)
@@ -57,7 +48,7 @@
 				{:else}
 					<EyeOff />
 				{/if}
-			</button>
+			</button> -->
 			<button
 				class="icon-btn-sm bg-gray-400 rounded text-gray-100"
 				onclick={() => {
@@ -71,7 +62,7 @@
 			</button>
 		</div>
 	</div>
-	{#if chart.showing}
-		<canvas bind:this={canvas} class="ml-2"></canvas>
-	{/if}
+	<!-- {#if chart.showing} -->
+	<ChartCanvas bind:chart />
+	<!-- {/if} -->
 </DragResizeCard>

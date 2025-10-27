@@ -83,7 +83,8 @@ async def handler(ws: ServerConnection):
         await experimentHandler(ws)
 
     elif path.startswith("/chart"):
-        await chartHandler(*unquote(path).split("/")[1], ws)
+        # unquote.split => ["", "chart", "<chart_title>"]
+        await chartHandler(unquote(path).split("/")[2], ws)
 
     elif path == "/close":
         await ws.close()

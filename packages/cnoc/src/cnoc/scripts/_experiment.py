@@ -11,7 +11,7 @@ from websockets import ServerConnection
 
 from ..public.exceptions import ExperimentEnded
 
-from ..public.params import dict2Params
+from ..public._params import dict2Params
 
 from ..public.equipment import EquipmentABC
 
@@ -148,12 +148,16 @@ class App:
             {
                 "event": "started",
                 "expected_loop_count": cls.manager.expected_loop_count,
-                "chart_configs": cls.manager.chartConfigs(),
-                "saver_configs": cls.manager.saverConfigs(),
+                "chart_configs": {
+                    k: v.getConfig() for k, v in cls.manager._charts.items()
+                },
+                "saver_configs": [s.path for s in cls.manager._savers],
             }
         )
 
         cls.state.should_run.set()
+
+    # All following methods are called from the runner thread
 
     @classmethod
     def _runner_wrapper(cls):
@@ -161,7 +165,6 @@ class App:
         cls.runCoroThreadsafe(cls.ws.close())
         cls.task.cancel()
 
-    # All following methods are called from the runner thread
     @classmethod
     def _runner(cls):
         try:
@@ -221,6 +224,9 @@ class App:
     @classmethod
     def _close(cls):
         cls.experiment.cleanup()
-        cls.manager.close()
+        for chart in cls.manager._charts.values():
+            chart.close()
+        for saver in cls.manager._savers:
+            saver.close()
         for e in cls.equipments.values():
             e.cleanup()

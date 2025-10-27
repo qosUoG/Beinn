@@ -65,16 +65,17 @@ const handlers: Handler = {
     resize: function () { },
     set_is_drawing_points: function () { },
     reset: function () { },
-    hide: function () { },
+    destroy: function () { }
+    // hide: function () { },
 }
 
-let _experiment_name: string
 
 
 
-handlers.instantiate = function instantiate({ experiment_name, config }: { experiment_name: string, config: ScatterConfig }) {
+
+handlers.instantiate = function instantiate({ config }: { config: ScatterConfig }) {
     _scatter_config = config
-    _experiment_name = experiment_name
+
     resetConfig()
 }
 
@@ -144,21 +145,29 @@ handlers.reset = function reset() {
 }
 
 
-handlers.hide = function hide() {
-    if (_chart) _chart.destroy()
+// handlers.hide = function hide() {
+//     if (_chart) _chart.destroy()
+//     _canvas = undefined
+
+//     _online = false
+
+
+//     if (_ws !== undefined) {
+//         _ws.onclose = null
+//         _ws.close()
+//     }
+
+//     if (_ws_interval !== undefined) {
+//         clearInterval(_ws_interval)
+//         _ws_interval = undefined
+//     }
+// }
+
+handlers.destroy = function destroy() {
     _canvas = undefined
-
-    _online = false
-
-
-    if (_ws !== undefined) {
-        _ws.onclose = null
-        _ws.close()
-    }
-
-    if (_ws_interval !== undefined) {
-        clearInterval(_ws_interval)
-        _ws_interval = undefined
+    if (_chart) {
+        _chart.destroy()
+        _chart = undefined
     }
 }
 
@@ -181,7 +190,7 @@ function wsConnect() {
     if (!wsNotConnected()) return
 
 
-    _ws = new WebSocket(cnoc_url + "chart/" + _experiment_name + "/" + _scatter_config.title)
+    _ws = new WebSocket(cnoc_url + "chart/" + _scatter_config.title)
     _ws.binaryType = "arraybuffer"
 
     _ws.onopen = () => {
@@ -281,7 +290,7 @@ function wsConnect() {
 
                 // sort the datasets required
                 y_set.forEach(chart_y_index => {
-                    (_datasets[chart_y_index].data as Point[]).sort((a, b) => a.x - b.x)
+                    (_datasets[chart_y_index].data as Point[]).sort((a, b) => a.x! - b.x!)
                 })
 
 

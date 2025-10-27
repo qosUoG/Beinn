@@ -7,7 +7,6 @@ export type ChartMessages =
     {
         command: "instantiate"
         payload: {
-            experiment_name: string,
             config: ChartConfigs
         }
     } |
@@ -27,5 +26,9 @@ export type ChartMessages =
     } | {
         command: "reset", payload?: undefined
     } | {
-        command: "hide", payload?: undefined
+        command: "destroy", payload?: undefined
     }
+// |
+// {
+//     command: "hide", payload?: undefined
+// }

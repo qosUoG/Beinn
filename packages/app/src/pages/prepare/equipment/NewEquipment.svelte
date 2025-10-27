@@ -72,7 +72,7 @@
 				class=" py-0.5 px-1 flex-grow w-fit border-l-1 border-slate-400 text-center relative">
 				{#if open}
 					<div
-						class=" absolute bottom-0 left-0 w-full bg-slate-200 border">
+						class=" absolute bottom-0 left-0 w-full bg-slate-200 rounded border p-2">
 						{#each equipment_controller.imports as { cls, module }}
 							{@const selected =
 								equipment_controller.temp.cls === cls &&

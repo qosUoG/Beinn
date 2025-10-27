@@ -13,118 +13,120 @@
 </script>
 
 {#if workspace_controller.status === "ready"}
-	<div
-		class="frow items-center bg-white rounded min-h-[24px] relative"
-		{@attach clickoutside}>
-		{#if open}
-			<div
-				class="bg-white absolute bottom-0 left-0 w-full rounded border">
-				{#each experiment_controller.imports as { cls, module }}
-					<button
-						class={cn(
-							"text-slate-400 wrapped  w-full",
-							experiment_controller.cls === cls &&
-								experiment_controller.module === module
-								? "bg-slate-700 text-slate-500"
-								: "hover:bg-slate-300"
-						)}
-						onclick={async () => {
-							if (
-								experiment_controller.cls === cls &&
-								experiment_controller.module === module
-							)
-								return;
-
-							experiment_controller.module = module;
-							experiment_controller.cls = cls;
-
-							open = false;
-							await tick();
-							await experiment_controller.loadExperiment();
-						}}>
-						from
-						<span
+	<div class=" bg-white rounded min-h-[24px]">
+		<div
+			{@attach clickoutside}
+			class=" py-0.5 px-1 frow text-center relative">
+			{#if open}
+				<div
+					class="bg-slate-200 absolute bottom-0 left-0 w-full rounded border p-2">
+					{#each experiment_controller.imports as { cls, module }}
+						<button
 							class={cn(
-								" font-semibold",
+								"text-slate-400 wrapped  w-full",
 								experiment_controller.cls === cls &&
 									experiment_controller.module === module
-									? "text-white"
-									: "text-slate-950"
-							)}>
-							{module}
-						</span>
-						import
-						<span
-							class={cn(
-								" font-semibold",
-								experiment_controller.cls === cls &&
+									? "bg-slate-700 text-slate-500"
+									: "hover:bg-slate-300"
+							)}
+							onclick={async () => {
+								if (
+									experiment_controller.cls === cls &&
 									experiment_controller.module === module
-									? "text-white"
-									: "text-slate-950"
-							)}>
-							{cls}
-						</span>
-					</button>
-				{:else}
-					<span
-						class="text-slate-400 wrapped italic select-none cursor-default">
-						No available imports ...
-					</span>
-				{/each}
-			</div>
-		{/if}
+								)
+									return;
 
-		{#if experiment_controller.editable}
-			<button
-				class="w-full frow items-center"
-				onclick={() => {
-					open = true;
-				}}>
-				<div class="flex-grow">
-					{#if experiment_controller.cls && experiment_controller.module}
-						from
-						<span class="text-slate-950 font-semibold">
-							{experiment_controller.module}
-						</span>
-						import
-						<span class="text-slate-950 font-semibold">
-							{experiment_controller.cls}
-						</span>
-					{:else}
-						<span class="text-slate-400 italic"
-							>Select experiment ...</span>
-					{/if}
-				</div>
+								experiment_controller.module = module;
+								experiment_controller.cls = cls;
 
-				{#if experiment_controller.experiment}
-					<span class=" icon-btn-sm text-slate-400">
-						<Pencil />
-					</span>
-				{/if}
-			</button>
-		{:else}
-			<span class="w-full frow items-center">
-				<div class="flex-grow">
-					{#if experiment_controller.cls && experiment_controller.module}
-						from
-						<span class="text-slate-950 font-semibold">
-							{experiment_controller.module}
-						</span>
-						import
-						<span class="text-slate-950 font-semibold">
-							{experiment_controller.cls}
-						</span>
+								open = false;
+								await tick();
+								await experiment_controller.loadExperiment();
+							}}>
+							from
+							<span
+								class={cn(
+									" font-semibold",
+									experiment_controller.cls === cls &&
+										experiment_controller.module === module
+										? "text-white"
+										: "text-slate-950"
+								)}>
+								{module}
+							</span>
+							import
+							<span
+								class={cn(
+									" font-semibold",
+									experiment_controller.cls === cls &&
+										experiment_controller.module === module
+										? "text-white"
+										: "text-slate-950"
+								)}>
+								{cls}
+							</span>
+						</button>
 					{:else}
-						<span class="text-slate-400 italic"
-							>Select experiment ...</span>
-					{/if}
+						<span
+							class="text-slate-400 wrapped italic select-none cursor-default">
+							No available imports ...
+						</span>
+					{/each}
 				</div>
-				{#if experiment_controller.experiment}
-					<span class=" icon-btn-sm text-slate-400">
-						<PencilOff />
-					</span>
-				{/if}
-			</span>
-		{/if}
+			{/if}
+
+			{#if experiment_controller.editable}
+				<button
+					class="w-full frow items-center"
+					onclick={() => {
+						open = true;
+					}}>
+					<div class="flex-grow">
+						{#if experiment_controller.cls && experiment_controller.module}
+							from
+							<span class="text-slate-950 font-semibold">
+								{experiment_controller.module}
+							</span>
+							import
+							<span class="text-slate-950 font-semibold">
+								{experiment_controller.cls}
+							</span>
+						{:else}
+							<span class="text-slate-400 italic"
+								>Select experiment ...</span>
+						{/if}
+					</div>
+
+					{#if experiment_controller.experiment}
+						<span class=" icon-btn-sm text-slate-400">
+							<Pencil />
+						</span>
+					{/if}
+				</button>
+			{:else}
+				<span class="w-full frow items-center">
+					<div class="flex-grow">
+						{#if experiment_controller.cls && experiment_controller.module}
+							from
+							<span class="text-slate-950 font-semibold">
+								{experiment_controller.module}
+							</span>
+							import
+							<span class="text-slate-950 font-semibold">
+								{experiment_controller.cls}
+							</span>
+						{:else}
+							<span class="text-slate-400 italic"
+								>Select experiment ...</span>
+						{/if}
+					</div>
+					{#if experiment_controller.experiment}
+						<span class=" icon-btn-sm text-slate-400">
+							<PencilOff />
+						</span>
+					{/if}
+				</span>
+			{/if}
+		</div>
 	</div>
 {/if}
