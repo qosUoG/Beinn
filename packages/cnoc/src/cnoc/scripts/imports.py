@@ -46,6 +46,10 @@ def eeImports(eetype: type[ExperimentABC] | type[EquipmentABC], names: list[str]
                 f"Failed to import package {name} from {src} for {eetype.__name__}: {e}",
                 flush=True,
             )
+            _, _, traceback = sys.exc_info()
+            print_tb(traceback)
+            print(end=None, flush=True)
+            sys.exit(1)
             sys.exit(1)
 
     for name in names:

@@ -25,7 +25,7 @@ class ExampleExperiment(ExperimentABC):
 
         compselectintparam: P.SelectInt
         compselectfloatparam: P.SelectFloat
-        compinstanceequipmentparam: P.InstanceEquipment[ExampleEquipment]
+        compinstanceequipmentparam: P.Equipment[ExampleEquipment]
 
     class ParamsType(TypedDict):
         strparam: P.Str
@@ -35,7 +35,7 @@ class ExampleExperiment(ExperimentABC):
         selectstrparam: P.SelectStr
         selectintparam: P.SelectInt
         selectfloatparam: P.SelectFloat
-        instance_equipment_param: P.InstanceEquipment[ExampleEquipment]
+        instance_equipment_param: P.Equipment[ExampleEquipment]
         compositeparam: P.Composite["ExampleExperiment.CompositeParamsType"]
 
     def __init__(self):

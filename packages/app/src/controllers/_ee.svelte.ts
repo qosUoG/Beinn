@@ -77,7 +77,10 @@ export class Instance {
         // Get the default params list of the instance
         const res = await this.getParams()
 
-        if (res === undefined) return
+        if (res === undefined) {
+            this.reloading = false
+            return
+        }
 
         this.params = res.params
 
@@ -104,7 +107,7 @@ export class Instance {
 
     async getParams() {
 
-        const { stdout, code } = await shell({ fn: "uv", cmd: ["run", "params", this.module, this.cls], description: "Getting params", cwd: workspace_controller.path! })
+        const { stdout, code } = await shell({ fn: "uv", cmd: ["run", "params", this.module, this.cls], description: `Loading ${this.module}.${this.cls}`, cwd: workspace_controller.path! })
         if (code !== 0) return
 
         return JSON.parse(stdout) as ConcInstance
@@ -178,7 +181,7 @@ export abstract class EEBaseController {
     async updateImports() {
         const { stdout, code } = await shell({
             fn: "uv",
-            cmd: ["run", "imports", this.eetype, ...dependency_controller.has_driver_package_names], description: "Getting imports",
+            cmd: ["run", "imports", this.eetype, ...dependency_controller.has_driver_package_names], description: `Loading available ${this.eetype} modules`,
             cwd: workspace_controller.path!,
         })
 

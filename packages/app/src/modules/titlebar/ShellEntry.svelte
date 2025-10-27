@@ -8,6 +8,7 @@
 		Folder,
 		TriangleAlert,
 		CalendarClock,
+		Binary,
 	} from "@lucide/svelte";
 	let { entry }: { entry: ShellEntry } = $props();
 
@@ -20,7 +21,7 @@
 
 <div
 	class={cn(
-		"fcol  rounded px-2 ",
+		"fcol  rounded pr-2 ",
 		error ? "bg-red-100" : "bg-slate-200",
 		open ? "pb-2" : ""
 	)}>
@@ -31,16 +32,30 @@
 			e.stopPropagation();
 		}}>
 		<div class="frow-2 items-center">
-			{#if error}
+			<div
+				class="fcol bg-slate-800 rounded-l py-1 px-2 self-stretch flex justify-center">
+				<!-- <span class="icon-btn-sm">
+					<CalendarClock />
+				</span> -->
+				<div class=" text-[10px] text-white">
+					{new Date(entry.timestamp).toLocaleString().split(", ")[0]}
+				</div>
+				<div class=" text-[10px] text-white">
+					{new Date(entry.timestamp).toLocaleString().split(", ")[1]}
+				</div>
+			</div>
+
+			<!-- {#if error}
 				<span class="icon-btn-sm text-red-600">
 					<TriangleAlert />
 				</span>
-			{/if}
+			{/if} -->
 
-			<div class="py-2 text-ellipsis">
+			<div class="py-2">
 				{entry.description}
 			</div>
 		</div>
+
 		{#if !open}
 			<span class="icon-btn-sm">
 				<ChevronLeft />
@@ -53,20 +68,31 @@
 	</button>
 
 	{#if open}
-		<div class="fcol-1">
-			<div class="frow-2 items-center">
-				<span class="icon-btn-sm">
-					<CalendarClock />
-				</span>
-				{new Date(entry.timestamp).toLocaleString()}
-			</div>
-
+		<div class="fcol-1 pt-2 pl-2">
 			<div class="frow-2 items-center">
 				<span class="icon-btn-sm">
 					<Folder />
 				</span>
 				{entry.cwd}
 			</div>
+			{#if entry.err !== ""}
+				<div class="frow-2 items-center">
+					<span class="icon-btn-sm text-red-600">
+						<TriangleAlert />
+					</span>
+					{entry.err}
+				</div>
+			{/if}
+
+			{#if error}
+				<div class="frow-2 items-center">
+					<span class="icon-btn-sm">
+						<Binary />
+					</span>
+					{entry.code === null ? "N/A" : entry.code}
+				</div>
+			{/if}
+
 			<div class="fcol-1 bg-slate-600 rounded">
 				<div class="frow-2 items-center text-white rounded p-1">
 					<span class="icon-btn-sm text-white">

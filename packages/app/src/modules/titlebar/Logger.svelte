@@ -31,7 +31,8 @@
 					class="bg-slate-600 text-white rounded-l h-full px-1 text-[10px] flex items-center">
 					SHELL
 				</div>
-				<div class="text-ellipsis">
+				<div
+					class="text-ellipsis overflow-hidden w-[212px] whitespace-nowrap">
 					{entry.description}
 				</div>
 			</div>
@@ -41,7 +42,8 @@
 					class="bg-red-600 text-white rounded h-full px-1 text-[10px] flex items-center">
 					ERROR
 				</div>
-				<div class="text-ellipsis">
+				<div
+					class="text-ellipsis overflow-hidden w-[212px] whitespace-nowrap">
 					{entry.message}
 				</div>
 			</div>
@@ -63,8 +65,33 @@
 				{#if entry.type === "shell"}
 					<ShellEntry {entry} />
 				{:else if entry.type === "error"}
-					<div>
-						{entry.message}
+					<div class="frow-2 items-center">
+						<div
+							class="fcol items-center bg-slate-800 rounded-l py-1 px-2">
+							<!-- <span class="icon-btn-sm">
+					<CalendarClock />
+				</span> -->
+							<div class=" text-[10px] text-white">
+								{new Date(entry.timestamp)
+									.toLocaleString()
+									.split(", ")[0]}
+							</div>
+							<div class=" text-[10px] text-white">
+								{new Date(entry.timestamp)
+									.toLocaleString()
+									.split(", ")[1]}
+							</div>
+						</div>
+
+						<!-- {#if error}
+				<span class="icon-btn-sm text-red-600">
+					<TriangleAlert />
+				</span>
+			{/if} -->
+
+						<div class="py-2 text-ellipsis">
+							{entry.message}
+						</div>
 					</div>
 				{/if}
 			{/each}
