@@ -126,33 +126,35 @@ class App:
         )
 
         # Run experiment start function
-        await cls._initiate_experiment()
+        await asyncio.to_thread(cls.inititate)
 
         # Run the experiment loops
         Thread(target=cls._runner_wrapper).start()
 
     @classmethod
-    async def _initiate_experiment(cls):
+    def inititate(cls):
         try:
-            await asyncio.to_thread(lambda: cls.experiment.start(cls.manager))
+            cls.experiment.start(cls.manager)
         except Exception as e:
             print(f"Error starting experiment: {e}", flush=True)
             print_tb(sys.exc_info()[2])
             cls._flush()
-            await cls.sendJson({"event": "ended"})
+            cls.runCoroThreadsafe(cls.sendJson({"event": "ended"}))
             cls.ws.close()
             cls.task.cancel()
             return
         # send started
-        await cls.sendJson(
-            {
-                "event": "started",
-                "expected_loop_count": cls.manager.expected_loop_count,
-                "chart_configs": {
-                    k: v.getConfig() for k, v in cls.manager._charts.items()
-                },
-                "saver_configs": [s._saver.path for s in cls.manager._savers],
-            }
+        cls.runCoroThreadsafe(
+            cls.sendJson(
+                {
+                    "event": "started",
+                    "expected_loop_count": cls.manager.expected_loop_count,
+                    "chart_configs": {
+                        k: v.getConfig() for k, v in cls.manager._charts.items()
+                    },
+                    "saver_configs": [s._saver.path for s in cls.manager._savers],
+                }
+            )
         )
 
         cls.state.should_run.set()
