@@ -11,7 +11,7 @@ from ._params import (
     StrParam,
 )
 
-type Param = (
+type TParam = (
     SelectStrParam
     | SelectFloatParam
     | SelectIntParam
@@ -45,7 +45,7 @@ class Param:
         return InstanceEquipmentParam(required)
 
     @classmethod
-    def Composite(cls, children: dict[str, Param]):
+    def Composite(cls, children: dict[str, TParam]):
         return CompositeParam(children)
 
     class Select:
