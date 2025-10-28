@@ -106,7 +106,7 @@ async def _main():
         try:
             await App.task
         except asyncio.CancelledError:
-            pass
+            return
 
 
 def main():
