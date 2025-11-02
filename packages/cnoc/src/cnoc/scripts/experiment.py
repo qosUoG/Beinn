@@ -74,6 +74,7 @@ async def experimentHandler(ws: ServerConnection):
         Globals.app.kill()
         for ws in Globals.wss:
             await ws.close(4000)
+            await ws.wait_closed()
         Globals.task.cancel()
 
 

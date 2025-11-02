@@ -214,6 +214,7 @@ function wsConnect() {
 
             wsConnect()
             postMessage("ws closed")
+            postMessage(event.code)
         }
         else
             _online = false
