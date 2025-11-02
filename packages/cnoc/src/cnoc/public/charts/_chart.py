@@ -56,10 +56,8 @@ class ChartABC(ABC):
 
         res: bytes = bytes()
         while True:
-            try:
-                await asyncio.wait_for(self._has_data.wait(), timeout=1)
-            except asyncio.TimeoutError:
-                pass
+            self._has_data.wait()
+
             with self._lock:
                 if self._should_stop:
                     self._subscribed = False
@@ -73,7 +71,4 @@ class ChartABC(ABC):
 
     def unsubscribe(self):
         self._has_data.clear()
-        if self._lock.locked():
-            print("Cannot unsubscribe while locked!!!!!", flush=True)
-
         self._subscribed = False

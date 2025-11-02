@@ -39,12 +39,7 @@ async def chartHandler(chart_name: str, ws: ServerConnection):
                 await ws.send(frames)
 
         await ws.close(4000)
-        await ws.wait_closed()
-        print("ended", flush=True)
-
     except ConnectionClosed:
-        print("closed", flush=True)
-        chart.unsubscribe()
         Globals.wss.remove(ws)
 
 
