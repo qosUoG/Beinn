@@ -44,7 +44,7 @@ async def chartHandler(chart_name: str, ws: ServerConnection):
         return
 
     except ConnectionClosed:
-        pass
+        chart.unsubscribe()
 
 
 async def experimentHandler(ws: ServerConnection):
