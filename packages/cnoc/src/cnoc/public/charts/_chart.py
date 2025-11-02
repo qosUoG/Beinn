@@ -63,7 +63,7 @@ class ChartABC(ABC):
             with self._lock:
                 if self._should_stop:
                     self._subscribed = False
-                    break
+                    return
 
                 res = self._buf
                 self._buf = bytes()
