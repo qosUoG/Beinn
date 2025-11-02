@@ -93,7 +93,7 @@ export class Experiment extends Instance {
 
 
     async start() {
-        if (this.ws !== undefined) this.ws.close()
+        if (this.ws !== undefined) this.ws.close(4000)
         new WebSocket("ws://localhost:8080/close")
         await sleep(100)
         this.state = "starting"
@@ -187,10 +187,10 @@ export class Experiment extends Instance {
                     this.expected_loop_count = data.expected_loop_count
 
                     for (const config of Object.values(data.chart_configs)) {
-                        // if (this.charts[config.title] !== undefined) {
-                        //     this.charts[config.title].restart()
-                        //     return
-                        // }
+                        if (this.charts[config.title] !== undefined) {
+                            this.charts[config.title].restart(config)
+                            return
+                        }
                         const chart = new Chart(config)
                         this.charts[config.title] = chart
                     }

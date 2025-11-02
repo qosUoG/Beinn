@@ -62,7 +62,7 @@
 			</button>
 		</div>
 	</div>
-	<!-- {#if chart.showing} -->
-	<ChartCanvas bind:chart />
-	<!-- {/if} -->
+	{#if chart.showing}
+		<ChartCanvas bind:chart />
+	{/if}
 </DragResizeCard>

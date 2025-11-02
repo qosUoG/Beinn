@@ -64,7 +64,6 @@ const handlers: Handler = {
     set_canvas: function () { },
     resize: function () { },
     set_is_drawing_points: function () { },
-    destroy: function () { },
     hide: function () { },
     show: function () { },
     restart: function () { }
@@ -119,22 +118,33 @@ handlers.set_canvas = function set_canvas({ canvas, width, height }: { canvas: O
 }
 
 handlers.show = function show() {
+    resetConfig()
+}
 
-    if (_ws !== undefined)
-        _ws.close(4000)
+
+handlers.hide = function hide() {
+    if (_chart) _chart.destroy()
+
+    _canvas = undefined
 
     if (_ws_interval !== undefined) {
         clearInterval(_ws_interval)
         _ws_interval = undefined
     }
 
-    resetConfig()
-    _decimation = 0
+    if (_ws !== undefined)
+        _ws.close(4000)
 
-    if (_chart) _chart.destroy()
+}
 
-    if (_canvas)
-        _chart = new Chart(_canvas as unknown as HTMLCanvasElement, deepCopy(_chart_config))
+
+
+handlers.restart = function restart(res: { config: ScatterConfig }) {
+    handlers.instantiate(res)
+    if (_chart !== undefined)
+        _chart.destroy()
+
+    _chart = new Chart(_canvas as unknown as HTMLCanvasElement, deepCopy(_chart_config))
 
     // load previous chart data 
     updateData()
@@ -142,42 +152,10 @@ handlers.show = function show() {
 
     // Establish websocket connection if not already established
     wsConnect()
-
-}
-
-
-handlers.hide = function hide() {
-    if (_chart) _chart.destroy()
-    _canvas = undefined
-
-    _online = false
-
-
-    if (_ws !== undefined) {
-        _ws.onclose = null
-        _ws.close(4000)
-    }
-
-    if (_ws_interval !== undefined) {
-        clearInterval(_ws_interval)
-        _ws_interval = undefined
-    }
-}
-
-handlers.destroy = function destroy() {
-    _canvas = undefined
-    if (_chart) {
-        _chart.destroy()
-        _chart = undefined
-    }
-}
-
-handlers.restart = function restart() {
-    resetConfig()
-    wsConnect()
 }
 
 function resetConfig() {
+    _decimation = 0
     _chart_config.data.datasets = _scatter_config.y_names.map(label => ({ data: [], label }))
     _chart_config.options.scales.x.title.text = _scatter_config.x_axis
     _chart_config.options.scales.y.title.text = _scatter_config.y_axis
@@ -204,6 +182,10 @@ function wsConnect() {
     _ws.onopen = () => {
         _online = true
         // Run once every 10 seconds so it does not fall asleep
+        if (_ws_interval !== undefined) {
+            clearInterval(_ws_interval)
+        }
+
         _ws_interval = setInterval(() => {
             if (_online && wsNotConnected()) wsConnect()
         }, 10000)

@@ -17,9 +17,7 @@ export class Chart<T extends ChartConfigs = ChartConfigs> {
         this.worker.postMessage({ command: "resize", payload: { width, height } } satisfies ChartMessages)
     }
 
-    destroy() {
-        this.worker.postMessage({ command: "destroy" } satisfies ChartMessages)
-    }
+
 
     hide() {
         this.worker.postMessage({ command: "hide" } satisfies ChartMessages)
@@ -113,8 +111,8 @@ export class Chart<T extends ChartConfigs = ChartConfigs> {
         this.worker.postMessage({ command: "show" } satisfies ChartMessages)
     }
 
-    restart() {
-        this.worker.postMessage({ command: "restart" } satisfies ChartMessages)
+    restart(config: ChartConfigs) {
+        this.worker.postMessage({ command: "restart", payload: { config } } satisfies ChartMessages)
     }
 
 

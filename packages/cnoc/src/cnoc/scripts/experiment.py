@@ -39,12 +39,12 @@ async def chartHandler(chart_name: str, ws: ServerConnection):
                 await ws.send(frames)
 
         await ws.close(4000)
+        await ws.wait_closed()
         print("ended", flush=True)
         return
 
     except ConnectionClosed:
-        chart.stop()
-        print("stopped", flush=True)
+        pass
 
 
 async def experimentHandler(ws: ServerConnection):
