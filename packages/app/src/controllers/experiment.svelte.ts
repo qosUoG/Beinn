@@ -99,12 +99,11 @@ export class Experiment extends Instance {
 
 
         handler.stdout.on("data", (line) => {
+            console.log(line)
             if (line.startsWith("ws:loaded")) {
                 this.startWebsocket()
-                console.log("started")
                 return
             }
-            console.log(line)
             this.cli.logs.append(line)
         })
         handler.stderr.on("data", (line) => {
@@ -186,7 +185,7 @@ export class Experiment extends Instance {
                     this.expected_loop_count = data.expected_loop_count
 
                     for (const config of Object.values(data.chart_configs)) {
-
+                        console.log(config)
                         if (this.charts[config.title] !== undefined) {
                             this.charts[config.title].reset()
                             return
