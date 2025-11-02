@@ -70,6 +70,6 @@ class Scatter(ChartABC):
                     # If without value, a 0 is put there
                     encoded.append(0)
 
-            self._plot(encoded)
+            self._plot(bytes(encoded))
         except KeyError as e:
             raise Exception(f"key {e.args[0]} for frame of chart;scatter is wrong")
