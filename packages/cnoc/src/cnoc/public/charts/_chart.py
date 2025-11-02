@@ -57,7 +57,7 @@ class ChartABC(ABC):
         res: bytes = bytes()
         while True:
             try:
-                await asyncio.wait_for(self._has_data.wait(), timeout=1)
+                await asyncio.wait_for(self._has_data.wait(), timeout=2)
             except asyncio.TimeoutError:
                 pass
             with self._lock:
