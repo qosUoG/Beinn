@@ -41,6 +41,8 @@ async def chartHandler(chart_name: str, ws: ServerConnection):
         await ws.close(4000)
         await ws.wait_closed()
         print("ended", flush=True)
+    except GeneratorExit:
+        chart.unsubscribe()
 
     except ConnectionClosed:
         chart.unsubscribe()
