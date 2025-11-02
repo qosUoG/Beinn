@@ -42,6 +42,9 @@ async def chartHandler(chart_name: str, ws: ServerConnection):
 
     except ConnectionClosed:
         chart.stop()
+        print("stopped", flush=True)
+
+    print("ended", flush=True)
 
 
 async def experimentHandler(ws: ServerConnection):
