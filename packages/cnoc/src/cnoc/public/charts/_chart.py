@@ -68,8 +68,8 @@ class ChartABC(ABC):
                 yield res
 
     def unsubscribe(self):
+        self._has_data.clear()
         if self._lock.locked():
             print("Cannot unsubscribe while locked!!!!!", flush=True)
 
         self._subscribed = False
-        self._has_data.clear()

@@ -132,7 +132,7 @@ handlers.hide = function hide() {
         _ws_interval = undefined
     }
 
-    if (!_ws.CLOSED) {
+    if (_ws.readyState !== _ws.CLOSED) {
         _ws.close(4000)
     }
 }
@@ -173,10 +173,8 @@ function wsConnect() {
     const wsNotConnected = () =>
         (_ws === undefined || (_ws.readyState !== WebSocket.OPEN && _ws.readyState !== WebSocket.CONNECTING))
 
+
     if (!wsNotConnected()) return
-
-    console.log("gogogo")
-
 
     _ws = new WebSocket(cnoc_url + "chart/" + _scatter_config.title)
     _ws.binaryType = "arraybuffer"
