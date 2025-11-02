@@ -136,15 +136,10 @@ class ExampleExperiment(ExperimentABC):
             }
         )
         self.saver.save(pd.DataFrame({"index": [index], "temperature": [value]}))
-        # print("plotted")
-
-        # self.saver.save({"saver$x": index, "temperature": value})
-        # print("saved")
+        print("experiment loop", index, flush=True)
 
         if index >= 9:
             raise exceptions.ExperimentEnded
-        # if index % 100 == 0:
-        #     print(index)
 
     @override
     def cleanup(self):

@@ -3,11 +3,19 @@
 	import type { Chart } from "$controllers/charts/charts.svelte";
 	import { Circle, CircleSlash2, Eye, EyeOff } from "@lucide/svelte";
 	import ChartCanvas from "./ChartCanvas.svelte";
+	import { onMount } from "svelte";
 
 	let {
 		chart = $bindable(),
 		parent = $bindable(),
 	}: { chart: Chart; parent: HTMLElement } = $props();
+
+	onMount(() => {
+		chart.show();
+		return () => {
+			chart.hide();
+		};
+	});
 
 	let target: HTMLDivElement | undefined = $state(undefined);
 </script>
