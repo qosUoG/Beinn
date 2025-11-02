@@ -1,12 +1,15 @@
 <script lang="ts">
-	import { getClickOutsideAttachment } from "$components/utils.svelte";
+	import { cn, getClickOutsideAttachment } from "$components/utils.svelte";
 	import { experiment_controller } from "$controllers/experiment.svelte";
-	import { SquareTerminal, Terminal } from "@lucide/svelte";
+	import { ChevronsDown, SquareTerminal, Terminal } from "@lucide/svelte";
+	import { onMount, tick } from "svelte";
+	import CliModal from "./CliModal.svelte";
 
 	const clickoutside = getClickOutsideAttachment(() => {
 		show_cli = false;
 	});
-
+	let editable: HTMLDivElement | undefined = $state(undefined);
+	let editable_modal: HTMLDivElement | undefined = $state(undefined);
 	async function keyDownHandler(e: KeyboardEvent) {
 		switch (e.key) {
 			case "Enter":
@@ -27,78 +30,117 @@
 			}
 			case "Tab": {
 				e.preventDefault();
-				experiment_controller.experiment!.cli.command += "    ";
+				const range = document.createRange();
+				const selection = window.getSelection()!;
+				const offset = selection.getRangeAt(0).startOffset;
+				experiment_controller.experiment!.cli.command =
+					experiment_controller.experiment!.cli.command.slice(
+						0,
+						offset
+					) +
+					"    " +
+					experiment_controller.experiment!.cli.command.slice(offset);
+
+				await tick();
+
+				range.setStart(editable!.childNodes[0], 4 + offset);
+				range.collapse(true);
+
+				selection.removeAllRanges();
+				selection.addRange(range);
+
 				return;
 			}
 		}
 	}
 
 	let show_cli = $state(false);
+
+	let small: HTMLDivElement | undefined = $state(undefined);
+
+	onMount(() => {
+		if (small)
+			small.scrollTop =
+				experiment_controller.experiment!.cli.small_scroll_height;
+	});
+	$effect(() => {
+		if (small === undefined) return;
+
+		experiment_controller.experiment!.cli.command;
+		experiment_controller.experiment!.cli.logs.entries;
+
+		if (experiment_controller.experiment!.cli.follow_scroll) {
+			experiment_controller.experiment!.cli.small_scroll_height =
+				small.scrollHeight;
+			small.scrollTop = small.scrollHeight;
+		}
+	});
 </script>
 
-<button
-	class="frow-2 p-1 min-h-0 h-full w-full"
-	onclick={(e) => {
-		show_cli = !show_cli;
-		e.stopPropagation();
-	}}>
-	<div class="icon-btn-sm rounded bg-slate-200">
-		<SquareTerminal />
-	</div>
-	<div
-		class="overflow-y-scroll fcol text-white min-h-0 h-full scrollbar-slate-300 w-full">
-		{#each experiment_controller.experiment!.cli.logs.entries as entry}
-			<div class="text-white text-left">
-				{entry}
+<div class="frow-1 grow bg-slate-800 rounded p-1 relative">
+	<div class="absolute top-0 left-0 fcol justify-between h-full">
+		<button
+			class={cn(
+				"rounded border border-slate-200 ml-1 mt-1",
+				experiment_controller.experiment!.cli.follow_scroll
+					? "bg-slate-200 text-slate-50 "
+					: ""
+			)}
+			onclick={() => {
+				experiment_controller.experiment!.cli.follow_scroll =
+					!experiment_controller.experiment!.cli.follow_scroll;
+			}}>
+			<div
+				class={cn(
+					"icon-btn-sm ",
+					experiment_controller.experiment!.cli.follow_scroll
+						? "animate-pulse text-slate-800"
+						: "text-slate-200"
+				)}>
+				<ChevronsDown />
 			</div>
-		{/each}
+		</button>
+		<div
+			class="text-white font-mono text-[11px] whitespace-pre-wrap ml-1 mb-1.5 self-end">
+			{`>>>`}
+		</div>
 	</div>
-</button>
+	<div class="fcol w-full min-h-0 ml-8">
+		<button
+			class=" min-h-0 w-full rounded grow"
+			onclick={(e) => {
+				show_cli = !show_cli;
+				e.stopPropagation();
+			}}>
+			<div
+				bind:this={small}
+				class="overflow-y-scroll fcol text-white min-h-0 h-full scrollbar-slate-300 w-full"
+				onscroll={() => {
+					experiment_controller.experiment!.cli.small_scroll_height =
+						small!.scrollTop;
+				}}>
+				{#each experiment_controller.experiment!.cli.logs.entries as entry}
+					<div
+						class="text-white text-left font-mono whitespace-pre-wrap break-all text-[11px]">
+						{entry}
+					</div>
+				{/each}
+			</div>
+		</button>
+
+		<div
+			contenteditable="plaintext-only"
+			bind:innerText={experiment_controller.experiment!.cli.command}
+			bind:this={editable}
+			class=" text-white font-mono text-[11px] whitespace-break-spaces break-all min-h-4 grow focus:outline-none"
+			spellcheck="false"
+			autocapitalize="off"
+			onkeydown={keyDownHandler}
+			role={"input of repl"}>
+		</div>
+	</div>
+</div>
 
 {#if show_cli}
-	<div
-		class="absolute top-0 left-0 w-full h-full z-1000 flex justify-center items-center backdrop-blur-2xl">
-		<div class="bg-slate-700 rounded w-xl h-3/4">
-			<div
-				class="fcol-2 p-2 min-h-0 h-full w-full"
-				{@attach clickoutside}>
-				<div
-					class="overflow-y-scroll fcol text-white min-h-0 grow scrollbar-slate-300 w-full">
-					{#each experiment_controller.experiment!.cli.logs.entries as entry}
-						<div class="text-white">
-							{entry}
-						</div>
-					{/each}
-				</div>
-				<div
-					class="w-full bg-slate-200 rounded p-2 frow-2 items-center">
-					<div class="icon-btn-sm">
-						<Terminal />
-					</div>
-					<textarea
-						onkeydown={keyDownHandler}
-						class=" resize-none outline-none focus:outline-none grow scrollbar-slate-400 font-mono h-12"
-						spellcheck="false"
-						autocomplete="off"
-						autocapitalize="off"
-						bind:value={
-							experiment_controller.experiment!.cli.command
-						}></textarea>
-				</div>
-			</div>
-		</div>
-		<!-- <div class="frow-2 p-1 min-h-0 h-full w-full">
-            <div class="icon-btn-sm rounded bg-slate-200">
-                <SquareTerminal />
-            </div>
-            <input
-                class="w-full bg-slate-200 wrapped"
-                bind:value={input}
-                autocapitalize="off"
-                autocomplete="off"
-                autocorrect="off"
-                spellcheck="false"
-                onkeydown={keyDownHandler} />
-        </div> -->
-	</div>
+	<CliModal {clickoutside} />
 {/if}

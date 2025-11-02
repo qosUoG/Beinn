@@ -1,9 +1,4 @@
 import { deepCopy } from "$lib/utils";
-import { tick } from "svelte";
-import { equipment_controller } from "./equipment.svelte";
-import { LogController } from "./log.svelte";
-import { workspace_controller } from "./workspace.svelte";
-import { experiment_controller } from "./experiment.svelte";
 
 
 class Logs {
@@ -82,6 +77,10 @@ class History {
 export class Cli {
     history: History = $state(new History())
     logs: Logs = $state(new Logs())
+
+    follow_scroll: boolean = $state(true)
+    small_scroll_height: number = $state(0)
+    large_scroll_height: number = $state(0)
 
     #command: string = $state("")
 
