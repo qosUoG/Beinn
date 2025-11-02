@@ -34,10 +34,8 @@ async def chartHandler(chart_name: str, ws: ServerConnection):
 
     try:
         async for frames in chart.subscribe():
-            print("frames start", flush=True)
-            print(frames, flush=True)
-            print("frames end", flush=True)
             if frames:
+                print("frames", frames, flush=True)
                 await ws.send(frames)
 
     except ConnectionClosed:
@@ -89,7 +87,7 @@ async def handler(ws: ServerConnection):
     elif path.startswith("/chart"):
         # unquote.split => ["", "chart", "<chart_title>"]
         print("connect", flush=True)
-        print(len(Globals.wss), flush=True)
+        print(Globals.wss[0].state, flush=True)
         await chartHandler(unquote(path).split("/")[2], ws)
 
     elif path == "/close":

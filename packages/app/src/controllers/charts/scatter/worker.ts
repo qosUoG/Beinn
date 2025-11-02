@@ -120,7 +120,7 @@ handlers.set_canvas = function set_canvas({ canvas, width, height }: { canvas: O
 handlers.reset = function reset() {
 
     if (_ws !== undefined)
-        _ws.close()
+        _ws.close(4000)
 
     if (_ws_interval !== undefined) {
         clearInterval(_ws_interval)
@@ -154,7 +154,7 @@ handlers.hide = function hide() {
 
     if (_ws !== undefined) {
         _ws.onclose = null
-        _ws.close()
+        _ws.close(4000)
     }
 
     if (_ws_interval !== undefined) {
@@ -202,8 +202,11 @@ function wsConnect() {
     }
 
     _ws.onclose = (event) => {
-        if (event.code !== 4000)
+        if (event.code !== 4000) {
+
             wsConnect()
+            postMessage("ws closed")
+        }
         else
             _online = false
     }
@@ -447,7 +450,7 @@ onmessage = function (event: MessageEvent<ChartMessages>) {
     //         _chart.destroy()
     //         if (_ws !== undefined) {
     //             _ws.onclose = null
-    //             _ws.close()
+    //             _ws.close(4000)
     //         }
 
     //         if (_ws_interval !== undefined)
