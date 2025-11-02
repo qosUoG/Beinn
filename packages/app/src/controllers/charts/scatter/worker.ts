@@ -64,9 +64,10 @@ const handlers: Handler = {
     set_canvas: function () { },
     resize: function () { },
     set_is_drawing_points: function () { },
-    reset: function () { },
     destroy: function () { },
     hide: function () { },
+    show: function () { },
+    restart: function () { }
 }
 
 
@@ -117,7 +118,7 @@ handlers.set_canvas = function set_canvas({ canvas, width, height }: { canvas: O
     wsConnect()
 }
 
-handlers.reset = function reset() {
+handlers.show = function show() {
 
     if (_ws !== undefined)
         _ws.close(4000)
@@ -171,12 +172,19 @@ handlers.destroy = function destroy() {
     }
 }
 
+handlers.restart = function restart() {
+    resetConfig()
+    wsConnect()
+}
+
 function resetConfig() {
     _chart_config.data.datasets = _scatter_config.y_names.map(label => ({ data: [], label }))
     _chart_config.options.scales.x.title.text = _scatter_config.x_axis
     _chart_config.options.scales.y.title.text = _scatter_config.y_axis
     _datasets = _scatter_config.y_names.map(label => ({ data: [], label }))
 }
+
+
 
 let _online = false
 let _pending_update = false
@@ -354,7 +362,7 @@ function wsConnect() {
 
 
 let _decimation = 0
-let _last_update_timestamp: number
+
 function updateData() {
 
     if (_chart === undefined || _canvas === undefined) return
@@ -366,7 +374,7 @@ function updateData() {
     if (data_length < width * 4) {
         _chart.data.datasets = _datasets
         _chart.update()
-        _last_update_timestamp = Date.now()
+
         return
     }
 

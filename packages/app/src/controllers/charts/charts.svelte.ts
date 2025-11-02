@@ -70,7 +70,7 @@ export class Chart<T extends ChartConfigs = ChartConfigs> {
             return
         }
         // reset the chart
-        this.reset()
+        this.show()
     }
 
 
@@ -109,8 +109,12 @@ export class Chart<T extends ChartConfigs = ChartConfigs> {
 
 
 
-    reset() {
-        this.worker.postMessage({ command: "reset" } satisfies ChartMessages)
+    show() {
+        this.worker.postMessage({ command: "show" } satisfies ChartMessages)
+    }
+
+    restart() {
+        this.worker.postMessage({ command: "restart" } satisfies ChartMessages)
     }
 
 

@@ -1,4 +1,4 @@
-import { deepCopy, shell, type Prettify } from "$lib/utils"
+import { deepCopy, shell, sleep, type Prettify } from "$lib/utils"
 import { Command } from "@tauri-apps/plugin-shell"
 import { EEBaseController, Instance, type ConcInstance, type InstanceSave } from "./_ee.svelte"
 import { Chart } from "./charts/charts.svelte"
@@ -95,6 +95,7 @@ export class Experiment extends Instance {
     async start() {
         if (this.ws !== undefined) this.ws.close()
         new WebSocket("ws://localhost:8080/close")
+        await sleep(100)
         this.state = "starting"
         const handler = Command.create("uv", ["run", "experiment"], { cwd: workspace_controller.path! })
 
@@ -112,13 +113,13 @@ export class Experiment extends Instance {
             this.cli.logs.append(line)
         })
 
-        const p = new Promise((resolve) => {
-            handler.on("close", resolve)
-            handler.on("error", resolve)
+        handler.on("error", (e) => {
+            console.log(e)
+            this.cli.logs.append(e)
         })
 
         await handler.spawn()
-        await p
+
     }
 
     pause() {
@@ -186,11 +187,10 @@ export class Experiment extends Instance {
                     this.expected_loop_count = data.expected_loop_count
 
                     for (const config of Object.values(data.chart_configs)) {
-                        console.log(config)
-                        if (this.charts[config.title] !== undefined) {
-                            this.charts[config.title].reset()
-                            return
-                        }
+                        // if (this.charts[config.title] !== undefined) {
+                        //     this.charts[config.title].restart()
+                        //     return
+                        // }
                         const chart = new Chart(config)
                         this.charts[config.title] = chart
                     }
