@@ -48,7 +48,7 @@ async def experimentHandler(ws: ServerConnection):
             match res["event"]:
                 case "start":
                     Globals.app = App(ws, asyncio.get_running_loop(), res["value"])
-                    await Globals.app.start(res["value"], ws)
+                    await Globals.app.start()
                 case "pause":
                     Globals.app.pause()
                 case "stop":
