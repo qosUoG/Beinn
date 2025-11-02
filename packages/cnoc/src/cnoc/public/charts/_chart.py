@@ -51,8 +51,8 @@ class ChartABC(ABC):
             self._subscribed = True
             if self._history:
                 history = self._history
-
-        yield history
+        if history:
+            yield history
 
         res: bytes
         while True:
@@ -64,8 +64,8 @@ class ChartABC(ABC):
 
                 res = self._buf
                 self._has_data.clear()
-
-            yield res
+            if res:
+                yield res
 
     def unsubscribe(self):
         if self._lock.locked():
