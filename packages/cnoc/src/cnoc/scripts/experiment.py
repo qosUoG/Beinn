@@ -44,8 +44,8 @@ async def chartHandler(chart_name: str, ws: ServerConnection):
         print("ended", flush=True)
 
     except ConnectionClosed:
-        Globals.wss.remove(ws)
         chart.unsubscribe()
+        Globals.wss.remove(ws)
 
 
 async def experimentHandler(ws: ServerConnection):

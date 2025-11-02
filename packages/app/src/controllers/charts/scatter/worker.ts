@@ -132,9 +132,9 @@ handlers.hide = function hide() {
         _ws_interval = undefined
     }
 
-    if (_ws !== undefined)
+    if (!_ws.CLOSED) {
         _ws.close(4000)
-
+    }
 }
 
 
