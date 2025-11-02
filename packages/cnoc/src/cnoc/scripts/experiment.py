@@ -42,6 +42,7 @@ async def chartHandler(chart_name: str, ws: ServerConnection):
         chart.stop()
         print("stopped", flush=True)
 
+    await ws.close(4000)
     print("ended", flush=True)
 
 
