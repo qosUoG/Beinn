@@ -32,11 +32,8 @@ async def chartHandler(chart_name: str, ws: ServerConnection):
     # Subscribe websocket to chart stream
     chart = Globals.app._manager._charts[chart_name]
 
-    print("connected to chart", chart_name, flush=True)
-
     try:
         async for frames in chart.subscribe():
-            print("sending frame", frames, flush=True)
             await ws.send(frames)
 
     except ConnectionClosed:

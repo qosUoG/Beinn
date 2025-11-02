@@ -45,9 +45,9 @@ class ChartABC(ABC):
     async def subscribe(self):
         # First yield frames available before subscription
         with self._lock:
+            self._subscribed = True
             if self._history:
                 history = self._history
-                self._subscribed = True
                 yield history
 
         while True:
@@ -57,6 +57,7 @@ class ChartABC(ABC):
                     self._subscribed = False
                     break
 
-            res = self._buf
-            self._has_data.clear()
-            yield res
+            with self._lock:
+                res = self._buf
+                self._has_data.clear()
+                yield res
