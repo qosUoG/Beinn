@@ -290,7 +290,7 @@ class App:
         self._lock.acquire(True, 1)
         self._experiment.cleanup()
         for chart in self._manager._charts.values():
-            chart.close()
+            chart.stop()
         for saver in self._manager._savers:
             saver._saver.close()
         for e in self._equipments.values():
