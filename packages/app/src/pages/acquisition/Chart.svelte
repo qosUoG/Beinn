@@ -35,7 +35,7 @@
 			{chart.config.title}
 		</div>
 		<div>
-			<!-- <button
+			<button
 				class="icon-btn-sm bg-gray-400 rounded text-gray-100"
 				onclick={() => {
 					if (!chart.showing && target)
@@ -48,7 +48,7 @@
 				{:else}
 					<EyeOff />
 				{/if}
-			</button> -->
+			</button>
 			<button
 				class="icon-btn-sm bg-gray-400 rounded text-gray-100"
 				onclick={() => {

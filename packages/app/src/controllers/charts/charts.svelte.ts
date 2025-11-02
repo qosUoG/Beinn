@@ -21,9 +21,9 @@ export class Chart<T extends ChartConfigs = ChartConfigs> {
         this.worker.postMessage({ command: "destroy" } satisfies ChartMessages)
     }
 
-    // hide() {
-    //     this.worker.postMessage({ command: "hide" } satisfies ChartMessages)
-    // }
+    hide() {
+        this.worker.postMessage({ command: "hide" } satisfies ChartMessages)
+    }
 
 
     #is_drawing_points = $state(false)
@@ -58,20 +58,20 @@ export class Chart<T extends ChartConfigs = ChartConfigs> {
 
     config: T
 
-    // #showing = $state(true)
+    #showing = $state(true)
 
-    // get showing() {
-    //     return this.#showing
-    // }
-    // set showing(value: boolean) {
-    //     this.#showing = value
-    //     if (value === false) {
-    //         this.hide()
-    //         return
-    //     }
-    //     // reset the chart
-    //     this.reset()
-    // }
+    get showing() {
+        return this.#showing
+    }
+    set showing(value: boolean) {
+        this.#showing = value
+        if (value === false) {
+            this.hide()
+            return
+        }
+        // reset the chart
+        this.reset()
+    }
 
 
     constructor(config: T) {

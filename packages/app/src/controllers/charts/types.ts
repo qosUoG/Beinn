@@ -11,7 +11,6 @@ export type ChartMessages =
         }
     } |
     {
-
         command: "set_canvas",
         payload: {
             canvas: OffscreenCanvas,
@@ -21,14 +20,8 @@ export type ChartMessages =
     } | {
         command: "resize",
         payload: { width: number, height: number }
-    } | {
-        command: "set_is_drawing_points", payload: { is_drawing_points: boolean }
-    } | {
-        command: "reset", payload?: undefined
-    } | {
-        command: "destroy", payload?: undefined
     }
-// |
-// {
-//     command: "hide", payload?: undefined
-// }
+    | { command: "set_is_drawing_points", payload: { is_drawing_points: boolean } }
+    | { command: "reset", payload?: undefined }
+    | { command: "destroy", payload?: undefined }
+    | { command: "hide", payload?: undefined }

@@ -65,8 +65,8 @@ const handlers: Handler = {
     resize: function () { },
     set_is_drawing_points: function () { },
     reset: function () { },
-    destroy: function () { }
-    // hide: function () { },
+    destroy: function () { },
+    hide: function () { },
 }
 
 
@@ -145,23 +145,23 @@ handlers.reset = function reset() {
 }
 
 
-// handlers.hide = function hide() {
-//     if (_chart) _chart.destroy()
-//     _canvas = undefined
+handlers.hide = function hide() {
+    if (_chart) _chart.destroy()
+    _canvas = undefined
 
-//     _online = false
+    _online = false
 
 
-//     if (_ws !== undefined) {
-//         _ws.onclose = null
-//         _ws.close()
-//     }
+    if (_ws !== undefined) {
+        _ws.onclose = null
+        _ws.close()
+    }
 
-//     if (_ws_interval !== undefined) {
-//         clearInterval(_ws_interval)
-//         _ws_interval = undefined
-//     }
-// }
+    if (_ws_interval !== undefined) {
+        clearInterval(_ws_interval)
+        _ws_interval = undefined
+    }
+}
 
 handlers.destroy = function destroy() {
     _canvas = undefined
