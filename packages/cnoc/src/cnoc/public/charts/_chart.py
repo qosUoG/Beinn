@@ -56,13 +56,17 @@ class ChartABC(ABC):
 
         res: bytes = bytes()
         while True:
-            await self._has_data.wait()
+            try:
+                await asyncio.wait_for(self._has_data.wait(), timeout=1)
+            except asyncio.TimeoutError:
+                pass
             with self._lock:
                 if self._should_stop:
                     self._subscribed = False
                     break
 
                 res = self._buf
+                self._buf = bytes()
                 self._has_data.clear()
             if res:
                 yield res
