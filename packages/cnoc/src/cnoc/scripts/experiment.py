@@ -34,7 +34,8 @@ async def chartHandler(chart_name: str, ws: ServerConnection):
 
     try:
         async for frames in chart.subscribe():
-            await ws.send(frames)
+            if frames:
+                await ws.send(frames)
 
     except ConnectionClosed:
         chart.stop()
