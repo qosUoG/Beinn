@@ -175,6 +175,8 @@ function wsConnect() {
 
     if (!wsNotConnected()) return
 
+    console.log("gogogo")
+
 
     _ws = new WebSocket(cnoc_url + "chart/" + _scatter_config.title)
     _ws.binaryType = "arraybuffer"

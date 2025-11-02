@@ -1,4 +1,3 @@
-from ast import Global
 import asyncio
 from urllib.parse import unquote
 import json
