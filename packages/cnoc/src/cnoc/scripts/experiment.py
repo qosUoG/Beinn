@@ -1,3 +1,4 @@
+from ast import Global
 import asyncio
 from urllib.parse import unquote
 import json
@@ -41,11 +42,9 @@ async def chartHandler(chart_name: str, ws: ServerConnection):
         await ws.close(4000)
         await ws.wait_closed()
         print("ended", flush=True)
-    except GeneratorExit:
-        print("GeneratorExit", flush=True)
-        chart.unsubscribe()
 
     except ConnectionClosed:
+        Globals.wss.remove(ws)
         chart.unsubscribe()
 
 
