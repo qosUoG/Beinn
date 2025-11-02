@@ -50,7 +50,8 @@ class ChartABC(ABC):
             self._subscribed = True
             if self._history:
                 history = self._history
-                yield history
+
+        yield history
 
         while True:
             await self._has_data.wait()
@@ -61,15 +62,12 @@ class ChartABC(ABC):
 
                 res = self._buf
                 self._has_data.clear()
-                yield res
+
+            yield res
 
     def unsubscribe(self):
-        def _unsubscribe():
-            self._subscribed = False
-            self._has_data.clear()
+        if self._lock.locked():
+            print("Cannot unsubscribe while locked!!!!!", flush=True)
 
-        if not self._lock.locked():
-            with self._lock:
-                _unsubscribe()
-        else:
-            _unsubscribe()
+        self._subscribed = False
+        self._has_data.clear()
