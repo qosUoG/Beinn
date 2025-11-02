@@ -62,3 +62,8 @@ class ChartABC(ABC):
                 res = self._buf
                 self._has_data.clear()
                 yield res
+
+    def unsubscribe(self):
+        with self._lock:
+            self._subscribed = False
+            self._has_data.clear()
