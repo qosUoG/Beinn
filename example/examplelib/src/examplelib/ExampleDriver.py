@@ -141,3 +141,7 @@ class ExampleEquipment(EquipmentABC):
     @override
     def cleanup(self):
         pass
+
+    @override
+    def interactive(self):
+        pass

@@ -13,7 +13,7 @@ from websockets.asyncio.server import serve
 class Globals:
     task: asyncio.Task
     app: App
-    wss: list[ServerConnection]
+    wss: list[ServerConnection] = []
 
 
 class InstancePayload(TypedDict):
