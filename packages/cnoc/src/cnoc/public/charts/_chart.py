@@ -56,7 +56,7 @@ class ChartABC(ABC):
 
         res: bytes = bytes()
         while True:
-            self._has_data.wait()
+            await self._has_data.wait()
 
             with self._lock:
                 if self._should_stop:
