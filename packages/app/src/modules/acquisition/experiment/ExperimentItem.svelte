@@ -72,7 +72,7 @@
 				{/if}
 			</div>
 			<div
-				class="h-full w-full border-1 border-slate-600 bg-slate-200 relative rounded overflow-clip col-span-3">
+				class="h-full w-full border border-slate-600 bg-slate-200 relative rounded overflow-clip col-span-3">
 				<div
 					class="absolute top-0 left-0 h-full rounded-l frow-1 w-full items-center">
 					{#if experiment.status === "initial"}
@@ -145,7 +145,7 @@
 					{/key}
 				</div>
 				<div
-					class="border-1 border-slate-600 box-border bg-slate-200 rounded flex-grow justify-center frow items-center h-full">
+					class="border-1 border-slate-600 box-border bg-slate-200 rounded grow justify-center frow items-center h-full">
 					{#if experiment.status === "initial"}
 						- / -
 					{:else if experiment.expected_loop_count === -1}

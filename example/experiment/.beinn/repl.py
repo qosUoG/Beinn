@@ -1,0 +1,13 @@
+from cnoc.public._params import dict2Params
+import json
+from examplelib.ExampleDriver import ExampleEquipment
+from examplelib.ExampleDriver import ExampleEquipment
+aa = ExampleEquipment()
+bb = ExampleEquipment()
+equipments = [aa, bb]
+aa.params = dict2Params(json.loads("""{"strparam":{"type":"str","value":"","required":false},"floatparam":{"type":"float","suffix":"W","value":0,"required":false},"intparam":{"type":"int","suffix":"","value":0,"required":false},"boolparam":{"type":"bool","value":false,"required":false},"selectstrparam":{"type":"select.str","options":["option1","option2","option3"],"value":"option1","required":false},"selectintparam":{"type":"select.int","options":[1,2,3],"value":2,"required":false},"selectfloatparam":{"type":"select.float","options":[1.1,2.2,3.3],"value":1.1,"required":false},"compositeparam":{"type":"composite","children":{"compstrparam":{"type":"str","value":"","required":false},"compfloatparam":{"type":"float","suffix":"W","value":0,"required":false},"compintparam":{"type":"int","suffix":"","value":0,"required":false},"compboolparam":{"type":"bool","value":false,"required":false},"compselectstrparam":{"type":"select.str","options":["option1","option2","option3"],"value":"option1","required":false},"compselectintparam":{"type":"select.int","options":[1,2,3],"value":1,"required":false},"compselectfloatparam":{"type":"select.float","options":[1.1,2.2,3.3],"value":1.1,"required":false}}}}"""),equipments)
+
+bb.params = dict2Params(json.loads("""{"strparam":{"type":"str","value":"","required":false},"floatparam":{"type":"float","suffix":"W","value":0,"required":false},"intparam":{"type":"int","suffix":"","value":0,"required":false},"boolparam":{"type":"bool","value":false,"required":false},"selectstrparam":{"type":"select.str","options":["option1","option2","option3"],"value":"option1","required":false},"selectintparam":{"type":"select.int","options":[1,2,3],"value":2,"required":false},"selectfloatparam":{"type":"select.float","options":[1.1,2.2,3.3],"value":1.1,"required":false},"compositeparam":{"type":"composite","children":{"compstrparam":{"type":"str","value":"","required":false},"compfloatparam":{"type":"float","suffix":"W","value":0,"required":false},"compintparam":{"type":"int","suffix":"","value":0,"required":false},"compboolparam":{"type":"bool","value":false,"required":false},"compselectstrparam":{"type":"select.str","options":["option1","option2","option3"],"value":"option1","required":false},"compselectintparam":{"type":"select.int","options":[1,2,3],"value":1,"required":false},"compselectfloatparam":{"type":"select.float","options":[1.1,2.2,3.3],"value":1.1,"required":false}}}}"""),equipments)
+
+aa.interactive()
+bb.interactive()

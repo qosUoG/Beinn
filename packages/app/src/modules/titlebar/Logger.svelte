@@ -1,7 +1,7 @@
 <script lang="ts">
 	import { getClickOutsideAttachment } from "$components/utils.svelte";
 	import { log_controller } from "$controllers/log.svelte";
-	import { ChevronLeft, ScrollText } from "@lucide/svelte";
+	import { ScrollText } from "@lucide/svelte";
 	import ShellEntry from "./ShellEntry.svelte";
 
 	const entry = $derived.by(() => {
@@ -57,20 +57,17 @@
 
 {#if show_log}
 	<div
-		class="h-screen w-screen backdrop-blur-lg absolute top-0 left-0 z-10000 flex items-center justify-center">
+		class="h-screen w-screen backdrop-blur-lg absolute top-0 left-0 z-10000 flex items-center justify-center bg-slate-600/50">
 		<div
 			{@attach clickoutside}
-			class="bg-white scrollbar-slate-600 rounded w-144 h-3/4 p-4 fcol-2 overflow-y-scroll">
+			class="bg-white scrollbar-slate-600 rounded w-xl h-3/4 p-4 fcol-2 overflow-y-scroll">
 			{#each log_controller.log_entries as entry}
 				{#if entry.type === "shell"}
 					<ShellEntry {entry} />
 				{:else if entry.type === "error"}
-					<div class="frow-2 items-center">
+					<div class="frow-2 items-center bg-red-100 rounded w-full">
 						<div
-							class="fcol items-center bg-slate-800 rounded-l py-1 px-2">
-							<!-- <span class="icon-btn-sm">
-					<CalendarClock />
-				</span> -->
+							class="fcol items-center bg-slate-800 rounded-l py-1 px-2 h-full justify-center">
 							<div class=" text-[10px] text-white">
 								{new Date(entry.timestamp)
 									.toLocaleString()
@@ -82,12 +79,6 @@
 									.split(", ")[1]}
 							</div>
 						</div>
-
-						<!-- {#if error}
-				<span class="icon-btn-sm text-red-600">
-					<TriangleAlert />
-				</span>
-			{/if} -->
 
 						<div class="py-2 text-ellipsis">
 							{entry.message}

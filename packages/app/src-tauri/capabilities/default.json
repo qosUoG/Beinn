@@ -86,6 +86,11 @@
 					"args": true
 				},
 				{
+					"name": ".venv/bin/python",
+					"cmd": ".venv/bin/python",
+					"args": true
+				},
+				{
 					"name": "uvx",
 					"cmd": "uvx",
 					"args": true
@@ -123,6 +128,26 @@
 				{
 					"name": "taskkill",
 					"cmd": "taskkill",
+					"args": true
+				}
+			]
+		},
+		{
+			"identifier": "shell:allow-stdin-write",
+			"allow": [
+				{
+					"name": ".venv/bin/python",
+					"cmd": ".venv/bin/python",
+					"args": true
+				}
+			]
+		},
+		{
+			"identifier": "shell:allow-kill",
+			"allow": [
+				{
+					"name": ".venv/bin/python",
+					"cmd": ".venv/bin/python",
 					"args": true
 				}
 			]

@@ -58,3 +58,10 @@ class EquipmentABC(ABC):
         when entering this function
         """
         raise NotImplementedError
+
+    @abstractmethod
+    def interactive(self):
+        """
+        Code to run before REPL mode is entered
+        """
+        raise NotImplementedError

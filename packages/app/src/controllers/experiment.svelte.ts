@@ -163,7 +163,7 @@ export class Experiment extends Instance {
             this.ws!.send(JSON.stringify({
                 event: "start",
                 value: {
-                    equipments: Object.values(equipment_controller.equipment_instances).map(e => ({
+                    equipments: Object.values(equipment_controller.equipments).map(e => ({
                         name: e.name,
                         module: e.module,
                         cls: e.cls,
@@ -211,121 +211,6 @@ export class Experiment extends Instance {
             }
         }
     }
-
-
-
-
-
-    //     workspace_controller.registerCallback("experiment:status", ({ name, status }: { name: string, status: "started" | "loop_start" | "paused" | "stopped" | "completed" }) => {
-
-    //         // Handle loop count
-    //         if (status === "started") {
-    //             this.instances[name].loop_count = 0
-    //         }
-
-    //         // Handle timer
-    //         const updateTotalTime = () => {
-    //             const now = Date.now()
-    //             this.instances[name].total_time += now - this.instances[name].total_time_timer_timestamp
-    //             this.instances[name].total_time_timer_timestamp = now
-    //         }
-
-    //         const updateLoopTime = () => {
-    //             const now = Date.now()
-    //             this.instances[name].loop_time += now - this.instances[name].loop_time_timer_timestamp
-    //             this.instances[name].loop_time_timer_timestamp = now
-    //         }
-
-
-    //         switch (status) {
-    //             case "started":
-    //                 if (this.instances[name].total_time_timer !== undefined)
-    //                     clearInterval(this.instances[name].total_time_timer)
-
-    //                 this.instances[name].total_time = 0
-    //                 this.instances[name].total_time_timer_timestamp = Date.now()
-    //                 this.instances[name].total_time_timer = setInterval(updateTotalTime, 500)
-
-    //                 this.instances[name].loop_time = -1
-    //                 break
-    //             case "loop_start":
-    //                 if (this.instances[name].loop_time_timer !== undefined) {
-    //                     clearInterval(this.instances[name].loop_time_timer)
-    //                     updateLoopTime()
-    //                 }
-
-
-    //                 this.instances[name].loop_time = 0
-    //                 this.instances[name].loop_time_timer_timestamp = Date.now()
-
-
-    //                 this.instances[name].loop_time_timer = setInterval(updateLoopTime, 500)
-
-    //                 // Restart total time timer in case of coming from paused
-    //                 if (this.instances[name].total_time_timer === undefined) {
-    //                     this.instances[name].total_time_timer_timestamp = Date.now()
-    //                     this.instances[name].total_time_timer = setInterval(updateTotalTime, 500)
-    //                 }
-    //                 break
-
-    //             case "paused":
-    //             case "stopped":
-    //             case "completed":
-    //                 if (this.instances[name].total_time_timer !== undefined) {
-    //                     clearInterval(this.instances[name].total_time_timer)
-    //                     updateTotalTime()
-    //                     this.instances[name].total_time_timer = undefined
-    //                     this.instances[name].total_time_timer_timestamp = 0
-    //                 }
-    //                 if (this.instances[name].loop_time_timer !== undefined) {
-    //                     clearInterval(this.instances[name].loop_time_timer)
-    //                     updateLoopTime()
-    //                     this.instances[name].loop_time_timer = undefined
-    //                     this.instances[name].loop_time_timer_timestamp = 0
-    //                 }
-
-
-
-    //         }
-
-    //         // Handle status
-    //         switch (status) {
-    //             case "started":
-    //             case "paused":
-    //             case "stopped":
-    //             case "completed":
-    //                 this.instances[name].status = status
-    //                 break
-    //             case "loop_start":
-    //                 this.instances[name].status = "running"
-    //                 break
-
-    //         }
-    //     })
-
-    //     workspace_controller.registerCallback("experiment:expected_loop_count", ({ name, expected_loop_count }: { name: string, expected_loop_count: number }) => {
-    //         this.instances[name].expected_loop_count = expected_loop_count
-    //     })
-
-
-    //     workspace_controller.registerCallback("experiment:loop_count", ({ name, loop_count }: { name: string, loop_count: number }) => {
-    //         this.instances[name].loop_count = loop_count
-    //     })
-
-    //     workspace_controller.registerCallback("experiment:chart_config", ({ name, config }: { name: string, config: ChartConfigs }) => {
-    //         if (this.instances[name].charts[config.title] !== undefined) {
-    //             this.instances[name].charts[config.title].reset()
-    //             return
-    //         }
-    //         const chart = new Chart(config, name)
-    //         this.instances[name].charts[config.title] = chart
-
-    //     })
-
-    // })
-
-
-
 
 }
 

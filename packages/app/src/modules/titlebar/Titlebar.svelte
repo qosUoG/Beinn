@@ -4,7 +4,7 @@
 	import Logger from "./Logger.svelte";
 </script>
 
-<div class="min-h-[40px] frow-4 py-2 m-auto justify-between w-1/2">
+<div class="min-h-10 frow-4 py-2 m-auto justify-between w-1/2">
 	<div class="frow-2 z-1000">
 		<div class="grid grid-cols-2">
 			<button

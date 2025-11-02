@@ -15,7 +15,7 @@
 	import { workspace_controller } from "$controllers/workspace.svelte";
 </script>
 
-<div class="justify-between fcol-2 min-h-0 flex-grow bg-slate-200 rounded p-2">
+<div class=" fcol-2 min-h-0 bg-slate-200 rounded p-2">
 	<div class="frow justify-between items-center">
 		<div class="title">Experiment</div>
 		{#if experiment_controller.experiment}
@@ -47,8 +47,7 @@
 		<ExperimentSelector />
 
 		{#if experiment_controller.experiment}
-			<div
-				class=" overflow-y-scroll scrollbar-slate-400 -mr-2 flex-grow pb-8">
+			<div class=" overflow-y-scroll scrollbar-slate-400 -mr-2 grow pb-8">
 				<div
 					class={cn(
 						"grid grid-cols-2 border-2 border-slate-800 bg-slate-300 rounded-t p-0.5",

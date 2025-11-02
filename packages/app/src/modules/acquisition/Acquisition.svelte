@@ -33,7 +33,7 @@
 		{@render tab("Log")}
 	</div>
 
-	<div class={cn(" bg-slate-800 flex-grow min-h-0  p-2 fcol-2")}>
+	<div class={cn(" bg-slate-800 grow min-h-0  p-2 fcol-2")}>
 		{#if page === "Dependency"}
 			<Dependency />
 		{:else if page === "Equipment"}

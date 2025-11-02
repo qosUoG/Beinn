@@ -13,7 +13,7 @@
 </script>
 
 {#if experiment_controller.experiment}
-	<div class="bg-white rounded w-128 min-w-128">
+	<div class="bg-white rounded w-lg min-w-lg">
 		<div class="fcol-2 border-2 border-slate-800 rounded p-1">
 			<div class="grid grid-cols-4 gap-2">
 				<div class="frow-1 items-center">
@@ -63,7 +63,7 @@
 					{/if}
 				</div>
 				<div
-					class="h-full w-full border-1 border-slate-600 bg-slate-200 relative rounded overflow-clip col-span-3">
+					class="h-full w-full border border-slate-600 bg-slate-200 relative rounded overflow-clip col-span-3">
 					<div
 						class="absolute top-0 left-0 h-full rounded-l frow-1 w-full items-center">
 						{#if experiment_controller.experiment.state === "ready"}
@@ -100,7 +100,7 @@
 				</div>
 				<div class="grid grid-cols-4 gap-2 justify-between col-span-4">
 					<div
-						class="border-1 border-slate-600 box-border bg-slate-200 rounded frow items-center justify-center">
+						class="border border-slate-600 box-border bg-slate-200 rounded frow items-center justify-center">
 						<span class="icon-btn-sm">
 							<CalendarClock />
 						</span>
@@ -125,7 +125,7 @@
 					</div>
 
 					<div
-						class="border-1 border-slate-600 box-border bg-slate-200 rounded frow items-center justify-center">
+						class="border border-slate-600 box-border bg-slate-200 rounded frow items-center justify-center">
 						<span class="icon-btn-sm">
 							<Clock />
 						</span>
@@ -138,7 +138,7 @@
 					</div>
 
 					<div
-						class="border-1 border-slate-600 box-border bg-slate-200 rounded frow items-center justify-center">
+						class="border border-slate-600 box-border bg-slate-200 rounded frow items-center justify-center">
 						<span class="icon-btn-sm">
 							<TimerReset />
 						</span>
@@ -150,7 +150,7 @@
 						{/key}
 					</div>
 					<div
-						class="border-1 border-slate-600 box-border bg-slate-200 rounded flex-grow justify-center frow items-center h-full">
+						class="border border-slate-600 box-border bg-slate-200 rounded grow justify-center frow items-center h-full">
 						{#if experiment_controller.experiment.state === "ready"}
 							- / -
 						{:else if experiment_controller.experiment.expected_loop_count === -1}

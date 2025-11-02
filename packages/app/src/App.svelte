@@ -32,7 +32,7 @@
 		</div> -->
 	{/if}
 
-	<!-- <div class="w-full flex-grow relative">
+	<!-- <div class="w-full grow relative">
 		<div class="absolute top-0 left-0 w-full h-full frow min-h-0">
 			{#if acquisition_opened}
 				<Acquisition bind:open={acquisition_opened} />

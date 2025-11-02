@@ -164,6 +164,26 @@
 	button#decorum-tb-close {
 		@apply z-10000;
 	} */
+
+	div.monaco-icon-label-container {
+		@apply flex items-center;
+	}
+
+	div.monaco-tl-row {
+		@apply gap-2 pl-2;
+	}
+
+	a.action-label {
+		@apply flex items-center p-0!;
+	}
+
+	div.title-label {
+		@apply flex items-center;
+	}
+
+	ul.actions-container {
+		@apply gap-2;
+	}
 }
 
 @utility scrollbar-* {

@@ -7,8 +7,7 @@
 </script>
 
 {#if experiment_controller.experiment}
-	<div
-		class=" rounded flex-grow frow items-start bg-slate-700 min-h-0 h-full">
+	<div class=" rounded grow frow items-start bg-slate-700 min-h-0 h-full">
 		{#if experiment_controller.experiment.state === "ready"}
 			{#if experiment_controller.experiment.note !== undefined}
 				<div class="grid grid-rows-2 h-full rounded">

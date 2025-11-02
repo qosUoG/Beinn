@@ -27,13 +27,13 @@
 
 <div class="frow-2 bg-slate-200 rounded items-center p-2">
 	<div class=" title">Workspace</div>
-	<div class=" rounded bg-white flex-grow px-2 h-full min-w-0">
+	<div class=" rounded bg-white grow px-2 h-full min-w-0">
 		{#if workspace_controller.path}
-			<div class="text-nowrap w-full overflow-x-scroll translate-y-[4px]">
+			<div class="text-nowrap w-full overflow-x-scroll translate-y-1">
 				{workspace_controller.path}
 			</div>
 		{:else}
-			<div class="translate-y-[4px] italic text-slate-400">
+			<div class="translate-y-1 italic text-slate-400">
 				No workspace selected
 			</div>
 		{/if}

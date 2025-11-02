@@ -98,14 +98,14 @@
 
 	<div
 		{@attach refreshAttachment}
-		class="flex-grow overflow-y-scroll font-mono tracking-tighter font-light scrollbar-slate-200">
+		class="grow overflow-y-scroll font-mono tracking-tighter font-light scrollbar-slate-200">
 		{#each cnoc_controller.log_entries as entry}
 			<div class="frow">
 				{#if cnoc_controller.show_timetext}
 					{@render timetext(entry.timestamp)}
 				{/if}
 				<div
-					class="text-slate-100 text-wrap flex-grow whitespace-break-spaces break-all text-[11px]">
+					class="text-slate-100 text-wrap grow whitespace-break-spaces break-all text-[11px]">
 					{entry.message.replace(/\u001b\[.*?m/g, "")}
 				</div>
 			</div>

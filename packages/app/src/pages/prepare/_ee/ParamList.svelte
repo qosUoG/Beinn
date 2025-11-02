@@ -1,5 +1,5 @@
 <script lang="ts">
-	import type { AllParamTypes } from "$controllers/params.svelte";
+	import type { RuntimeAllParamTypes } from "$controllers/params.svelte";
 	import Composite from "./Composite.svelte";
 	import Param from "./Param.svelte";
 
@@ -8,26 +8,33 @@
 		composite_opens = $bindable(),
 		params = $bindable(),
 		saveFn,
+		editable = true,
 	}: {
 		param_opens: boolean;
 		composite_opens: Record<string, boolean>;
-		params: Record<string, AllParamTypes>;
+		params: Record<string, RuntimeAllParamTypes>;
 		saveFn: () => Promise<void>;
+		editable?: boolean;
 	} = $props();
 </script>
 
 {#if param_opens}
 	<div
-		class="fcol *:border-b-1 *:border-slate-400 border-2 border-t-0 border-slate-800">
+		class="fcol *:border-b *:border-slate-400 border-2 border-t-0 border-slate-800 min-w-80">
 		{#each Object.keys(params) as key}
 			{#if params[key].type === "composite"}
 				<Composite
 					label={key}
 					bind:open={composite_opens[key]}
 					bind:params={params[key].children}
-					{saveFn} />
+					{saveFn}
+					{editable} />
 			{:else}
-				<Param label={key} bind:param={params[key]} {saveFn} />
+				<Param
+					label={key}
+					bind:param={params[key]}
+					{saveFn}
+					{editable} />
 			{/if}
 		{/each}
 	</div>

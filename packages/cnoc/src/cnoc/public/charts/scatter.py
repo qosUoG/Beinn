@@ -43,6 +43,7 @@ class Scatter(ChartABC):
             "mode": self.mode,
         }
 
+    @override
     def plot(self, frame: dict[str, float]):
         """
         Plots a data point

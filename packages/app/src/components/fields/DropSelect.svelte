@@ -1,7 +1,8 @@
-<script lang="ts" generics="T extends string | number">
+<script lang="ts" generics="T">
 	import { cn, getClickOutsideAttachment } from "$components/utils.svelte";
 	import { tick } from "svelte";
 	import Label from "./Label.svelte";
+	import { experiment_controller } from "$controllers/experiment.svelte";
 
 	let open = $state(false);
 
@@ -14,28 +15,31 @@
 		mandatory = false,
 		value = $bindable(),
 		options,
+		editable = true,
 	}: {
 		label: string;
 		mandatory?: boolean;
-		value: T;
-		options: T[];
+		value: { key: string; value: T };
+		options: { key: string; value: T }[];
+		editable?: boolean;
 	} = $props();
 </script>
 
 <div class="frow items-center">
 	<Label {label} {mandatory} />
 	<div
-		{@attach clickoutside}
-		class="  flex-grow w-fit border-l-1 border-slate-400 text-center relative box-border h-5">
+		class="  grow w-fit border-l border-slate-400 text-center relative box-border h-5">
 		{#if open}
 			<div
+				{@attach clickoutside}
 				class="bg-white absolute top-0 left-0 w-full border border-black z-1 h-fit max-h-84">
 				<div class="max-h-84 overflow-y-scroll scrollbar-slate-400">
 					{#each options as option}
 						<button
 							class={cn(
 								"  w-full py-0.5 px-1",
-								value === option
+								value.key === option.key &&
+									value.key === option.value
 									? "bg-slate-700 text-white"
 									: "hover:bg-slate-300"
 							)}
@@ -43,7 +47,7 @@
 								value = option;
 								open = false;
 							}}>
-							{option}
+							{option.key}
 						</button>
 					{:else}
 						<button
@@ -57,12 +61,19 @@
 				</div>
 			</div>
 		{/if}
-		<button
-			class="w-full h-full py-0.5 px-1 box-border"
-			onclick={() => {
-				open = true;
-			}}>
-			{value}
-		</button>
+		{#if experiment_controller.editable && editable}
+			<button
+				class="w-full h-full py-0.5 px-1 box-border"
+				onclick={(e) => {
+					open = true;
+					e.stopPropagation();
+				}}>
+				{value.key}
+			</button>
+		{:else}
+			<div class="w-full h-full py-0.5 px-1 box-border">
+				{value.key}
+			</div>
+		{/if}
 	</div>
 </div>

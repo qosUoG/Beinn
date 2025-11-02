@@ -10,6 +10,12 @@ from .utils import preloadLocal
 from websockets.asyncio.server import serve
 
 
+class Globals:
+    task: asyncio.Task
+    app: App
+    wss: list[ServerConnection]
+
+
 class InstancePayload(TypedDict):
     name: str
     module: str
@@ -24,66 +30,51 @@ class StartPayload(TypedDict):
 
 async def chartHandler(chart_name: str, ws: ServerConnection):
     # Subscribe websocket to chart stream
-    (subscription, unsubscribe, setRate, getRate) = App.manager._charts[
-        chart_name
-    ].subscribe(ws)
-
-    if subscription is None:
-        await ws.close()
-        return
-
-    async def consumer():
-        async for message in ws:
-            data = json.loads(message)
-            assert data["command"] == "rate"
-            await setRate(data["value"])
-            await ws.send(json.dumps({"command": "rate", "value": getRate()}))
-
-    consumer_task = asyncio.create_task(consumer())
+    chart = Globals.app._manager._charts[chart_name]
 
     try:
-        async for frames in subscription():
+        async for frames in chart.subscribe():
             if frames:
                 await ws.send(frames)
 
-        consumer_task.cancel()
-        unsubscribe()
-        await ws.close(4000)
-        return
-
     except ConnectionClosed:
-        consumer_task.cancel()
-        unsubscribe()
+        chart.stop()
 
 
 async def experimentHandler(ws: ServerConnection):
-    # print("ws:loaded", flush=True)
     try:
         async for message in ws:
             res = json.loads(message)
             match res["event"]:
                 case "start":
-                    await App.start(res["value"], ws)
+                    Globals.app = App(ws, asyncio.get_running_loop(), res["value"])
+                    await Globals.app.start(res["value"], ws)
                 case "pause":
-                    App.state.pause()
+                    Globals.app.pause()
                 case "stop":
-                    App.state.stop()
+                    Globals.app.stop()
                 case "continue":
-                    App.state.cont()
+                    Globals.app.cont()
                 case "save_note":
-                    App.saveNote(res["value"])
+                    Globals.app.saveNote(res["value"])
                 case "interpret":
                     if "name" in res["value"]:
-                        App.interpret(res["value"]["command"], res["value"]["name"])
+                        Globals.app.interpret(
+                            res["value"]["command"], res["value"]["name"]
+                        )
                     else:
-                        App.interpret(res["value"]["command"])
+                        Globals.app.interpret(res["value"]["command"])
     except ConnectionClosed:
-        App.state.stop()
-        App.task.cancel()
+        Globals.app.kill()
+        for ws in Globals.wss:
+            await ws.close()
+        Globals.task.cancel()
 
 
 async def handler(ws: ServerConnection):
     path = ws.request.path
+
+    Globals.wss.append(ws)
 
     # Workspace
     if path == "/experiment":
@@ -94,17 +85,20 @@ async def handler(ws: ServerConnection):
         await chartHandler(unquote(path).split("/")[2], ws)
 
     elif path == "/close":
-        await ws.close()
-        App.task.cancel()
+        Globals.app.kill()
+        for ws in Globals.wss:
+            await ws.close()
+        Globals.task.cancel()
 
 
 async def _main():
     preloadLocal()
     async with serve(handler, "localhost", 8080) as server:
-        App.task = asyncio.create_task(server.serve_forever())
+        Globals.task = asyncio.create_task(server.serve_forever())
+        # This asks beinn to connect to the websocket server
         print("ws:loaded", flush=True)
         try:
-            await App.task
+            await Globals.task
         except asyncio.CancelledError:
             return
 

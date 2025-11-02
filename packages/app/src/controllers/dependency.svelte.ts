@@ -45,6 +45,10 @@ class Dependencies {
 
     dependencies: Dependency[] = $state([])
 
+    get has_updating_package() {
+        return this.dependencies.find(d => d.updating) !== undefined
+    }
+
 
     get has_driver_package_names() {
         return this.dependencies.filter(d => d.has_driver).map(d => d.name)

@@ -13,7 +13,7 @@
 </script>
 
 {#if workspace_controller.status === "ready"}
-	<div class=" bg-white rounded min-h-[24px]">
+	<div class=" bg-white rounded min-h-6">
 		<div
 			{@attach clickoutside}
 			class=" py-0.5 px-1 frow text-center relative">
@@ -42,6 +42,8 @@
 								open = false;
 								await tick();
 								await experiment_controller.loadExperiment();
+
+								await experiment_controller.save();
 							}}>
 							from
 							<span
@@ -81,7 +83,7 @@
 					onclick={() => {
 						open = true;
 					}}>
-					<div class="flex-grow">
+					<div class="grow">
 						{#if experiment_controller.cls && experiment_controller.module}
 							from
 							<span class="text-slate-950 font-semibold">
@@ -105,7 +107,7 @@
 				</button>
 			{:else}
 				<span class="w-full frow items-center">
-					<div class="flex-grow">
+					<div class="grow">
 						{#if experiment_controller.cls && experiment_controller.module}
 							from
 							<span class="text-slate-950 font-semibold">

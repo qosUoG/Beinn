@@ -1,11 +1,9 @@
-import { deepCopy, shell, type Prettify } from "$lib/utils"
 import { tick } from "svelte"
-import type { SelectFloatParam, SelectStrParam, SimpleParamType } from "./params.svelte"
 import { workspace_controller } from "./workspace.svelte"
-import { Command } from "@tauri-apps/plugin-shell"
 import { EEBaseController, Instance, type ConcInstance, type InstanceSave } from "./_ee.svelte"
 import { exists, readTextFile, writeTextFile } from "@tauri-apps/plugin-fs"
 import { log_controller } from "./log.svelte"
+import { Repl } from "./repl.svelte"
 
 export class EquipmentController extends EEBaseController {
 
@@ -15,17 +13,15 @@ export class EquipmentController extends EEBaseController {
         cls: "",
     })
 
-    #equipments = $state<Record<string, Instance>>({})
-    get equipment_instances() {
-        return Object.values(this.#equipments)
-    }
+    equipments = $state<Instance[]>([])
+
     get equipment_names() {
-        return this.equipment_instances.map(i => i.name)
+        return this.equipments.map(i => i.name)
     }
 
     constructor() { super("equipment") }
 
-    async create({ name, module, cls, id }: { name: string, module: string, cls: string, id?: string }) {
+    async create({ name, module, cls }: { name: string, module: string, cls: string }) {
         // Check if equipment with same name already exists
         if (name in this.equipment_names) {
             log_controller.appendError(`Equipment with name ${name} already exists`)
@@ -36,55 +32,133 @@ export class EquipmentController extends EEBaseController {
 
         await equipment.initialize()
 
-        this.#equipments[id ?? crypto.randomUUID()] = equipment
-
+        this.equipments.push(equipment)
         return true
     }
 
     async remove(name: string) {
-        delete this.#equipments[name]
-
+        this.equipments = this.equipments.filter(e => e.name !== name)
         await tick()
 
         await this.save()
     }
 
     async save() {
-        let save: Record<string, InstanceSave> = {}
-        for (const [id, equipment] of Object.entries(this.#equipments))
-            save[id] = equipment.toSave()
+        let save = this.equipments.map(e => e.toSave())
+
         await writeTextFile(workspace_controller.path! + "/.beinn/equipments.json",
             JSON.stringify(save))
     }
 
     async loadSave(path: string) {
         if (!await exists(path + "/.beinn/equipments.json")) return
-        const save = JSON.parse(await readTextFile(path + "/.beinn/equipments.json")) as Record<string, InstanceSave>
+        const save = JSON.parse(await readTextFile(path + "/.beinn/equipments.json")) as InstanceSave[]
 
-        for (const [id, equipment] of Object.entries(save)) {
+        for (const equipment of save) {
             // Check if equipment is included in the imports
             const found = this.imports.find(imp => imp.module === equipment.module && imp.cls === equipment.cls)
-            if (found === undefined) continue
+            if (found === undefined) {
+                log_controller.appendError(`Error while loading save of ${equipment.name} save:  ${equipment.module}  ${equipment.cls} not found`)
+                continue
+            }
 
             // Create the equipment
-            const success = await this.create({ name: equipment.name, module: equipment.module, cls: equipment.cls, id })
-            if (!success) continue
+            const success = await this.create({ name: equipment.name, module: equipment.module, cls: equipment.cls })
+            if (!success)
+                log_controller.appendError(`Error while loading save of ${equipment.name} save:Cannot create equipment`)
+
+
         }
 
-        for (const [id, equipment] of Object.entries(save)) {
-            if (!(id in this.#equipments)) continue
+        for (const s of save) {
+            const equipment = this.equipments.find(e => e.name === s.name)
+            if (equipment === undefined) {
+                log_controller.appendError(`Parameter of ${s.name} is not applied: equipment not found`)
+                continue
+            }
+
             // Apply the save
-            this.#equipments[id].assignParams(equipment.params)
-            this.#equipments[id].param_opens = equipment.param_opens
+            equipment.assignParams(equipment.params)
+            equipment.param_opens = equipment.param_opens
             for (const key of Object.keys(equipment.composite_opens))
-                if (key in this.#equipments[id].composite_opens)
-                    this.#equipments[id].composite_opens = equipment.composite_opens
+                if (key in equipment.composite_opens)
+                    equipment.composite_opens = equipment.composite_opens
         }
     }
 
+    repl: Repl | undefined = $state(undefined)
+
+    async startREPL(equipment: Instance | undefined) {
+        if (this.repl !== undefined) {
+            log_controller.appendError(`REPL session of ${equipment?.name ? equipment.name : "all equipments"} already running`)
+            return
+        }
+
+        // Create temporary file for repl initialization
+        let text = [
+            "from cnoc.public._params import dict2Params",
+            "import json"
+        ];
+
+        let equipments: Instance[]
+
+        if (equipment !== undefined) {
+            equipments = [equipment]
+            // Add all equipments referenced in the param list to the equipments list
+            const addEquipment = (equipment: Instance) => {
+                if (equipments.find(e => e.name === equipment.name)) return
+                equipments.push(equipment)
+            }
+
+            for (const param of Object.values(equipment.params)) {
+                if (param.type === "instance.equipment" && param.instance) {
+                    addEquipment(param.instance)
+                    continue
+                }
+
+                if (param.type !== "composite") continue
+
+
+                for (const child of Object.values(param.children))
+                    if (child.type === "instance.equipment" && child.instance)
+                        addEquipment(child.instance)
+
+            }
+        }
+        else
+            equipments = this.equipments
+
+        for (const equipment of equipments)
+            text.push(`from ${equipment.module} import ${equipment.cls}`)
+
+        for (const equipment of equipments)
+            text.push(`${equipment.name} = ${equipment.cls}()`)
+
+        text.push(`equipments = [${equipments.map(e => e.name).join(", ")}]`)
+
+        for (const equipment of equipments)
+            text.push(`${equipment.name}.params = dict2Params(json.loads("""${JSON.stringify(equipment.params)}"""),equipments)\n`)
+        for (const equipment of equipments)
+            text.push(`${equipment.name}.interactive()`)
+
+
+        await writeTextFile(workspace_controller.path! + "/.beinn/repl.py", text.join("\n"))
+        this.repl = new Repl(text.join("\n"), equipments)
+    }
+
+    closeREPL() {
+        if (this.repl && this.repl.online) this.repl.kill()
+
+        this.repl = undefined
+    }
+
     reset() {
-        this.#equipments = {}
+        this.equipments = []
         this.imports = []
+
+        if (this.repl && this.repl.online) this.repl.kill()
+        this.repl = undefined
+
         this.temp = {
             name: "",
             module: "",

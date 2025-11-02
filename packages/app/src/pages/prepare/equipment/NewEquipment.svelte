@@ -50,7 +50,7 @@
 	</div>
 
 	<div
-		class="fcol *:border-1 *:border-slate-400 *:border-b-0 last:border-b-1 last:border-b-slate-400">
+		class="fcol *:border *:border-slate-400 *:border-b-0 last:border-b last:border-b-slate-400">
 		<InputField
 			label="name"
 			bind:value={equipment_controller.temp.name}
@@ -69,7 +69,7 @@
 			<Label label="import" mandatory />
 			<div
 				{@attach clickoutside}
-				class=" py-0.5 px-1 flex-grow w-fit border-l-1 border-slate-400 text-center relative">
+				class=" py-0.5 px-1 grow w-fit border-l border-slate-400 text-center relative">
 				{#if open}
 					<div
 						class=" absolute bottom-0 left-0 w-full bg-slate-200 rounded border p-2">

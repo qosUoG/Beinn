@@ -59,7 +59,7 @@
 			<Label label="import" mandatory />
 			<div
 				{@attach clickoutside}
-				class=" py-0.5 px-1 flex-grow w-fit border-l-1 border-slate-400 text-center relative">
+				class=" py-0.5 px-1 grow w-fit border-l border-slate-400 text-center relative">
 				{#if open}
 					<div
 						class="bg-white absolute bottom-0 left-0 w-full rounded border">

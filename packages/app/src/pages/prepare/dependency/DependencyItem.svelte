@@ -72,7 +72,7 @@
 				<button
 					class={cn(
 						dependency.has_driver
-							? " border-green-600 text-white bg-green-600"
+							? " border-green-500 text-white bg-green-500"
 							: "border-slate-500 text-slate-500 line-through",
 						"border rounded px-1 box-border"
 					)}

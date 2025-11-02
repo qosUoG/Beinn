@@ -4,21 +4,16 @@ version = "0.1.0"
 description = "Add your description here"
 readme = "README.md"
 requires-python = ">=3.13"
-dependencies = [
- "aiosqlite>=0.21.0",
- "cnoc",
- "examplelib",
- "numpy>=2.2.3",
- "pandas>=2.3.1",
- "tables>=3.10.2",
-]
+dependencies = [ "cnoc", "examplelib", "numpy>=2.2.3", "pandas>=2.3.1", "tables>=3.10.2" ]
 
 [tool]
 [tool.uv]
 link-mode = "copy"
 
 [tool.uv.sources]
-cnoc = { git = "https://github.com/qosUoG/Beinn", subdirectory = "packages/cnoc" }
+[tool.uv.sources.cnoc]
+git = "https://github.com/qosUoG/Beinn"
+subdirectory = "packages/cnoc"
 
 [tool.uv.sources.examplelib]
 path = "../examplelib"

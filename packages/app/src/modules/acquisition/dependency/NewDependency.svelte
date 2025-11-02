@@ -89,8 +89,7 @@
 			<div class="min-w-16 px-1 h-full flex items-center">
 				type<span class="text-red-500">*</span>
 			</div>
-			<div
-				class="grid grid-cols-3 flex-grow *:border-l-1 *:border-slate-400">
+			<div class="grid grid-cols-3 grow *:border-l *:border-slate-400">
 				{@render typeBoilerPlate("pip")}
 				{@render typeBoilerPlate("git")}
 				{@render typeBoilerPlate("path")}

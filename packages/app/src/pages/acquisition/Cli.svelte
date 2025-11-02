@@ -58,12 +58,12 @@
 {#if show_cli}
 	<div
 		class="absolute top-0 left-0 w-full h-full z-1000 flex justify-center items-center backdrop-blur-2xl">
-		<div class="bg-slate-700 rounded w-144 h-3/4">
+		<div class="bg-slate-700 rounded w-xl h-3/4">
 			<div
 				class="fcol-2 p-2 min-h-0 h-full w-full"
 				{@attach clickoutside}>
 				<div
-					class="overflow-y-scroll fcol text-white min-h-0 flex-grow scrollbar-slate-300 w-full">
+					class="overflow-y-scroll fcol text-white min-h-0 grow scrollbar-slate-300 w-full">
 					{#each experiment_controller.experiment!.cli.logs.entries as entry}
 						<div class="text-white">
 							{entry}
@@ -77,7 +77,7 @@
 					</div>
 					<textarea
 						onkeydown={keyDownHandler}
-						class=" resize-none outline-none focus:outline-none flex-grow scrollbar-slate-400 font-mono h-12"
+						class=" resize-none outline-none focus:outline-none grow scrollbar-slate-400 font-mono h-12"
 						spellcheck="false"
 						autocomplete="off"
 						autocapitalize="off"

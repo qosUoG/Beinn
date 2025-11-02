@@ -69,14 +69,14 @@
 	</div>
 	<div
 		{@attach refreshAttachment}
-		class="flex-grow min-h-0 overflow-y-scroll font-mono tracking-tighter font-light scrollbar-slate-200">
+		class="grow min-h-0 overflow-y-scroll font-mono tracking-tighter font-light scrollbar-slate-200">
 		{#each beinn_log_controller.log_entries as entry}
 			<div class="frow">
 				{#if beinn_log_controller.show_timetext}
 					{@render timetext(entry.timestamp)}
 				{/if}
 				<div
-					class="text-slate-100 text-wrap flex-grow whitespace-break-spaces break-all text-[11px]">
+					class="text-slate-100 text-wrap grow whitespace-break-spaces break-all text-[11px]">
 					{entry.message.replace(/\u001b\[.*?m/g, "")}
 				</div>
 			</div>

@@ -21,11 +21,17 @@ from ..public.experiment import ExperimentABC
 from ..public.manager import Manager
 
 
-class State:
+def flush():
+    print(end=None, flush=True)
+
+
+class _State:
     def __init__(self):
         self._lock = Lock()
         self.should_run = Event()
         self._should_stop = False
+        self._ended: bool = False
+        self._force_stop: bool = False
 
     def start(self):
         self.should_run.set()
@@ -59,6 +65,21 @@ class State:
         with self._lock:
             return self._should_stop
 
+    @property
+    def ended(self):
+        with self._lock:
+            return self._ended
+
+    @property
+    def force_stop(self):
+        with self._lock:
+            return self._force_stop
+
+    def kill(self):
+        with self._lock:
+            self._force_stop = True
+        self.stop()
+
 
 class Instance(TypedDict):
     name: str
@@ -73,43 +94,121 @@ class Payload(TypedDict):
 
 
 class App:
-    task: asyncio.Task
+    # A thread safe wrapper of App
+    def __init__(self, ws: ServerConnection, loop: asyncio.EventLoop, res: Payload):
+        self._lock: Lock = Lock()
+        self._loop = loop
+        self._ws = ws
+        self._manager = Manager()
+        self._state = _State()
 
-    equipments: dict[str, EquipmentABC] = {}
-    manager: Manager = Manager()
+        self._equipments: dict[str, EquipmentABC] = {}
+        self._experiment: ExperimentABC
 
-    experiment: ExperimentABC
-    ws: ServerConnection
-    loop: asyncio.EventLoop
+        equipments_payload = res["equipments"]
+        experiment_payload = res["experiment"]
 
-    state: State = State()
+        # Load all equipment
+        for e in equipments_payload:
+            self._equipments[e["name"]] = getattr(
+                importlib.reload(importlib.import_module(e["module"])),
+                e["cls"],
+            )()
 
-    experiment_lock: Lock = Lock()
+        # Load experiment
+        self._experiment = getattr(
+            importlib.reload(importlib.import_module(experiment_payload["module"])),
+            experiment_payload["cls"],
+        )()
 
-    @classmethod
-    def _flush(cls):
-        print(end=None, flush=True)
+        # Set all equipment params
+        for e in equipments_payload:
+            self._equipments[e["name"]].params = dict2Params(
+                e["params"], self._equipments
+            )
 
-    @classmethod
-    async def sendJson(cls, data: dict[str, Any]):
-        await cls.ws.send(json.dumps(data))
+        # Set experiment params
+        self._experiment.params = dict2Params(
+            experiment_payload["params"], self._equipments
+        )
 
-    @classmethod
-    def runCoroThreadsafe(cls, coro: Coroutine[Any, Any, None]):
-        asyncio.run_coroutine_threadsafe(coro, cls.loop)
+    def _runCoroThreadsafe(self, coro: Coroutine[Any, Any, None]):
+        asyncio.run_coroutine_threadsafe(coro, self._loop)
 
-    @classmethod
-    def saveNote(cls, note: str):
-        with cls.experiment_lock:
-            if cls.manager._savers:
-                for saver in cls.manager._savers:
+    def _sendJson(self, data: dict[str, Any]):
+        self._runCoroThreadsafe(self._ws.send(json.dumps(data)))
+
+    def _ended_event(self):
+        flush()
+        self._state._ended = True
+        self._sendJson({"event": "ended"})
+
+    def _paused_event(self):
+        self._sendJson({"event": "paused"})
+
+    def _loop_start_event(self, index: int):
+        self._sendJson({"event": "loop_start", "loop_count": index})
+
+    async def start(self):
+        # Run experiment start function
+        await asyncio.to_thread(self.initiate)
+
+        # Run the experiment loops
+        Thread(target=self._runner).start()
+
+    def pause(self):
+        self._state.pause()
+
+    def stop(self):
+        self._state.stop()
+
+    def cont(self):
+        self._state.cont()
+
+    def kill(self):
+        self._state.kill()
+        self.close()
+
+    @property
+    def ended(self):
+        return self._state.ended
+
+    def initiate(self):
+        with self._lock:
+            try:
+                self._experiment.start(self._manager)
+            except Exception as e:
+                if self._state.force_stop:
+                    return
+                print(f"Error starting experiment: {e}", flush=True)
+                print_tb(sys.exc_info()[2])
+                self._ended_event()
+                return
+            # send started
+
+            self._sendJson(
+                {
+                    "event": "started",
+                    "expected_loop_count": self._manager.expected_loop_count,
+                    "chart_configs": {
+                        k: v.getConfig() for k, v in self._manager._charts.items()
+                    },
+                    "saver_configs": [s._saver.path for s in self._manager._savers],
+                }
+            )
+
+            self._state.should_run.set()
+
+    def saveNote(self, note: str):
+        with self._lock:
+            if self._manager._savers:
+                for saver in self._manager._savers:
                     saver._saver.saveNote(note)
 
-    @classmethod
-    def interpret(cls, command: str, name: str | None = None):
+    def interpret(self, command: str, name: str | None = None):
         try:
             if name is not None:
-                command = command.replace(name, f"cls.equipments['{name}']")
+                command = command.replace(name, f"self.equipments['{name}']")
 
         except KeyError:
             print(f"{name} is not found in the list of equipments", flush=True)
@@ -119,7 +218,7 @@ class App:
             return
 
         try:
-            with cls.experiment_lock:
+            with self._lock:
                 print(
                     f"{eval(command, globals=globals())}",
                     flush=True,
@@ -133,7 +232,7 @@ class App:
             return
 
         try:
-            with cls.experiment_lock:
+            with self._lock:
                 f = StringIO()
 
                 with redirect_stdout(f):
@@ -146,143 +245,54 @@ class App:
             print(e, flush=True)
             return
 
-    @classmethod
-    async def start(cls, res: Payload, ws: ServerConnection):
-        cls.ws = ws
-        cls.loop = asyncio.get_running_loop()
-        # Load equipment and experiment
-
-        equipments_payload = res["equipments"]
-        experiment_payload = res["experiment"]
-
-        # Load all equipment
-        for e in equipments_payload:
-            cls.equipments[e["name"]] = getattr(
-                importlib.reload(importlib.import_module(e["module"])),
-                e["cls"],
-            )()
-
-        # Load experiment
-        cls.experiment = getattr(
-            importlib.reload(importlib.import_module(experiment_payload["module"])),
-            experiment_payload["cls"],
-        )()
-
-        # Set all equipment params
-        for e in equipments_payload:
-            cls.equipments[e["name"]].params = dict2Params(e["params"], cls.equipments)
-
-        # Set experiment params
-        cls.experiment.params = dict2Params(
-            experiment_payload["params"], cls.equipments
-        )
-
-        # Run experiment start function
-        await asyncio.to_thread(cls.inititate)
-
-        # Run the experiment loops
-        Thread(target=cls._runner_wrapper).start()
-
-    @classmethod
-    def inititate(cls):
-        with cls.experiment_lock:
-            try:
-                cls.experiment.start(cls.manager)
-            except Exception as e:
-                print(f"Error starting experiment: {e}", flush=True)
-                print_tb(sys.exc_info()[2])
-                cls._flush()
-                cls.runCoroThreadsafe(cls.sendJson({"event": "ended"}))
-                cls.ws.close()
-                cls.task.cancel()
-                return
-            # send started
-            cls.runCoroThreadsafe(
-                cls.sendJson(
-                    {
-                        "event": "started",
-                        "expected_loop_count": cls.manager.expected_loop_count,
-                        "chart_configs": {
-                            k: v.getConfig() for k, v in cls.manager._charts.items()
-                        },
-                        "saver_configs": [s._saver.path for s in cls.manager._savers],
-                    }
-                )
-            )
-
-            cls.state.should_run.set()
-
-    # All following methods are called from the runner thread
-
-    @classmethod
-    def _runner_wrapper(cls):
-        cls._runner()
-        cls.runCoroThreadsafe(cls.ws.close())
-        cls.task.cancel()
-
-    @classmethod
-    def _runner(cls):
+    def _runner(self):
         try:
             loop_count = -1
             while True:
                 # Wait until the running event is set in each loop
-                cls.state.should_run.wait()
+                self._state.should_run.wait()
 
                 # Stop the experiment is the stop event is set
-                if cls.state.should_stop:
-                    cls._ended_event()
+                if self._state.should_stop:
+                    self._ended_event()
                     return
 
                 # Loop the experiment once with the newest index
                 loop_count += 1
                 try:
-                    cls._loop_start_event(loop_count)
-                    with cls.experiment_lock:
-                        cls.experiment.loop(
+                    self._loop_start_event(loop_count)
+                    with self._lock:
+                        self._experiment.loop(
                             loop_count,
-                            cls.state.shouldStop,
+                            self._state.shouldStop,
                         )
-                    cls._flush()
+                    flush()
 
                 except ExperimentEnded:
-                    cls._ended_event()
+                    self._ended_event()
                     return
 
                 # Pause the loop
-                if not cls.state.should_run.is_set():
+                if not self._state.should_run.is_set():
                     # Decrement to exclude the previous loop index
                     loop_count -= 1
-                    cls._paused_event()
+                    self._paused_event()
 
         except Exception as e:
+            if self._state.force_stop:
+                return
             print(f"{type(e).__name__} in experiment: {e}", flush=True)
             print_tb(sys.exc_info()[2])
-            cls._flush()
-            cls._ended_event()
+            self._ended_event()
             return
 
-    @classmethod
-    def _ended_event(cls):
-        cls._close()
-        cls._flush()
-        cls.runCoroThreadsafe(cls.sendJson({"event": "ended"}))
-
-    @classmethod
-    def _paused_event(cls):
-        cls.runCoroThreadsafe(cls.sendJson({"event": "paused"}))
-
-    @classmethod
-    def _loop_start_event(cls, index: int):
-        cls.runCoroThreadsafe(
-            cls.sendJson({"event": "loop_start", "loop_count": index})
-        )
-
-    @classmethod
-    def _close(cls):
-        cls.experiment.cleanup()
-        for chart in cls.manager._charts.values():
+    def close(self):
+        self._lock.acquire(True, 1)
+        self._experiment.cleanup()
+        for chart in self._manager._charts.values():
             chart.close()
-        for saver in cls.manager._savers:
+        for saver in self._manager._savers:
             saver._saver.close()
-        for e in cls.equipments.values():
+        for e in self._equipments.values():
             e.cleanup()
+        self._lock.release()

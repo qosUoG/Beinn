@@ -44,12 +44,19 @@ class WorkspaceController {
         if (parsed.tool.uv["link-mode"] === undefined) parsed.tool.uv["link-mode"] = "copy"
         await writeTextFile(path + "/pyproject.toml", stringify(parsed))
 
-        await shell({ fn: "uv", cmd: "add pandas tables numpy", cwd: path, description: "Installing pandas, tables, numpy" })
+        // Check what needs to be installed
+        const required_packages = ["pandas", "tables", "numpy"];
+        let install_command = ["add"];
+        for (const pkg of required_packages) {
+            if (!(parsed.project.dependencies as string[]).find(dep => dep.startsWith(pkg)))
+                install_command.push(pkg)
+        }
 
-        await shell({ fn: "uv", cmd: "add git+https://github.com/qosUoG/Beinn#subdirectory=packages/cnoc", cwd: path, description: "Installing cnoc" })
+        if (install_command.length > 1)
+            await shell({ fn: "uv", cmd: install_command, cwd: path, description: "Installing " + install_command.join(", ") })
 
-        // In case cnoc is already installed and stale
-        // await shell({ fn: "uv", cmd: "lock --upgrade-package cnoc", cwd: path, description: "Updating cnoc" })
+        if (!(parsed.project.dependencies as string[]).find(dep => dep.startsWith("cnoc")))
+            await shell({ fn: "uv", cmd: "add git+https://github.com/qosUoG/Beinn#subdirectory=packages/cnoc", cwd: path, description: "Installing cnoc" })
 
         await shell({ fn: "uv", cmd: "sync", cwd: path, description: "Syncing uv" })
 

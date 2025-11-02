@@ -1,5 +1,5 @@
-import { shell, type Prettify } from "$lib/utils"
-import type { AllParamTypes, SelectFloatParam, SelectStrParam, SimpleParamType } from "./params.svelte"
+import { deepCopy, shell, type Prettify } from "$lib/utils"
+import { runtime2Save, save2Runtime, type AllParamTypes, type RuntimeAllParamTypes, type RuntimeEquipmentParam, type SelectFloatParam, type SelectStrParam, type SimpleParamType } from "./params.svelte"
 import { dependency_controller } from "./dependency.svelte"
 import { workspace_controller } from "./workspace.svelte"
 import { tick } from "svelte"
@@ -30,7 +30,7 @@ export class Instance {
     module: string
     cls: string
 
-    params: Record<string, AllParamTypes> = $state({})
+    params: Record<string, RuntimeAllParamTypes> = $state({})
 
     name: string
     temp_name: string
@@ -51,7 +51,7 @@ export class Instance {
         const res = await this.getParams()
         if (res === undefined) return
 
-        this.params = res.params
+        this.params = save2Runtime(res.params)
 
         await tick()
 
@@ -69,10 +69,10 @@ export class Instance {
         const save: {
             params: Record<string, AllParamTypes>,
             composite_opens: Record<string, boolean>,
-        } = JSON.parse(JSON.stringify({
+        } = deepCopy({
             params: this.params,
             composite_opens: this.composite_opens,
-        }))
+        })
 
         // Get the default params list of the instance
         const res = await this.getParams()
@@ -82,11 +82,12 @@ export class Instance {
             return
         }
 
-        this.params = res.params
+        this.params = save2Runtime(res.params)
+
 
         await tick()
 
-        this.assignParams(save.params)
+        await this.assignParams(save.params)
 
         await tick()
 
@@ -113,15 +114,32 @@ export class Instance {
         return JSON.parse(stdout) as ConcInstance
     }
 
-    async assignParams(params: Prettify<Instance["params"]>) {
+
+
+    async assignParams(params: Record<string, AllParamTypes>) {
         const assignParam = (obj: Prettify<Exclude<Instance["params"], "composite">>, key: string, param: SimpleParamType) => {
             if (!(key in obj) || obj[key].type !== param.type) return
 
             switch (param.type) {
                 case "instance.equipment": {
-                    if (equipment_controller.equipment_names.includes(param.value))
-                        obj[key].value = param.value
+                    if (!param.value) {
+                        (obj[key] as RuntimeEquipmentParam).value = null;
+                        (obj[key] as RuntimeEquipmentParam).instance = undefined
+                        return
+                    }
 
+
+                    const equipment = equipment_controller.equipments.find(e => e.name === param.value)
+                    if (equipment === undefined) {
+                        log_controller.appendError(`Cannot assign param ${key} to ${param.value}: equipment not found`);
+                        (obj[key] as RuntimeEquipmentParam).value = null;
+                        (obj[key] as RuntimeEquipmentParam).instance = undefined;
+                        return
+                    }
+
+
+                    (obj[key] as RuntimeEquipmentParam).value = param.value;
+                    (obj[key] as RuntimeEquipmentParam).instance = equipment
                     return
                 }
                 case "select.str": {
@@ -162,7 +180,7 @@ export class Instance {
             name: this.name,
             module: this.module,
             cls: this.cls,
-            params: this.params,
+            params: runtime2Save(this.params),
             param_opens: this.param_opens,
             composite_opens: this.composite_opens,
         })

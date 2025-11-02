@@ -6,6 +6,7 @@
 	import {
 		ChevronDown,
 		ChevronRight,
+		ChevronsLeftRightEllipsis,
 		FolderSync,
 		LoaderCircle,
 		Trash2,
@@ -86,6 +87,20 @@
 		{/if}
 
 		<div class="frow-1">
+			<button
+				aria-label={`REPL ${equipment.name}`}
+				class={cn(
+					" icon-btn-sm text-white ",
+					experiment_controller.editable
+						? " bg-green-500"
+						: "bg-slate-300 cursor-not-allowed *:cursor-not-allowed **:cursor-not-allowed"
+				)}
+				onclick={async () => {
+					if (experiment_controller.editable)
+						await equipment_controller.startREPL(equipment);
+				}}>
+				<ChevronsLeftRightEllipsis />
+			</button>
 			{#if equipment.reloading}
 				<div class="icon-btn-sm bg-blue-600">
 					<div class="text-white animate-spin">
@@ -105,7 +120,8 @@
 						if (experiment_controller.editable) equipment.reload();
 					}}>
 					<FolderSync />
-				</button>{/if}
+				</button>
+			{/if}
 
 			<button
 				aria-label={`Remove ${equipment.name}`}

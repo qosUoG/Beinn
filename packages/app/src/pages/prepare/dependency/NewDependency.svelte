@@ -97,13 +97,12 @@
 			}}>{type}</button>
 	{/snippet}
 	<div
-		class="fcol *:border-1 *:border-slate-400 *:border-b-0 last:border-b-1 last:border-b-slate-400">
+		class="fcol *:border *:border-slate-400 *:border-b-0 last:border-b last:border-b-slate-400">
 		<div class="frow items-stretch">
 			<div class="min-w-16 px-1 h-full flex items-center">
 				type<span class="text-red-500">*</span>
 			</div>
-			<div
-				class="grid grid-cols-3 flex-grow *:border-l-1 *:border-slate-400">
+			<div class="grid grid-cols-3 grow *:border-l *:border-slate-400">
 				{@render typeBoilerPlate("pip")}
 				{@render typeBoilerPlate("git")}
 				{@render typeBoilerPlate("path")}

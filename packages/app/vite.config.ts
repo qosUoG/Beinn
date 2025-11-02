@@ -7,6 +7,9 @@ const host = process.env.TAURI_DEV_HOST;
 
 // https://vite.dev/config/
 export default defineConfig({
+  worker: {
+    format: 'es'
+  },
   clearScreen: false,
   server: {
     port: 5173,
@@ -50,5 +53,7 @@ export default defineConfig({
 
       $controllers: path.resolve("./src/controllers"),
     },
+    // dedupe: ['vscode']
   },
+
 })
