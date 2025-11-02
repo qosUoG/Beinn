@@ -33,6 +33,8 @@ class ChartABC(ABC):
             # Make sure to have a copy
             self._history += encoded
 
+            print("encoded", encoded, flush=True)
+
             if self._subscribed:
                 self._buf = encoded
                 self._has_data.set()
