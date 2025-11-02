@@ -89,6 +89,7 @@ async def handler(ws: ServerConnection):
     elif path.startswith("/chart"):
         # unquote.split => ["", "chart", "<chart_title>"]
         print("connect", flush=True)
+        print(len(Globals.wss), flush=True)
         await chartHandler(unquote(path).split("/")[2], ws)
 
     elif path == "/close":
