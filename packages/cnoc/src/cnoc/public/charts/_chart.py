@@ -57,7 +57,6 @@ class ChartABC(ABC):
                     self._subscribed = False
                     break
 
-            with self._lock:
                 res = self._buf
                 self._has_data.clear()
                 yield res
