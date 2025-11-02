@@ -64,6 +64,8 @@ class ChartABC(ABC):
                 yield res
 
     def unsubscribe(self):
+        if self._lock.locked():
+            self._lock.release()
         with self._lock:
             self._subscribed = False
             self._has_data.clear()
