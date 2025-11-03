@@ -81,14 +81,22 @@ class ExampleExperiment(ExperimentABC):
         # self.inputs = numpy.arange(self.params["intparam"].value)
 
         # # # After the params, instantiate charts and sql savers as needed
-        self.scatter_plot: charts.Scatter = charts.Scatter(
-            title="Example Scatter Plot",
+        self.scatter_plot1: charts.Scatter = charts.Scatter(
+            title="Example Scatter Plot1",
             x_axis="index",
             y_axis="C",
             y_names=["temperature"],
             mode="append",
         )
-        manager.createChart(self.scatter_plot)
+        manager.createChart(self.scatter_plot1)
+        self.scatter_plot2: charts.Scatter = charts.Scatter(
+            title="Example Scatter Plot2",
+            x_axis="index",
+            y_axis="C",
+            y_names=["temperature"],
+            mode="append",
+        )
+        manager.createChart(self.scatter_plot2)
         self.saver = Saver("data.h5", self.params)
 
         manager.createSaver(self.saver)
@@ -129,7 +137,7 @@ class ExampleExperiment(ExperimentABC):
         # Raise an exception such that qoslapapp knows experiment is ended
         # print(f"loop: {index}")
         value = random.random()
-        self.scatter_plot.plot(
+        self.scatter_plot1.plot(
             {
                 "chart:x": index,
                 "temperature": value,

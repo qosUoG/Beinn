@@ -1,5 +1,5 @@
 <script lang="ts">
-	import { CalendarClock } from "@lucide/svelte";
+	import { ClockFading } from "@lucide/svelte";
 	import Timer from "./Timer.svelte";
 	import type { Experiment } from "$controllers/experiment.svelte";
 
@@ -25,7 +25,7 @@
 <div
 	class="border border-slate-600 box-border bg-slate-200 rounded frow items-center justify-center">
 	<span class="icon-btn-sm">
-		<CalendarClock />
+		<ClockFading />
 	</span>
 	{#if show_time}
 		{#key experiment.total_time_clock.milliseconds - experiment.loop_time_clock.milliseconds}

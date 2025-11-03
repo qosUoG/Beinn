@@ -27,6 +27,28 @@ export function getRandomId(targetKeySet: string[]) {
 
 export const sleep = (ms: number) => new Promise(r => setTimeout(r, ms));
 
+export const debounce = (callback: (...args: any[]) => void, wait: number) => {
+    let timer: Timer
+    return (...args: any[]) => {
+        if (timer) clearTimeout(timer)
+
+        timer = setTimeout(() => {
+            callback(...args);
+        }, wait);
+    };
+}
+
+export const throttle = (callback: (...args: any[]) => void, delay: number) => {
+    let lastTime = 0;
+    return (...args: any[]) => {
+        let now = Date.now();
+        if (now - lastTime >= delay) {
+            callback(...args);
+            lastTime = now;
+        }
+    };
+}
+
 
 export async function shell({ fn, cmd, description, cwd }:
     { fn: string, cmd: string | string[], description: string, cwd: string }) {

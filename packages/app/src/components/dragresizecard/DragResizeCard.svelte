@@ -16,6 +16,8 @@
 		children,
 		target = $bindable(),
 		class: clazz,
+		onmousedown,
+		onmouseup,
 	}: {
 		parent: HTMLElement;
 		top: number;
@@ -37,14 +39,17 @@
 
 		children: Snippet;
 		class?: string;
-		target: HTMLElement | undefined;
+		target: HTMLDivElement | undefined;
+
+		onmousedown?: (target: HTMLDivElement) => void;
+		onmouseup?: (target: HTMLDivElement) => void;
 	} = $props();
 
 	const getStyle = (
 		v: "top" | "bottom" | null,
 		h: "left" | "right" | null
 	) => {
-		let style = "absolute mx-1 z-2  ";
+		let style = "absolute mx-1   ";
 		switch (h) {
 			case "left":
 				style += "w-2 -left-1 ";
@@ -116,12 +121,19 @@
 	</div>
 
 	<div
+		role={"chart move"}
 		class={cn(
-			"absolute top-1 left-1/2 -translate-x-1/2 rounded w-6 text-center h-6 py-1 text-slate-600 bg-slate-200 z-100",
+			"absolute top-1 left-1/2 -translate-x-1/2 rounded w-6 text-center h-6 py-1 text-slate-600 bg-slate-200 ",
 			moving
 				? "cursor-grabbing **:cursor-grabbing"
 				: "cursor-grab **:cursor-grab"
 		)}
+		onmouseup={() => {
+			if (onmouseup) onmouseup(target!);
+		}}
+		onmousedown={(e) => {
+			if (onmousedown) onmousedown(target!);
+		}}
 		{@attach move(parent, target, moving, onmove)}>
 		<GripHorizontal />
 	</div>

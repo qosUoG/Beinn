@@ -31,6 +31,7 @@ const _chart_config = {
             x: {
                 type: "linear",
                 title: { text: "", display: true }
+
             },
             y: {
                 type: "linear",
@@ -44,13 +45,26 @@ const _chart_config = {
             line: {
                 borderWidth: 2
             }
-        }
+        },
+        plugins: {
+            decimation: {
+                enabled: true
+            },
+            // tooltip: { position: 'nearest' }
+
+        },
+        // interaction: {
+        //     intersect: false,
+        //     mode: 'nearest',
+        //     axis: 'xy',
+        // },
+
     },
 
 } satisfies ChartConfiguration<"line">
 
 function startChart() {
-    _decimation = 0
+    // _decimation = 0
     _chart_config.data.datasets = _scatter_config.y_names.map(label => ({ data: [], label }))
     _chart_config.options.scales.x.title.text = _scatter_config.x_axis
     _chart_config.options.scales.y.title.text = _scatter_config.y_axis
@@ -74,6 +88,11 @@ const handlers: Handler = {
     unset_canvas: function () { },
     resize: function () { },
     set_is_drawing_points: function () { },
+    zoom: function () { },
+    pan: function () { },
+    auto_axis: function () { },
+    enable_tooltip: function () { },
+    disable_tooltip: function () { },
 }
 
 handlers.set_config = function set_config({ config }) {
@@ -133,9 +152,151 @@ handlers.resize = function resize({ width, height }) {
     _chart.update()
 }
 
+handlers.zoom = function zoom({ direction, x, y }) {
+    if (_chart === undefined) {
+        postMessage("Chart shall exist when zoom is called")
+        return
+    }
+
+    const factor = direction === "in" ? 0.9 : 1.1
+
+    // Determine where the zoom position is along x axis
+    if (x) {
+        const x_value = _chart.scales.x.getValueForPixel(x)
+        if (x_value === undefined) { return }
+
+        const old_x_min = _chart.scales.x.min
+        const old_x_max = _chart.scales.x.max
+
+        const new_x_min = x_value - factor * (x_value - old_x_min)
+        const new_x_max = x_value + factor * (old_x_max - x_value)
+
+        _chart.options!.scales!.x!.min = new_x_min
+        _chart.options!.scales!.x!.max = new_x_max
+
+    }
+
+    // Determine where the zoom position is along y axis
+    if (y) {
+        const y_value = _chart.scales.y.getValueForPixel(y)
+        if (y_value === undefined) { return }
+
+        const old_y_min = _chart.scales.y.min
+        const old_y_max = _chart.scales.y.max
+
+        const new_y_min = y_value - factor * (y_value - old_y_min)
+        const new_y_max = y_value + factor * (old_y_max - y_value)
+
+        _chart.options!.scales!.y!.min = new_y_min
+        _chart.options!.scales!.y!.max = new_y_max
+    }
+
+    _chart.update()
+}
+
+
+handlers.pan = function pan({ old_x, old_y, new_x, new_y }) {
+    if (_chart === undefined) {
+        postMessage("Chart shall exist when pan is called")
+        return
+    }
+
+    const old_x_value = _chart.scales.x.getValueForPixel(old_x)
+    if (old_x_value === undefined) return
+
+    const old_y_value = _chart.scales.y.getValueForPixel(old_y)
+    if (old_y_value === undefined) return
+
+    const new_x_value = _chart.scales.x.getValueForPixel(new_x)
+    if (new_x_value === undefined) return
+
+    const new_y_value = _chart.scales.y.getValueForPixel(new_y)
+    if (new_y_value === undefined) return
+
+    const x_offset = new_x_value - old_x_value
+    const y_offset = new_y_value - old_y_value
+
+    _chart.options!.scales!.x!.min = _chart.scales.x.min - x_offset
+    _chart.options!.scales!.x!.max = _chart.scales.x.max - x_offset
+    _chart.options!.scales!.y!.min = _chart.scales.y.min - y_offset
+    _chart.options!.scales!.y!.max = _chart.scales.y.max - y_offset
+
+    _chart.update()
+}
+
+handlers.auto_axis = function auto_axis() {
+    if (_chart === undefined) {
+        postMessage("Chart shall exist when auto_axis is called")
+        return
+    }
+
+    _chart.options!.scales!.x!.min = undefined
+    _chart.options!.scales!.x!.max = undefined
+    _chart.options!.scales!.y!.min = undefined
+    _chart.options!.scales!.y!.max = undefined
+
+    _chart.update()
+}
+
+handlers.enable_tooltip = function enable_tooltip({ x, y }) {
+    if (_chart === undefined) {
+        postMessage("Chart shall exist when enable_tooltip is called")
+        return
+    }
+
+    // Reset tooltip
+    const tooltip = _chart.tooltip!;
+    if (tooltip.getActiveElements().length > 0)
+        tooltip.setActiveElements([], { x: 0, y: 0 });
+
+    // Get the x y values
+    const x_value = _chart.scales.x.getValueForPixel(x)
+    const y_value = _chart.scales.y.getValueForPixel(y)
+    if (x_value === undefined || y_value === undefined) return
+
+    // Find the nearest datapoint
+    let datasetIndex = 0
+    let index = 0
+    let distance = Math.abs(_datasets[0].data[0].x! - x_value) + Math.abs(_datasets[0].data[0].y! - y_value)
+    _datasets.forEach((dataset, di) => {
+        dataset.data.forEach(({ x: data_x, y: data_y }, i) => {
+            const distance_x = Math.abs(x_value - data_x)
+            const distance_y = Math.abs(y_value - data_y)
+            if (distance_x + distance_y < distance) {
+                distance = distance_x + distance_y
+                datasetIndex = di
+                index = i
+            }
+        })
+    })
+
+    // Find the nearest point
+    const chartArea = _chart.chartArea;
+
+    tooltip.setActiveElements([{ datasetIndex, index }],
+        {
+            x: (chartArea.left + chartArea.right) / 2,
+            y: (chartArea.top + chartArea.bottom) / 2,
+        });
+
+    _chart.update();
+}
+
+handlers.disable_tooltip = function disable_tooltip() {
+    if (_chart === undefined) {
+        postMessage("Chart shall exist when disable_tooltip is called")
+        return
+    }
+
+    // Reset tooltip
+    _chart.tooltip!.setActiveElements([], { x: 0, y: 0 });
+
+    _chart.update();
+}
+
 let _online = false
-let _pending_update = false
-let _update_timeout: Timer | undefined = undefined
+// let _pending_update = false
+// let _update_timeout: Timer | undefined = undefined
 
 function wsDisconnect() {
     _online = false
@@ -295,97 +456,107 @@ function wsConnect() {
 
         }
 
-        // Flag that update is pending
-        if (_update_timeout !== undefined) {
-            _pending_update = true
+        if (_chart === undefined) {
+            postMessage("Chart shall exist when update is called")
             return
         }
 
-        updateChart()
-
-        _update_timeout = setInterval(() => {
-            if (_pending_update) {
-                updateChart()
-                return
-            }
-            clearInterval(_update_timeout)
-            _update_timeout = undefined
-        }, 200)
-    }
-}
-
-let _decimation = 0
-
-function updateChart() {
-
-    if (_chart === undefined || _canvas === undefined) return
-
-    const width = _canvas.width
-    const data_length = _datasets[0].data.length
-    const number_of_datasets = _datasets.length
-    // Decimate data only if needed
-    if (data_length < width * 4) {
         _chart.data.datasets = _datasets
-        _chart.update()
+        _chart!.update()
 
-        return
+
+        // Flag that update is pending
+        // if (_update_timeout !== undefined) {
+        //     _pending_update = true
+        //     return
+        // }
+
+
+        // updateChart()
+
+        // _update_timeout = setInterval(() => {
+        //     if (_pending_update) {
+        //         updateChart()
+        //         return
+        //     }
+        //     clearInterval(_update_timeout)
+        //     _update_timeout = undefined
+        // }, 200)
     }
-
-    const new_decimation = Math.floor(data_length / width)
-
-    // Cursor to start decimating from
-    let from_index = 0
-
-    if (new_decimation === _decimation) {
-        // If decimation still the same, check if new data points is enough to form new decimation
-        const old_data_length = _chart.data.datasets[0].data.length
-
-        // Not enough data
-        if (data_length < old_data_length + _decimation)
-            return
-
-        // Cursor for decimating new point(s)
-        from_index = old_data_length * _decimation / 2
-
-
-    } else {
-        // Otherwise, start from scratch
-        _decimation = new_decimation
-
-        _chart.destroy()
-        _chart = new Chart(_canvas as unknown as HTMLCanvasElement, deepCopy(_chart_config))
-    }
-
-    for (let i = from_index; i < data_length; i += _decimation) {
-
-        // First check if reached end of possible decimation
-        if (i + _decimation >= data_length)
-            break
-
-        // Decimate each dataset
-        for (let d_i = 0; d_i < number_of_datasets; d_i++) {
-            const slice = _datasets[d_i].data.slice(i + 1, i + _decimation)
-
-            let min_y = _datasets[d_i].data[i].y
-            let max_y = _datasets[d_i].data[i].y
-
-            for (let s_i = 0; s_i < slice.length; s_i++) {
-                if (slice[s_i].y < min_y) min_y = slice[s_i].y
-                else if (slice[s_i].y > max_y) max_y = slice[s_i].y
-            }
-
-            const min_x = _datasets[d_i].data[i].x
-            const max_x = min_x + (slice[slice.length - 1].x - _datasets[d_i].data[i].x) / 2
-
-            _chart.data.datasets[d_i].data.push({ x: min_x, y: min_y })
-
-            _chart.data.datasets[d_i].data.push({ x: max_x, y: max_y })
-
-        }
-    }
-    _chart.update()
-    _pending_update = false
 }
+
+// let _decimation = 0
+
+// function updateChart() {
+
+//     if (_chart === undefined || _canvas === undefined) return
+
+//     const width = _canvas.width
+//     const data_length = _datasets[0].data.length
+//     const number_of_datasets = _datasets.length
+//     // Decimate data only if needed
+//     if (data_length < width * 4) {
+//         _chart.data.datasets = _datasets
+//         _chart.update()
+
+//         return
+//     }
+
+//     const new_decimation = Math.floor(data_length / width)
+
+//     // Cursor to start decimating from
+//     let from_index = 0
+
+//     if (new_decimation === _decimation) {
+//         // If decimation still the same, check if new data points is enough to form new decimation
+//         const old_data_length = _chart.data.datasets[0].data.length
+
+//         // Not enough data
+//         if (data_length < old_data_length + _decimation)
+//             return
+
+//         // Cursor for decimating new point(s)
+//         from_index = old_data_length * _decimation / 2
+
+
+//     } else {
+//         // Otherwise, start from scratch
+//         _decimation = new_decimation
+
+//         _chart.destroy()
+//         _chart = new Chart(_canvas as unknown as HTMLCanvasElement, deepCopy(_chart_config))
+//     }
+
+//     for (let i = from_index; i < data_length; i += _decimation) {
+
+//         // First check if reached end of possible decimation
+//         if (i + _decimation >= data_length)
+//             break
+
+//         // Decimate each dataset
+//         for (let d_i = 0; d_i < number_of_datasets; d_i++) {
+//             const slice = _datasets[d_i].data.slice(i + 1, i + _decimation)
+
+//             let min_y = _datasets[d_i].data[i].y
+//             let max_y = _datasets[d_i].data[i].y
+
+//             for (let s_i = 0; s_i < slice.length; s_i++) {
+//                 if (slice[s_i].y < min_y) min_y = slice[s_i].y
+//                 else if (slice[s_i].y > max_y) max_y = slice[s_i].y
+//             }
+
+//             const min_x = _datasets[d_i].data[i].x
+//             const max_x = min_x + (slice[slice.length - 1].x - _datasets[d_i].data[i].x) / 2
+
+//             _chart.data.datasets[d_i].data.push({ x: min_x, y: min_y })
+
+//             _chart.data.datasets[d_i].data.push({ x: max_x, y: max_y })
+
+//         }
+//     }
+//     _chart.update()
+//     _pending_update = false
+// }
 
 // Webworker onmessage
 onmessage = function (event: MessageEvent<ChartMessages>) {

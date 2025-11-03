@@ -1,7 +1,7 @@
 import { deepCopy, shell, sleep, type Prettify } from "$lib/utils"
 import { Child, Command } from "@tauri-apps/plugin-shell"
 import { EEBaseController, Instance, type ConcInstance, type InstanceSave } from "./_ee.svelte"
-import { Chart } from "./charts/charts.svelte"
+import { Chart } from "./charts/chart.svelte"
 import type { ChartConfigs } from "./charts/types"
 
 import { workspace_controller } from "./workspace.svelte"
@@ -10,6 +10,7 @@ import { tick } from "svelte"
 import { exists, readTextFile, writeTextFile } from "@tauri-apps/plugin-fs"
 import { equipment_controller } from "./equipment.svelte"
 import { Cli } from "./cli.svelte"
+import { log_controller } from "./log.svelte"
 
 type ExperimentEvent = {
     event: "started"
@@ -84,6 +85,7 @@ export class Experiment extends Instance {
         "stopping" = $state("ready")
 
     charts: Record<string, Chart> = $state({})
+    chart_in_focus: string | undefined = $state(undefined)
 
     loop_count: number = $state(0)
     expected_loop_count: number = $state(-1)
@@ -211,13 +213,26 @@ export class Experiment extends Instance {
                 case "started":
                     this.expected_loop_count = data.expected_loop_count
 
+                    let top = 16
+                    let left = 16
+                    let names: Set<string> = new Set()
+
                     for (const config of Object.values(data.chart_configs)) {
+                        if (names.has(config.title)) {
+                            this.cli.logs.append(`ERROR:Chart with title ${config.title} already exists`)
+                        }
+                        names.add(config.title)
+
                         if (this.charts[config.title] !== undefined) {
                             this.charts[config.title].setConfig(config)
-                            return
+                            top += 8
+                            left += 8
+                            continue
                         }
-                        const chart = new Chart(config)
-                        this.charts[config.title] = chart
+
+                        this.charts[config.title] = new Chart(config, top, left)
+                        top += 8
+                        left += 8
                     }
 
                     if (data.saver_configs.length > 0)

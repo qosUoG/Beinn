@@ -1,6 +1,6 @@
 <script lang="ts">
 	import { experiment_controller } from "$controllers/experiment.svelte";
-	import Chart from "./Chart.svelte";
+	import Chart from "./chart/Chart.svelte";
 	import Cli from "./Cli.svelte";
 	import Panel from "./panel/Panel.svelte";
 	import Note from "./Note.svelte";
