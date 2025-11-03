@@ -1,11 +1,11 @@
 import { deepCopy, shell, sleep, type Prettify } from "$lib/utils"
-import { Command } from "@tauri-apps/plugin-shell"
+import { Child, Command } from "@tauri-apps/plugin-shell"
 import { EEBaseController, Instance, type ConcInstance, type InstanceSave } from "./_ee.svelte"
 import { Chart } from "./charts/charts.svelte"
 import type { ChartConfigs } from "./charts/types"
 
 import { workspace_controller } from "./workspace.svelte"
-import type { AllParamTypes } from "./params.svelte"
+import type { AllParamTypes, RuntimeAllParamTypes, RuntimeSimpleParamType } from "./params.svelte"
 import { tick } from "svelte"
 import { exists, readTextFile, writeTextFile } from "@tauri-apps/plugin-fs"
 import { equipment_controller } from "./equipment.svelte"
@@ -23,17 +23,22 @@ type ExperimentEvent = {
     event: "paused"
 } | {
     event: "ended"
+    loop_ended: boolean
 }
 class Clock {
     milliseconds: number = $state(0)
     timer: Timer | undefined = undefined
     past_now: number = 0
 
+    get stopped() {
+        return this.timer === undefined
+    }
+
     start() {
         this.past_now = Date.now()
         this.timer = setInterval(() => {
             const now = Date.now()
-            this.milliseconds = now - this.past_now
+            this.milliseconds += now - this.past_now
             this.past_now = now
         }, 500)
     }
@@ -41,7 +46,7 @@ class Clock {
     stop() {
         if (this.timer === undefined) return
         this.clearTimer()
-        this.milliseconds = Date.now() - this.past_now
+        this.milliseconds += Date.now() - this.past_now
 
     }
 
@@ -55,6 +60,11 @@ class Clock {
     reset() {
         this.milliseconds = 0
         this.clearTimer()
+    }
+
+    restart() {
+        this.reset()
+        this.start()
     }
 }
 
@@ -75,27 +85,38 @@ export class Experiment extends Instance {
 
     charts: Record<string, Chart> = $state({})
 
-    current_loop_count: number = $state(0)
+    loop_count: number = $state(0)
     expected_loop_count: number = $state(-1)
 
     total_time_clock: Clock = $state(new Clock())
     loop_time_clock: Clock = $state(new Clock())
 
-    loop_count: number = $state(0)
+    starting_time_total: number | undefined = $state(undefined)
+
+
 
     ws: WebSocket | undefined = undefined
 
     note: string | undefined = $state(undefined)
-    sidetab_showing: "cli" | "notes" = $state("cli")
 
     cli: Cli = $state(new Cli())
 
-
+    process: Child | undefined = undefined
 
     async start() {
+        this.total_time_clock.reset()
+        this.loop_time_clock.reset()
+        this.starting_time_total = undefined
+
+
+
         if (this.ws !== undefined) this.ws.close(4000)
         new WebSocket("ws://localhost:8080/close")
-        await sleep(100)
+
+
+        if (this.process) this.process.kill()
+
+        this.total_time_clock.start()
         this.state = "starting"
         const handler = Command.create("uv", ["run", "experiment"], { cwd: workspace_controller.path! })
 
@@ -118,7 +139,10 @@ export class Experiment extends Instance {
             this.cli.logs.append(e)
         })
 
-        await handler.spawn()
+
+        this.process = await handler.spawn()
+
+
 
     }
 
@@ -200,14 +224,32 @@ export class Experiment extends Instance {
                         this.note = ""
                     break
                 case "loop_start":
+                    if (this.starting_time_total === undefined)
+                        this.starting_time_total = this.total_time_clock.milliseconds
+
+                    if (this.total_time_clock.stopped)
+                        this.total_time_clock.start()
+
+                    this.loop_time_clock.restart()
+
+
                     this.state = "looping"
-                    this.current_loop_count = data.loop_count
+                    this.loop_count = data.loop_count
                     break
                 case "paused":
                     this.state = "paused"
+                    this.loop_time_clock.stop()
+                    this.total_time_clock.stop()
                     break
                 case "ended":
                     this.state = "ready"
+                    this.loop_time_clock.stop()
+                    this.total_time_clock.stop()
+
+                    if (data.loop_ended)
+                        this.loop_count += 1
+
+
                     break
             }
         }
@@ -225,6 +267,22 @@ export class ExperimentController extends EEBaseController {
 
     get editable() {
         return this.experiment === undefined || this.experiment.state === "ready"
+    }
+
+    get playable() {
+        if (this.experiment === undefined || this.experiment.state !== "ready") return false
+
+        function paramIsPlayable(param: RuntimeSimpleParamType) {
+            return param.type !== "instance.equipment" || (param.required && param.value) || param.required === false;
+        }
+
+        return Object.values(experiment_controller.experiment!.params).every(
+            (param) => {
+                if (param.type === "composite")
+                    return Object.values(param.children).every((p) => paramIsPlayable(p))
+
+                return paramIsPlayable(param)
+            })
     }
 
     constructor() { super("experiment") }

@@ -1,0 +1,17 @@
+<script lang="ts">
+	import type { Experiment } from "$controllers/experiment.svelte";
+
+	let { experiment }: { experiment: Experiment } = $props();
+	import { Clock } from "@lucide/svelte";
+	import Timer from "./Timer.svelte";
+</script>
+
+<div
+	class="border border-slate-600 box-border bg-slate-200 rounded frow items-center justify-center">
+	<span class="icon-btn-sm">
+		<Clock />
+	</span>
+	{#key experiment.total_time_clock.milliseconds}
+		<Timer time={experiment.total_time_clock.milliseconds} class="px-1" />
+	{/key}
+</div>

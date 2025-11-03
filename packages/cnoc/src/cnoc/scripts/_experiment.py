@@ -138,10 +138,10 @@ class App:
     def _sendJson(self, data: dict[str, Any]):
         self._runCoroThreadsafe(self._ws.send(json.dumps(data)))
 
-    def _ended_event(self):
+    def _ended_event(self, loop_ended: bool):
         flush()
         self._state._ended = True
-        self._sendJson({"event": "ended"})
+        self._sendJson({"event": "ended", "loop_ended": loop_ended})
 
     def _paused_event(self):
         self._sendJson({"event": "paused"})
@@ -254,7 +254,7 @@ class App:
 
                 # Stop the experiment is the stop event is set
                 if self._state.should_stop:
-                    self._ended_event()
+                    self._ended_event(False)
                     return
 
                 # Loop the experiment once with the newest index
@@ -269,7 +269,7 @@ class App:
                     flush()
 
                 except ExperimentEnded:
-                    self._ended_event()
+                    self._ended_event(True)
                     return
 
                 # Pause the loop
@@ -283,7 +283,7 @@ class App:
                 return
             print(f"{type(e).__name__} in experiment: {e}", flush=True)
             print_tb(sys.exc_info()[2])
-            self._ended_event()
+            self._ended_event(False)
             return
 
     def close(self):
