@@ -9,7 +9,7 @@
 	onMount(() => {
 		if (canvas) chart.setCanvas(canvas.transferControlToOffscreen());
 		return () => {
-			chart.hide();
+			chart.unsetCanvas();
 		};
 	});
 </script>

@@ -1,4 +1,5 @@
 
+import { log_controller } from "$controllers/log.svelte";
 import type { ChartConfigs, ChartMessages } from "./types";
 
 
@@ -8,22 +9,7 @@ import type { ChartConfigs, ChartMessages } from "./types";
 export class Chart<T extends ChartConfigs = ChartConfigs> {
     worker: Worker
 
-    // Worker interface
-    #setIsDrawingPoints(value: boolean) {
-        this.worker.postMessage({ command: "set_is_drawing_points", payload: { is_drawing_points: value } } satisfies ChartMessages)
-    }
-
-    #resize(width: number, height: number) {
-        this.worker.postMessage({ command: "resize", payload: { width, height } } satisfies ChartMessages)
-    }
-
-
-
-    hide() {
-        this.worker.postMessage({ command: "hide" } satisfies ChartMessages)
-    }
-
-
+    // is_drawing_points
     #is_drawing_points = $state(false)
 
     get is_drawing_points() {
@@ -31,8 +17,12 @@ export class Chart<T extends ChartConfigs = ChartConfigs> {
     }
     set is_drawing_points(value: boolean) {
         this.#is_drawing_points = value
-        this.#setIsDrawingPoints(value)
+        this.worker.postMessage({ command: "set_is_drawing_points", payload: { is_drawing_points: value } } satisfies ChartMessages)
     }
+
+    // width and height
+    top: number = $state(8)
+    left: number = $state(8)
     #width = $state(560)
     #height = $state(400)
     get width() {
@@ -50,27 +40,13 @@ export class Chart<T extends ChartConfigs = ChartConfigs> {
         this.#resize(this.#width - 16, value - 48)
     }
 
-    top: number = $state(8)
-    left: number = $state(8)
-
+    #resize(width: number, height: number) {
+        this.worker.postMessage({ command: "resize", payload: { width, height } } satisfies ChartMessages)
+    }
 
     config: T
 
-    #showing = $state(true)
-
-    get showing() {
-        return this.#showing
-    }
-    set showing(value: boolean) {
-        this.#showing = value
-        if (value === false) {
-            this.hide()
-            return
-        }
-        // reset the chart
-        this.show()
-    }
-
+    showing = $state(true)
 
     constructor(config: T) {
         this.config = config
@@ -91,29 +67,24 @@ export class Chart<T extends ChartConfigs = ChartConfigs> {
         }
 
 
-        if (this.worker === undefined) throw Error(`Worker script of ${config.type} is undefined`)
-        this.worker.postMessage({
-            command: "instantiate",
-            payload: {
-                config
-            }
-        } satisfies ChartMessages)
+        if (this.worker === undefined) log_controller.appendError(`Worker script of ${config.type} is undefined`)
+
+        this.setConfig(config)
+    }
+
+    setConfig(config: T) {
+        this.worker.postMessage({ command: "set_config", payload: { config } } satisfies ChartMessages)
     }
 
     setCanvas(canvas: OffscreenCanvas) {
-
         this.worker.postMessage({ command: "set_canvas", payload: { canvas, width: this.#width - 16, height: this.#height - 48 } } satisfies ChartMessages, [canvas])
     }
 
-
-
-    show() {
-        this.worker.postMessage({ command: "show" } satisfies ChartMessages)
+    unsetCanvas() {
+        this.worker.postMessage({ command: "unset_canvas" } satisfies ChartMessages)
     }
 
-    restart(config: ChartConfigs) {
-        this.worker.postMessage({ command: "restart", payload: { config } } satisfies ChartMessages)
-    }
+
 
 
 }

@@ -182,13 +182,14 @@ export class Experiment extends Instance {
         this.ws.onmessage = (e) => {
 
             const data = JSON.parse(e.data) as ExperimentEvent
+            console.log(data)
             switch (data.event) {
                 case "started":
                     this.expected_loop_count = data.expected_loop_count
 
                     for (const config of Object.values(data.chart_configs)) {
                         if (this.charts[config.title] !== undefined) {
-                            this.charts[config.title].restart(config)
+                            this.charts[config.title].setConfig(config)
                             return
                         }
                         const chart = new Chart(config)

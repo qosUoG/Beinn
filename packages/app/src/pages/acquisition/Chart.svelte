@@ -10,13 +10,6 @@
 		parent = $bindable(),
 	}: { chart: Chart; parent: HTMLElement } = $props();
 
-	onMount(() => {
-		chart.show();
-		return () => {
-			chart.hide();
-		};
-	});
-
 	let target: HTMLDivElement | undefined = $state(undefined);
 </script>
 

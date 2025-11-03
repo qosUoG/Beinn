@@ -5,7 +5,6 @@
 	import TabSelect from "$components/fields/TabSelect.svelte";
 	import { equipment_controller } from "$controllers/equipment.svelte";
 	import type { RuntimeSimpleParamType } from "$controllers/params.svelte";
-	import { tick } from "svelte";
 
 	let {
 		label,

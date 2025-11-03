@@ -15,9 +15,6 @@ let _ws: WebSocket
 let _datasets: { data: { x: number, y: number }[], label: string }[] = []
 let _ws_interval: Timer | undefined
 
-
-
-
 const _chart_config = {
     type: "line",
     data: {
@@ -52,6 +49,18 @@ const _chart_config = {
 
 } satisfies ChartConfiguration<"line">
 
+function startChart() {
+    _decimation = 0
+    _chart_config.data.datasets = _scatter_config.y_names.map(label => ({ data: [], label }))
+    _chart_config.options.scales.x.title.text = _scatter_config.x_axis
+    _chart_config.options.scales.y.title.text = _scatter_config.y_axis
+    _datasets = _scatter_config.y_names.map(label => ({ data: [], label }))
+
+    _chart = new Chart(_canvas as unknown as HTMLCanvasElement, deepCopy(_chart_config))
+
+    // Establish websocket connection
+    wsConnect()
+}
 
 
 
@@ -60,26 +69,54 @@ type Handler = {
     (_: Extract<ChartMessages, { command: K }>["payload"]) => void
 }
 const handlers: Handler = {
-    instantiate: function () { },
+    set_config: function () { },
     set_canvas: function () { },
+    unset_canvas: function () { },
     resize: function () { },
     set_is_drawing_points: function () { },
-    hide: function () { },
-    show: function () { },
-    restart: function () { }
 }
 
-
-
-
-
-handlers.instantiate = function instantiate({ config }: { config: ScatterConfig }) {
+handlers.set_config = function set_config({ config }) {
     _scatter_config = config
 
-    resetConfig()
+    if (!_chart) return
+
+    // if there is a chart running
+    wsDisconnect()
+    _chart.destroy()
+    _chart = undefined
+
+    startChart()
 }
 
-handlers.set_is_drawing_points = function set_is_drawing_points({ is_drawing_points }: { is_drawing_points: boolean }) {
+handlers.set_canvas = function set_canvas({ canvas, width, height }) {
+    // Make sure its in fresh state
+    _canvas = canvas
+    _canvas.width = width
+    _canvas.height = height
+
+    if (_chart !== undefined) {
+        postMessage("Scatter worker: Chart shall not exist when set_canvas is called")
+        return
+    }
+
+    startChart()
+}
+
+handlers.unset_canvas = function unset_canvas() {
+    if (_chart === undefined) {
+        postMessage("Scatter worker: Chart shall exist when unset_canvas is called")
+        return
+    }
+
+    wsDisconnect()
+
+    _chart.destroy()
+    _chart = undefined
+    _canvas = undefined
+}
+
+handlers.set_is_drawing_points = function set_is_drawing_points({ is_drawing_points }) {
     if (_chart) {
         _chart.options.elements!.point!.radius = is_drawing_points ? 4 : 0
         _chart.update()
@@ -87,89 +124,30 @@ handlers.set_is_drawing_points = function set_is_drawing_points({ is_drawing_poi
     _chart_config.options.elements.point.radius = is_drawing_points ? 4 : 0
 }
 
-handlers.resize = function resize({ width, height }: { width: number, height: number }) {
-    if (_canvas && _chart) {
-        _canvas.width = width
-        _canvas.height = height
-        _chart.resize(width, height)
-        _chart.update()
+handlers.resize = function resize({ width, height }) {
+    if (_canvas === undefined || _chart === undefined) return
 
-
-    }
-}
-
-handlers.set_canvas = function set_canvas({ canvas, width, height }: { canvas: OffscreenCanvas, width: number, height: number }) {
-
-    _canvas = canvas
     _canvas.width = width
     _canvas.height = height
-
-    if (_chart !== undefined)
-        _chart.destroy()
-
-    _chart = new Chart(_canvas as unknown as HTMLCanvasElement, deepCopy(_chart_config))
-
-    // load previous chart data 
-    updateData()
-
-
-    // Establish websocket connection if not already established
-    wsConnect()
+    _chart.resize(width, height)
+    _chart.update()
 }
-
-handlers.show = function show() {
-    resetConfig()
-}
-
-
-handlers.hide = function hide() {
-    if (_chart) _chart.destroy()
-
-    _canvas = undefined
-
-    if (_ws_interval !== undefined) {
-        clearInterval(_ws_interval)
-        _ws_interval = undefined
-    }
-
-    if (_ws.readyState !== _ws.CLOSED) {
-        _ws.close(4000)
-    }
-}
-
-
-
-handlers.restart = function restart(res: { config: ScatterConfig }) {
-    handlers.instantiate(res)
-    if (_chart !== undefined)
-        _chart.destroy()
-
-    _chart = new Chart(_canvas as unknown as HTMLCanvasElement, deepCopy(_chart_config))
-
-    // load previous chart data 
-    updateData()
-
-
-    // Establish websocket connection if not already established
-    wsConnect()
-}
-
-function resetConfig() {
-    _decimation = 0
-    _chart_config.data.datasets = _scatter_config.y_names.map(label => ({ data: [], label }))
-    _chart_config.options.scales.x.title.text = _scatter_config.x_axis
-    _chart_config.options.scales.y.title.text = _scatter_config.y_axis
-    _datasets = _scatter_config.y_names.map(label => ({ data: [], label }))
-}
-
-
 
 let _online = false
 let _pending_update = false
 let _update_timeout: Timer | undefined = undefined
+
+function wsDisconnect() {
+    _online = false
+
+    clearInterval(_ws_interval)
+    _ws_interval = undefined
+
+    _ws.onclose = null
+    _ws.close()
+}
+
 function wsConnect() {
-
-
     const wsNotConnected = () =>
         (_ws === undefined || (_ws.readyState !== WebSocket.OPEN && _ws.readyState !== WebSocket.CONNECTING))
 
@@ -231,86 +209,87 @@ function wsConnect() {
             }
         }
 
+        function overwriteMode() {
+            // Get all of the frames
+            const frames = [...parseFrames(frames_bytes)]
 
+            // Frame size is assumed to be right, as such only size of the first frame is checked
+            if (frames[0].length !== y_length + 1) throw Error("Frame size does not match with the config of the chart")
 
+            // frames are first sorted by it's x value
+            frames.sort((a, b) => (a[0] as number) - (b[0] as number))
+
+            // append frame in reversed order, skip if repeated
+            const x_set = new Set<number>()
+            // Sort the y dataset if that data is added to that y 
+            const y_set = new Set<number>()
+            for (let frame_index = frames.length; frame_index > 0; frame_index--) {
+                const frame = frames[frame_index]
+
+                const x = frame[0] as number
+
+                // put x into set to avoid repeat
+                if (x_set.has(x)) continue
+                else x_set.add(x)
+
+                // Put each non null y value into dataset
+                for (let frame_y_index = 1; frame_y_index < frame.length; frame_y_index++) {
+                    const y = frame[frame_y_index]
+                    if (y === null) continue
+
+                    // add y to dataset that needs sorted
+                    y_set.add(frame_y_index);
+
+                    const chart_y_index = frame_y_index - 1
+
+                    // Check if a point with same x already exist
+                    const point_index = _datasets[chart_y_index].data.findIndex(point => (point as Point).x === x);
+
+                    // -1 if not found
+                    if (point_index === -1)
+                        _datasets[chart_y_index].data.push({ x, y })
+                    else
+                        (_datasets[chart_y_index].data[point_index] as Point).y = y
+                }
+            }
+
+            // sort the datasets required
+            y_set.forEach(chart_y_index => {
+                (_datasets[chart_y_index].data as Point[]).sort((a, b) => a.x! - b.x!)
+            })
+        }
+
+        function appendMode() {
+            let checked = false
+            for (const frame of parseFrames(frames_bytes)) {
+                if (!checked) {
+                    // Frame size is assumed to be right, as such only size of the first frame is checked
+                    if (frame.length !== y_length + 1) throw Error("Frame size does not match with the config of the chart")
+
+                    checked = true
+                }
+
+                const x = frame[0] as number
+
+                // append y value to each dataset
+                for (let frame_y_index = 1; frame_y_index < frame.length; frame_y_index++) {
+                    const y = frame[frame_y_index]
+                    if (y === null) continue
+
+                    _datasets[frame_y_index - 1].data.push({ x, y })
+                }
+            }
+        }
 
         switch (_scatter_config.mode) {
             case "overwrite": {
                 // In overwrite mode
-
-                // Get all of the frames
-                const frames = [...parseFrames(frames_bytes)]
-
-                // Frame size is assumed to be right, as such only size of the first frame is checked
-                if (frames[0].length !== y_length + 1) throw Error("Frame size does not match with the config of the chart")
-
-
-                // frames are first sorted by it's x value
-                frames.sort((a, b) => (a[0] as number) - (b[0] as number))
-
-                // append frame in reversed order, skip if repeated
-                const x_set = new Set<number>()
-                // Sort the y dataset if that data is added to that y 
-                const y_set = new Set<number>()
-                for (let frame_index = frames.length; frame_index > 0; frame_index--) {
-                    const frame = frames[frame_index]
-
-                    const x = frame[0] as number
-
-                    // put x into set to avoid repeat
-                    if (x_set.has(x)) continue
-                    else x_set.add(x)
-
-                    // Put each non null y value into dataset
-                    for (let frame_y_index = 1; frame_y_index < frame.length; frame_y_index++) {
-                        const y = frame[frame_y_index]
-                        if (y === null) continue
-
-                        // add y to dataset that needs sorted
-                        y_set.add(frame_y_index);
-
-                        const chart_y_index = frame_y_index - 1
-
-                        // Check if a point with same x already exist
-                        const point_index = _datasets[chart_y_index].data.findIndex(point => (point as Point).x === x);
-
-                        // -1 if not found
-                        if (point_index === -1)
-                            _datasets[chart_y_index].data.push({ x, y })
-                        else
-                            (_datasets[chart_y_index].data[point_index] as Point).y = y
-                    }
-                }
-
-                // sort the datasets required
-                y_set.forEach(chart_y_index => {
-                    (_datasets[chart_y_index].data as Point[]).sort((a, b) => a.x! - b.x!)
-                })
-
-
+                overwriteMode()
                 break
             }
             case "append": {
                 // In append mode, x is assumed to be in ascending order without repeat
-                let checked = false
-                for (const frame of parseFrames(frames_bytes)) {
-                    if (!checked) {
-                        // Frame size is assumed to be right, as such only size of the first frame is checked
-                        if (frame.length !== y_length + 1) throw Error("Frame size does not match with the config of the chart")
-
-                        checked = true
-                    }
-
-                    const x = frame[0] as number
-
-                    // append y value to each dataset
-                    for (let frame_y_index = 1; frame_y_index < frame.length; frame_y_index++) {
-                        const y = frame[frame_y_index]
-                        if (y === null) continue
-
-                        _datasets[frame_y_index - 1].data.push({ x, y })
-                    }
-                }
+                appendMode()
                 break
             }
 
@@ -322,31 +301,22 @@ function wsConnect() {
             return
         }
 
-        updateData()
+        updateChart()
 
         _update_timeout = setInterval(() => {
             if (_pending_update) {
-                updateData()
+                updateChart()
                 return
             }
             clearInterval(_update_timeout)
             _update_timeout = undefined
         }, 200)
-
-
-
-
     }
-
-
 }
-
-
-
 
 let _decimation = 0
 
-function updateData() {
+function updateChart() {
 
     if (_chart === undefined || _canvas === undefined) return
 
@@ -415,38 +385,12 @@ function updateData() {
     }
     _chart.update()
     _pending_update = false
-
-
 }
-
-
-
-
-
-
-
-
-
-
-
-
 
 // Webworker onmessage
 onmessage = function (event: MessageEvent<ChartMessages>) {
 
     handlers[event.data.command](event.data.payload as Extract<ChartMessages, [typeof event.data.command]>)
-    //     case "kill": {
-    //         _online = false
 
-    //         _chart.destroy()
-    //         if (_ws !== undefined) {
-    //             _ws.onclose = null
-    //             _ws.close(4000)
-    //         }
-
-    //         if (_ws_interval !== undefined)
-    //             clearInterval(_ws_interval)
-    //     }
-    // }
 }
 
