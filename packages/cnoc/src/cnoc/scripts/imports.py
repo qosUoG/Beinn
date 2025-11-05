@@ -13,7 +13,9 @@ from ..public.equipment import EquipmentABC
 from ..public.experiment import ExperimentABC
 
 
-def eeImports(eetype: type[ExperimentABC] | type[EquipmentABC], names: list[str]):
+def eeImports(
+    eetype: type[ExperimentABC] | type[EquipmentABC], names: list[str], path: str
+):
     class ReturnType(TypedDict):
         module: str
         cls: str
@@ -49,8 +51,6 @@ def eeImports(eetype: type[ExperimentABC] | type[EquipmentABC], names: list[str]
             _, _, traceback = sys.exc_info()
             print_tb(traceback)
             print(end=None, flush=True)
-            sys.exit(1)
-            sys.exit(1)
 
     for name in names:
         try:
@@ -63,24 +63,13 @@ def eeImports(eetype: type[ExperimentABC] | type[EquipmentABC], names: list[str]
             continue
 
         for package in pkgutil.walk_packages(pkg.__path__, pkg.__name__ + "."):
-            examinePackage("walk_packages", package.name)
+            examinePackage(name, package.name)
 
     def onerror(x: str):
         print(f"Error importing module {x} while walk_packages ")
         _, _, traceback = sys.exc_info()
         print_tb(traceback)
         print(end=None, flush=True)
-        sys.exit(1)
-
-    roots: list[str]
-    if "/" in __file__:
-        roots = __file__.split("/")
-    elif "\\" in __file__:
-        roots = __file__.split("\\")
-    else:
-        roots = [__file__]
-    venv_index = roots.index(".venv")
-    path = "/".join(roots[:venv_index])
 
     for package in pkgutil.walk_packages([path], onerror=onerror):
         examinePackage(path, package.name)
@@ -89,10 +78,10 @@ def eeImports(eetype: type[ExperimentABC] | type[EquipmentABC], names: list[str]
 
 
 def main():
-    preloadLocal()
+    path = preloadLocal()
 
     match sys.argv[1]:
         case "equipment":
-            print(json.dumps(eeImports(EquipmentABC, sys.argv[2:])))
+            print(json.dumps(eeImports(EquipmentABC, sys.argv[2:], path)))
         case "experiment":
-            print(json.dumps(eeImports(ExperimentABC, sys.argv[2:])))
+            print(json.dumps(eeImports(ExperimentABC, sys.argv[2:], path)))

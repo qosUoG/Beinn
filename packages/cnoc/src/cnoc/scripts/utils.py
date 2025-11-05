@@ -2,12 +2,11 @@ import site
 
 
 def preloadLocal():
-    roots: list[str]
-    if "/" in __file__:
-        roots = __file__.split("/")
-    elif "\\" in __file__:
-        roots = __file__.split("\\")
+    slash = "/" if "/" in __file__ else "\\"
+    roots = __file__.split(slash)
     venv_index = roots.index(".venv")
-    path = "/".join(roots[:venv_index])
+    path = slash.join(roots[:venv_index])
 
     site.addsitedir(path)
+
+    return path
