@@ -13,8 +13,15 @@ from ..public.equipment import EquipmentABC
 from ..public.experiment import ExperimentABC
 
 
+def onerror(x: str):
+    print(f"Error importing module {x} while walk_packages ")
+    _, _, traceback = sys.exc_info()
+    print_tb(traceback)
+    print(end=None, flush=True)
+
+
 def eeImports(
-    eetype: type[ExperimentABC] | type[EquipmentABC], names: list[str], path: str
+    eetype: type[ExperimentABC] | type[EquipmentABC], names: list[str], local_name: str
 ):
     class ReturnType(TypedDict):
         module: str
@@ -65,23 +72,20 @@ def eeImports(
         for package in pkgutil.walk_packages(pkg.__path__, pkg.__name__ + "."):
             examinePackage(name, package.name)
 
-    def onerror(x: str):
-        print(f"Error importing module {x} while walk_packages ")
-        _, _, traceback = sys.exc_info()
-        print_tb(traceback)
-        print(end=None, flush=True)
+    for package in pkgutil.walk_packages(onerror=onerror):
+        if not package.name.startswith(local_name):
+            continue
 
-    for package in pkgutil.walk_packages([path], onerror=onerror):
-        examinePackage(path, package.name)
+        examinePackage(local_name, package.name)
 
     return list(res.values())
 
 
 def main():
-    path = preloadLocal()
+    local_name = preloadLocal()
 
     match sys.argv[1]:
         case "equipment":
-            print(json.dumps(eeImports(EquipmentABC, sys.argv[2:], path)))
+            print(json.dumps(eeImports(EquipmentABC, sys.argv[2:], local_name)))
         case "experiment":
-            print(json.dumps(eeImports(ExperimentABC, sys.argv[2:], path)))
+            print(json.dumps(eeImports(ExperimentABC, sys.argv[2:], local_name)))

@@ -9,4 +9,4 @@ def preloadLocal():
 
     site.addsitedir(path)
 
-    return path
+    return roots[-1]
