@@ -13,13 +13,6 @@ from ..public.equipment import EquipmentABC
 from ..public.experiment import ExperimentABC
 
 
-def onerror(x: str):
-    print(f"Error importing module {x} while walk_packages ")
-    _, _, traceback = sys.exc_info()
-    print_tb(traceback)
-    print(end=None, flush=True)
-
-
 def eeImports(
     eetype: type[ExperimentABC] | type[EquipmentABC], names: list[str], local_name: str
 ):
@@ -29,7 +22,7 @@ def eeImports(
 
     res: dict[type[ExperimentABC] | type[EquipmentABC], ReturnType] = {}
 
-    def examinePackage(src: str, name: str):
+    def examinePackage(src: str):
         try:
             for [cls, clsT] in inspect.getmembers(
                 importlib.import_module(name), inspect.isclass
@@ -59,6 +52,15 @@ def eeImports(
             print_tb(traceback)
             print(end=None, flush=True)
 
+    def onerror(x: str, names: list[str]):
+        if x not in names or x != local_name:
+            return
+
+        print(f"Error importing module {x} while walk_packages ")
+        _, _, traceback = sys.exc_info()
+        print_tb(traceback)
+        print(end=None, flush=True)
+
     for name in names:
         try:
             pkg = importlib.import_module(name)
@@ -69,7 +71,9 @@ def eeImports(
             )
             continue
 
-        for package in pkgutil.walk_packages(pkg.__path__, pkg.__name__ + "."):
+        for package in pkgutil.walk_packages(
+            pkg.__path__, pkg.__name__ + ".", onerror=onerror
+        ):
             examinePackage(name, package.name)
 
     for package in pkgutil.walk_packages(onerror=onerror):
