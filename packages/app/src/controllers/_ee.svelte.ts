@@ -48,7 +48,12 @@ export class Instance {
     }
 
     async initialize() {
-        const res = await this.getParams()
+        let res
+        try {
+            res = await this.getParams()
+        } catch (e) {
+            return
+        }
         if (res === undefined) return
 
         this.params = save2Runtime(res.params)
