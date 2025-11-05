@@ -9,4 +9,4 @@ def preloadLocal():
 
     site.addsitedir(path)
 
-    return roots[-1]
+    return roots[venv_index - 1]
