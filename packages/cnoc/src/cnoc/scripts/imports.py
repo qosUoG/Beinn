@@ -52,7 +52,7 @@ def eeImports(
             print_tb(traceback)
             print(end=None, flush=True)
 
-    def onerror(x: str, names: list[str]):
+    def onerror(x: str):
         if x not in names or x != local_name:
             return
 
