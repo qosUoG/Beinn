@@ -132,6 +132,11 @@
 					"name": "code",
 					"cmd": "code",
 					"args": true
+				},
+				{
+					"name": "code.cmd",
+					"cmd": "code.cmd",
+					"args": true
 				}
 			]
 		},
