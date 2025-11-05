@@ -21,11 +21,13 @@ class Scatter(ChartABC):
         title: str,
         mode: ScatterMode,
         x_axis: str,
+        x_name: str,
         y_axis: str,
         y_names: list[str],
     ):
         self.title = title
         self.x_axis = x_axis
+        self.x_name = x_name
         self.y_axis = y_axis
         self.y_names = y_names
         self.mode = mode
@@ -38,6 +40,7 @@ class Scatter(ChartABC):
             "type": Scatter.type,
             "title": self.title,
             "x_axis": self.x_axis,
+            "x_name": self.x_name,
             "y_axis": self.y_axis,
             "y_names": self.y_names,
             "mode": self.mode,
@@ -58,7 +61,7 @@ class Scatter(ChartABC):
             # f64 byte array
             encoded = array.array("d")
             # 0: value of x
-            encoded.append(frame["chart:x"])
+            encoded.append(frame[self.x_name])
             for y_name in self.y_names:
                 if y_name in frame:
                     # If have value, takes two 8 byte floats.
