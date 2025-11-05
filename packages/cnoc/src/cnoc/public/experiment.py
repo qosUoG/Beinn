@@ -25,7 +25,7 @@ class ExperimentABC(ABC):
     """
 
     @abstractmethod
-    def start(self, cnoc: Manager) -> None:
+    def start(self, manager: Manager) -> None:
         raise NotImplementedError
 
     @abstractmethod
