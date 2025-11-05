@@ -143,7 +143,7 @@ class Dependencies {
             }
 
             case "path": {
-                await shell({ fn: "uv", cmd: `add ${source.path}${source.editable ? "--editable" : ""}`, cwd: path, description: "Installing local dependency" })
+                await shell({ fn: "uv", cmd: `add ${source.path} ${source.editable ? "--editable" : ""}`, cwd: path, description: "Installing local dependency" })
                 break
             }
             case "pip": {

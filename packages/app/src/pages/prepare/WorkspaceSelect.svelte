@@ -1,7 +1,7 @@
 <script lang="ts">
 	import { open } from "@tauri-apps/plugin-dialog";
 	import { workspace_controller } from "$controllers/workspace.svelte";
-	import { FolderOpen, LoaderCircle } from "@lucide/svelte";
+	import { FolderOpen, Keyboard, LoaderCircle } from "@lucide/svelte";
 
 	import { load, type Store } from "@tauri-apps/plugin-store";
 
@@ -14,6 +14,8 @@
 
 	import { homeDir } from "@tauri-apps/api/path";
 
+	import { Command } from "@tauri-apps/plugin-shell";
+
 	async function folderSearchHandler() {
 		const path = await open({
 			directory: true,
@@ -21,7 +23,14 @@
 			defaultPath: (await getSavedWorkspacePath()) ?? (await homeDir()),
 		});
 
-		if (path) await workspace_controller.loadWorkspace(path);
+		if (path) {
+			await store.set("workspace_path", path);
+			await workspace_controller.loadWorkspace(path);
+		}
+	}
+
+	async function openerHandler() {
+		await Command.create("code", [workspace_controller.path!]).execute();
 	}
 </script>
 
@@ -48,5 +57,10 @@
 		<button
 			class="icon-btn-sm bg-slate-500 text-slate-50"
 			onclick={folderSearchHandler}><FolderOpen /></button>
+		{#if workspace_controller.status === "ready"}
+			<button
+				class="icon-btn-sm bg-slate-500 text-slate-50"
+				onclick={openerHandler}><Keyboard /></button>
+		{/if}
 	{/if}
 </div>

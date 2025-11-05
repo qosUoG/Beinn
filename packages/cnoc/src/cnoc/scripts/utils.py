@@ -1,3 +1,4 @@
+import os
 import site
 import sys
 
@@ -10,7 +11,12 @@ def preloadLocal():
 
     site.addsitedir(path)
 
-    return roots[venv_index - 1]
+    # possible local packages
+    return [
+        f
+        for f in os.listdir(path)
+        if os.path.isdir(path + slash + f) and not f.startswith((".", "__"))
+    ]
 
 
 def printErr(msg: str):

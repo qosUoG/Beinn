@@ -13,6 +13,7 @@ class WorkspaceController {
     status: "empty" | "loading" | "ready" = $state("empty")
 
     async loadWorkspace(path: string) {
+        const old_status = this.status
         this.status = "loading"
         await tick()
         const pyproject_exists = await exists(path + "/pyproject.toml")
@@ -26,7 +27,10 @@ class WorkspaceController {
             );
 
             // Abort if user chooses not to
-            if (!confirmation) return
+            if (!confirmation) {
+                this.status = old_status
+                return
+            }
         }
 
         // Empty directory

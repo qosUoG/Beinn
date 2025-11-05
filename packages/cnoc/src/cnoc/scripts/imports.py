@@ -3,6 +3,7 @@ import inspect
 import json
 import pkgutil
 import sys
+from threading import local
 from traceback import print_tb
 from typing import TypedDict
 
@@ -14,7 +15,9 @@ from ..public.experiment import ExperimentABC
 
 
 def eeImports(
-    eetype: type[ExperimentABC] | type[EquipmentABC], names: list[str], local_name: str
+    eetype: type[ExperimentABC] | type[EquipmentABC],
+    names: list[str],
+    local_names: list[str],
 ):
     class ReturnType(TypedDict):
         module: str
@@ -53,7 +56,7 @@ def eeImports(
             errFlush()
 
     def onerror(x: str):
-        if x not in names or x != local_name:
+        if x not in names or x not in local_names:
             return
 
         print(f"Error importing module {x} while walk_packages ", file=sys.stderr)
@@ -76,19 +79,19 @@ def eeImports(
             examinePackage(name, package.name)
 
     for package in pkgutil.walk_packages(onerror=onerror):
-        if not package.name.startswith(local_name):
-            continue
-
-        examinePackage(local_name, package.name)
+        for name in local_names:
+            if package.name.startswith(name):
+                examinePackage(name, package.name)
+                break
 
     return list(res.values())
 
 
 def main():
-    local_name = preloadLocal()
+    local_names = preloadLocal()
 
     match sys.argv[1]:
         case "equipment":
-            print(json.dumps(eeImports(EquipmentABC, sys.argv[2:], local_name)))
+            print(json.dumps(eeImports(EquipmentABC, sys.argv[2:], local_names)))
         case "experiment":
-            print(json.dumps(eeImports(ExperimentABC, sys.argv[2:], local_name)))
+            print(json.dumps(eeImports(ExperimentABC, sys.argv[2:], local_names)))

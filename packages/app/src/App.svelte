@@ -9,12 +9,16 @@
 	import Acquisition from "$pages/acquisition/Acquisition.svelte";
 	import { app_controller } from "$controllers/app.svelte";
 	import Prepare from "$pages/prepare/Prepare.svelte";
+	import { experiment_controller } from "$controllers/experiment.svelte";
 
 	getCurrentWindow().listen("tauri://close-requested", async () => {
-		// if (await workspace_controller.kill()) await exit();
+		if (
+			experiment_controller.experiment === undefined ||
+			experiment_controller.editable
+		) {
+			await exit();
+		}
 	});
-
-	let acquisition_opened = $state(false);
 </script>
 
 <div class="w-screen h-screen fcol max-h-screen max-w-screen">

@@ -6,9 +6,7 @@
 	"permissions": [
 		"core:default",
 		"shell:default",
-
 		"shell:allow-kill",
-
 		"fs:default",
 		{
 			"identifier": "fs:allow-write",
@@ -129,6 +127,11 @@
 					"name": "taskkill",
 					"cmd": "taskkill",
 					"args": true
+				},
+				{
+					"name": "code",
+					"cmd": "code",
+					"args": true
 				}
 			]
 		},
@@ -162,6 +165,15 @@
 		},
 		"os:default",
 		"process:default",
-		"store:default"
+		"store:default",
+		"opener:default",
+		{
+			"identifier": "opener:allow-open-path",
+			"allow": [
+				{
+					"path": "/**"
+				}
+			]
+		}
 	]
 }
