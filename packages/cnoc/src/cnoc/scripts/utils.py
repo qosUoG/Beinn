@@ -1,4 +1,5 @@
 import site
+import sys
 
 
 def preloadLocal():
@@ -10,3 +11,11 @@ def preloadLocal():
     site.addsitedir(path)
 
     return roots[venv_index - 1]
+
+
+def printErr(msg: str):
+    print(msg, flush=True, file=sys.stderr)
+
+
+def errFlush():
+    print(end=None, flush=True, file=sys.stderr)

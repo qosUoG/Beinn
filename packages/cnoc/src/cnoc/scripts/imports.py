@@ -6,7 +6,7 @@ import sys
 from traceback import print_tb
 from typing import TypedDict
 
-from .utils import preloadLocal
+from .utils import errFlush, preloadLocal, printErr
 
 
 from ..public.equipment import EquipmentABC
@@ -40,34 +40,33 @@ def eeImports(
                     print(
                         f"Duplicate class {cls} found in {name}, already imported from {res[clsT]['module']}",
                         flush=True,
+                        file=sys.stderr,
                     )
         except ModuleNotFoundError:
             return
         except Exception as e:
-            print(
-                f"Failed to import package {name} from {src} for {eetype.__name__}: {e}",
-                flush=True,
+            printErr(
+                f"Failed to import package {name} from {src} for {eetype.__name__}: {e}"
             )
             _, _, traceback = sys.exc_info()
-            print_tb(traceback)
-            print(end=None, flush=True)
+            print_tb(traceback, file=sys.stderr)
+            errFlush()
 
     def onerror(x: str):
         if x not in names or x != local_name:
             return
 
-        print(f"Error importing module {x} while walk_packages ")
+        print(f"Error importing module {x} while walk_packages ", file=sys.stderr)
         _, _, traceback = sys.exc_info()
-        print_tb(traceback)
-        print(end=None, flush=True)
+        print_tb(traceback, file=sys.stderr)
+        errFlush()
 
     for name in names:
         try:
             pkg = importlib.import_module(name)
         except Exception as e:
-            print(
-                f"Failed to import module {name} from names for {eetype.__name__}: {e}",
-                flush=True,
+            printErr(
+                f"Failed to import module {name} from names for {eetype.__name__}: {e}"
             )
             continue
 

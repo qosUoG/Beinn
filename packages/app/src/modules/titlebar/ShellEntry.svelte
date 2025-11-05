@@ -102,7 +102,16 @@
 				</div>
 				<div class="p-2 pt-0 fcol-1">
 					{#each entry.std as { type, data }}
-						<div class="text-white">{data}</div>
+						{#if type === "stderr"}
+							<div class="text-white">{data}</div>
+						{/if}
+					{/each}
+				</div>
+				<div class="p-2 pt-0 fcol-1">
+					{#each entry.std as { type, data }}
+						{#if type === "stdout"}
+							<div class="text-white">{data}</div>
+						{/if}
 					{/each}
 				</div>
 			</div>
