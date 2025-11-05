@@ -71,7 +71,7 @@ def eeImports(
         print_tb(traceback)
         print(end=None, flush=True)
 
-    for package in pkgutil.walk_packages([path], onerror=onerror):
+    for package in pkgutil.walk_packages(onerror=onerror):
         examinePackage(path, package.name)
 
     return list(res.values())
