@@ -29,7 +29,7 @@ tauri-plugin-dialog = "2.4.2"
 tauri-plugin-decorum = { git = "https://github.com/clearlysid/tauri-plugin-decorum.git", branch = "main" }
 tauri-plugin-persisted-scope = "2.3.4"
 tauri-plugin-http = "2.5.4"
-tauri-plugin-os = "2.3.2"
+tauri-plugin-os = "2"
 tauri-plugin-process = "2.3.1"
 tauri-plugin-store = "2.4.1"
 fix-path-env = { git = "https://github.com/tauri-apps/fix-path-env-rs", branch = "dev" }

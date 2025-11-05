@@ -15,6 +15,7 @@
 	import { homeDir } from "@tauri-apps/api/path";
 
 	import { Command } from "@tauri-apps/plugin-shell";
+	import { platform } from "@tauri-apps/plugin-os";
 
 	async function folderSearchHandler() {
 		const path = await open({
@@ -30,7 +31,14 @@
 	}
 
 	async function openerHandler() {
-		await Command.create("code", [workspace_controller.path!]).execute();
+		if (platform() === "windows")
+			await Command.create("code.cmd", [
+				workspace_controller.path!,
+			]).execute();
+		else
+			await Command.create("code", [
+				workspace_controller.path!,
+			]).execute();
 	}
 </script>
 
