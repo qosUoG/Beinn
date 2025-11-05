@@ -22,7 +22,7 @@ def eeImports(
 
     res: dict[type[ExperimentABC] | type[EquipmentABC], ReturnType] = {}
 
-    def examinePackage(src: str):
+    def examinePackage(src: str, name: str):
         try:
             for [cls, clsT] in inspect.getmembers(
                 importlib.import_module(name), inspect.isclass
