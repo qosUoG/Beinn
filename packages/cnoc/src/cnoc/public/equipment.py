@@ -13,11 +13,11 @@ example/examplelib.
 """
 
 from abc import ABC, abstractmethod
-from typing import Any
+from typing import Any, cast
 from _typeshed import DataclassInstance
 
 
-class EquipmentABC(ABC):
+class EquipmentABC[T: DataclassInstance](ABC):
     """
     Base class of all equipment drivers
 
@@ -28,15 +28,18 @@ class EquipmentABC(ABC):
 
     """
 
+    def __init__(self):
+        self.params: T
+
     def setParams(
         self,
         params: dict[str, Any],
-        equipments: dict[str, "EquipmentABC"],
+        equipments: dict[str, "EquipmentABC[Any]"],
         ParamsCls: type[DataclassInstance],
     ):
         from ._params import dict2Params
 
-        self.params: DataclassInstance = dict2Params(params, equipments, ParamsCls)
+        self.params = cast(T, dict2Params(params, equipments, ParamsCls))
 
     # def _cnoc_interpret(self, code: str, name: str):
     #     with self.lock:

@@ -1,6 +1,6 @@
 from dataclasses import field
 from enum import Enum
-from typing import Iterable
+from typing import Any, Iterable
 from .equipment import EquipmentABC
 from . import _params
 from _typeshed import DataclassInstance
@@ -28,7 +28,7 @@ class p:
         def of(cls, children: T):
             return field(default=children())
 
-    class equipment[T: EquipmentABC]:
+    class equipment[T: EquipmentABC[Any]]:
         @classmethod
         def instance(cls):
             return field(default=_params.Equipment[T]())

@@ -30,7 +30,7 @@ class ExperimentABC(ABC):
     def setParams(
         self,
         params: dict[str, Any],
-        equipments: dict[str, EquipmentABC],
+        equipments: dict[str, EquipmentABC[Any]],
         ParamsCls: type[DataclassInstance],
     ):
         from ._params import dict2Params

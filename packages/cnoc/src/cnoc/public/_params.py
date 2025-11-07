@@ -251,7 +251,7 @@ class Bool:
         return {"value": self.value}
 
 
-_GenericEquipment = TypeVar("_GenericEquipment", bound=EquipmentABC)
+_GenericEquipment = TypeVar("_GenericEquipment", bound=EquipmentABC[Any])
 
 
 @dataclass
@@ -272,7 +272,7 @@ class Equipment(Generic[_GenericEquipment]):
         }
 
     @classmethod
-    def fromDict(cls, data: DictType, equipments: dict[str, EquipmentABC]):
+    def fromDict(cls, data: DictType, equipments: dict[str, EquipmentABC[Any]]):
         if data["type"] != cls.type:
             raise ValueError(f"Invalid type {data['type']} for {cls.type}")
 
@@ -309,7 +309,7 @@ type AllParamType = (
     | Float
     | Str
     | Bool
-    | Equipment[EquipmentABC]
+    | Equipment[EquipmentABC[Any]]
 )
 
 type AllParamDictType = (
@@ -320,7 +320,7 @@ type AllParamDictType = (
     | Float.DictType
     | Str.DictType
     | Bool.DictType
-    | Equipment[EquipmentABC].DictType
+    | Equipment[EquipmentABC[Any]].DictType
 )
 
 type AllParamSaveType = (
@@ -331,7 +331,7 @@ type AllParamSaveType = (
     | Float.SaveType
     | Str.SaveType
     | Bool.SaveType
-    | Equipment[EquipmentABC].SaveType
+    | Equipment[EquipmentABC[Any]].SaveType
 )
 
 
@@ -345,7 +345,7 @@ def params2Dict(params: Any):
 
 def dict2Params(
     data: dict[str, AllParamDictType | dict[str, AllParamDictType]],
-    equipments: dict[str, EquipmentABC],
+    equipments: dict[str, EquipmentABC[Any]],
     ParamsCls: type[DataclassInstance],
 ) -> DataclassInstance:
     """

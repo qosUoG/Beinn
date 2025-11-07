@@ -107,7 +107,7 @@ class App:
         self.manager = Manager()
         self._state = _State()
 
-        self._equipments: dict[str, EquipmentABC] = {}
+        self._equipments: dict[str, EquipmentABC[Any]] = {}
         self._experiment: ExperimentABC
 
         equipments_payload = res["equipments"]

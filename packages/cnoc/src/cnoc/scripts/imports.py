@@ -4,7 +4,7 @@ import json
 import pkgutil
 import sys
 from traceback import print_tb
-from typing import TypedDict
+from typing import Any, TypedDict
 
 from .utils import errFlush, preloadLocal, printErr
 
@@ -14,7 +14,7 @@ from ..public.experiment import ExperimentABC
 
 
 def eeImports(
-    eetype: type[ExperimentABC] | type[EquipmentABC],
+    eetype: type[ExperimentABC] | type[EquipmentABC[Any]],
     names: list[str],
     local_names: list[str],
 ):
@@ -22,7 +22,7 @@ def eeImports(
         module: str
         cls: str
 
-    res: dict[type[ExperimentABC] | type[EquipmentABC], ReturnType] = {}
+    res: dict[type[ExperimentABC] | type[EquipmentABC[Any]], ReturnType] = {}
 
     def examinePackage(src: str, name: str):
         try:
