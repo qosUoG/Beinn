@@ -347,6 +347,7 @@ class InstanceEquipmentParam(Generic[_GenericEquipment]):
         return param
 
     def toSave(self) -> dict[str, Any]:
+        assert hasattr(self.instance, "params")
         return {
             "value": self.value,
             "params": params2Dict(cast(Params, self.instance.params))  # type: ignore
