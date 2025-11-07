@@ -1,81 +1,94 @@
+from typing import cast
 from .equipment import EquipmentABC
-from ._params import (
-    BoolParam,
-    CompositeParam,
-    FloatParam,
-    InstanceEquipmentParam,
-    IntParam,
-    SelectFloatParam,
-    SelectIntParam,
-    SelectStrParam,
-    StrParam,
+from . import _params
+
+type _SimpleParamType = (
+    _params.SelectStrParam
+    | _params.SelectFloatParam
+    | _params.SelectIntParam
+    | _params.IntParam
+    | _params.FloatParam
+    | _params.StrParam
+    | _params.BoolParam
+    | _params.InstanceEquipmentParam[EquipmentABC]
 )
 
-type Bool = BoolParam
-type Int = IntParam
-type Float = FloatParam
-type Str = StrParam
-type Equipment[E: EquipmentABC] = InstanceEquipmentParam[E]
-type Composite[ChildType] = CompositeParam[ChildType]
-type SelectStr = SelectStrParam
-type SelectInt = SelectIntParam
-type SelectFloat = SelectFloatParam
 
-type AllParams = (
-    SelectStrParam
-    | SelectFloatParam
-    | SelectIntParam
-    | IntParam
-    | FloatParam
-    | StrParam
-    | BoolParam
-    | InstanceEquipmentParam[EquipmentABC]
-)
+class P:
+    @classmethod
+    def Int(cls):
+        return _params.IntParam
+
+    @classmethod
+    def Float(cls):
+        return _params.FloatParam
+
+    @classmethod
+    def Str(cls):
+        return _params.StrParam
+
+    @classmethod
+    def Bool(cls):
+        return _params.BoolParam
+
+    @classmethod
+    def Equipment[T: EquipmentABC](cls):
+        return _params.InstanceEquipmentParam[T]
+
+    @classmethod
+    def Composite[T: dict[str, _SimpleParamType]](cls):
+        return _params.CompositeParam[T]
+
+    class Select:
+        @classmethod
+        def Str(cls):
+            return _params.SelectStrParam
+
+        @classmethod
+        def Int(cls):
+            return _params.SelectIntParam
+
+        @classmethod
+        def Float(cls):
+            return _params.SelectFloatParam
 
 
 class p:
     @classmethod
-    def int(cls, default: int = 0, suffix: str = "", required: bool = False):
-        return IntParam(default, suffix, required)
+    def int(cls, default: int = 0, suffix: str = ""):
+        return _params.IntParam(default, suffix)
 
     @classmethod
-    def float(cls, default: float = 0.0, suffix: str = "", required: bool = False):
-        return FloatParam(default, suffix, required)
+    def float(cls, default: float = 0.0, suffix: str = ""):
+        return _params.FloatParam(default, suffix)
 
     @classmethod
-    def str(cls, default: str = "", required: bool = False):
-        return StrParam(default, required)
+    def str(cls, default: str = ""):
+        return _params.StrParam(default)
 
     @classmethod
-    def boolean(cls, default: bool = False, required: bool = False):
-        return BoolParam(default, required)
+    def boolean(cls, default: bool = False):
+        return _params.BoolParam(default)
 
     @classmethod
-    def equipment(cls, required: bool = False):
-        return InstanceEquipmentParam(required)
+    def equipment[T: EquipmentABC](cls):
+        return _params.InstanceEquipmentParam[T]()
 
     @classmethod
-    def composite(cls, children: dict[str, AllParams]):
-        return CompositeParam(children)
+    def composite[T: dict[str, _SimpleParamType]](
+        cls, children: dict[str, _SimpleParamType]
+    ):
+        return _params.CompositeParam[T](cast(T, children))
 
     class select:
         @classmethod
-        def str(
-            cls, options: list[str], value: str | None = None, required: bool = False
-        ):
-            return SelectStrParam(options, value, required)
+        def str(cls, options: list[str], value: str | None = None):
+            return _params.SelectStrParam(options, value)
 
         @classmethod
-        def int(
-            cls, options: list[int], value: int | None = None, required: bool = False
-        ):
-            return SelectIntParam(options, value, required)
+        def int(cls, options: list[int], value: int | None = None):
+            return _params.SelectIntParam(options, value)
 
         @classmethod
-        def float(
-            cls,
-            options: list[float],
-            value: float | None = None,
-            required: bool = False,
-        ):
-            return SelectFloatParam(options, value, required)
+        def float(cls, options: list[float], value: float | None = None):
+            return _params.SelectFloatParam(options, value)
