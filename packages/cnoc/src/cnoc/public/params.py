@@ -14,43 +14,20 @@ type _SimpleParamType = (
 )
 
 
-class P:
-    @classmethod
-    def Int(cls):
-        return _params.IntParam
+type Int = _params.IntParam
+type Float = _params.FloatParam
+type Str = _params.StrParam
+type Equipment[E: EquipmentABC] = _params.InstanceEquipmentParam[E]
+type Composite[T: dict[str, _SimpleParamType]] = _params.CompositeParam[T]
+type SelectStr = _params.SelectStrParam
+type SelectInt = _params.SelectIntParam
+type SelectFloat = _params.SelectFloatParam
 
-    @classmethod
-    def Float(cls):
-        return _params.FloatParam
 
-    @classmethod
-    def Str(cls):
-        return _params.StrParam
-
-    @classmethod
-    def Bool(cls):
-        return _params.BoolParam
-
-    @classmethod
-    def Equipment[T: EquipmentABC](cls):
-        return _params.InstanceEquipmentParam[T]
-
-    @classmethod
-    def Composite[T: dict[str, _SimpleParamType]](cls):
-        return _params.CompositeParam[T]
-
-    class Select:
-        @classmethod
-        def Str(cls):
-            return _params.SelectStrParam
-
-        @classmethod
-        def Int(cls):
-            return _params.SelectIntParam
-
-        @classmethod
-        def Float(cls):
-            return _params.SelectFloatParam
+class Select:
+    Str = _params.SelectStrParam
+    Int = _params.SelectIntParam
+    Float = _params.SelectFloatParam
 
 
 class p:
