@@ -1,5 +1,9 @@
-from ctypes import cast
-from dataclasses import asdict, dataclass, field, fields
+from dataclasses import asdict, dataclass, field
+from typing import cast
+
+from examplelib.ExampleDriver import ExampleEquipment, Params
+
+from cnoc.public._params import params2Dict
 
 
 @dataclass
@@ -13,9 +17,7 @@ class Parent:
 
 
 def main():
-    p = Parent()
-
-    print(asdict(p))
+    print(ExampleEquipment.params.__dict__)
 
 
 if __name__ == "__main__":

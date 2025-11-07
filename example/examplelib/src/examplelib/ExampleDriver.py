@@ -2,7 +2,7 @@ from dataclasses import dataclass
 import math
 from random import random
 from typing import override
-from cnoc import EquipmentABC, p
+from cnoc import EquipmentABC, p, P
 
 
 """
@@ -20,32 +20,35 @@ For class attribute, one must wrap the type with ClassVar like "equipment_pi",
 
 @dataclass
 class NestedParams:
-    compstrparam = p.str()
-    compfloatparam = p.float(suffix="W")
-    compintparam = p.int()
-    compbool = p.boolean(False)
-    compselectstr = p.select.str(["option1", "option2", "option3"])
+    compstrparam: P.Str = p.str()
+    compfloatparam: P.Float = p.float(suffix="W")
+    compintparam: P.Int = p.int()
+    compbool: P.Bool = p.boolean(False)
+    compselectstr: P.Select.Str = p.select.str(["option1", "option2", "option3"])
 
-    compselectint = p.select.int([1, 2, 3])
-    compselectfloat = p.select.float([1.1, 2.2, 3.3])
+    compselectint: P.Select.Int = p.select.int([1, 2, 3])
+    compselectfloat: P.Select.Float = p.select.float([1.1, 2.2, 3.3])
 
 
-class ExampleEquipment(EquipmentABC):
-    @dataclass
-    class Params:
-        str = p.str()
-        float = p.float(suffix="W")
-        int = p.int()
-        bool = p.boolean(False)
-        selectstr = p.select.str(["option1", "option2", "option3"])
-        selectint = p.select.int([1, 2, 3], 2)
-        selectfloat = p.select.float([1.1, 2.2, 3.3])
-        composite = p.composite(NestedParams)
+@dataclass
+class Params:
+    str: P.Str = p.str()
+    float: P.Float = p.float(suffix="W")
+    int: P.Int = p.int()
+    bool: P.Bool = p.boolean(False)
+    selectstr: P.Select.Str = p.select.str(["option1", "option2", "option3"])
+    selectint: P.Select.Int = p.select.int([1, 2, 3], 2)
+    selectfloat: P.Select.Float = p.select.float([1.1, 2.2, 3.3])
+    composite: NestedParams = p.composite[NestedParams].of(NestedParams)
 
+
+class ExampleEquipment(EquipmentABC[Params]):
     # These are class attributes instead of instance attributes
     # While you may acquire it through the instance, it maybe easily mixed up
     equipment_pi: float = math.pi
     equipment_model: str = "QOS007"
+
+    params = Params()
 
     def __init__(self):
         # # After the params list, one shall instantiate the equipment instance if needed

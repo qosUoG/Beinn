@@ -396,16 +396,28 @@ def params2Save(
 ) -> dict[str, AllParamSaveType | dict[str, AllParamSaveType]]:
     res: dict[str, AllParamSaveType | dict[str, AllParamSaveType]] = {}
 
-    def toSave(_p: dict[str, AllParamType]):
+    def toSave(_p: DataclassInstance):
         _res: dict[str, AllParamSaveType] = {}
-        for _k, _v in _p.items():
+        for _k, _v in _p.__dict__.items():
             _res[_k] = _v.toSave()
         return _res
 
-    for k, v in asdict(params).items():
-        v = cast(AllParamType | dict[str, AllParamType], v)
-        if isinstance(v, dict):
-            res[k] = toSave(v)
-        else:
+    for k, v in params.__dict__.items():
+        v = cast(AllParamType | DataclassInstance, v)
+        if isinstance(
+            v,
+            (
+                Int,
+                Float,
+                Str,
+                Bool,
+                Equipment,
+                Select.Int,
+                Select.Float,
+                Select.Str,
+            ),
+        ):
             res[k] = v.toSave()
+        else:
+            res[k] = toSave(v)
     return res
