@@ -13,7 +13,10 @@ from typing import Any, Callable, cast
 
 from .equipment import EquipmentABC
 from .manager import Manager
-from _typeshed import DataclassInstance
+from typing import TYPE_CHECKING
+
+if TYPE_CHECKING:
+    from _typeshed import DataclassInstance
 
 
 class ExperimentABC[T: DataclassInstance](ABC):

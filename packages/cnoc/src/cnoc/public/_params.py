@@ -23,7 +23,10 @@ experiment, please refer to the example directory.
 """
 
 from dataclasses import InitVar, asdict, dataclass, field, fields
-from _typeshed import DataclassInstance
+from typing import TYPE_CHECKING
+
+if TYPE_CHECKING:
+    from _typeshed import DataclassInstance
 
 from typing import (
     Any,

@@ -3,7 +3,12 @@ from enum import Enum
 from typing import Any, Iterable, Type
 from .equipment import EquipmentABC
 from . import _params
-from _typeshed import DataclassInstance
+
+
+from typing import TYPE_CHECKING
+
+if TYPE_CHECKING:
+    from _typeshed import DataclassInstance
 
 
 class p:
