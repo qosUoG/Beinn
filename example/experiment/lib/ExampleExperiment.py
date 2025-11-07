@@ -72,7 +72,7 @@ class ExampleExperiment(ExperimentABC):
         # This should be all of the __init__ code. For instantiation of params from the final params list, or turning on equipment, initializing equipment etc, define in the start method
 
     @override
-    def start(self, manager: Manager) -> int:
+    def start(self, manager: Manager):
         # # You may interact with the equipment here to do initialization
         # self.params["instance_equipment_param"].instance.echo("hellow world")
         # self.params["instance_equipment_param"].instance.power = 10
