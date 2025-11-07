@@ -1,10 +1,7 @@
 import time
 from typing import TypedDict
 import pandas as pd
-from typing import TYPE_CHECKING
-
-if TYPE_CHECKING:
-    from _typeshed import DataclassInstance
+from ._utils import DataclassInstance
 from ._params import AllParamSaveType, params2Save
 
 

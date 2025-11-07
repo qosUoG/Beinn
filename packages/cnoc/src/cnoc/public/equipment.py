@@ -14,10 +14,7 @@ example/examplelib.
 
 from abc import ABC, abstractmethod
 from typing import Any, cast
-from typing import TYPE_CHECKING
-
-if TYPE_CHECKING:
-    from _typeshed import DataclassInstance
+from ._utils import DataclassInstance
 
 
 class EquipmentABC[T: DataclassInstance](ABC):

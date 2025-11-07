@@ -5,10 +5,7 @@ from .equipment import EquipmentABC
 from . import _params
 
 
-from typing import TYPE_CHECKING
-
-if TYPE_CHECKING:
-    from _typeshed import DataclassInstance
+from ._utils import DataclassInstance
 
 
 class p:

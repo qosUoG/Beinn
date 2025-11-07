@@ -2,10 +2,7 @@ import time
 from typing import Any, TypedDict, cast
 import pandas as pd
 from ._saver import Saver as _S
-from typing import TYPE_CHECKING
-
-if TYPE_CHECKING:
-    from _typeshed import DataclassInstance
+from ._utils import DataclassInstance
 
 
 class Metadata(TypedDict):
