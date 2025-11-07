@@ -13,6 +13,7 @@ example/examplelib.
 """
 
 from abc import ABC, abstractmethod
+from typing import Never
 
 
 class EquipmentABC(ABC):
@@ -49,7 +50,7 @@ class EquipmentABC(ABC):
     #             print(e, flush=True)
 
     @abstractmethod
-    def cleanup(self):
+    def cleanup(self) -> Never:
         """
         Perform any clean up if needed
 
@@ -60,7 +61,7 @@ class EquipmentABC(ABC):
         raise NotImplementedError
 
     @abstractmethod
-    def interactive(self):
+    def interactive(self) -> Never:
         """
         Code to run before REPL mode is entered
         """

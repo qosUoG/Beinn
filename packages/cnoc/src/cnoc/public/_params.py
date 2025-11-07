@@ -25,7 +25,7 @@ experiment, please refer to the example directory.
 # from .experiment import ExperimentABC
 
 from abc import ABC
-from typing import Any, Literal, TypedDict
+from typing import Any, Generic, Literal, Type, TypedDict, cast, TypeVar
 from .equipment import EquipmentABC
 
 
@@ -311,7 +311,10 @@ class BoolParam(_ParamBase):
         return {"value": self.value}
 
 
-class InstanceEquipmentParam[T: EquipmentABC](_ParamBase):
+_GenericEquipment = TypeVar("_GenericEquipment", bound=EquipmentABC)
+
+
+class InstanceEquipmentParam(Generic[_GenericEquipment]):
     """
     param type with instance implementing EquipmentProxy type
 
@@ -327,8 +330,9 @@ class InstanceEquipmentParam[T: EquipmentABC](_ParamBase):
 
     def __init__(self, required: bool = False):
         self.value: str | None = None
-        self.instance: T | None = None
-        super().__init__(required)
+        self.instance: _GenericEquipment | None = None
+        self.required = required
+        # super().__init__(required)
 
     class DictType(TypedDict):
         type: Literal["instance.equipment"]
@@ -351,14 +355,16 @@ class InstanceEquipmentParam[T: EquipmentABC](_ParamBase):
             if data["value"] not in equipments:
                 raise ValueError(f"Equipment {data['value']} not found.")
             param.value = data["value"]
-            param.instance = equipments[data["value"]]
+            param.instance = cast(_GenericEquipment, equipments[data["value"]])
 
         return param
 
     def toSave(self) -> dict[str, Any]:
         return {
             "value": self.value,
-            "params": params2Dict(self.instance.params) if self.instance else None,
+            "params": params2Dict(cast(Params, self.instance.params))  # type: ignore
+            if self.instance
+            else None,
         }
 
 
@@ -373,16 +379,56 @@ type _SimpleParamType = (
     | InstanceEquipmentParam[EquipmentABC]
 )
 
+type _SimpleParamDictType = (
+    SelectStrParam.DictType
+    | SelectFloatParam.DictType
+    | SelectIntParam.DictType
+    | IntParam.DictType
+    | FloatParam.DictType
+    | StrParam.DictType
+    | BoolParam.DictType
+    | InstanceEquipmentParam[EquipmentABC].DictType
+)
 
-class CompositeParam[T]:
+Children = TypeVar("Children", bound=dict[str, _SimpleParamType])
+
+
+_CompositeChildrenTypesType = TypedDict(
+    "_CompositeChildrenTypesType",
+    {
+        "select.str": Type[SelectStrParam],
+        "select.float": Type[SelectFloatParam],
+        "select.int": Type[SelectIntParam],
+        "int": Type[IntParam],
+        "float": Type[FloatParam],
+        "str": Type[StrParam],
+        "bool": Type[BoolParam],
+        "instance.equipment": Type[InstanceEquipmentParam[EquipmentABC]],
+    },
+)
+
+
+_CompositeChildrenTypes: _CompositeChildrenTypesType = {
+    "select.str": SelectStrParam,
+    "select.float": SelectFloatParam,
+    "select.int": SelectIntParam,
+    "int": IntParam,
+    "float": FloatParam,
+    "str": StrParam,
+    "bool": BoolParam,
+    "instance.equipment": InstanceEquipmentParam[EquipmentABC],
+}
+
+
+class CompositeParam(Generic[Children]):
     type: Literal["composite"] = "composite"
 
-    def __init__(self, children: T):
+    def __init__(self, children: Children):
         self.children = children
 
     class DictType(TypedDict):
         type: Literal["composite"]
-        children: T
+        children: dict[str, _SimpleParamDictType]
 
     def toDict(self) -> DictType:
         return {
@@ -391,43 +437,83 @@ class CompositeParam[T]:
         }
 
     @classmethod
-    def fromDict(cls, data: DictType, equipments: dict[str, EquipmentABC]):
+    def fromDict(
+        cls, data: DictType, equipments: dict[str, EquipmentABC]
+    ) -> "CompositeParam[Children]":
         if data["type"] != cls.type:
             raise ValueError(f"Invalid type {data['type']} for {cls.type}")
 
-        children: Params = {}
+        children: Children = cast(Children, {})
         for k, v in data["children"].items():
-            for tp in _param_type_arr:
-                if v["type"] == tp.type:
-                    children[k] = (
-                        tp.fromDict(v, equipments)
-                        if tp.type == "instance.equipment"
-                        else tp.fromDict(v)
-                    )
+            tp = _CompositeChildrenTypes[v["type"]]
 
-                    break
+            match tp.type:
+                case "bool":
+                    assert v["type"] == "bool"
+                    children[k] = tp.fromDict(v)
+                case "float":
+                    assert v["type"] == "float"
+                    children[k] = tp.fromDict(v)
+                case "int":
+                    assert v["type"] == "int"
+                    children[k] = tp.fromDict(v)
+                case "str":
+                    assert v["type"] == "str"
+                    children[k] = tp.fromDict(v)
+                case "select.str":
+                    assert v["type"] == "select.str"
+                    children[k] = tp.fromDict(v)
+                case "select.int":
+                    assert v["type"] == "select.int"
+                    children[k] = tp.fromDict(v)
+                case "select.float":
+                    assert v["type"] == "select.float"
+                    children[k] = tp.fromDict(v)
+                case "instance.equipment":
+                    assert v["type"] == "instance.equipment"
+                    children[k] = tp.fromDict(v, equipments)
 
-        return CompositeParam(children)
+        return CompositeParam[Children](children)
 
     def toSave(self):
         return {k: v.toSave() for k, v in self.children.items()}
 
 
-type AllParamTypes = _SimpleParamType | CompositeParam[_SimpleParamType]
-type Params = dict[str, AllParamTypes]
+type AllParamType = _SimpleParamType | CompositeParam[dict[str, _SimpleParamType]]
+type Params = dict[str, AllParamType]
+
+type AllParamDictType = (
+    _SimpleParamDictType | CompositeParam[dict[str, _SimpleParamType]].DictType
+)
 
 
-_param_type_arr = [
-    SelectStrParam,
-    SelectIntParam,
-    SelectFloatParam,
-    IntParam,
-    FloatParam,
-    StrParam,
-    BoolParam,
-    InstanceEquipmentParam[EquipmentABC],
-    CompositeParam,
-]
+_AllParamsTypesType = TypedDict(
+    "_AllParamsTypesType",
+    {
+        "select.str": Type[SelectStrParam],
+        "select.float": Type[SelectFloatParam],
+        "select.int": Type[SelectIntParam],
+        "int": Type[IntParam],
+        "float": Type[FloatParam],
+        "str": Type[StrParam],
+        "bool": Type[BoolParam],
+        "instance.equipment": Type[InstanceEquipmentParam[EquipmentABC]],
+        "composite": Type[CompositeParam[dict[str, _SimpleParamType]]],
+    },
+)
+
+
+_AllParamsTypes: _AllParamsTypesType = {
+    "select.str": SelectStrParam,
+    "select.float": SelectFloatParam,
+    "select.int": SelectIntParam,
+    "int": IntParam,
+    "float": FloatParam,
+    "str": StrParam,
+    "bool": BoolParam,
+    "instance.equipment": InstanceEquipmentParam[EquipmentABC],
+    "composite": CompositeParam[dict[str, _SimpleParamType]],
+}
 
 
 def params2Dict(params: Params) -> dict[str, Any]:
@@ -437,7 +523,9 @@ def params2Dict(params: Params) -> dict[str, Any]:
     return {k: v.toDict() for k, v in params.items()}
 
 
-def dict2Params(data: dict[str, Any], equipments: dict[str, EquipmentABC]) -> Params:
+def dict2Params(
+    data: dict[str, AllParamDictType], equipments: dict[str, EquipmentABC]
+) -> Params:
     """
     Convert the dictionary representation back to Params
     However this function does not set the instance of the params,
@@ -445,18 +533,36 @@ def dict2Params(data: dict[str, Any], equipments: dict[str, EquipmentABC]) -> Pa
     """
     params: Params = {}
     for k, v in data.items():
-        if v["type"] == CompositeParam.type:
-            params[k] = CompositeParam.fromDict(v, equipments)
-            continue
+        tp = _AllParamsTypes[v["type"]]
 
-        for tp in _param_type_arr:
-            if v["type"] == tp.type:
-                params[k] = (
-                    tp.fromDict(v, equipments)
-                    if tp.type == "instance.equipment"
-                    else tp.fromDict(v)
-                )
-                break
+        match tp.type:
+            case "bool":
+                assert v["type"] == "bool"
+                params[k] = tp.fromDict(v)
+            case "float":
+                assert v["type"] == "float"
+                params[k] = tp.fromDict(v)
+            case "int":
+                assert v["type"] == "int"
+                params[k] = tp.fromDict(v)
+            case "str":
+                assert v["type"] == "str"
+                params[k] = tp.fromDict(v)
+            case "select.str":
+                assert v["type"] == "select.str"
+                params[k] = tp.fromDict(v)
+            case "select.int":
+                assert v["type"] == "select.int"
+                params[k] = tp.fromDict(v)
+            case "select.float":
+                assert v["type"] == "select.float"
+                params[k] = tp.fromDict(v)
+            case "instance.equipment":
+                assert v["type"] == "instance.equipment"
+                params[k] = tp.fromDict(v, equipments)
+            case "composite":
+                assert v["type"] == "composite"
+                params[k] = CompositeParam.fromDict(v, equipments)
 
     return params
 

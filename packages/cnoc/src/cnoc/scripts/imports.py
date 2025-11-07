@@ -3,7 +3,6 @@ import inspect
 import json
 import pkgutil
 import sys
-from threading import local
 from traceback import print_tb
 from typing import TypedDict
 
@@ -95,3 +94,5 @@ def main():
             print(json.dumps(eeImports(EquipmentABC, sys.argv[2:], local_names)))
         case "experiment":
             print(json.dumps(eeImports(ExperimentABC, sys.argv[2:], local_names)))
+        case _:
+            printErr(f"Invalid argument {sys.argv[1]}")

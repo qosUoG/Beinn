@@ -1,5 +1,5 @@
 import time
-from typing import TypedDict
+from typing import Any, TypedDict, cast
 import pandas as pd
 
 from ._params import Params
@@ -8,7 +8,7 @@ from ._saver import Saver as _S
 
 class Metadata(TypedDict):
     time: time.struct_time
-    params: dict
+    params: dict[str, Any]
     note: str
 
 
@@ -38,8 +38,8 @@ class Reader:
     def get(self, key: str) -> DataSet:
         store = pd.HDFStore(self.path)
         dataset = Reader.DataSet(
-            store.get(key),
-            store.get_storer(key).attrs.metadata,
+            cast(pd.DataFrame, store.get(key)),
+            cast(Metadata, store.get_storer(key).attrs.metadata),
         )
         store.close()
         return dataset
