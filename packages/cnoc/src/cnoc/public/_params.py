@@ -359,7 +359,7 @@ def params2Dict(params: DataclassInstance):
             res[k] = v.toDict()
         else:
             res[k] = {
-                k: cast(AllParamType, v).toDict() for k, v in params.__dict__.items()
+                _k: cast(AllParamType, _v).toDict() for _k, _v in v.__dict__.items()
             }
 
     return res
