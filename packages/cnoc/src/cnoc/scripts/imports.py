@@ -14,7 +14,7 @@ from ..public.experiment import ExperimentABC
 
 
 def eeImports(
-    eetype: type[ExperimentABC] | type[EquipmentABC[Any]],
+    eetype: type[ExperimentABC[Any]] | type[EquipmentABC[Any]],
     names: list[str],
     local_names: list[str],
 ):
@@ -22,7 +22,7 @@ def eeImports(
         module: str
         cls: str
 
-    res: dict[type[ExperimentABC] | type[EquipmentABC[Any]], ReturnType] = {}
+    res: dict[type[ExperimentABC[Any]] | type[EquipmentABC[Any]], ReturnType] = {}
 
     def examinePackage(src: str, name: str):
         try:

@@ -9,14 +9,14 @@ example/examplelib.
 """
 
 from abc import ABC, abstractmethod
-from typing import Any, Callable
+from typing import Any, Callable, cast
 
 from .equipment import EquipmentABC
 from .manager import Manager
 from _typeshed import DataclassInstance
 
 
-class ExperimentABC(ABC):
+class ExperimentABC[T: DataclassInstance](ABC):
     """
     Base class of all experiment scripts
 
@@ -27,6 +27,9 @@ class ExperimentABC(ABC):
 
     """
 
+    def __init__(self):
+        self.params: T
+
     def setParams(
         self,
         params: dict[str, Any],
@@ -35,7 +38,7 @@ class ExperimentABC(ABC):
     ):
         from ._params import dict2Params
 
-        self.params: DataclassInstance = dict2Params(params, equipments, ParamsCls)
+        self.params = cast(T, dict2Params(params, equipments, ParamsCls))
 
     @abstractmethod
     def start(self, manager: Manager) -> None:

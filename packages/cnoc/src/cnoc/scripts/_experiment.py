@@ -108,7 +108,7 @@ class App:
         self._state = _State()
 
         self._equipments: dict[str, EquipmentABC[Any]] = {}
-        self._experiment: ExperimentABC
+        self._experiment: ExperimentABC[Any]
 
         equipments_payload = res["equipments"]
         experiment_payload = res["experiment"]
