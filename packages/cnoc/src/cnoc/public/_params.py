@@ -22,7 +22,7 @@ experiment, please refer to the example directory.
 
 """
 
-from dataclasses import InitVar, asdict, dataclass, field, fields
+from dataclasses import InitVar, dataclass, field, fields
 from ._utils import DataclassInstance
 
 from typing import (
@@ -335,12 +335,34 @@ type AllParamSaveType = (
 )
 
 
-def params2Dict(params: Any):
+def params2Dict(params: DataclassInstance):
     """
     Convert the params to a dictionary representation
     """
 
-    return {k: cast(AllParamType, v).toDict() for k, v in asdict(params).items()}
+    res: dict[str, AllParamDictType | dict[str, AllParamDictType]] = {}
+    for k, v in params.__dict__.items():
+        v = cast(AllParamType | DataclassInstance, v)
+        if isinstance(
+            v,
+            (
+                Int,
+                Float,
+                Str,
+                Bool,
+                Equipment,
+                Select.Int,
+                Select.Float,
+                Select.Str,
+            ),
+        ):
+            res[k] = v.toDict()
+        else:
+            res[k] = {
+                k: cast(AllParamType, v).toDict() for k, v in params.__dict__.items()
+            }
+
+    return res
 
 
 def dict2Params(
