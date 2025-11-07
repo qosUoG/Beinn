@@ -2,7 +2,7 @@ from typing import cast
 from .equipment import EquipmentABC
 from . import _params
 
-type _SimpleParamType = (
+type SimpleParamType = (
     _params.SelectStrParam
     | _params.SelectFloatParam
     | _params.SelectIntParam
@@ -18,9 +18,9 @@ type Int = _params.IntParam
 type Float = _params.FloatParam
 type Str = _params.StrParam
 type Equipment[E: EquipmentABC] = _params.InstanceEquipmentParam[E]
-type Composite[T: dict[str, _SimpleParamType]] = _params.CompositeParam[T]
+type Composite[T: dict[str, SimpleParamType]] = _params.CompositeParam[T]
 
-type CompositeChildren = dict[str, _SimpleParamType]
+type CompositeChildren = dict[str, SimpleParamType]
 
 
 class Select:
@@ -51,8 +51,8 @@ class p:
         return _params.InstanceEquipmentParam[T]()
 
     @classmethod
-    def composite[T: dict[str, _SimpleParamType]](
-        cls, children: dict[str, _SimpleParamType]
+    def composite[T: dict[str, SimpleParamType]](
+        cls, children: dict[str, SimpleParamType]
     ):
         return _params.CompositeParam[T](cast(T, children))
 
