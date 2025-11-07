@@ -1,68 +1,48 @@
-from typing import Any, Iterable, Mapping, TypedDict, cast
+from dataclasses import field
+from enum import Enum
+from typing import Iterable
 from .equipment import EquipmentABC
 from . import _params
-
-type SimpleParamType = (
-    _params.SelectStrParam
-    | _params.SelectFloatParam
-    | _params.SelectIntParam
-    | _params.IntParam
-    | _params.FloatParam
-    | _params.StrParam
-    | _params.BoolParam
-    | _params.InstanceEquipmentParam[EquipmentABC]
-)
-
-
-type Int = _params.IntParam
-type Float = _params.FloatParam
-type Str = _params.StrParam
-type Equipment[E: EquipmentABC] = _params.InstanceEquipmentParam[E]
-type Composite[T: Mapping[str, Any]] = _params.CompositeParam[T]
-
-
-class Select:
-    Str = _params.SelectStrParam
-    Int = _params.SelectIntParam
-    Float = _params.SelectFloatParam
 
 
 class p:
     @classmethod
     def int(cls, default: int = 0, suffix: str = ""):
-        return _params.IntParam(default, suffix)
+        return field(default=_params.Int(default, suffix))
 
     @classmethod
     def float(cls, default: float = 0.0, suffix: str = ""):
-        return _params.FloatParam(default, suffix)
+        return field(default=_params.Float(default, suffix))
 
     @classmethod
     def str(cls, default: str = ""):
-        return _params.StrParam(default)
+        return field(default=_params.Str(default))
 
     @classmethod
-    def boolean(cls, default: bool = False):
-        return _params.BoolParam(default)
+    def boolean(cls, default: bool = True):
+        return field(default=_params.Bool(default))
 
     @classmethod
     def equipment[T: EquipmentABC](cls):
-        return _params.InstanceEquipmentParam[T]()
-
-    @classmethod
-    def composite[T: dict[str, SimpleParamType]](
-        cls, children: dict[str, SimpleParamType]
-    ):
-        return _params.CompositeParam[T](cast(T, children))
+        return field(default=_params.Equipment[T]())
 
     class select:
         @classmethod
-        def str(cls, options: Iterable[str], value: str | None = None):
-            return _params.SelectStrParam(list(options), value)
+        def str(cls, options: Iterable[str], default: str | None = None):
+            return field(default=_params.Select.Str(list(options), default))
 
         @classmethod
-        def int(cls, options: Iterable[int], value: int | None = None):
-            return _params.SelectIntParam(list(options), value)
+        def enum(cls, default: Enum):
+            return field(
+                default=_params.Select.Str(
+                    list(default.__class__.__members__.keys()), default.name
+                )
+            )
 
         @classmethod
-        def float(cls, options: Iterable[float], value: float | None = None):
-            return _params.SelectFloatParam(list(options), value)
+        def int(cls, options: Iterable[int], default: int | None = None):
+            return field(default=_params.Select.Int(list(options), default))
+
+        @classmethod
+        def float(cls, options: Iterable[float], default: float | None = None):
+            return field(default=_params.Select.Float(list(options), default))
