@@ -22,19 +22,11 @@ experiment, please refer to the example directory.
 
 """
 
-# from .experiment import ExperimentABC
-
-from abc import ABC
 from typing import Any, Generic, Literal, Type, TypedDict, cast, TypeVar
 from .equipment import EquipmentABC
 
 
-class _ParamBase(ABC):
-    def __init__(self, required: bool):
-        self.required = required
-
-
-class SelectStrParam(_ParamBase):
+class SelectStrParam:
     """
     Single select param with value of type str
 
@@ -48,9 +40,7 @@ class SelectStrParam(_ParamBase):
 
     type: Literal["select.str"] = "select.str"
 
-    def __init__(
-        self, options: list[str], value: str | None = None, required: bool = False
-    ):
+    def __init__(self, options: list[str], value: str | None = None):
         """
         Parameters
         ----------
@@ -63,105 +53,98 @@ class SelectStrParam(_ParamBase):
         """
         self._options = options
         self.value = value if value is not None and value in options else options[0]
-        super().__init__(required)
 
     class DictType(TypedDict):
         type: Literal["select.str"]
         options: list[str]
         value: str
-        required: bool
 
     @classmethod
     def fromDict(cls, data: DictType):
         if data["type"] != cls.type:
             raise ValueError(f"Invalid type {data['type']} for {cls.type}")
-        return cls(data["options"], data["value"], data["required"])
+        return cls(data["options"], data["value"])
 
     def toDict(self) -> DictType:
         return {
             "type": self.type,
             "options": self._options,
             "value": self.value,
-            "required": self.required,
         }
 
     def toSave(self):
         return {"value": self.value}
 
 
-class SelectIntParam(_ParamBase):
+class SelectIntParam:
     """Single select of int type. Detail refer to SelectStrParam class"""
 
     type: Literal["select.int"] = "select.int"
 
-    def __init__(
-        self, options: list[int], value: int | None = None, required: bool = False
-    ):
+    def __init__(self, options: list[int], value: int | None = None):
         self._options = options
         self.value = value if value is not None and value in options else options[0]
-        super().__init__(required)
 
     class DictType(TypedDict):
         type: Literal["select.int"]
         options: list[int]
         value: int
-        required: bool
 
     @classmethod
     def fromDict(cls, data: DictType):
         if data["type"] != cls.type:
             raise ValueError(f"Invalid type {data['type']} for {cls.type}")
-        return cls(data["options"], data["value"], data["required"])
+        return cls(
+            data["options"],
+            data["value"],
+        )
 
     def toDict(self) -> DictType:
         return {
             "type": self.type,
             "options": self._options,
             "value": self.value,
-            "required": self.required,
         }
 
     def toSave(self):
         return {"value": self.value}
 
 
-class SelectFloatParam(_ParamBase):
+class SelectFloatParam:
     """Single select of float type. Detail refer to SelectStrParam class"""
 
     type: Literal["select.float"] = "select.float"
 
-    def __init__(
-        self, options: list[float], value: float | None = None, required: bool = False
-    ):
+    def __init__(self, options: list[float], value: float | None = None):
         self._options = options
         self.value = value if value is not None and value in options else options[0]
-        super().__init__(required)
 
     class DictType(TypedDict):
         type: Literal["select.float"]
         options: list[float]
         value: float
-        required: bool
 
     @classmethod
     def fromDict(cls, data: DictType):
         if data["type"] != cls.type:
             raise ValueError(f"Invalid type {data['type']} for {cls.type}")
-        return cls(data["options"], data["value"], data["required"])
+        return cls(
+            data["options"],
+            data["value"],
+        )
 
     def toDict(self) -> DictType:
         return {
             "type": self.type,
             "options": self._options,
             "value": self.value,
-            "required": self.required,
         }
 
     def toSave(self):
         return {"value": self.value}
 
 
-class IntParam(_ParamBase):
+class IntParam:
     """
     param with value of type int
 
@@ -175,7 +158,7 @@ class IntParam(_ParamBase):
 
     type: Literal["int"] = "int"
 
-    def __init__(self, default: int = 0, suffix: str = "", required: bool = False):
+    def __init__(self, default: int = 0, suffix: str = ""):
         """
         Parameters
         ----------
@@ -188,33 +171,33 @@ class IntParam(_ParamBase):
         """
         self.value = default
         self.suffix = suffix
-        super().__init__(required)
 
     class DictType(TypedDict):
         type: Literal["int"]
         suffix: str
         value: int
-        required: bool
 
     @classmethod
     def fromDict(cls, data: DictType):
         if data["type"] != cls.type:
             raise ValueError(f"Invalid type {data['type']} for {cls.type}")
-        return cls(data["value"], data["suffix"], data["required"])
+        return cls(
+            data["value"],
+            data["suffix"],
+        )
 
     def toDict(self) -> DictType:
         return {
             "type": self.type,
             "suffix": self.suffix,
             "value": self.value,
-            "required": self.required,
         }
 
     def toSave(self) -> dict[str, Any]:
         return {"value": self.value, "suffix": self.suffix}
 
 
-class FloatParam(_ParamBase):
+class FloatParam:
     """IntParam but of float type. Detail refer to IntParam class
 
     Default value if none is given is 0.0
@@ -222,36 +205,36 @@ class FloatParam(_ParamBase):
 
     type: Literal["float"] = "float"
 
-    def __init__(self, default: float = 0.0, suffix: str = "", required: bool = False):
+    def __init__(self, default: float = 0.0, suffix: str = ""):
         self.value = default
         self.suffix = suffix
-        super().__init__(required)
 
     class DictType(TypedDict):
         type: Literal["float"]
         suffix: str
         value: float
-        required: bool
 
     @classmethod
     def fromDict(cls, data: DictType):
         if data["type"] != cls.type:
             raise ValueError(f"Invalid type {data['type']} for {cls.type}")
-        return cls(data["value"], data["suffix"], data["required"])
+        return cls(
+            data["value"],
+            data["suffix"],
+        )
 
     def toDict(self) -> DictType:
         return {
             "type": self.type,
             "suffix": self.suffix,
             "value": self.value,
-            "required": self.required,
         }
 
     def toSave(self) -> dict[str, Any]:
         return {"value": self.value, "suffix": self.suffix}
 
 
-class StrParam(_ParamBase):
+class StrParam:
     """
     IntParam but of str type, without suffix. Detail refer to IntParam class.
     Default value if not given is empty string.
@@ -259,29 +242,32 @@ class StrParam(_ParamBase):
 
     type: Literal["str"] = "str"
 
-    def __init__(self, default: str = "", required: bool = False):
+    def __init__(self, default: str = ""):
         self.value = default
-        super().__init__(required)
 
     class DictType(TypedDict):
         type: Literal["str"]
         value: str
-        required: bool
 
     @classmethod
     def fromDict(cls, data: DictType):
         if data["type"] != cls.type:
             raise ValueError(f"Invalid type {data['type']} for {cls.type}")
-        return cls(data["value"], data["required"])
+        return cls(
+            data["value"],
+        )
 
     def toDict(self) -> DictType:
-        return {"type": self.type, "value": self.value, "required": self.required}
+        return {
+            "type": self.type,
+            "value": self.value,
+        }
 
     def toSave(self):
         return {"value": self.value}
 
 
-class BoolParam(_ParamBase):
+class BoolParam:
     """
     IntParam but of bool type, without suffix. Detail refer to IntParam class.
     Default value if not given is empty string.
@@ -289,23 +275,26 @@ class BoolParam(_ParamBase):
 
     type: Literal["bool"] = "bool"
 
-    def __init__(self, default: bool = False, required: bool = False):
+    def __init__(self, default: bool = False):
         self.value = default
-        super().__init__(required)
 
     class DictType(TypedDict):
         type: Literal["bool"]
         value: bool
-        required: bool
 
     @classmethod
     def fromDict(cls, data: DictType):
         if data["type"] != cls.type:
             raise ValueError(f"Invalid type {data['type']} for {cls.type}")
-        return cls(data["value"], data["required"])
+        return cls(
+            data["value"],
+        )
 
     def toDict(self) -> DictType:
-        return {"type": self.type, "value": self.value, "required": self.required}
+        return {
+            "type": self.type,
+            "value": self.value,
+        }
 
     def toSave(self):
         return {"value": self.value}
@@ -328,29 +317,27 @@ class InstanceEquipmentParam(Generic[_GenericEquipment]):
 
     type: Literal["instance.equipment"] = "instance.equipment"
 
-    def __init__(self, required: bool = False):
+    def __init__(self):
         self.value: str | None = None
         self.instance: _GenericEquipment | None = None
-        self.required = required
-        # super().__init__(required)
+
+        #
 
     class DictType(TypedDict):
         type: Literal["instance.equipment"]
         value: str | None
-        required: bool
 
     def toDict(self) -> DictType:
         return {
             "type": self.type,
             "value": self.value if self.value else None,
-            "required": self.required,
         }
 
     @classmethod
     def fromDict(cls, data: DictType, equipments: dict[str, EquipmentABC]):
         if data["type"] != cls.type:
             raise ValueError(f"Invalid type {data['type']} for {cls.type}")
-        param = cls(data["required"])
+        param = cls()
         if data["value"] is not None:
             if data["value"] not in equipments:
                 raise ValueError(f"Equipment {data['value']} not found.")
