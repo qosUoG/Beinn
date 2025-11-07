@@ -22,9 +22,10 @@ class p:
     def boolean(cls, default: bool = True):
         return field(default=_params.Bool(default))
 
-    @classmethod
-    def equipment[T: EquipmentABC](cls):
-        return field(default=_params.Equipment[T]())
+    class equipment[T: EquipmentABC]:
+        @classmethod
+        def instance(cls):
+            return field(default=_params.Equipment[T]())
 
     class select:
         @classmethod
