@@ -13,7 +13,7 @@ example/examplelib.
 """
 
 from abc import ABC, abstractmethod
-from typing import Any, Never
+from typing import Any
 from _typeshed import DataclassInstance
 
 
@@ -61,7 +61,7 @@ class EquipmentABC(ABC):
     #             print(e, flush=True)
 
     @abstractmethod
-    def cleanup(self) -> Never:
+    def cleanup(self) -> None:
         """
         Perform any clean up if needed
 
@@ -72,7 +72,7 @@ class EquipmentABC(ABC):
         raise NotImplementedError
 
     @abstractmethod
-    def interactive(self) -> Never:
+    def interactive(self) -> None:
         """
         Code to run before REPL mode is entered
         """

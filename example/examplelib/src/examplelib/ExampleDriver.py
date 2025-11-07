@@ -1,7 +1,7 @@
 from dataclasses import dataclass, field
 import math
 from random import random
-from typing import TypedDict, override
+from typing import override
 from cnoc import EquipmentABC, p
 
 
@@ -40,7 +40,7 @@ class ExampleEquipment(EquipmentABC):
         selectstr = p.select.str(["option1", "option2", "option3"])
         selectint = p.select.int([1, 2, 3], 2)
         selectfloat = p.select.float([1.1, 2.2, 3.3])
-        composite = field(default_factory=NestedParams)
+        composite = p.composite(NestedParams)
 
     # These are class attributes instead of instance attributes
     # While you may acquire it through the instance, it maybe easily mixed up
@@ -48,31 +48,6 @@ class ExampleEquipment(EquipmentABC):
     equipment_model: str = "QOS007"
 
     def __init__(self):
-        super().__init__()
-        # Default params list
-        self.params: ExampleEquipment.ParamsType = {
-            "strparam": p.str(),
-            "floatparam": p.float(suffix="W"),
-            "intparam": p.int(),
-            "boolparam": p.boolean(False),
-            "selectstrparam": p.select.str(["option1", "option2", "option3"]),
-            "selectintparam": p.select.int([1, 2, 3], 2),
-            "selectfloatparam": p.select.float([1.1, 2.2, 3.3]),
-            "compositeparam": p.composite(
-                {
-                    "compstrparam": p.str(),
-                    "compfloatparam": p.float(suffix="W"),
-                    "compintparam": p.int(),
-                    "compboolparam": p.boolean(False),
-                    "compselectstrparam": p.select.str(
-                        ["option1", "option2", "option3"]
-                    ),
-                    "compselectintparam": p.select.int([1, 2, 3]),
-                    "compselectfloatparam": p.select.float([1.1, 2.2, 3.3]),
-                },
-            ),
-        }
-
         # # After the params list, one shall instantiate the equipment instance if needed
         # # using corresponding libraries, such as pyvisa, pyserial, zhinst.toolkit etc
         # # The example below is adapted from pyvisa official doc
