@@ -1,7 +1,7 @@
 <script lang="ts">
-	import type { CompositeParam } from "$controllers/params.svelte";
 	import { ChevronDown, ChevronRight } from "@lucide/svelte";
 	import Param from "./Param.svelte";
+	import type { RuntimeAllParamTypes } from "$controllers/params.svelte";
 
 	let {
 		label,
@@ -11,7 +11,7 @@
 		editable = true,
 	}: {
 		label: string;
-		params: CompositeParam["children"];
+		params: Record<string, RuntimeAllParamTypes>;
 		open: boolean;
 		saveFn: () => Promise<void>;
 		editable?: boolean;

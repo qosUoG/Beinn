@@ -1,5 +1,5 @@
 import { deepCopy, shell, type Prettify } from "$lib/utils"
-import { runtime2Save, save2Runtime, type AllParamTypes, type RuntimeAllParamTypes, type RuntimeEquipmentParam, type SelectFloatParam, type SelectStrParam, type SimpleParamType } from "./params.svelte"
+import { runtime2Save, save2Runtime, type AllParamTypes, type RuntimeAllParamTypes, type RuntimeEquipmentParam, type SelectFloatParam, type SelectStrParam } from "./params.svelte"
 import { dependency_controller } from "./dependency.svelte"
 import { workspace_controller } from "./workspace.svelte"
 import { tick } from "svelte"
@@ -12,14 +12,14 @@ export type Imports = { module: string, cls: string }[]
 export type ConcInstance = {
     module: string,
     cls: string,
-    params: Record<string, AllParamTypes>,
+    params: Record<string, AllParamTypes | Record<string, AllParamTypes>>,
 }
 
 export type InstanceSave = {
     name: string;
     module: string;
     cls: string;
-    params: Record<string, AllParamTypes>;
+    params: Record<string, AllParamTypes | Record<string, AllParamTypes>>;
     param_opens: boolean;
     composite_opens: Record<string, boolean>;
 }
@@ -30,7 +30,7 @@ export class Instance {
     module: string
     cls: string
 
-    params: Record<string, RuntimeAllParamTypes> = $state({})
+    params: Record<string, RuntimeAllParamTypes | Record<string, RuntimeAllParamTypes>> = $state({})
 
     name: string
     temp_name: string
@@ -60,8 +60,9 @@ export class Instance {
 
         await tick()
 
+
         for (const [key, value] of Object.entries(this.params))
-            if (value.type === "composite" && this.composite_opens[key] === undefined)
+            if (!("type" in value) && this.composite_opens[key] === undefined)
                 this.composite_opens[key] = true
 
         this.initialized = true
@@ -71,8 +72,8 @@ export class Instance {
         this.reloading = true
         await tick()
 
-        const save: {
-            params: Record<string, AllParamTypes>,
+        const temp: {
+            params: Record<string, RuntimeAllParamTypes | Record<string, RuntimeAllParamTypes>>,
             composite_opens: Record<string, boolean>,
         } = deepCopy({
             params: this.params,
@@ -92,7 +93,7 @@ export class Instance {
 
         await tick()
 
-        await this.assignParams(save.params)
+        await this.assignParams(temp.params)
 
         await tick()
 
@@ -105,7 +106,7 @@ export class Instance {
 
         // Add composite_opens keys that are in the new params
         for (const [key, value] of Object.entries(this.params))
-            if (value.type === "composite" && this.composite_opens[key] === undefined)
+            if (!("type" in value) && this.composite_opens[key] === undefined)
                 this.composite_opens[key] = true
 
         this.reloading = false
@@ -121,8 +122,8 @@ export class Instance {
 
 
 
-    async assignParams(params: Record<string, AllParamTypes>) {
-        const assignParam = (obj: Prettify<Exclude<Instance["params"], "composite">>, key: string, param: SimpleParamType) => {
+    async assignParams(params: Record<string, RuntimeAllParamTypes | Record<string, RuntimeAllParamTypes>>) {
+        const assignParam = (obj: Record<string, RuntimeAllParamTypes>, key: string, param: AllParamTypes) => {
             if (!(key in obj) || obj[key].type !== param.type) return
 
             switch (param.type) {
@@ -168,15 +169,15 @@ export class Instance {
         }
 
         for (const [key, param] of Object.entries(params)) {
-
-            if (param.type === "composite") {
-                if (this.params[key]?.type !== "composite") continue
-
-                for (const [child_key, child_param] of Object.entries(param.children))
-                    assignParam(this.params[key].children, child_key, child_param)
+            if (!("type" in param)) {
+                for (const [_key, _param] of Object.entries(param))
+                    assignParam(this.params[key] as Record<string, RuntimeAllParamTypes>, _key, _param)
+                continue
             }
-            else
-                assignParam(this.params, key, param)
+
+            assignParam(this.params as Record<string, RuntimeAllParamTypes>, key, param as AllParamTypes)
+
+
         }
     }
 
@@ -199,6 +200,10 @@ export abstract class EEBaseController {
 
     constructor(eetype: "equipment" | "experiment") {
         this.eetype = eetype
+    }
+
+    reset() {
+        this.imports = []
     }
 
     async updateImports() {

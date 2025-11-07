@@ -4,6 +4,7 @@ import { EEBaseController, Instance, type ConcInstance, type InstanceSave } from
 import { exists, readTextFile, writeTextFile } from "@tauri-apps/plugin-fs"
 import { log_controller } from "./log.svelte"
 import { Repl } from "./repl.svelte"
+import { runtime2Save, save2Runtime, type RuntimeAllParamTypes } from "./params.svelte"
 
 export class EquipmentController extends EEBaseController {
 
@@ -78,9 +79,12 @@ export class EquipmentController extends EEBaseController {
             }
 
             // Apply the save
-            equipment.assignParams(equipment.params)
-            equipment.param_opens = equipment.param_opens
-            for (const key of Object.keys(equipment.composite_opens))
+            equipment.assignParams(save2Runtime(s.params))
+            await tick()
+
+
+            equipment.param_opens = s.param_opens
+            for (const key of Object.keys(s.composite_opens))
                 if (key in equipment.composite_opens)
                     equipment.composite_opens = equipment.composite_opens
         }
@@ -116,10 +120,10 @@ export class EquipmentController extends EEBaseController {
                     continue
                 }
 
-                if (param.type !== "composite") continue
+                if (!("type" in param)) continue
 
 
-                for (const child of Object.values(param.children))
+                for (const child of Object.values(param as Record<string, RuntimeAllParamTypes>))
                     if (child.type === "instance.equipment" && child.instance)
                         addEquipment(child.instance)
 
@@ -154,7 +158,7 @@ export class EquipmentController extends EEBaseController {
 
     reset() {
         this.equipments = []
-        this.imports = []
+        super.reset()
 
         if (this.repl && this.repl.online) this.repl.kill()
         this.repl = undefined

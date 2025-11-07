@@ -4,7 +4,7 @@
 	import InputField from "$components/fields/InputField.svelte";
 	import TabSelect from "$components/fields/TabSelect.svelte";
 	import { equipment_controller } from "$controllers/equipment.svelte";
-	import type { RuntimeSimpleParamType } from "$controllers/params.svelte";
+	import type { RuntimeAllParamTypes } from "$controllers/params.svelte";
 
 	let {
 		label,
@@ -13,7 +13,7 @@
 		editable = true,
 	}: {
 		label: string;
-		param: RuntimeSimpleParamType;
+		param: RuntimeAllParamTypes;
 		saveFn: () => Promise<void>;
 		editable?: boolean;
 	} = $props();
@@ -22,7 +22,6 @@
 {#if param.type === "int" || param.type === "float"}
 	<InputField
 		{editable}
-		mandatory={param.required}
 		{label}
 		bind:value={
 			() => param.value,
@@ -49,7 +48,6 @@
 {:else if param.type === "str"}
 	<ContentEditable
 		{editable}
-		mandatory={param.required}
 		{label}
 		bind:value={
 			() => param.value,
@@ -61,7 +59,6 @@
 {:else if param.type === "bool"}
 	<TabSelect
 		{editable}
-		mandatory={param.required}
 		{label}
 		bind:value={
 			() => param.value,
@@ -77,7 +74,6 @@
 {:else if param.type === "select.float" || param.type === "select.int" || param.type === "select.str"}
 	<DropSelect
 		{editable}
-		mandatory={param.required}
 		{label}
 		bind:value={
 			() => ({ key: `${param.value}`, value: param.value }),
@@ -90,7 +86,6 @@
 {:else if param.type === "instance.equipment"}
 	<DropSelect
 		{editable}
-		mandatory={param.required}
 		{label}
 		bind:value={
 			() => ({

@@ -16,6 +16,7 @@
 
 	import { Command } from "@tauri-apps/plugin-shell";
 	import { platform } from "@tauri-apps/plugin-os";
+	import { experiment_controller } from "$controllers/experiment.svelte";
 
 	async function folderSearchHandler() {
 		const path = await open({
@@ -62,13 +63,19 @@
 			</div>
 		</div>
 	{:else}
-		<button
-			class="icon-btn-sm bg-slate-500 text-slate-50"
-			onclick={folderSearchHandler}><FolderOpen /></button>
 		{#if workspace_controller.status === "ready"}
 			<button
 				class="icon-btn-sm bg-slate-500 text-slate-50"
 				onclick={openerHandler}><Keyboard /></button>
+		{/if}
+		{#if experiment_controller.editable}
+			<button
+				class="icon-btn-sm bg-slate-500 text-slate-50"
+				onclick={folderSearchHandler}><FolderOpen /></button>
+		{:else}
+			<div class="icon-btn-sm bg-slate-300 text-slate-50">
+				<FolderOpen />
+			</div>
 		{/if}
 	{/if}
 </div>

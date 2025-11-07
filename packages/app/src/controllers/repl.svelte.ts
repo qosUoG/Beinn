@@ -1,7 +1,7 @@
 import { workspace_controller } from "$controllers/workspace.svelte"
 import { Child, Command } from "@tauri-apps/plugin-shell"
 import type { Instance } from "./_ee.svelte"
-import { sleep } from "$lib/utils"
+
 
 export class Repl {
     process: Child | undefined = undefined

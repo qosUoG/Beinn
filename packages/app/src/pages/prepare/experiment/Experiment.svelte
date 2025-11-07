@@ -81,9 +81,9 @@
 							experiment_controller.experiment.composite_opens
 						}
 						bind:params={experiment_controller.experiment.params}
-						saveFn={experiment_controller.save.bind(
-							experiment_controller
-						)} />
+						saveFn={async () => {
+							await experiment_controller.save();
+						}} />
 				</div>
 			</div>
 		{/if}

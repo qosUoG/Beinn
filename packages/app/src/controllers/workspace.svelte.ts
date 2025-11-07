@@ -7,12 +7,20 @@ import { confirm } from "@tauri-apps/plugin-dialog"
 import { shell } from "$lib/utils"
 import { equipment_controller } from "./equipment.svelte"
 import { experiment_controller } from "./experiment.svelte"
+import { log_controller } from "./log.svelte"
 
 class WorkspaceController {
     path: string | null = $state(null)
     status: "empty" | "loading" | "ready" = $state("empty")
 
     async loadWorkspace(path: string) {
+        dependency_controller.reset()
+        equipment_controller.reset()
+        experiment_controller.reset()
+        log_controller.reset()
+
+
+
         const old_status = this.status
         this.status = "loading"
         await tick()

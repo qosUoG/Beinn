@@ -12,7 +12,10 @@
 	}: {
 		param_opens: boolean;
 		composite_opens: Record<string, boolean>;
-		params: Record<string, RuntimeAllParamTypes>;
+		params: Record<
+			string,
+			RuntimeAllParamTypes | Record<string, RuntimeAllParamTypes>
+		>;
 		saveFn: () => Promise<void>;
 		editable?: boolean;
 	} = $props();
@@ -22,17 +25,17 @@
 	<div
 		class="fcol *:border-b *:border-slate-400 border-2 border-t-0 border-slate-800 min-w-80">
 		{#each Object.keys(params) as key}
-			{#if params[key].type === "composite"}
+			{#if !("type" in params[key])}
 				<Composite
 					label={key}
 					bind:open={composite_opens[key]}
-					bind:params={params[key].children}
+					bind:params={params[key]}
 					{saveFn}
 					{editable} />
 			{:else}
 				<Param
 					label={key}
-					bind:param={params[key]}
+					bind:param={params[key] as RuntimeAllParamTypes}
 					{saveFn}
 					{editable} />
 			{/if}

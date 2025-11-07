@@ -39,7 +39,7 @@ class Params:
     selectstr: P.Select.Str = p.select.str(["option1", "option2", "option3"])
     selectint: P.Select.Int = p.select.int([1, 2, 3], 2)
     selectfloat: P.Select.Float = p.select.float([1.1, 2.2, 3.3])
-    composite: NestedParams = p.composite[NestedParams].of(NestedParams)
+    composite: NestedParams = p.composite(NestedParams)
 
 
 class ExampleEquipment(EquipmentABC[Params]):

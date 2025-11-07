@@ -61,10 +61,8 @@
 									param.value === old_name
 								)
 									param.value = value;
-								else if (param.type === "composite") {
-									for (const p of Object.values(
-										param.children
-									)) {
+								else if (!("type" in param)) {
+									for (const p of Object.values(param)) {
 										if (
 											p.type === "instance.equipment" &&
 											p.value === old_name

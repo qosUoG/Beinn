@@ -5,7 +5,7 @@ import { Chart } from "./charts/chart.svelte"
 import type { ChartConfigs } from "./charts/types"
 
 import { workspace_controller } from "./workspace.svelte"
-import type { AllParamTypes, RuntimeAllParamTypes, RuntimeSimpleParamType } from "./params.svelte"
+import { save2Runtime, type AllParamTypes, type RuntimeAllParamTypes } from "./params.svelte"
 import { tick } from "svelte"
 import { exists, readTextFile, writeTextFile } from "@tauri-apps/plugin-fs"
 import { equipment_controller } from "./equipment.svelte"
@@ -124,7 +124,6 @@ export class Experiment extends Instance {
 
 
         handler.stdout.on("data", (line) => {
-            console.log(line)
             if (line.startsWith("ws:loaded")) {
                 this.startWebsocket()
                 return
@@ -132,13 +131,17 @@ export class Experiment extends Instance {
             this.cli.logs.append(line)
         })
         handler.stderr.on("data", (line) => {
-            console.log(line)
             this.cli.logs.append(line)
         })
 
         handler.on("error", (e) => {
-            console.log(e)
+            console.log("Python process error: " + e)
             this.cli.logs.append(e)
+        })
+
+        handler.on("close", (code) => {
+            console.log("Python process exited with code " + code)
+            this.state = "ready"
         })
 
 
@@ -287,16 +290,34 @@ export class ExperimentController extends EEBaseController {
     get playable() {
         if (this.experiment === undefined || this.experiment.state !== "ready") return false
 
-        function paramIsPlayable(param: RuntimeSimpleParamType) {
-            return param.type !== "instance.equipment" || (param.required && param.value) || param.required === false;
+        function paramIsPlayable(param: RuntimeAllParamTypes) {
+            switch (param.type) {
+                case "select.float":
+                case "select.int":
+                    return param.options.includes(param.value)
+
+                case "select.str":
+                    return param.options.includes(param.value)
+
+                case "int":
+                case "float":
+                    return param.value !== undefined
+                case "str":
+                    return param.value !== "" && param.value !== undefined
+                case "bool":
+                    return true
+                case "instance.equipment":
+                    return param.value !== null
+
+            }
         }
 
         return Object.values(experiment_controller.experiment!.params).every(
             (param) => {
-                if (param.type === "composite")
-                    return Object.values(param.children).every((p) => paramIsPlayable(p))
+                if (!("type" in param))
+                    return Object.values(param).every((p) => paramIsPlayable(p))
 
-                return paramIsPlayable(param)
+                return paramIsPlayable(param as RuntimeAllParamTypes)
             })
     }
 
@@ -333,7 +354,7 @@ export class ExperimentController extends EEBaseController {
         await this.loadExperiment()
 
         // Apply the save
-        this.experiment!.assignParams(save.params)
+        this.experiment!.assignParams(save2Runtime(save.params))
         this.experiment!.param_opens = save.param_opens
         for (const key of Object.keys(save.composite_opens))
             if (key in this.experiment!.composite_opens)
@@ -343,7 +364,7 @@ export class ExperimentController extends EEBaseController {
 
     reset() {
         this.experiment = undefined
-        this.imports = []
+        super.reset()
         this.module = ""
         this.cls = ""
     }

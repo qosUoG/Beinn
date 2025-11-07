@@ -3,6 +3,7 @@
 	import { tick } from "svelte";
 	import Label from "./Label.svelte";
 	import { experiment_controller } from "$controllers/experiment.svelte";
+	import { deepCopy } from "$lib/utils";
 
 	let open = $state(false);
 

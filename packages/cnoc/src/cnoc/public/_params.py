@@ -365,50 +365,55 @@ def params2Dict(params: DataclassInstance):
     return res
 
 
-def dict2Params(
+def dict2Params[T: DataclassInstance](
     data: dict[str, AllParamDictType | dict[str, AllParamDictType]],
     equipments: dict[str, EquipmentABC[Any]],
-    ParamsCls: type[DataclassInstance],
-) -> DataclassInstance:
+    ParamsCls: type[T],
+) -> T:
     """
     Convert the dictionary representation back to Params
     However this function does not set the instance of the params,
     i.e. the instance must be set after all instances are loaded
     """
-    res = {}
-    for k, v in data.items():
-        if "type" not in v:
-            fs = fields(ParamsCls)
-            for f in fs:
-                if f.name == k:
-                    res[k] = dict2Params(
-                        cast(
-                            dict[str, AllParamDictType | dict[str, AllParamDictType]], v
-                        ),
-                        equipments,
-                        cast(type[DataclassInstance], f.type),
-                    )
-                    break
 
+    def toParam(v: AllParamDictType):
         match v["type"]:
             case "bool":
-                res[k] = Bool.fromDict(cast(Bool.DictType, v))
+                res[k] = Bool.fromDict(v)
             case "float":
-                res[k] = Float.fromDict(cast(Float.DictType, v))
+                res[k] = Float.fromDict(v)
             case "int":
-                res[k] = Int.fromDict(cast(Int.DictType, v))
+                res[k] = Int.fromDict(v)
             case "str":
-                res[k] = Str.fromDict(cast(Str.DictType, v))
+                res[k] = Str.fromDict(v)
             case "select.str":
-                res[k] = Select.Str.fromDict(cast(Select.Str.DictType, v))
+                res[k] = Select.Str.fromDict(v)
             case "select.int":
-                res[k] = Select.Int.fromDict(cast(Select.Int.DictType, v))
+                res[k] = Select.Int.fromDict(v)
             case "select.float":
-                res[k] = Select.Float.fromDict(cast(Select.Float.DictType, v))
+                res[k] = Select.Float.fromDict(v)
             case "instance.equipment":
-                res[k] = Equipment.fromDict(cast(Equipment.DictType, v), equipments)
+                res[k] = Equipment.fromDict(v, equipments)
             case _:
                 raise ValueError(f"Invalid type {v['type']}")
+
+    res = {}
+    for k, v in data.items():
+        if "type" in v:
+            res[k] = toParam(cast(AllParamDictType, v))
+            continue
+
+        fs = fields(ParamsCls)
+        for f in fs:
+            if f.name != k:
+                continue
+
+            _res = {}
+            for _k, _v in v.items():
+                _res[_k] = toParam(_v)
+
+            res[k] = cast(type[DataclassInstance], f.type)(**_res)
+            break
 
     return ParamsCls(**res)
 

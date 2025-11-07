@@ -8,7 +8,7 @@ from typing import Callable, override
 import time
 
 
-from cnoc import charts, p, Saver, ExperimentABC, Manager, ExperimentEnded
+from cnoc import charts, p, Saver, ExperimentABC, Manager, ExperimentEnded, P
 
 from examplelib.ExampleDriver import ExampleEquipment
 import pandas as pd
@@ -16,37 +16,30 @@ import pandas as pd
 
 @dataclass
 class CompositeParamsType:
-    compstrparam = p.str()
-    compfloatparam = p.float(suffix="W")
-
-    compintparam = p.int()
-    compboolparam = p.boolean(False)
-    compselectstrparam = p.select.str(["option1", "option2", "option3"])
-
-    compselectintparam = p.select.int([1, 2, 3])
-    compselectfloatparam = p.select.float([1.1, 2.2, 3.3])
-    compinstanceequipmentparam = p.equipment[ExampleEquipment].instance()
+    compstrparam: P.Str = p.str()
+    compfloatparam: P.Float = p.float(suffix="W")
+    compintparam: P.Int = p.int()
+    compboolparam: P.Bool = p.boolean(False)
+    compselectstrparam: P.Select.Str = p.select.str(["option1", "option2", "option3"])
+    compselectintparam: P.Select.Int = p.select.int([1, 2, 3])
+    compselectfloatparam: P.Select.Float = p.select.float([1.1, 2.2, 3.3])
+    compinstanceequipmentparam: P.Equipment[ExampleEquipment] = p.equipment()
 
 
-class ExampleExperiment(ExperimentABC):
-    @dataclass
-    class ParamsType:
-        strparam = p.str()
-        floatparam = p.float(suffix="W")
-        intparam = p.int()
-        boolparam = p.boolean(False)
-        selectstrparam = p.select.str(["option1", "option2", "option3"])
-        selectintparam = p.select.int([1, 2, 3], 1)
-        selectfloatparam = p.select.float([1.1, 2.2, 3.3])
-        composite = p.composite(CompositeParamsType)
+@dataclass
+class Params:
+    strparam: P.Str = p.str()
+    floatparam: P.Float = p.float(suffix="W")
+    intparam: P.Int = p.int()
+    boolparam: P.Bool = p.boolean(False)
+    selectstrparam: P.Select.Str = p.select.str(["option1", "option2", "option3"])
+    selectintparam: P.Select.Int = p.select.int([1, 2, 3], 1)
+    selectfloatparam: P.Select.Float = p.select.float([1.1, 2.2, 3.3])
+    composite: CompositeParamsType = p.composite(CompositeParamsType)
 
-    def __init__(self):
-        # The name of the experiment assigned during runtime would be made accessible.
-        # You would need it to pass to the createChart and createSqlSaver methods
 
-        super().__init__()
-
-        # This should be all of the __init__ code. For instantiation of params from the final params list, or turning on equipment, initializing equipment etc, define in the start method
+class ExampleExperiment(ExperimentABC[Params]):
+    params = Params()
 
     @override
     def start(self, manager: Manager):
