@@ -3,9 +3,20 @@ from enum import Enum
 from typing import Any, Iterable, Type
 from .equipment import EquipmentABC
 from . import _params
-
-
 from ._utils import DataclassInstance
+
+
+class P:
+    class Select:
+        Str = _params.Select.Str
+        Int = _params.Select.Int
+        Float = _params.Select.Float
+
+    Str = _params.Str
+    Int = _params.Int
+    Float = _params.Float
+    Bool = _params.Bool
+    Equipment = _params.Equipment
 
 
 class p:
