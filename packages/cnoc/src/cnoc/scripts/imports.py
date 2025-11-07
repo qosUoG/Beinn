@@ -6,11 +6,13 @@ import sys
 from traceback import print_tb
 from typing import Any, TypedDict
 
-from .utils import errFlush, preloadLocal, printErr
+from .utils import Runtime, preloadLocal
 
 
 from ..public.equipment import EquipmentABC
 from ..public.experiment import ExperimentABC
+
+runtime = Runtime()
 
 
 def eeImports(
@@ -39,20 +41,18 @@ def eeImports(
                 if clsT not in res:
                     res[clsT] = {"module": name, "cls": cls}
                 else:
-                    print(
-                        f"Duplicate class {cls} found in {name}, already imported from {res[clsT]['module']}",
-                        flush=True,
-                        file=sys.stderr,
+                    runtime.printErr(
+                        f"Duplicate class {cls} found in {name}, already imported from {res[clsT]['module']}"
                     )
         except ModuleNotFoundError:
             return
         except Exception as e:
-            printErr(
+            runtime.printErr(
                 f"Failed to import package {name} from {src} for {eetype.__name__}: {e}"
             )
             _, _, traceback = sys.exc_info()
             print_tb(traceback, file=sys.stderr)
-            errFlush()
+            runtime.errFlush()
 
     def onerror(x: str):
         if x not in names or x not in local_names:
@@ -61,13 +61,13 @@ def eeImports(
         print(f"Error importing module {x} while walk_packages ", file=sys.stderr)
         _, _, traceback = sys.exc_info()
         print_tb(traceback, file=sys.stderr)
-        errFlush()
+        runtime.errFlush()
 
     for name in names:
         try:
             pkg = importlib.import_module(name)
         except Exception as e:
-            printErr(
+            runtime.printErr(
                 f"Failed to import module {name} from names for {eetype.__name__}: {e}"
             )
             continue
@@ -87,12 +87,25 @@ def eeImports(
 
 
 def main():
-    local_names = preloadLocal()
+    try:
+        local_names = preloadLocal()
 
-    match sys.argv[1]:
-        case "equipment":
-            print(json.dumps(eeImports(EquipmentABC, sys.argv[2:], local_names)))
-        case "experiment":
-            print(json.dumps(eeImports(ExperimentABC, sys.argv[2:], local_names)))
-        case _:
-            printErr(f"Invalid argument {sys.argv[1]}")
+        match sys.argv[1]:
+            case "equipment":
+                runtime.printResult(
+                    json.dumps(eeImports(EquipmentABC, sys.argv[2:], local_names))
+                )
+            case "experiment":
+                runtime.printResult(
+                    json.dumps(eeImports(ExperimentABC, sys.argv[2:], local_names))
+                )
+            case _:
+                runtime.printErr(f"Invalid argument {sys.argv[1]}")
+
+    except Exception as e:
+        runtime.printErr(f"Error: {e}")
+        _, _, traceback = sys.exc_info()
+        print_tb(traceback, file=sys.stderr)
+        runtime.errFlush()
+
+    runtime.end()

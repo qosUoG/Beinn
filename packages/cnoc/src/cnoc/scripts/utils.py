@@ -29,9 +29,20 @@ def preloadLocal():
     return res
 
 
-def printErr(msg: str):
-    print(msg, flush=True, file=sys.stderr)
+class Runtime:
+    def __init__(self):
+        self.success = True
 
+    def errFlush(self):
+        print(flush=True, file=sys.stderr)
 
-def errFlush():
-    print(end=None, flush=True, file=sys.stderr)
+    def printResult(self, msg: str):
+        print(msg, flush=True, file=sys.stdout)
+        sys.exit(0 if self.success else 1)
+
+    def printErr(self, msg: str):
+        print(msg, flush=True, file=sys.stderr)
+        self.success = False
+
+    def end(self):
+        sys.exit(0 if self.success else 1)
