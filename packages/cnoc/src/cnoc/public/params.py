@@ -1,4 +1,4 @@
-from typing import Iterable, cast
+from typing import Any, Iterable, cast
 from .equipment import EquipmentABC
 from . import _params
 
@@ -18,9 +18,7 @@ type Int = _params.IntParam
 type Float = _params.FloatParam
 type Str = _params.StrParam
 type Equipment[E: EquipmentABC] = _params.InstanceEquipmentParam[E]
-type Composite[T: dict[str, SimpleParamType]] = _params.CompositeParam[T]
-
-type CompositeChildren = dict[str, SimpleParamType]
+type Composite[T: dict[str, Any]] = _params.CompositeParam[T]
 
 
 class Select:
