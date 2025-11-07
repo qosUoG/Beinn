@@ -1,7 +1,6 @@
 from dataclasses import field
 from enum import Enum
 from typing import Any, Iterable, Type
-from .equipment import EquipmentABC
 from . import _params
 from ._utils import DataclassInstance
 
@@ -36,15 +35,13 @@ class p:
     def boolean(cls, default: bool = True):
         return field(default_factory=lambda: _params.Bool(default))
 
-    class composite[T: DataclassInstance]:
-        @classmethod
-        def of(cls, children: Type[T]):
-            return field(default_factory=lambda: children())
+    @classmethod
+    def equipment(cls):
+        return field(default_factory=lambda: _params.Equipment[Any]())
 
-    class equipment[T: EquipmentABC[Any]]:
-        @classmethod
-        def instance(cls):
-            return field(default_factory=lambda: _params.Equipment[T]())
+    @classmethod
+    def composite(cls, children: Type[DataclassInstance]):
+        return field(default_factory=lambda: children())
 
     class select:
         @classmethod
