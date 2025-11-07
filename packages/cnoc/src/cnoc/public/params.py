@@ -1,6 +1,6 @@
 from dataclasses import field
 from enum import Enum
-from typing import Any, Iterable
+from typing import Any, Iterable, Type
 from .equipment import EquipmentABC
 from . import _params
 from _typeshed import DataclassInstance
@@ -23,9 +23,9 @@ class p:
     def boolean(cls, default: bool = True):
         return field(default=_params.Bool(default))
 
-    class composite[T: type[DataclassInstance]]:
+    class composite[T: DataclassInstance]:
         @classmethod
-        def of(cls, children: T):
+        def of(cls, children: Type[T]):
             return field(default=children())
 
     class equipment[T: EquipmentABC[Any]]:
