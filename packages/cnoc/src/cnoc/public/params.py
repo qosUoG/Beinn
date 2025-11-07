@@ -1,4 +1,4 @@
-from typing import cast
+from typing import Iterable, cast
 from .equipment import EquipmentABC
 from . import _params
 
@@ -58,13 +58,13 @@ class p:
 
     class select:
         @classmethod
-        def str(cls, options: list[str], value: str | None = None):
-            return _params.SelectStrParam(options, value)
+        def str(cls, options: Iterable[str], value: str | None = None):
+            return _params.SelectStrParam(list(options), value)
 
         @classmethod
-        def int(cls, options: list[int], value: int | None = None):
-            return _params.SelectIntParam(options, value)
+        def int(cls, options: Iterable[int], value: int | None = None):
+            return _params.SelectIntParam(list(options), value)
 
         @classmethod
-        def float(cls, options: list[float], value: float | None = None):
-            return _params.SelectFloatParam(options, value)
+        def float(cls, options: Iterable[float], value: float | None = None):
+            return _params.SelectFloatParam(list(options), value)
