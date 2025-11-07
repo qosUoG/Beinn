@@ -23,9 +23,10 @@ class p:
     def boolean(cls, default: bool = True):
         return field(default=_params.Bool(default))
 
-    @classmethod
-    def composite(cls, children: type[DataclassInstance]):
-        return field(default=children())
+    class composite[T: type[DataclassInstance]]:
+        @classmethod
+        def of(cls, children: T):
+            return field(default=children())
 
     class equipment[T: EquipmentABC]:
         @classmethod
