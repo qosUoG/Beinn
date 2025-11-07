@@ -2,70 +2,47 @@ from dataclasses import dataclass
 
 
 import random
-from typing import Callable, TypedDict, override
+from typing import Callable, override
 
 
 import time
 
 
-from cnoc import charts, exceptions, P, p, Saver, ExperimentABC, Manager
+from cnoc import charts, p, Saver, ExperimentABC, Manager, ExperimentEnded
 
 from examplelib.ExampleDriver import ExampleEquipment
 import pandas as pd
 
 
 @dataclass
+class CompositeParamsType:
+    compstrparam = p.str()
+    compfloatparam = p.float(suffix="W")
+
+    compintparam = p.int()
+    compboolparam = p.boolean(False)
+    compselectstrparam = p.select.str(["option1", "option2", "option3"])
+
+    compselectintparam = p.select.int([1, 2, 3])
+    compselectfloatparam = p.select.float([1.1, 2.2, 3.3])
+    compinstanceequipmentparam = p.equipment[ExampleEquipment].instance()
+
+
 class ExampleExperiment(ExperimentABC):
-    class CompositeParamsType(TypedDict):
-        compstrparam: P.Str
-        compfloatparam: P.Float
-        compintparam: P.Int
-        compboolparam: P.Bool
-        compselectstrparam: P.SelectStr
-
-        compselectintparam: P.SelectInt
-        compselectfloatparam: P.SelectFloat
-        compinstanceequipmentparam: P.Equipment[ExampleEquipment]
-
-    class ParamsType(TypedDict):
-        strparam: P.Str
-        floatparam: P.Float
-        intparam: P.Int
-        boolparam: P.Bool
-        selectstrparam: P.SelectStr
-        selectintparam: P.SelectInt
-        selectfloatparam: P.SelectFloat
-        instance_equipment_param: P.Equipment[ExampleEquipment]
-        compositeparam: P.Composite["ExampleExperiment.CompositeParamsType"]
+    @dataclass
+    class ParamsType:
+        strparam = p.str()
+        floatparam = p.float(suffix="W")
+        intparam = p.int()
+        boolparam = p.boolean(False)
+        selectstrparam = p.select.str(["option1", "option2", "option3"])
+        selectintparam = p.select.int([1, 2, 3], 1)
+        selectfloatparam = p.select.float([1.1, 2.2, 3.3])
+        composite = p.composite(CompositeParamsType)
 
     def __init__(self):
         # The name of the experiment assigned during runtime would be made accessible.
         # You would need it to pass to the createChart and createSqlSaver methods
-
-        self.params: ExampleExperiment.ParamsType = {
-            "strparam": p.str(),
-            "floatparam": p.float(suffix="W"),
-            "intparam": p.int(),
-            "boolparam": p.boolean(False),
-            "selectstrparam": p.select.str(["option1", "option2", "option3"]),
-            "selectintparam": p.select.int([1, 2, 3], 1),
-            "selectfloatparam": p.select.float([1.1, 2.2, 3.3]),
-            "instance_equipment_param": p.equipment(required=True),
-            "compositeparam": p.composite(
-                {
-                    "compstrparam": p.str(),
-                    "compfloatparam": p.float(suffix="W"),
-                    "compintparam": p.int(),
-                    "compboolparam": p.boolean(False),
-                    "compselectstrparam": p.select.str(
-                        ["option1", "option2", "option3"]
-                    ),
-                    "compselectintparam": p.select.int([1, 2, 3]),
-                    "compselectfloatparam": p.select.float([1.1, 2.2, 3.3]),
-                    "compinstanceequipmentparam": p.equipment(required=True),
-                },
-            ),
-        }
 
         super().__init__()
 
@@ -84,6 +61,7 @@ class ExampleExperiment(ExperimentABC):
         self.scatter_plot1: charts.Scatter = charts.Scatter(
             title="Example Scatter Plot1",
             x_axis="index",
+            x_name="index",
             y_axis="C",
             y_names=["temperature"],
             mode="append",
@@ -92,6 +70,7 @@ class ExampleExperiment(ExperimentABC):
         self.scatter_plot2: charts.Scatter = charts.Scatter(
             title="Example Scatter Plot2",
             x_axis="index",
+            x_name="index",
             y_axis="C",
             y_names=["temperature"],
             mode="append",
@@ -139,7 +118,7 @@ class ExampleExperiment(ExperimentABC):
         value = random.random()
         self.scatter_plot1.plot(
             {
-                "chart:x": index,
+                "index": index,
                 "temperature": value,
             }
         )
@@ -147,7 +126,7 @@ class ExampleExperiment(ExperimentABC):
         print("experiment loop", index, flush=True)
 
         if index >= 9:
-            raise exceptions.ExperimentEnded
+            raise ExperimentEnded
 
     @override
     def cleanup(self):
