@@ -17,3 +17,11 @@ class Manager:
 
     def createSaver(self, saver: Saver):
         self._savers.append(saver)
+
+    @property
+    def savers(self):
+        return self._savers
+
+    @property
+    def charts(self):
+        return self._charts

@@ -9,8 +9,11 @@ example/examplelib.
 """
 
 from abc import ABC, abstractmethod
-from typing import Callable
+from typing import Any, Callable
+
+from .equipment import EquipmentABC
 from .manager import Manager
+from _typeshed import DataclassInstance
 
 
 class ExperimentABC(ABC):
@@ -23,6 +26,16 @@ class ExperimentABC(ABC):
         a dictionary of parameters accessible by the experiment script
 
     """
+
+    def setParams(
+        self,
+        params: dict[str, Any],
+        equipments: dict[str, EquipmentABC],
+        ParamsCls: type[DataclassInstance],
+    ):
+        from ._params import dict2Params
+
+        self.params: DataclassInstance = dict2Params(params, equipments, ParamsCls)
 
     @abstractmethod
     def start(self, manager: Manager) -> None:

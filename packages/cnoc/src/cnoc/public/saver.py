@@ -1,9 +1,8 @@
 import time
 from typing import Any, TypedDict, cast
 import pandas as pd
-
-from ._params import Params
 from ._saver import Saver as _S
+from _typeshed import DataclassInstance
 
 
 class Metadata(TypedDict):
@@ -13,11 +12,15 @@ class Metadata(TypedDict):
 
 
 class Saver:
-    def __init__(self, path: str, params: Params):
+    def __init__(self, path: str, params: DataclassInstance):
         self._saver = _S(path, params)
 
     def save(self, data: pd.DataFrame):
         self._saver.save(data)
+
+    @property
+    def saver(self):
+        return self._saver
 
 
 class Reader:
@@ -39,7 +42,7 @@ class Reader:
         store = pd.HDFStore(self.path)
         dataset = Reader.DataSet(
             cast(pd.DataFrame, store.get(key)),
-            cast(Metadata, store.get_storer(key).attrs.metadata),
+            cast(Metadata, store.get_storer(key).attrs.metadata),  # type: ignore
         )
         store.close()
         return dataset
@@ -54,8 +57,8 @@ class Reader:
         store = pd.HDFStore(self.path)
         res = [
             Reader.DataSet(
-                store.get(key),
-                store.get_storer(key).attrs.metadata,
+                cast(pd.DataFrame, store.get(key)),
+                store.get_storer(key).attrs.metadata,  # type: ignore
             )
             for key in store.keys()
         ]
@@ -65,7 +68,10 @@ class Reader:
     def items(self):
         store = pd.HDFStore(self.path)
         res = {
-            key: Reader.DataSet(store.get(key), store.get_storer(key).attrs.metadata)
+            key: Reader.DataSet(
+                cast(pd.DataFrame, store.get(key)),
+                store.get_storer(key).attrs.metadata,  # type: ignore
+            )
             for key in [key[1:] for key in store.keys()]
         }
         store.close()

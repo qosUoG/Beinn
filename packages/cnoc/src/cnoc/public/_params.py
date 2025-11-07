@@ -335,9 +335,6 @@ type AllParamSaveType = (
 )
 
 
-ParamsType = TypeVar("ParamsType", bound=type[DataclassInstance])
-
-
 def params2Dict(params: Any):
     """
     Convert the params to a dictionary representation
@@ -349,8 +346,8 @@ def params2Dict(params: Any):
 def dict2Params(
     data: dict[str, AllParamDictType | dict[str, AllParamDictType]],
     equipments: dict[str, EquipmentABC],
-    ParamsCls: ParamsType,
-) -> ParamsType:
+    ParamsCls: type[DataclassInstance],
+) -> DataclassInstance:
     """
     Convert the dictionary representation back to Params
     However this function does not set the instance of the params,
@@ -367,7 +364,7 @@ def dict2Params(
                             dict[str, AllParamDictType | dict[str, AllParamDictType]], v
                         ),
                         equipments,
-                        cast(ParamsType, f.type),
+                        cast(type[DataclassInstance], f.type),
                     )
                     break
 
@@ -394,12 +391,22 @@ def dict2Params(
     return ParamsCls(**res)
 
 
-def params2Save(params: DataclassInstance) -> dict[str, Any]:
+def params2Save(
+    params: DataclassInstance,
+) -> dict[str, AllParamSaveType | dict[str, AllParamSaveType]]:
     res: dict[str, AllParamSaveType | dict[str, AllParamSaveType]] = {}
+
+    def toSave(_p: DataclassInstance):
+        _res: dict[str, AllParamSaveType] = {}
+        for _k, _v in asdict(_p).items():
+            _v = cast(AllParamType, _v)
+            _res[_k] = _v.toSave()
+        return _res
+
     for k, v in asdict(params).items():
         v = cast(AllParamType | dict[str, AllParamType], v)
         if isinstance(v, dict):
-            res[k] = params2Save(cast(DataclassInstance, v))
+            res[k] = toSave(cast(DataclassInstance, v))
         else:
             res[k] = v.toSave()
     return res

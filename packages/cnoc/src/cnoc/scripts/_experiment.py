@@ -13,8 +13,6 @@ from websockets import ServerConnection
 
 from ..public.exceptions import ExperimentEnded
 
-from ..public._params import dict2Params
-
 from ..public.equipment import EquipmentABC
 
 from ..public.experiment import ExperimentABC
@@ -70,6 +68,11 @@ class _State:
         with self._lock:
             return self._ended
 
+    @ended.setter
+    def ended(self, value: bool):
+        with self._lock:
+            self._ended = value
+
     @property
     def force_stop(self):
         with self._lock:
@@ -95,11 +98,13 @@ class Payload(TypedDict):
 
 class App:
     # A thread safe wrapper of App
-    def __init__(self, ws: ServerConnection, loop: asyncio.EventLoop, res: Payload):
+    def __init__(
+        self, ws: ServerConnection, loop: asyncio.AbstractEventLoop, res: Payload
+    ):
         self._lock: Lock = Lock()
         self._loop = loop
         self._ws = ws
-        self._manager = Manager()
+        self.manager = Manager()
         self._state = _State()
 
         self._equipments: dict[str, EquipmentABC] = {}
@@ -123,13 +128,17 @@ class App:
 
         # Set all equipment params
         for e in equipments_payload:
-            self._equipments[e["name"]].params = dict2Params(
-                e["params"], self._equipments
+            self._equipments[e["name"]].setParams(
+                e["params"],
+                self._equipments,
+                self._equipments[e["name"]].params.__class__,
             )
 
         # Set experiment params
-        self._experiment.params = dict2Params(
-            experiment_payload["params"], self._equipments
+        self._experiment.setParams(
+            experiment_payload["params"],
+            self._equipments,
+            self._experiment.params.__class__,
         )
 
     def _runCoroThreadsafe(self, coro: Coroutine[Any, Any, None]):
@@ -140,7 +149,7 @@ class App:
 
     def _ended_event(self, loop_ended: bool):
         flush()
-        self._state._ended = True
+        self._state.ended = True
         self._sendJson({"event": "ended", "loop_ended": loop_ended})
 
     def _paused_event(self):
@@ -176,24 +185,24 @@ class App:
     def initiate(self):
         with self._lock:
             try:
-                self._experiment.start(self._manager)
+                self._experiment.start(self.manager)
             except Exception as e:
                 if self._state.force_stop:
                     return
                 print(f"Error starting experiment: {e}", flush=True)
                 print_tb(sys.exc_info()[2])
-                self._ended_event()
+                self._ended_event(False)
                 return
             # send started
 
             self._sendJson(
                 {
                     "event": "started",
-                    "expected_loop_count": self._manager.expected_loop_count,
+                    "expected_loop_count": self.manager.expected_loop_count,
                     "chart_configs": {
-                        k: v.getConfig() for k, v in self._manager._charts.items()
+                        k: v.getConfig() for k, v in self.manager.charts.items()
                     },
-                    "saver_configs": [s._saver.path for s in self._manager._savers],
+                    "saver_configs": [s.saver.path for s in self.manager.savers],
                 }
             )
 
@@ -201,9 +210,9 @@ class App:
 
     def saveNote(self, note: str):
         with self._lock:
-            if self._manager._savers:
-                for saver in self._manager._savers:
-                    saver._saver.saveNote(note)
+            if self.manager.savers:
+                for saver in self.manager.savers:
+                    saver.saver.saveNote(note)
 
     def interpret(self, command: str, name: str | None = None):
         try:
@@ -289,10 +298,10 @@ class App:
     def close(self):
         self._lock.acquire(True, 1)
         self._experiment.cleanup()
-        for chart in self._manager._charts.values():
+        for chart in self.manager.charts.values():
             chart.stop()
-        for saver in self._manager._savers:
-            saver._saver.close()
+        for saver in self.manager.savers:
+            saver.saver.close()
         for e in self._equipments.values():
             e.cleanup()
         self._lock.release()

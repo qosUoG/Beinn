@@ -1,8 +1,8 @@
 import asyncio
 from urllib.parse import unquote
 import json
-from typing import Any, TypedDict
-from websockets import ConnectionClosed, ServerConnection
+from typing import Any, TypedDict, cast
+from websockets import ConnectionClosed, Request, ServerConnection
 
 
 from ._experiment import App
@@ -11,7 +11,7 @@ from websockets.asyncio.server import serve
 
 
 class Globals:
-    task: asyncio.Task
+    task: asyncio.Task[Any]
     app: App
     wss: list[ServerConnection] = []
 
@@ -30,7 +30,7 @@ class StartPayload(TypedDict):
 
 async def chartHandler(chart_name: str, ws: ServerConnection):
     # Subscribe websocket to chart stream
-    chart = Globals.app._manager._charts[chart_name]
+    chart = Globals.app.manager.charts[chart_name]
 
     try:
         async for frames in chart.subscribe():
@@ -67,6 +67,9 @@ async def experimentHandler(ws: ServerConnection):
                         )
                     else:
                         Globals.app.interpret(res["value"]["command"])
+
+                case _:
+                    print(f"Invalid event {res['event']}", flush=True)
     except ConnectionClosed:
         Globals.app.kill()
         for ws in Globals.wss:
@@ -76,7 +79,7 @@ async def experimentHandler(ws: ServerConnection):
 
 
 async def handler(ws: ServerConnection):
-    path = ws.request.path
+    path = cast(Request, ws.request).path
 
     Globals.wss.append(ws)
 

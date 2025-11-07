@@ -13,7 +13,8 @@ example/examplelib.
 """
 
 from abc import ABC, abstractmethod
-from typing import Never
+from typing import Any, Never
+from _typeshed import DataclassInstance
 
 
 class EquipmentABC(ABC):
@@ -26,6 +27,16 @@ class EquipmentABC(ABC):
         a dictionary of parameters accessible by the equipment driver
 
     """
+
+    def setParams(
+        self,
+        params: dict[str, Any],
+        equipments: dict[str, "EquipmentABC"],
+        ParamsCls: type[DataclassInstance],
+    ):
+        from ._params import dict2Params
+
+        self.params: DataclassInstance = dict2Params(params, equipments, ParamsCls)
 
     # def _cnoc_interpret(self, code: str, name: str):
     #     with self.lock:
