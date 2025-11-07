@@ -40,7 +40,7 @@ class p:
         return field(default_factory=lambda: _params.Equipment[Any]())
 
     @classmethod
-    def composite(cls, children: Type[DataclassInstance]):
+    def composite[T: DataclassInstance](cls, children: Type[T]):
         return field(default_factory=lambda: children())
 
     class select:
