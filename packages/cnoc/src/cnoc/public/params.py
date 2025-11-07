@@ -19,9 +19,8 @@ type Float = _params.FloatParam
 type Str = _params.StrParam
 type Equipment[E: EquipmentABC] = _params.InstanceEquipmentParam[E]
 type Composite[T: dict[str, _SimpleParamType]] = _params.CompositeParam[T]
-type SelectStr = _params.SelectStrParam
-type SelectInt = _params.SelectIntParam
-type SelectFloat = _params.SelectFloatParam
+
+type CompositeChildren = dict[str, _SimpleParamType]
 
 
 class Select:
