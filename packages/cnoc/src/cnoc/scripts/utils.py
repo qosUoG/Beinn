@@ -11,12 +11,22 @@ def preloadLocal():
 
     site.addsitedir(path)
 
-    # possible local packages
-    return [
+    res = [
         f
         for f in os.listdir(path)
         if os.path.isdir(path + slash + f) and not f.startswith((".", "__"))
     ]
+
+    res.extend(
+        [
+            f.split(".")[0]
+            for f in os.listdir(path)
+            if f.endswith(".py") and not f.startswith((".", "__"))
+        ]
+    )
+
+    # possible local packages
+    return res
 
 
 def printErr(msg: str):
