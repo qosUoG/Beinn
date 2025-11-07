@@ -1,19 +1,21 @@
 from ctypes import cast
-from dataclasses import dataclass, field, fields
-from enum import Enum
-from typing import Any
+from dataclasses import asdict, dataclass, field, fields
 
 
-class ee(Enum):
-    a = 1
-    b = 2
-    c = 3
+@dataclass
+class Nested:
+    x: int = field(default=0)
+
+
+@dataclass
+class Parent:
+    nested: Nested = field(default_factory=Nested)
 
 
 def main():
-    e = ee.a
+    p = Parent()
 
-    print(e.__class__.__members__.keys())
+    print(asdict(p))
 
 
 if __name__ == "__main__":
