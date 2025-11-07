@@ -22,47 +22,53 @@ class P:
 class p:
     @classmethod
     def int(cls, default: int = 0, suffix: str = ""):
-        return field(default=_params.Int(default, suffix))
+        return field(default_factory=lambda: _params.Int(default, suffix))
 
     @classmethod
     def float(cls, default: float = 0.0, suffix: str = ""):
-        return field(default=_params.Float(default, suffix))
+        return field(default_factory=lambda: _params.Float(default, suffix))
 
     @classmethod
     def str(cls, default: str = ""):
-        return field(default=_params.Str(default))
+        return field(default_factory=lambda: _params.Str(default))
 
     @classmethod
     def boolean(cls, default: bool = True):
-        return field(default=_params.Bool(default))
+        return field(default_factory=lambda: _params.Bool(default))
 
     class composite[T: DataclassInstance]:
         @classmethod
         def of(cls, children: Type[T]):
-            return field(default=children())
+            return field(default_factory=lambda: children())
 
     class equipment[T: EquipmentABC[Any]]:
         @classmethod
         def instance(cls):
-            return field(default=_params.Equipment[T]())
+            return field(default_factory=lambda: _params.Equipment[T]())
 
     class select:
         @classmethod
         def str(cls, options: Iterable[str], default: str | None = None):
-            return field(default=_params.Select.Str(list(options), default))
+            return field(
+                default_factory=lambda: _params.Select.Str(list(options), default)
+            )
 
         @classmethod
         def enum(cls, default: Enum):
             return field(
-                default=_params.Select.Str(
+                default_factory=lambda: _params.Select.Str(
                     list(default.__class__.__members__.keys()), default.name
                 )
             )
 
         @classmethod
         def int(cls, options: Iterable[int], default: int | None = None):
-            return field(default=_params.Select.Int(list(options), default))
+            return field(
+                default_factory=lambda: _params.Select.Int(list(options), default)
+            )
 
         @classmethod
         def float(cls, options: Iterable[float], default: float | None = None):
-            return field(default=_params.Select.Float(list(options), default))
+            return field(
+                default_factory=lambda: _params.Select.Float(list(options), default)
+            )
