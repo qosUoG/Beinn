@@ -1,7 +1,8 @@
+from dataclasses import dataclass, field
 import math
 from random import random
 from typing import TypedDict, override
-from cnoc import EquipmentABC, P, p
+from cnoc import EquipmentABC, p
 
 
 """
@@ -17,26 +18,29 @@ For class attribute, one must wrap the type with ClassVar like "equipment_pi",
 """
 
 
+@dataclass
+class NestedParams:
+    compstrparam = p.str()
+    compfloatparam = p.float(suffix="W")
+    compintparam = p.int()
+    compbool = p.boolean(False)
+    compselectstr = p.select.str(["option1", "option2", "option3"])
+
+    compselectint = p.select.int([1, 2, 3])
+    compselectfloat = p.select.float([1.1, 2.2, 3.3])
+
+
 class ExampleEquipment(EquipmentABC):
-    class CompositeParamsType(TypedDict):
-        compstrparam: P.Str
-        compfloatparam: P.Float
-        compintparam: P.Int
-        compbool: P.Bool
-        compselectstr: P.SelectStr
-
-        compselectint: P.SelectInt
-        compselectfloat: P.SelectFloat
-
-    class ParamsType(TypedDict, total=False):
-        str: P.Str
-        float: P.Float
-        int: P.Int
-        bool: P.Bool
-        selectstr: P.SelectStr
-        selectint: P.SelectInt
-        selectfloat: P.SelectFloat
-        composite: P.Composite["ExampleEquipment.CompositeParamsType"]
+    @dataclass
+    class Params:
+        str = p.str()
+        float = p.float(suffix="W")
+        int = p.int()
+        bool = p.boolean(False)
+        selectstr = p.select.str(["option1", "option2", "option3"])
+        selectint = p.select.int([1, 2, 3], 2)
+        selectfloat = p.select.float([1.1, 2.2, 3.3])
+        composite = field(default_factory=NestedParams)
 
     # These are class attributes instead of instance attributes
     # While you may acquire it through the instance, it maybe easily mixed up

@@ -3,6 +3,7 @@ from enum import Enum
 from typing import Iterable
 from .equipment import EquipmentABC
 from . import _params
+from _typeshed import DataclassInstance
 
 
 class p:
@@ -21,6 +22,10 @@ class p:
     @classmethod
     def boolean(cls, default: bool = True):
         return field(default=_params.Bool(default))
+
+    @classmethod
+    def composite(cls, children: type[DataclassInstance]):
+        return field(default=children())
 
     class equipment[T: EquipmentABC]:
         @classmethod
