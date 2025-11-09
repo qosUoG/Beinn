@@ -379,21 +379,21 @@ def dict2Params[T: DataclassInstance](
     def toParam(v: AllParamDictType):
         match v["type"]:
             case "bool":
-                res[k] = Bool.fromDict(v)
+                return Bool.fromDict(v)
             case "float":
-                res[k] = Float.fromDict(v)
+                return Float.fromDict(v)
             case "int":
-                res[k] = Int.fromDict(v)
+                return Int.fromDict(v)
             case "str":
-                res[k] = Str.fromDict(v)
+                return Str.fromDict(v)
             case "select.str":
-                res[k] = Select.Str.fromDict(v)
+                return Select.Str.fromDict(v)
             case "select.int":
-                res[k] = Select.Int.fromDict(v)
+                return Select.Int.fromDict(v)
             case "select.float":
-                res[k] = Select.Float.fromDict(v)
+                return Select.Float.fromDict(v)
             case "instance.equipment":
-                res[k] = Equipment.fromDict(v, equipments)
+                return Equipment[EquipmentABC[Any]].fromDict(v, equipments)
             case _:
                 raise ValueError(f"Invalid type {v['type']}")
 
