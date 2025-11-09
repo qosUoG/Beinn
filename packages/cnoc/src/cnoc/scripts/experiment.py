@@ -296,7 +296,7 @@ class AsyncApp:
 
         elif path == "/close":
             self.experiment_ws_handle.close()
-            await asyncio.gather(*[ws.close() for ws in self.wss])
+            await asyncio.gather(*[ws.close(4000) for ws in self.wss])
             if self.task:
                 self.task.cancel()
 
