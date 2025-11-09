@@ -28,33 +28,6 @@ from ..public.experiment import ExperimentABC
 from ..public.equipment import EquipmentABC
 from websockets.asyncio.server import serve
 
-# # from ._experiment import App
-# from .utils import preloadLocal
-
-
-# class StartPayload(TypedDict):
-#     equipments: list[InstancePayload]
-#     experiment: InstancePayload
-
-
-# async def chartHandler(chart_name: str, ws: ServerConnection):
-#     # Subscribe websocket to chart stream
-#     # chart = Globals.app.manager.charts[chart_name]
-
-#     try:
-#         # async for frames in chart.subscribe():
-#         #     if frames:
-#         #         await ws.send(frames)
-
-#         await ws.close(4000)
-#     except ConnectionClosed:
-#         # Globals.wss.remove(ws)
-#         pass
-#     # await ws.wait_closed()
-
-
-# async def experimentHandler(ws: ServerConnection):
-
 
 def flush():
     print(end=None, flush=True)
@@ -409,7 +382,6 @@ def main():
         app.initiate()
 
     except Exception as e:
-        print(json.dumps({"event": "error"}), flush=True)
         print(e, flush=True)
         print_tb(sys.exc_info()[2])
         sys.exit(1)

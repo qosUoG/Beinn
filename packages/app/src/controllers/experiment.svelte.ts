@@ -13,11 +13,6 @@ import { Cli } from "./cli.svelte"
 import { log_controller } from "./log.svelte"
 
 type ExperimentEvent = {
-    event: "started"
-    expected_loop_count: number
-    chart_configs: Record<string, ChartConfigs>
-    saver_configs: string[]
-} | {
     event: "loop_start"
     loop_count: number
 } | {
@@ -110,7 +105,7 @@ export class Experiment extends Instance {
         this.loop_time_clock.reset()
         this.starting_time_total = undefined
 
-
+        this.cli.clear()
 
         if (this.ws !== undefined) this.ws.close(4000)
         new WebSocket("ws://localhost:8080/close")
@@ -124,10 +119,52 @@ export class Experiment extends Instance {
 
 
         handler.stdout.on("data", (line) => {
-            if (line.startsWith("ws:loaded")) {
-                this.startWebsocket()
+            try {
+                let raw = JSON.parse(line)
+                if (raw.event === "started") {
+                    let { expected_loop_count, chart_configs, saver_configs } = raw as
+                        {
+                            event: "started"
+                            expected_loop_count: number
+                            chart_configs: Record<string, ChartConfigs>
+                            saver_configs: string[]
+                        }
+                    this.expected_loop_count = expected_loop_count
+
+                    let top = 16
+                    let left = 16
+                    let names: Set<string> = new Set()
+
+                    for (const config of Object.values(chart_configs)) {
+                        if (names.has(config.title)) {
+                            this.cli.logs.append(`ERROR:Chart with title ${config.title} already exists`)
+                        }
+                        names.add(config.title)
+
+                        if (this.charts[config.title] !== undefined) {
+                            this.charts[config.title].setConfig(config)
+                            top += 8
+                            left += 8
+                            continue
+                        }
+
+                        this.charts[config.title] = new Chart(config, top, left)
+                        top += 8
+                        left += 8
+                    }
+
+                    if (saver_configs.length > 0)
+                        this.note = ""
+                    this.startWebsocket()
+                    return
+                }
+            } catch (e) {
+                this.cli.logs.append(line)
                 return
             }
+
+
+
             this.cli.logs.append(line)
         })
         handler.stderr.on("data", (line) => {
@@ -211,36 +248,9 @@ export class Experiment extends Instance {
         this.ws.onmessage = (e) => {
 
             const data = JSON.parse(e.data) as ExperimentEvent
-            console.log(data)
+
             switch (data.event) {
-                case "started":
-                    this.expected_loop_count = data.expected_loop_count
 
-                    let top = 16
-                    let left = 16
-                    let names: Set<string> = new Set()
-
-                    for (const config of Object.values(data.chart_configs)) {
-                        if (names.has(config.title)) {
-                            this.cli.logs.append(`ERROR:Chart with title ${config.title} already exists`)
-                        }
-                        names.add(config.title)
-
-                        if (this.charts[config.title] !== undefined) {
-                            this.charts[config.title].setConfig(config)
-                            top += 8
-                            left += 8
-                            continue
-                        }
-
-                        this.charts[config.title] = new Chart(config, top, left)
-                        top += 8
-                        left += 8
-                    }
-
-                    if (data.saver_configs.length > 0)
-                        this.note = ""
-                    break
                 case "loop_start":
                     if (this.starting_time_total === undefined)
                         this.starting_time_total = this.total_time_clock.milliseconds

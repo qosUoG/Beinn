@@ -9,7 +9,7 @@
 		show_cli = false;
 	});
 	let editable: HTMLDivElement | undefined = $state(undefined);
-	let editable_modal: HTMLDivElement | undefined = $state(undefined);
+
 	async function keyDownHandler(e: KeyboardEvent) {
 		switch (e.key) {
 			case "Enter":
