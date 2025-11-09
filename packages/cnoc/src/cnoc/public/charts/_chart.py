@@ -7,7 +7,6 @@ class ChartABC(ABC):
     def __init__(self):
         self._lock = Lock()
         self._history = bytes()
-        self._posted_history = False
 
         self._send: Callable[[bytes], None] | None = None
 
@@ -32,16 +31,15 @@ class ChartABC(ABC):
             if self._send is None:
                 return
 
-            if not self._posted_history:
-                self._send(self._history)
+            self._send(encoded)
 
     def subscribe(self, send: Callable[[bytes], None]):
         # First yield frames available before subscription
         with self._lock:
             self._send = send
-            self._posted_history = False
+            if self._history:
+                self._send(self._history)
 
     def unsubscribe(self):
         with self._lock:
             self._send = None
-            self._posted_history = False
