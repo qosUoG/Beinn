@@ -1,4 +1,4 @@
-from typing import Dict
+from typing import Any, Dict
 
 from .saver import Saver
 from .charts._chart import ChartABC
@@ -6,7 +6,7 @@ from .charts._chart import ChartABC
 
 class Manager:
     def __init__(self):
-        self._savers: list[Saver] = []
+        self._savers: list[Saver[Any]] = []
         self._charts: Dict[str, ChartABC] = {}
 
         # Set the expected loop count, -1 means infinite
@@ -15,7 +15,7 @@ class Manager:
     def createChart(self, chart: ChartABC):
         self._charts[chart.title] = chart
 
-    def createSaver(self, saver: Saver):
+    def createSaver(self, saver: Saver[Any]):
         self._savers.append(saver)
 
     @property

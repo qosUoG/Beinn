@@ -2,7 +2,7 @@ from dataclasses import dataclass
 
 
 import random
-from typing import Callable, override
+from typing import Callable, TypedDict, override
 
 
 import time
@@ -11,7 +11,6 @@ import time
 from cnoc import charts, p, Saver, ExperimentABC, Manager, ExperimentEnded, P
 
 from examplelib.ExampleDriver import ExampleEquipment
-import pandas as pd
 
 
 @dataclass
@@ -36,6 +35,11 @@ class Params:
     selectintparam: P.Select.Int = p.select.int([1, 2, 3], 1)
     selectfloatparam: P.Select.Float = p.select.float([1.1, 2.2, 3.3])
     composite: CompositeParamsType = p.composite(CompositeParamsType)
+
+
+class SaverRowType(TypedDict):
+    index: list[int]
+    temperature: list[float]
 
 
 class ExampleExperiment(ExperimentABC[Params]):
@@ -69,7 +73,7 @@ class ExampleExperiment(ExperimentABC[Params]):
             mode="append",
         )
         manager.createChart(self.scatter_plot2)
-        self.saver = Saver("data.h5", self.params)
+        self.saver = Saver[SaverRowType]("data.h5", self.params, SaverRowType)
 
         manager.createSaver(self.saver)
 
@@ -115,7 +119,7 @@ class ExampleExperiment(ExperimentABC[Params]):
                 "temperature": value,
             }
         )
-        self.saver.save(pd.DataFrame({"index": [index], "temperature": [value]}))
+        self.saver.save({"index": [index], "temperature": [value]})
         print("experiment loop", index, flush=True)
 
         if index >= 9:

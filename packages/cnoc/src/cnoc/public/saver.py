@@ -1,5 +1,5 @@
 import time
-from typing import Any, TypedDict, cast
+from typing import Any, Mapping, TypedDict, cast
 import pandas as pd
 from ._saver import Saver as _S
 from ._utils import DataclassInstance
@@ -11,11 +11,11 @@ class Metadata(TypedDict):
     note: str
 
 
-class Saver:
-    def __init__(self, path: str, params: DataclassInstance):
-        self._saver = _S(path, params)
+class Saver[T: Mapping[str, object]]:
+    def __init__(self, path: str, params: DataclassInstance, type: type[T]):
+        self._saver = _S[T](path, params, type)
 
-    def save(self, data: pd.DataFrame):
+    def save(self, data: T):
         self._saver.save(data)
 
     @property
