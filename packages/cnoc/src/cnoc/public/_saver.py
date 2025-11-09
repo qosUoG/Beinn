@@ -31,7 +31,7 @@ class Saver:
 
         self._store.put(f"pid{self._key}", data, format="table")
         self._attrs = self._store.get_storer(f"pid{self._key}").attrs  # type: ignore
-        self._attrs.metadata = self._metadata  # type: ignore
+        self._attrs.metadata = json.dumps(self._metadata)  # type: ignore
 
     def saveNote(self, note: str):
         if not hasattr(self, "_attrs"):

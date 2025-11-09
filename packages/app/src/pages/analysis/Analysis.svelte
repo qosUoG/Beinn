@@ -8,5 +8,5 @@
 	FS.writeFile("data.h5", raw);
 	let data = new h5wasm.File("data.h5", "r");
 
-	console.log(data.get("pid0").attrs.metadata.value);
+	console.log(data.get("pid1").attrs.metadata.value);
 </script>
