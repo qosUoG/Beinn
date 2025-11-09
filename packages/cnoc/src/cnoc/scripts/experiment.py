@@ -161,6 +161,10 @@ class Runner:
             self._onEnd(False)
             return
 
+    def close(self):
+        self.stop()
+        self.experiment.cleanup()
+
 
 class ChartWsHandle:
     def __init__(
@@ -196,29 +200,31 @@ class ExperimentWsHandle:
         self, ws: ServerConnection, experiment: ExperimentABC[Any], manager: Manager
     ):
         self.ws = ws
-        runner = Runner(experiment, manager, self.onLoopStart, self.onPause, self.onEnd)
-        asyncio.create_task(asyncio.to_thread(runner.run))
-        runner.start()
+        self.runner = Runner(
+            experiment, manager, self.onLoopStart, self.onPause, self.onEnd
+        )
+        asyncio.create_task(asyncio.to_thread(self.runner.run))
+        self.runner.start()
         try:
             async for message in ws:
                 res = json.loads(message)
                 match res["event"]:
                     case "pause":
-                        runner.pause()
+                        self.runner.pause()
                     case "stop":
-                        runner.stop()
+                        self.runner.stop()
                     case "continue":
-                        runner.cont()
+                        self.runner.cont()
                     case "save_note":
-                        runner.saveNote(res["value"])
+                        self.runner.saveNote(res["value"])
                     case "interpret":
                         if "name" in res["value"]:
-                            runner.interpret(
+                            self.runner.interpret(
                                 res["value"]["command"], res["value"]["name"]
                             )
 
                         else:
-                            runner.interpret(res["value"]["command"])
+                            self.runner.interpret(res["value"]["command"])
 
                     case _:
                         print(f"Invalid event {res['event']}", flush=True)
@@ -251,6 +257,9 @@ class ExperimentWsHandle:
 
     # END OF METHODS CALLED BY RUNNER
 
+    def close(self):
+        self.runner.close()
+
 
 class AsyncApp:
     def __init__(self, manager: Manager, experiment: ExperimentABC[Any]):
@@ -258,6 +267,7 @@ class AsyncApp:
         self.manager = manager
         self.experiment = experiment
         self.wss: list[ServerConnection] = []
+        self._experiment_ws_handle: ExperimentWsHandle | None = None
 
     async def startServer(self):
         server = await serve(self.handler, "localhost", 8080)
@@ -269,7 +279,8 @@ class AsyncApp:
 
         # Multiplex
         if path == "/experiment":
-            await ExperimentWsHandle().handler(ws, self.experiment, self.manager)
+            self.experiment_ws_handle = ExperimentWsHandle()
+            await self.experiment_ws_handle.handler(ws, self.experiment, self.manager)
             self.wss.remove(ws)
 
         elif path.startswith("/chart"):
@@ -280,6 +291,7 @@ class AsyncApp:
             self.wss.remove(ws)
 
         elif path == "/close":
+            self.experiment_ws_handle.close()
             await asyncio.gather(*[ws.close() for ws in self.wss])
             if self.task:
                 self.task.cancel()

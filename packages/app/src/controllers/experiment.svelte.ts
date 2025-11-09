@@ -90,8 +90,6 @@ export class Experiment extends Instance {
 
     starting_time_total: number | undefined = $state(undefined)
 
-
-
     ws: WebSocket | undefined = undefined
 
     note: string | undefined = $state(undefined)
@@ -176,8 +174,10 @@ export class Experiment extends Instance {
             this.cli.logs.append(e)
         })
 
-        handler.on("close", (code) => {
-            console.log("Python process exited with code " + code)
+        handler.on("close", ({ code }) => {
+            console.log("Python process exited with code " + { code })
+            this.loop_time_clock.stop()
+            this.total_time_clock.stop()
             this.state = "ready"
         })
 
