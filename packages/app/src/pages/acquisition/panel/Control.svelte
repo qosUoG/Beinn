@@ -100,6 +100,16 @@
 	{@render spinner()}
 {/snippet}
 
+{#snippet ended()}
+	{#if experiment_controller.playable}
+		{@render playBtn()}
+	{:else}
+		{@render disabledPlayBtn()}
+	{/if}
+	{@render disabledPauseBtn()}
+	{@render disabledStopBtn()}
+{/snippet}
+
 <div class="frow-1 items-center">
 	{#if experiment.state === "ready"}
 		{@render ready()}
@@ -111,5 +121,7 @@
 		{@render paused()}
 	{:else if experiment.state === "stopping"}
 		{@render stopping()}
+	{:else if experiment.state === "ended"}
+		{@render ended()}
 	{/if}
 </div>

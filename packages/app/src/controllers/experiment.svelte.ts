@@ -79,7 +79,8 @@ export class Experiment extends Instance {
         "looping" |
         "pausing" |
         "paused" |
-        "stopping" = $state("ready")
+        "stopping" |
+        "ended" = $state("ready")
 
     charts: Record<string, Chart> = $state({})
     chart_in_focus: string | undefined = $state(undefined)
@@ -99,6 +100,8 @@ export class Experiment extends Instance {
     cli: Cli = $state(new Cli())
 
     process: Child | undefined = undefined
+
+
 
     async start() {
         this.total_time_clock.reset()
@@ -181,10 +184,10 @@ export class Experiment extends Instance {
         })
 
         handler.on("close", ({ code }) => {
-            console.log("Python process exited with code" + code)
             this.loop_time_clock.stop()
             this.total_time_clock.stop()
             this.state = "ready"
+
         })
 
 
@@ -259,7 +262,7 @@ export class Experiment extends Instance {
                     this.total_time_clock.stop()
                     break
                 case "ended":
-                    this.state = "ready"
+                    this.state = "ended"
                     this.loop_time_clock.stop()
                     this.total_time_clock.stop()
 
@@ -270,6 +273,8 @@ export class Experiment extends Instance {
                     break
             }
         }
+
+
     }
 
 }
@@ -287,7 +292,7 @@ export class ExperimentController extends EEBaseController {
     }
 
     get playable() {
-        if (this.experiment === undefined || this.experiment.state !== "ready") return false
+        if (this.experiment === undefined || (this.experiment.state !== "ready" && this.experiment.state !== "ended")) return false
 
         function paramIsPlayable(param: RuntimeAllParamTypes) {
             switch (param.type) {

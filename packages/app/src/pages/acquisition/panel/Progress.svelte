@@ -19,7 +19,6 @@
 	<div
 		class="absolute top-0 left-0 h-full rounded-l frow-1 w-full items-center">
 		{#if experiment.state === "ready" && experiment.process === undefined}
-			{console.log(experiment.process)}
 			<div class="w-full text-center">-</div>
 		{:else if experiment.expected_loop_count === -1}
 			<div class="w-full text-center">∞</div>
