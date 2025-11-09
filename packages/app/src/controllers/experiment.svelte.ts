@@ -122,7 +122,7 @@ export class Experiment extends Instance {
             try {
                 let raw = JSON.parse(line)
                 if (raw.event === "started") {
-                    console.log("hi")
+
                     let { expected_loop_count, chart_configs, saver_configs } = raw as
                         {
                             event: "started"
@@ -158,6 +158,9 @@ export class Experiment extends Instance {
                         this.note = ""
                     this.startWebsocket()
                     return
+                } else {
+                    this.cli.logs.append(line)
+                    return
                 }
             } catch (e) {
                 this.cli.logs.append(line)
@@ -166,7 +169,7 @@ export class Experiment extends Instance {
 
 
 
-            this.cli.logs.append(line)
+
         })
         handler.stderr.on("data", (line) => {
             this.cli.logs.append(line)
@@ -229,24 +232,7 @@ export class Experiment extends Instance {
     startWebsocket() {
         this.ws = new WebSocket("ws://localhost:8080/experiment")
 
-        this.ws.onopen = () => {
-            this.ws!.send(JSON.stringify({
-                event: "start",
-                value: {
-                    equipments: Object.values(equipment_controller.equipments).map(e => ({
-                        name: e.name,
-                        module: e.module,
-                        cls: e.cls,
-                        params: e.params,
-                    })),
-                    experiment: {
-                        module: this.module,
-                        cls: this.cls,
-                        params: this.params,
-                    },
-                }
-            }))
-        }
+
 
         this.ws.onmessage = (e) => {
 

@@ -179,13 +179,17 @@ class ChartWsHandle:
         asyncio.run_coroutine_threadsafe(self.ws.send(data), self.ws.loop)
 
     async def handler(self):
+        future: asyncio.Future[Any] = asyncio.Future()
         while True:
             try:
                 self.chart.subscribe(self.send)
+                await future
             except ConnectionClosed:
                 self.chart.unsubscribe()
+                future.cancel()
             except Exception as e:
                 self.chart.unsubscribe()
+                future.cancel()
                 print(f"Error in chart websocket handler: {e}", flush=True)
                 print(e, flush=True)
                 print_tb(sys.exc_info()[2])
