@@ -164,6 +164,8 @@ class Runner:
     def close(self):
         self.stop()
         self.experiment.cleanup()
+        for saver in self.manager.savers:
+            saver.saver.close()
 
 
 class ChartWsHandle:
