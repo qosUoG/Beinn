@@ -332,6 +332,11 @@ class App:
     def initiate(self):
         self.experiment.start(self.manager)
 
+    def close(self):
+        self.experiment.cleanup()
+        for saver in self.manager.savers:
+            saver.saver.close()
+
     async def start(self):
         async_app = AsyncApp(self.manager, self.experiment)
 
@@ -384,6 +389,7 @@ def parseSave(save: Save):
 
 
 def main():
+    app: App | None = None
     try:
         preloadLocal()
         app = App()
@@ -392,6 +398,8 @@ def main():
         app.initiate()
 
     except Exception as e:
+        if app:
+            app.close()
         print(e, flush=True)
         print_tb(sys.exc_info()[2])
         sys.exit(1)

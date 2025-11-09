@@ -122,6 +122,7 @@ export class Experiment extends Instance {
             try {
                 let raw = JSON.parse(line)
                 if (raw.event === "started") {
+                    console.log("hi")
                     let { expected_loop_count, chart_configs, saver_configs } = raw as
                         {
                             event: "started"
@@ -177,7 +178,7 @@ export class Experiment extends Instance {
         })
 
         handler.on("close", ({ code }) => {
-            console.log("Python process exited with code" + { code })
+            console.log("Python process exited with code" + code)
             this.loop_time_clock.stop()
             this.total_time_clock.stop()
             this.state = "ready"
