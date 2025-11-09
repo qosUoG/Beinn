@@ -329,8 +329,6 @@ class App:
                 params, self.equipments, self.experiment.params.__class__
             )
 
-            self.experiment = instance
-
     def initiate(self):
         self.experiment.start(self.manager)
 

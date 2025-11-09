@@ -41,12 +41,14 @@ class Clock {
 
     stop() {
         if (this.timer === undefined) return
+
         this.clearTimer()
         this.milliseconds += Date.now() - this.past_now
 
     }
 
     clearTimer() {
+
         if (this.timer === undefined) return
 
         clearInterval(this.timer)
@@ -175,7 +177,7 @@ export class Experiment extends Instance {
         })
 
         handler.on("close", ({ code }) => {
-            console.log("Python process exited with code " + { code })
+            console.log("Python process exited with code" + { code })
             this.loop_time_clock.stop()
             this.total_time_clock.stop()
             this.state = "ready"
