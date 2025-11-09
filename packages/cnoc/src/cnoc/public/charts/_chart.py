@@ -1,19 +1,15 @@
 from abc import ABC, abstractmethod
-import asyncio
 from threading import Lock
-from typing import Any
+from typing import Any, Callable
 
 
 class ChartABC(ABC):
     def __init__(self):
-        self._buf = bytes()
-        self._history = bytes()
-
         self._lock = Lock()
+        self._history = bytes()
+        self._posted_history = False
 
-        self._has_data = asyncio.Event()
-        self._subscribed = False
-        self._should_stop = False
+        self._send: Callable[[bytes], None] | None = None
 
         self.title: str
 
@@ -22,7 +18,7 @@ class ChartABC(ABC):
         raise NotImplementedError
 
     @abstractmethod
-    def plot(self, frame: dict[str, float]):
+    def plot(self, frame: dict[str, float]) -> None:
         """
         When implementing this method, one must call _plot to ensure the frame is actually stored
         """
@@ -33,40 +29,19 @@ class ChartABC(ABC):
             # Make sure to have a copy
             self._history += encoded
 
-            if self._subscribed:
-                self._buf = encoded
-                self._has_data.set()
+            if self._send is None:
+                return
 
-    def stop(self):
-        with self._lock:
-            self._has_data.set()
-            self._should_stop = True
+            if not self._posted_history:
+                self._send(self._history)
 
-    async def subscribe(self):
+    def subscribe(self, send: Callable[[bytes], None]):
         # First yield frames available before subscription
-        history: bytes = bytes()
         with self._lock:
-            self._subscribed = True
-            if self._history:
-                history = self._history
-        if history:
-            yield history
-
-        res: bytes = bytes()
-        while True:
-            await self._has_data.wait()
-
-            with self._lock:
-                if self._should_stop:
-                    self._subscribed = False
-                    return
-
-                res = self._buf
-                self._buf = bytes()
-                self._has_data.clear()
-            if res:
-                yield res
+            self._send = send
+            self._posted_history = False
 
     def unsubscribe(self):
-        self._has_data.clear()
-        self._subscribed = False
+        with self._lock:
+            self._send = None
+            self._posted_history = False

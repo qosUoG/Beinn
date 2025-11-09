@@ -1,1 +1,108 @@
-[{"name":"aa","module":"examplelib.ExampleDriver","cls":"ExampleEquipment","params":{"str":{"type":"str","value":"qwe"},"float":{"type":"float","suffix":"W","value":0},"int":{"type":"int","suffix":"","value":0},"bool":{"type":"bool","value":true},"selectstr":{"type":"select.str","options":["option1","option2","option3"],"value":"option1"},"selectint":{"type":"select.int","options":[1,2,3],"value":2},"selectfloat":{"type":"select.float","options":[1.1,2.2,3.3],"value":1.1},"composite":{"compstrparam":{"type":"str","value":"asdads"},"compfloatparam":{"type":"float","suffix":"W","value":0},"compintparam":{"type":"int","suffix":"","value":0},"compbool":{"type":"bool","value":false},"compselectstr":{"type":"select.str","options":["option1","option2","option3"],"value":"option2"},"compselectint":{"type":"select.int","options":[1,2,3],"value":2},"compselectfloat":{"type":"select.float","options":[1.1,2.2,3.3],"value":3.3}}},"param_opens":true,"composite_opens":{"composite":true}},{"name":"bb","module":"examplelib.ExampleDriver","cls":"ExampleEquipment","params":{"str":{"type":"str","value":"fff"},"float":{"type":"float","suffix":"W","value":0},"int":{"type":"int","suffix":"","value":0},"bool":{"type":"bool","value":true},"selectstr":{"type":"select.str","options":["option1","option2","option3"],"value":"option1"},"selectint":{"type":"select.int","options":[1,2,3],"value":2},"selectfloat":{"type":"select.float","options":[1.1,2.2,3.3],"value":1.1},"composite":{"compstrparam":{"type":"str","value":"asdas"},"compfloatparam":{"type":"float","suffix":"W","value":0},"compintparam":{"type":"int","suffix":"","value":0},"compbool":{"type":"bool","value":false},"compselectstr":{"type":"select.str","options":["option1","option2","option3"],"value":"option1"},"compselectint":{"type":"select.int","options":[1,2,3],"value":1},"compselectfloat":{"type":"select.float","options":[1.1,2.2,3.3],"value":1.1}}},"param_opens":true,"composite_opens":{"composite":true}}]
+[
+	{
+		"name": "aa",
+		"module": "examplelib.ExampleDriver",
+		"cls": "ExampleEquipment",
+		"params": {
+			"str": { "type": "str", "value": "qwe" },
+			"float": { "type": "float", "suffix": "W", "value": 0 },
+			"int": { "type": "int", "suffix": "", "value": 0 },
+			"bool": { "type": "bool", "value": true },
+			"selectstr": {
+				"type": "select.str",
+				"options": ["option1", "option2", "option3"],
+				"value": "option1"
+			},
+			"selectint": {
+				"type": "select.int",
+				"options": [1, 2, 3],
+				"value": 2
+			},
+			"selectfloat": {
+				"type": "select.float",
+				"options": [1.1, 2.2, 3.3],
+				"value": 1.1
+			},
+			"composite": {
+				"compstrparam": { "type": "str", "value": "asdads" },
+				"compfloatparam": {
+					"type": "float",
+					"suffix": "W",
+					"value": 0
+				},
+				"compintparam": { "type": "int", "suffix": "", "value": 0 },
+				"compbool": { "type": "bool", "value": false },
+				"compselectstr": {
+					"type": "select.str",
+					"options": ["option1", "option2", "option3"],
+					"value": "option2"
+				},
+				"compselectint": {
+					"type": "select.int",
+					"options": [1, 2, 3],
+					"value": 2
+				},
+				"compselectfloat": {
+					"type": "select.float",
+					"options": [1.1, 2.2, 3.3],
+					"value": 3.3
+				}
+			}
+		},
+		"param_opens": true,
+		"composite_opens": { "composite": true }
+	},
+	{
+		"name": "bb",
+		"module": "examplelib.ExampleDriver",
+		"cls": "ExampleEquipment",
+		"params": {
+			"str": { "type": "str", "value": "fff" },
+			"float": { "type": "float", "suffix": "W", "value": 0 },
+			"int": { "type": "int", "suffix": "", "value": 0 },
+			"bool": { "type": "bool", "value": true },
+			"selectstr": {
+				"type": "select.str",
+				"options": ["option1", "option2", "option3"],
+				"value": "option1"
+			},
+			"selectint": {
+				"type": "select.int",
+				"options": [1, 2, 3],
+				"value": 2
+			},
+			"selectfloat": {
+				"type": "select.float",
+				"options": [1.1, 2.2, 3.3],
+				"value": 1.1
+			},
+			"composite": {
+				"compstrparam": { "type": "str", "value": "asdas" },
+				"compfloatparam": {
+					"type": "float",
+					"suffix": "W",
+					"value": 0
+				},
+				"compintparam": { "type": "int", "suffix": "", "value": 0 },
+				"compbool": { "type": "bool", "value": false },
+				"compselectstr": {
+					"type": "select.str",
+					"options": ["option1", "option2", "option3"],
+					"value": "option1"
+				},
+				"compselectint": {
+					"type": "select.int",
+					"options": [1, 2, 3],
+					"value": 1
+				},
+				"compselectfloat": {
+					"type": "select.float",
+					"options": [1.1, 2.2, 3.3],
+					"value": 1.1
+				}
+			}
+		},
+		"param_opens": true,
+		"composite_opens": { "composite": true }
+	}
+]

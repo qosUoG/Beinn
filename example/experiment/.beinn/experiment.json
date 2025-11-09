@@ -1,1 +1,53 @@
-{"name":"","module":"lib.ExampleExperiment","cls":"ExampleExperiment","params":{"strparam":{"type":"str","value":"ddd"},"floatparam":{"type":"float","suffix":"W","value":0},"intparam":{"type":"int","suffix":"","value":0},"boolparam":{"type":"bool","value":false},"selectstrparam":{"type":"select.str","options":["option1","option2","option3"],"value":"option1"},"selectintparam":{"type":"select.int","options":[1,2,3],"value":1},"selectfloatparam":{"type":"select.float","options":[1.1,2.2,3.3],"value":1.1},"composite":{"compstrparam":{"type":"str","value":"ddasd"},"compfloatparam":{"type":"float","suffix":"W","value":0},"compintparam":{"type":"int","suffix":"","value":0},"compboolparam":{"type":"bool","value":false},"compselectstrparam":{"type":"select.str","options":["option1","option2","option3"],"value":"option2"},"compselectintparam":{"type":"select.int","options":[1,2,3],"value":1},"compselectfloatparam":{"type":"select.float","options":[1.1,2.2,3.3],"value":1.1},"compinstanceequipmentparam":{"type":"instance.equipment","value":"bb"}}},"param_opens":true,"composite_opens":{"composite":true}}
+{
+	"name": "",
+	"module": "lib.ExampleExperiment",
+	"cls": "ExampleExperiment",
+	"params": {
+		"strparam": { "type": "str", "value": "ddd" },
+		"floatparam": { "type": "float", "suffix": "W", "value": 0 },
+		"intparam": { "type": "int", "suffix": "", "value": 0 },
+		"boolparam": { "type": "bool", "value": false },
+		"selectstrparam": {
+			"type": "select.str",
+			"options": ["option1", "option2", "option3"],
+			"value": "option1"
+		},
+		"selectintparam": {
+			"type": "select.int",
+			"options": [1, 2, 3],
+			"value": 1
+		},
+		"selectfloatparam": {
+			"type": "select.float",
+			"options": [1.1, 2.2, 3.3],
+			"value": 1.1
+		},
+		"composite": {
+			"compstrparam": { "type": "str", "value": "ddasd" },
+			"compfloatparam": { "type": "float", "suffix": "W", "value": 0 },
+			"compintparam": { "type": "int", "suffix": "", "value": 0 },
+			"compboolparam": { "type": "bool", "value": false },
+			"compselectstrparam": {
+				"type": "select.str",
+				"options": ["option1", "option2", "option3"],
+				"value": "option2"
+			},
+			"compselectintparam": {
+				"type": "select.int",
+				"options": [1, 2, 3],
+				"value": 1
+			},
+			"compselectfloatparam": {
+				"type": "select.float",
+				"options": [1.1, 2.2, 3.3],
+				"value": 1.1
+			},
+			"compinstanceequipmentparam": {
+				"type": "instance.equipment",
+				"value": "bb"
+			}
+		}
+	},
+	"param_opens": true,
+	"composite_opens": { "composite": true }
+}
