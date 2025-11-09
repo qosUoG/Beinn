@@ -1,3 +1,4 @@
+import json
 import time
 from typing import TypedDict
 import pandas as pd
@@ -36,7 +37,7 @@ class Saver:
         if not hasattr(self, "_attrs"):
             self._attrs = self._store.get_storer(f"pid{self._key}").attrs  # type: ignore
         self._metadata["note"] = note
-        self._attrs.metadata = self._metadata  # type: ignore
+        self._attrs.metadata = json.dumps(self._metadata)  # type: ignore
 
     def close(self):
         self._store.close()

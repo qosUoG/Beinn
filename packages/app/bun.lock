@@ -17,6 +17,7 @@
         "@tauri-apps/plugin-store": "~2.4.1",
         "chart.js": "^4.5.1",
         "clsx": "^2.1.1",
+        "h5wasm": "^0.8.7",
         "smol-toml": "^1.4.2",
         "tailwind-merge": "^3.3.1",
         "tailwindcss": "^4.1.16",
@@ -269,6 +270,8 @@
     "fsevents": ["fsevents@2.3.3", "", { "os": "darwin" }, "sha512-5xoDfX+fL7faATnagmWPpbFtwh/R77WmMMqqHGS65C3vvB0YHrgF+B1YmZ3441tMj5n63k0212XNoJwzlhffQw=="],
 
     "graceful-fs": ["graceful-fs@4.2.11", "", {}, "sha512-RbJ5/jmFcNNCcDV5o9eTnBLJ/HszWV0P73bc+Ff4nS/rJj+YaS6IGyiOL0VoBYX+l1Wrl3k63h/KrH+nhJ0XvQ=="],
+
+    "h5wasm": ["h5wasm@0.8.7", "", {}, "sha512-7TJKTSXnZobVZYSywEsy3PnIqTDsyIX8i/WNmtnL6it+K/2OLcjZAg0Fpx+LUjyc9L/HqmWD8qYBd0Nf/dYwZA=="],
 
     "is-reference": ["is-reference@3.0.3", "", { "dependencies": { "@types/estree": "^1.0.6" } }, "sha512-ixkJoqQvAP88E6wLydLGGqCJsrFUnqoH6HnaczB8XmDH1oaWU+xxdptvikTgaEhtZ53Ky6YXiBuUI2WXLMCwjw=="],
 

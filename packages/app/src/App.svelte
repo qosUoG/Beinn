@@ -10,6 +10,7 @@
 	import { app_controller } from "$controllers/app.svelte";
 	import Prepare from "$pages/prepare/Prepare.svelte";
 	import { experiment_controller } from "$controllers/experiment.svelte";
+	import Analysis from "$pages/analysis/Analysis.svelte";
 
 	getCurrentWindow().listen("tauri://close-requested", async () => {
 		if (
@@ -29,11 +30,7 @@
 	{:else if app_controller.page === "execute"}
 		<Acquisition />
 	{:else if app_controller.page === "analyze"}
-		<!-- <div class="w-full h-full frow">
-			<div class="w-full h-full frow">
-				Analyze
-			</div>
-		</div> -->
+		<Analysis />
 	{/if}
 
 	<!-- <div class="w-full grow relative">
