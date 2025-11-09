@@ -185,6 +185,7 @@ class ChartWsHandle:
                 self.chart.subscribe(self.send)
                 await future
             except ConnectionClosed:
+                "closed connection"
                 self.chart.unsubscribe()
                 future.cancel()
             except Exception as e:
