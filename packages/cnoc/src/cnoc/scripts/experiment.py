@@ -344,18 +344,16 @@ class App:
 
         # This asks beinn to connect to the websocket server
         print(
-            {
-                json.dumps(
-                    {
-                        "event": "started",
-                        "expected_loop_count": self.manager.expected_loop_count,
-                        "chart_configs": {
-                            k: v.getConfig() for k, v in self.manager.charts.items()
-                        },
-                        "saver_configs": [s.saver.path for s in self.manager.savers],
-                    }
-                )
-            },
+            json.dumps(
+                {
+                    "event": "started",
+                    "expected_loop_count": self.manager.expected_loop_count,
+                    "chart_configs": {
+                        k: v.getConfig() for k, v in self.manager.charts.items()
+                    },
+                    "saver_configs": [s.saver.path for s in self.manager.savers],
+                }
+            ),
             flush=True,
         )
 
