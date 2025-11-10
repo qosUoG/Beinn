@@ -10,6 +10,7 @@ runtime = Runtime()
 
 
 def main():
+    f: h5py.File | None = None
     try:
         f = h5py.File("data.h5", "r+")
         dataset_key = sys.argv[1]
@@ -18,12 +19,12 @@ def main():
         metadata["note"] = sys.argv[2]
         f[dataset_key].attrs["metadata"] = json.dumps(metadata)
 
-        f.close()
-
     except Exception as e:
         runtime.printErr(f"Error: {e}")
         _, _, traceback = sys.exc_info()
         print_tb(traceback, file=sys.stderr)
         runtime.errFlush()
 
+    if f:
+        f.close()
     runtime.end()

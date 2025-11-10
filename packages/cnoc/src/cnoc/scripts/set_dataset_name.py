@@ -10,13 +10,13 @@ runtime = Runtime()
 
 
 def main():
+    f: h5py.File | None = None
     try:
-        f = h5py.File("data.h5", "r")
+        f = h5py.File("data.h5", "r+")
         dataset_key = sys.argv[1]
+        new_key = sys.argv[2]
 
-        print(f[dataset_key].values())
-
-        f.close()
+        f.move(dataset_key, new_key)
 
     except Exception as e:
         runtime.printErr(f"Error: {e}")
@@ -24,4 +24,6 @@ def main():
         print_tb(traceback, file=sys.stderr)
         runtime.errFlush()
 
+    if f:
+        f.close()
     runtime.end()
