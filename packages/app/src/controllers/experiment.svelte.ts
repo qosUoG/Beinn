@@ -92,6 +92,7 @@ export class Experiment extends Instance {
     starting_time_total: number | undefined = $state(undefined)
 
     note: string | undefined = $state(undefined)
+    saver_configs: string[] = []
 
     cli: Cli = $state(new Cli())
 
@@ -112,6 +113,7 @@ export class Experiment extends Instance {
         this.starting_time_total = undefined
 
         this.note = undefined
+        this.saver_configs = []
 
         this.cli = new Cli()
 
@@ -154,6 +156,7 @@ export class Experiment extends Instance {
                     saver_configs: string[]
                 }
             this.expected_loop_count = expected_loop_count
+            this.saver_configs = saver_configs
 
             let top = 16
             let left = 16
@@ -213,8 +216,20 @@ export class Experiment extends Instance {
         this.ws!.send(JSON.stringify({ event: "continue" }))
     }
 
-    saveNote(note: string) {
-        this.ws!.send(JSON.stringify({ event: "save_note", value: note }))
+    async saveNote(note: string) {
+        if (this.ws)
+            this.ws!.send(JSON.stringify({ event: "save_note", value: note }))
+        else {
+            for (const saver_config of this.saver_configs) {
+                await shell({
+                    fn: "uv",
+                    cmd: ["run", "save_note", saver_config],
+                    description: `Save Note to ${saver_config}`,
+                    cwd: workspace_controller.path!,
+                })
+            }
+        }
+
         this.note = note
     }
 
@@ -270,6 +285,10 @@ export class Experiment extends Instance {
                         this.loop_count += 1
                     break
             }
+        }
+
+        this.ws.onclose = () => {
+            this.ws = undefined
         }
 
         Object.values(this.charts).forEach(chart => chart.wsOpen())

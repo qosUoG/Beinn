@@ -184,6 +184,8 @@ handlers.mount = function mount({ canvas, width, height }) {
     }
 
     _chart = new Chart(_canvas as unknown as HTMLCanvasElement, deepCopy(_chart_config))
+    _chart.data.datasets = _datasets
+    _chart!.update()
 }
 
 handlers.unmount = function unmount() {

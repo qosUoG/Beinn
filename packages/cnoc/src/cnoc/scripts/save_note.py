@@ -1,0 +1,21 @@
+import sys
+from traceback import print_tb
+
+from .utils import Runtime
+import h5py
+
+runtime = Runtime()
+
+
+def main():
+    try:
+        f = h5py.File("mytestfile.hdf5", "rw")
+        print(f.keys())
+
+    except Exception as e:
+        runtime.printErr(f"Error: {e}")
+        _, _, traceback = sys.exc_info()
+        print_tb(traceback, file=sys.stderr)
+        runtime.errFlush()
+
+    runtime.end()
