@@ -9,7 +9,7 @@ runtime = Runtime()
 
 def main():
     try:
-        f = h5py.File("mytestfile.hdf5", "rw")
+        f = h5py.File("mytestfile.hdf5", "r+")
         print(f.keys())
 
     except Exception as e:
