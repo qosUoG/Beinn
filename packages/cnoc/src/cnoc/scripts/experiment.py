@@ -189,12 +189,13 @@ class ChartWsHandle:
             except ConnectionClosed:
                 self.chart.unsubscribe()
                 future.cancel()
+                return
             except Exception as e:
-                self.chart.unsubscribe()
-                future.cancel()
                 print(f"Error in chart websocket handler: {e}", flush=True)
                 print(e, flush=True)
                 print_tb(sys.exc_info()[2])
+                self.chart.unsubscribe()
+                future.cancel()
                 return
 
 
@@ -235,14 +236,16 @@ class ExperimentWsHandle:
                     case _:
                         print(f"Invalid event {res['event']}", flush=True)
         except ConnectionClosed:
+            self.runner.close()
             return
         except Exception as e:
+            self.runner.close()
             print(f"Error in experiment websocket handler: {e}", flush=True)
             print(e, flush=True)
             print_tb(sys.exc_info()[2])
             return
 
-        # START OF METHODS CALLED BY RUNNER
+    # START OF METHODS CALLED BY RUNNER
 
     def onLoopStart(self, loop_count: int):
         asyncio.run_coroutine_threadsafe(
@@ -261,10 +264,9 @@ class ExperimentWsHandle:
             self.ws.loop,
         )
 
-    # END OF METHODS CALLED BY RUNNER
+        asyncio.run_coroutine_threadsafe(self.ws.close(), self.ws.loop)
 
-    def close(self):
-        self.runner.close()
+    # END OF METHODS CALLED BY RUNNER
 
 
 class AsyncApp:
@@ -288,6 +290,8 @@ class AsyncApp:
             self.experiment_ws_handle = ExperimentWsHandle()
             await self.experiment_ws_handle.handler(ws, self.experiment, self.manager)
             self.wss.remove(ws)
+            for ws in self.wss:
+                await ws.close()
 
         elif path.startswith("/chart"):
             # unquote.split => ["", "chart", "<chart_title>"]
@@ -295,12 +299,6 @@ class AsyncApp:
                 self.manager.charts[unquote(path).split("/")[2]], ws
             ).handler()
             self.wss.remove(ws)
-
-        elif path == "/close":
-            self.experiment_ws_handle.close()
-            await asyncio.gather(*[ws.close(4000) for ws in self.wss])
-            if self.task:
-                self.task.cancel()
 
 
 class App:

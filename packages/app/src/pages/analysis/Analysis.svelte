@@ -7,6 +7,6 @@
 	let raw = await readFile(workspace_controller.path! + "/data.h5");
 	FS.writeFile("data.h5", raw);
 	let data = new h5wasm.File("data.h5", "r");
-
-	console.log(JSON.parse(data.get("pid2").attrs.metadata.value));
+	console.log(data.keys());
+	console.log(JSON.parse(data.get("pid3").attrs.metadata.value));
 </script>

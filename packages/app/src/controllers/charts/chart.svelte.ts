@@ -1,6 +1,6 @@
 
 import { log_controller } from "$controllers/log.svelte";
-import type { ChartConfigs, ChartMessages } from "./types";
+import type { ChartConfigs, fromWorkerChartMessages, toWorkerChartMessages } from "./types";
 
 export const DEFAULT_WIDTH = 560
 export const DEFAULT_HEIGHT = 400
@@ -18,7 +18,7 @@ export class Chart<T extends ChartConfigs = ChartConfigs> {
     }
     set is_drawing_points(value: boolean) {
         this.#is_drawing_points = value
-        this.worker.postMessage({ command: "set_is_drawing_points", payload: { is_drawing_points: value } } satisfies ChartMessages)
+        this.worker.postMessage({ command: "set_is_drawing_points", payload: { is_drawing_points: value } } satisfies toWorkerChartMessages)
     }
 
     // width and height
@@ -50,59 +50,56 @@ export class Chart<T extends ChartConfigs = ChartConfigs> {
     }
 
     #resize(width: number, height: number) {
-        this.worker.postMessage({ command: "resize", payload: { width, height } } satisfies ChartMessages)
+        this.worker.postMessage({ command: "resize", payload: { width, height } } satisfies toWorkerChartMessages)
     }
 
     config: T
 
     showing = $state(true)
 
-    constructor(config: T, top: number, left: number) {
-        this.config = config
+    constructor(config: T, top: number, left: number, onWsClose: (chart: Chart) => void) {
         this.top = $state(top)
         this.left = $state(left)
+
         switch (config.type) {
             case "chart:scatter": {
                 this.worker = new Worker(new URL("./scatter/worker.js", import.meta.url), { type: "module" })
                 this.worker.onmessage = (e) => {
-                    console.log(e.data)
+                    const res = e.data as fromWorkerChartMessages
+                    switch (res.command) {
+                        case "error": {
+                            console.log(res.payload.error)
+                            break
+                        }
+                        case "ws_closed": {
+                            onWsClose(this)
+                            break
+                        }
+                    }
                 }
-                this.worker.onerror = (e) => {
-                    console.log(e)
-                }
-                this.worker.onmessageerror = (e) => {
-                    console.log(e)
-                }
+                this.worker.onerror = console.log
+                this.worker.onmessageerror = console.log
                 break
             }
         }
 
-
         if (this.worker === undefined) log_controller.appendError(`Worker script of ${config.type} is undefined`)
 
-        this.setConfig(config)
-    }
 
-    setConfig(config: T) {
+        this.config = config
+        this.worker.postMessage({ command: "set_config", payload: { config: this.config } } satisfies toWorkerChartMessages)
         this.auto_axis = true
         this.tooltip_mode = false
-        this.worker.postMessage({ command: "set_config", payload: { config } } satisfies ChartMessages)
-    }
 
-    setCanvas(canvas: OffscreenCanvas) {
-        this.worker.postMessage({ command: "set_canvas", payload: { canvas, width: this.#width - this.canvas_width_offset, height: this.#height - this.canvas_height_offset } } satisfies ChartMessages, [canvas])
-    }
-
-    unsetCanvas() {
-        this.worker.postMessage({ command: "unset_canvas" } satisfies ChartMessages)
+        this.wsOpen()
     }
 
     zoom(direction: "in" | "out", x?: number, y?: number) {
-        this.worker.postMessage({ command: "zoom", payload: { direction, x, y } } satisfies ChartMessages)
+        this.worker.postMessage({ command: "zoom", payload: { direction, x, y } } satisfies toWorkerChartMessages)
     }
 
     pan(old_x: number, old_y: number, new_x: number, new_y: number) {
-        this.worker.postMessage({ command: "pan", payload: { old_x, old_y, new_x, new_y } } satisfies ChartMessages)
+        this.worker.postMessage({ command: "pan", payload: { old_x, old_y, new_x, new_y } } satisfies toWorkerChartMessages)
     }
 
     #auto_axis = $state(true)
@@ -112,7 +109,7 @@ export class Chart<T extends ChartConfigs = ChartConfigs> {
     set auto_axis(value: boolean) {
         this.#auto_axis = value
         if (value)
-            this.worker.postMessage({ command: "auto_axis" } satisfies ChartMessages)
+            this.worker.postMessage({ command: "auto_axis" } satisfies toWorkerChartMessages)
     }
 
     #tooltip_mode = $state(false)
@@ -122,10 +119,26 @@ export class Chart<T extends ChartConfigs = ChartConfigs> {
     set tooltip_mode(value: boolean) {
         this.#tooltip_mode = value
         if (!value)
-            this.worker.postMessage({ command: "disable_tooltip" } satisfies ChartMessages)
+            this.worker.postMessage({ command: "disable_tooltip" } satisfies toWorkerChartMessages)
     }
     enableTooltip(x: number, y: number) {
-        this.worker.postMessage({ command: "enable_tooltip", payload: { x, y } } satisfies ChartMessages)
+        this.worker.postMessage({ command: "enable_tooltip", payload: { x, y } } satisfies toWorkerChartMessages)
     }
 
+    onMount(canvas: OffscreenCanvas) {
+        this.worker.postMessage({ command: "mount", payload: { canvas, width: this.#width - this.canvas_width_offset, height: this.#height - this.canvas_height_offset } } satisfies toWorkerChartMessages, [canvas])
+    }
+
+    onUnmount() {
+        this.worker.postMessage({ command: "unmount" } satisfies toWorkerChartMessages)
+    }
+
+    wsOpen() {
+        this.worker.postMessage({ command: "ws_open" } satisfies toWorkerChartMessages)
+    }
+
+    destroy() {
+        this.worker.postMessage({ command: "ws_close" } satisfies toWorkerChartMessages)
+        this.worker.postMessage({ command: "destroy" } satisfies toWorkerChartMessages)
+    }
 }

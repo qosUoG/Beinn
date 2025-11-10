@@ -9,9 +9,9 @@
 	let { chart = $bindable() }: { chart: Chart } = $props();
 
 	onMount(() => {
-		if (canvas) chart.setCanvas(canvas.transferControlToOffscreen());
+		if (canvas) chart.onMount(canvas.transferControlToOffscreen());
 		return () => {
-			chart.unsetCanvas();
+			chart.onUnmount();
 		};
 	});
 

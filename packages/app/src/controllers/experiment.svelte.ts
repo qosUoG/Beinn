@@ -10,7 +10,6 @@ import { tick } from "svelte"
 import { exists, readTextFile, writeTextFile } from "@tauri-apps/plugin-fs"
 import { equipment_controller } from "./equipment.svelte"
 import { Cli } from "./cli.svelte"
-import { log_controller } from "./log.svelte"
 
 type ExperimentEvent = {
     event: "loop_start"
@@ -79,8 +78,7 @@ export class Experiment extends Instance {
         "looping" |
         "pausing" |
         "paused" |
-        "stopping" |
-        "ended" = $state("ready")
+        "stopping" = $state("ready")
 
     charts: Record<string, Chart> = $state({})
     chart_in_focus: string | undefined = $state(undefined)
@@ -93,86 +91,94 @@ export class Experiment extends Instance {
 
     starting_time_total: number | undefined = $state(undefined)
 
-    ws: WebSocket | undefined = undefined
-
     note: string | undefined = $state(undefined)
 
     cli: Cli = $state(new Cli())
 
+    ws: WebSocket | undefined = undefined
     process: Child | undefined = undefined
 
-
-
     async start() {
-        this.total_time_clock.reset()
-        this.loop_time_clock.reset()
+        Object.values(this.charts).forEach(chart => chart.destroy())
+        this.charts = {}
+        this.chart_in_focus = undefined
+
+        this.loop_count = 0
+        this.expected_loop_count = -1
+
+        this.total_time_clock = new Clock()
+        this.loop_time_clock = new Clock()
+
         this.starting_time_total = undefined
 
-        this.cli.clear()
+        this.note = undefined
 
-        if (this.ws !== undefined) this.ws.close(4000)
-        new WebSocket("ws://localhost:8080/close")
+        this.cli = new Cli()
 
+        if (this.ws !== undefined) {
+            this.ws.close()
+            this.ws = undefined
+        }
 
-        if (this.process) this.process.kill()
+        if (this.process) {
+            this.process.kill()
+            this.process = undefined
+        }
+
+        await tick()
 
         this.total_time_clock.start()
         this.state = "starting"
         const handler = Command.create("uv", ["run", "experiment"], { cwd: workspace_controller.path! })
 
-
         handler.stdout.on("data", (line) => {
+            let raw: any
+
             try {
-                let raw = JSON.parse(line)
-                if (raw.event === "started") {
-
-                    let { expected_loop_count, chart_configs, saver_configs } = raw as
-                        {
-                            event: "started"
-                            expected_loop_count: number
-                            chart_configs: Record<string, ChartConfigs>
-                            saver_configs: string[]
-                        }
-                    this.expected_loop_count = expected_loop_count
-
-                    let top = 16
-                    let left = 16
-                    let names: Set<string> = new Set()
-
-                    for (const config of Object.values(chart_configs)) {
-                        if (names.has(config.title)) {
-                            this.cli.logs.append(`ERROR:Chart with title ${config.title} already exists`)
-                        }
-                        names.add(config.title)
-
-                        if (this.charts[config.title] !== undefined) {
-                            this.charts[config.title].setConfig(config)
-                            top += 8
-                            left += 8
-                            continue
-                        }
-
-                        this.charts[config.title] = new Chart(config, top, left)
-                        top += 8
-                        left += 8
-                    }
-
-                    if (saver_configs.length > 0)
-                        this.note = ""
-                    this.startWebsocket()
-                    return
-                } else {
-                    this.cli.logs.append(line)
-                    return
-                }
+                raw = JSON.parse(line)
             } catch (e) {
                 this.cli.logs.append(line)
                 return
             }
 
+            if (raw.event !== "started") {
+                this.cli.logs.append(line)
+                return
+            }
 
+            let { expected_loop_count, chart_configs, saver_configs } = raw as
+                {
+                    event: "started"
+                    expected_loop_count: number
+                    chart_configs: Record<string, ChartConfigs>
+                    saver_configs: string[]
+                }
+            this.expected_loop_count = expected_loop_count
 
+            let top = 16
+            let left = 16
+            let names: Set<string> = new Set()
 
+            for (const config of Object.values(chart_configs)) {
+                if (names.has(config.title)) {
+                    this.cli.logs.append(`ERROR:Chart with title ${config.title} already exists`)
+                    continue
+                }
+                names.add(config.title)
+
+                this.charts[config.title] = new Chart(config, top, left, (chart) => {
+                    if (this.state === "looping" || this.state.startsWith("paus"))
+                        chart.wsOpen()
+                })
+
+                top += 8
+                left += 8
+            }
+
+            if (saver_configs.length > 0) this.note = ""
+
+            this.startWebsocket()
+            return
         })
         handler.stderr.on("data", (line) => {
             this.cli.logs.append(line)
@@ -190,11 +196,7 @@ export class Experiment extends Instance {
 
         })
 
-
         this.process = await handler.spawn()
-
-
-
     }
 
     pause() {
@@ -235,8 +237,6 @@ export class Experiment extends Instance {
     startWebsocket() {
         this.ws = new WebSocket("ws://localhost:8080/experiment")
 
-
-
         this.ws.onmessage = (e) => {
 
             const data = JSON.parse(e.data) as ExperimentEvent
@@ -262,21 +262,18 @@ export class Experiment extends Instance {
                     this.total_time_clock.stop()
                     break
                 case "ended":
-                    this.state = "ended"
+                    this.state = "ready"
                     this.loop_time_clock.stop()
                     this.total_time_clock.stop()
 
                     if (data.loop_ended)
                         this.loop_count += 1
-
-
                     break
             }
         }
 
-
+        Object.values(this.charts).forEach(chart => chart.wsOpen())
     }
-
 }
 
 
@@ -292,7 +289,7 @@ export class ExperimentController extends EEBaseController {
     }
 
     get playable() {
-        if (this.experiment === undefined || (this.experiment.state !== "ready" && this.experiment.state !== "ended")) return false
+        if (this.experiment === undefined || this.experiment.state !== "ready") return false
 
         function paramIsPlayable(param: RuntimeAllParamTypes) {
             switch (param.type) {
