@@ -292,6 +292,8 @@ class AsyncApp:
             self.wss.remove(ws)
             for ws in self.wss:
                 await ws.close()
+            if self.task:
+                self.task.cancel()
 
         elif path.startswith("/chart"):
             # unquote.split => ["", "chart", "<chart_title>"]
