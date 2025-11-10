@@ -11,12 +11,10 @@ runtime = Runtime()
 
 def main():
     try:
-        f = h5py.File("data.h5", "r+")
+        f = h5py.File("data.h5", "r")
         dataset_key = sys.argv[1]
 
-        metadata = json.loads(cast(str, f[dataset_key].attrs["metadata"]))
-        metadata["note"] = sys.argv[2]
-        f[dataset_key].attrs["metadata"] = json.dumps(metadata)
+        print(f[dataset_key].values())
 
         f.close()
 

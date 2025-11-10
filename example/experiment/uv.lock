@@ -58,7 +58,7 @@ wheels = [
 [[package]]
 name = "cnoc"
 version = "0.1.0"
-source = { git = "https://github.com/qosUoG/Beinn?subdirectory=packages%2Fcnoc#aaeab1ac98700845c0d011796824c41ea46835dc" }
+source = { git = "https://github.com/qosUoG/Beinn?subdirectory=packages%2Fcnoc#88b57428053ccafbe531757bfaff462a0248a985" }
 dependencies = [
     { name = "h5py" },
     { name = "pandas" },
