@@ -90,8 +90,6 @@ export class Chart<T extends ChartConfigs = ChartConfigs> {
         this.worker.postMessage({ command: "set_config", payload: { config: this.config } } satisfies toWorkerChartMessages)
         this.auto_axis = true
         this.tooltip_mode = false
-
-        this.wsOpen()
     }
 
     zoom(direction: "in" | "out", x?: number, y?: number) {

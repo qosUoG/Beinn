@@ -187,16 +187,14 @@ class ChartWsHandle:
                 self.chart.subscribe(self.send)
                 await future
             except ConnectionClosed:
-                self.chart.unsubscribe()
-                future.cancel()
-                return
+                pass
             except Exception as e:
                 print(f"Error in chart websocket handler: {e}", flush=True)
                 print(e, flush=True)
                 print_tb(sys.exc_info()[2])
+            finally:
                 self.chart.unsubscribe()
                 future.cancel()
-                return
 
 
 class ExperimentWsHandle:
@@ -236,14 +234,13 @@ class ExperimentWsHandle:
                     case _:
                         print(f"Invalid event {res['event']}", flush=True)
         except ConnectionClosed:
-            self.runner.close()
-            return
+            pass
         except Exception as e:
-            self.runner.close()
             print(f"Error in experiment websocket handler: {e}", flush=True)
             print(e, flush=True)
             print_tb(sys.exc_info()[2])
-            return
+        finally:
+            self.runner.close()
 
     # START OF METHODS CALLED BY RUNNER
 

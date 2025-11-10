@@ -10,7 +10,7 @@ let _canvas: OffscreenCanvas | undefined = undefined
 
 
 let _scatter_config: ScatterConfig
-let _ws: WebSocket
+let _ws: WebSocket | undefined = undefined
 
 let _datasets: { data: { x: number, y: number }[], label: string }[] = []
 
@@ -101,9 +101,7 @@ handlers.destroy = function clear() {
 }
 
 handlers.ws_open = function ws_open() {
-
-
-    if (_ws.readyState === WebSocket.OPEN || _ws.readyState === WebSocket.CONNECTING)
+    if (_ws !== undefined && (_ws.readyState === WebSocket.OPEN || _ws.readyState === WebSocket.CONNECTING))
         postErr("Scatter worker: WebSocket is already connected")
 
     _ws = new WebSocket(cnoc_url + "chart/" + _scatter_config.title)
@@ -170,6 +168,7 @@ handlers.ws_open = function ws_open() {
 }
 
 handlers.ws_close = function ws_close() {
+    if (_ws === undefined) return
     _ws.close()
 }
 

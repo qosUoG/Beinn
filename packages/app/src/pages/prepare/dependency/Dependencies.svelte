@@ -34,7 +34,7 @@
 							<LoaderCircle />
 						</div>
 					</div>
-				{:else}
+				{:else if experiment_controller.editable}
 					<button
 						class=" icon-btn-sm text-white bg-blue-600"
 						onclick={update}>
