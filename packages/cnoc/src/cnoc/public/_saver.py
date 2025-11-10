@@ -1,6 +1,6 @@
+from datetime import datetime
 import inspect
 import json
-import time
 from typing import Mapping, TypedDict
 import pandas as pd
 from ._utils import DataclassInstance
@@ -8,7 +8,7 @@ from ._params import AllParamSaveType, params2Save
 
 
 class Metadata(TypedDict):
-    time: str
+    time: int
     params: dict[str, AllParamSaveType | dict[str, AllParamSaveType]]
     note: str
     columns: list[str]
@@ -36,7 +36,7 @@ class Saver[T: Mapping[str, object]]:
         self._key = f"{path}{maximum + 1}"
 
         self._metadata: Metadata = {
-            "time": time.strftime("%Y/%m/%d %H:%M:%S UTC%z", time.localtime()),
+            "time": int(datetime.now().timestamp() * 1000),
             "params": params2Save(params),
             "note": "",
             "columns": list(tuple(inspect.get_annotations(type).keys())),
