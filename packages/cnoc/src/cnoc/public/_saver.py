@@ -17,8 +17,23 @@ class Metadata(TypedDict):
 class Saver[T: Mapping[str, object]]:
     def __init__(self, path: str, params: DataclassInstance, type: type[T]):
         self.path = path
-        self._store = pd.HDFStore(path)
-        self._key = len(self._store.keys())
+        self._store = pd.HDFStore("data.h5")
+        maximum = -1
+        for key in self._store.keys():
+            if not key.startswith(path):
+                continue
+
+            # Parse the number after the path
+            maybe_number: int
+            try:
+                maybe_number = int(key.replace(path, ""))
+            except ValueError:
+                # If not a number, then it is not the same path
+                continue
+
+            maximum = max(maybe_number, maximum)
+
+        self._key = f"{path}{maximum + 1}"
 
         self._metadata: Metadata = {
             "time": time.strftime("%Y/%m/%d %H:%M:%S UTC%z", time.localtime()),
