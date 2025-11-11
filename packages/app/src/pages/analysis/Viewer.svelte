@@ -33,7 +33,9 @@
 
 	<button
 		class="p-1 rounded h-7 aspect-square bg-red-500 text-white"
-		onclick={() => {}}>
+		onclick={() => {
+			tab.delete();
+		}}>
 		<Trash2 />
 	</button>
 </div>

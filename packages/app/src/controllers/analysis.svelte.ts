@@ -97,6 +97,17 @@ export class Tab {
         return this.#mode
     }
 
+    async delete() {
+        await shell({
+            fn: "uv",
+            cmd: ["run", "delete_dataset", this.#key],
+            description: `Delete dataset ${this.#key}`,
+            cwd: workspace_controller.path!,
+        })
+
+        await analysis_controller.load(undefined, this.#key);
+    }
+
     get titles() {
         return this.data.map(d => d.title)
     }
@@ -187,7 +198,7 @@ class AnalysisController {
         })
     }
 
-    async load(focus?: "note" | "key") {
+    async load(focus?: "note" | "key", del?: string) {
         if (workspace_controller.path === null || !await exists(workspace_controller.path + "/data.h5")) return
 
         let raw = await readFile(workspace_controller.path + "/data.h5");
@@ -209,8 +220,8 @@ class AnalysisController {
         this.file = file
 
         // Try to reload the tabs
-        const old_tabs = this.tabs
-        const old_active_tab_index = this.active_tab_index
+        const old_tabs = this.tabs.filter(t => t === undefined || t.get_key() !== del)
+        const old_active_tab_index = old_tabs.length === this.tabs.length ? this.active_tab_index : undefined
         this.active_tab_index = undefined
         this.tabs = []
         await tick()
@@ -224,6 +235,7 @@ class AnalysisController {
 
             await this.addTab(tab.get_key())
         }
+
 
         this.active_tab_index = old_active_tab_index
         await tick()
