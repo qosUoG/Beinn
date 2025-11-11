@@ -15,7 +15,7 @@
 	let open = $state(false);
 
 	let error = $derived(
-		entry.code === null || entry.code > 0 || entry.err !== ""
+		(entry.code !== null && entry.code > 0) || entry.err !== ""
 	);
 </script>
 

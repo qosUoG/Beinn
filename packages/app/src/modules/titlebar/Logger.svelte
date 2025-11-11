@@ -1,5 +1,5 @@
 <script lang="ts">
-	import { getClickOutsideAttachment } from "$components/utils.svelte";
+	import { cn, getClickOutsideAttachment } from "$components/utils.svelte";
 	import { log_controller } from "$controllers/log.svelte";
 	import { ScrollText } from "@lucide/svelte";
 	import ShellEntry from "./ShellEntry.svelte";
@@ -28,7 +28,13 @@
 		{#if entry.type === "shell"}
 			<div class="frow-2 items-center h-full">
 				<div
-					class="bg-slate-600 text-white rounded-l h-full px-1 text-[10px] flex items-center">
+					class={cn(
+						" text-white rounded-l h-full px-1 text-[10px] flex items-center",
+						(entry.code !== null && entry.code > 0) ||
+							entry.err !== ""
+							? "bg-red-600"
+							: "bg-slate-500"
+					)}>
 					SHELL
 				</div>
 				<div

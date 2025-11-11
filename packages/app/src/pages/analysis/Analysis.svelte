@@ -3,11 +3,10 @@
 	import { analysis_controller } from "$controllers/analysis.svelte";
 	import { workspace_controller } from "$controllers/workspace.svelte";
 	import { X, Plus } from "@lucide/svelte";
-	import { onDestroy, onMount } from "svelte";
+	import { onMount } from "svelte";
 	import Viewer from "./Viewer.svelte";
 	import Finder from "./Finder.svelte";
 	import Params from "./Params.svelte";
-	import { app_controller } from "$controllers/app.svelte";
 
 	onMount(() => {
 		analysis_controller.load();
@@ -44,7 +43,7 @@
 									analysis_controller.active_tab_index = i;
 								}}>
 								{#if tab}
-									{tab.key}
+									{tab.get_key()}
 								{:else}
 									New Tab
 								{/if}

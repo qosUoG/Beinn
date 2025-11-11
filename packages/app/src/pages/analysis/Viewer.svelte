@@ -2,69 +2,44 @@
 	import { Tab } from "$controllers/analysis.svelte";
 
 	import { cn } from "$components/utils.svelte";
-	import { NotepadText } from "@lucide/svelte";
+	import { NotepadText, Trash2 } from "@lucide/svelte";
 	import { debounce } from "$lib/utils";
 	import Chart from "./Chart.svelte";
+	import ChartConfig from "./ChartConfig.svelte";
 
 	let { tab = $bindable() }: { tab: Tab } = $props();
 
 	const saveNoteDebounced = debounce((note) => {
 		tab.save_note(note);
 	}, 1000);
+
+	const renameKeyDebounced = debounce((key) => {
+		tab.rename_key(key);
+	}, 1000);
 </script>
 
-<div class="bg-slate-700 rounded p-2 fcol-1">
-	<div class="frow-4 items-center">
-		<div class="text-white">x axis:</div>
-		<div class="frow-1">
-			{#each tab.titles as title}
-				<button
-					class={cn(
-						"  rounded px-2 py-0.5 border text-white",
-						tab.get_x() === title
-							? "border-white"
-							: " border-slate-700"
-					)}
-					onclick={() => {
-						tab.set_x(title);
-					}}>
-					{title}
-				</button>
-			{/each}
-		</div>
-	</div>
-	<div class="frow-4 items-center">
-		<div class="text-white">y axis:</div>
-		<div class="frow-1 flex-wrap">
-			{#each tab.titles as title}
-				<button
-					class={cn(
-						"  rounded px-2 py-0.5 border text-white",
-						tab.y_includes(title)
-							? "border-white"
-							: " border-slate-700"
-					)}
-					onclick={async () => {
-						await tab.toggle_y(title);
-					}}>
-					{title}
-				</button>
-			{/each}
-		</div>
-	</div>
-	<div class="frow-4 items-center">
-		<div class="text-white">y label:</div>
+<div class="frow-2 items-center p-1 justify-between">
+	<div class="underline underline-offset-4">
 		<input
-			class="border border-white w-32 rounded py-0.5 px-1 text-white"
+			class=" text-xl font-thin"
+			bind:this={tab.key_input}
 			bind:value={
-				() => tab.get_y_label(),
+				() => tab.get_key(),
 				(value) => {
-					tab.set_y_label(value);
+					tab.set_key(value);
+					renameKeyDebounced(value);
 				}
 			} />
 	</div>
+
+	<button
+		class="p-1 rounded h-7 aspect-square bg-red-500 text-white"
+		onclick={() => {}}>
+		<Trash2 />
+	</button>
 </div>
 
+<ChartConfig bind:tab />
 <Chart bind:tab />
 
 <div class=" bg-slate-800 rounded relative grow">

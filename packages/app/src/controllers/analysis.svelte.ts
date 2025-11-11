@@ -9,7 +9,28 @@ import { shell } from "$lib/utils";
 
 
 export class Tab {
-    key: string
+    #key: string
+    #temp_key: string
+    key_input: HTMLInputElement | undefined = $state(undefined)
+    set_key(value: string) {
+        this.#temp_key = value
+    }
+    async rename_key(key: string) {
+        await shell({
+            fn: "uv",
+            cmd: ["run", "rename_dataset", this.#key, key],
+            description: `Rename dataset from ${this.#key} to ${key}`,
+            cwd: workspace_controller.path!,
+        })
+
+        this.#key = key
+        this.#temp_key = key
+        await analysis_controller.load("key");
+
+    }
+    get_key() {
+        return this.#temp_key
+    }
     data: { title: string, data: number[] }[]
     #x: string
     params: Record<string, ArchivedParams | Record<string, ArchivedParams>>
@@ -71,12 +92,12 @@ export class Tab {
     async save_note(value: string) {
         await shell({
             fn: "uv",
-            cmd: ["run", "save_note", this.key, value],
-            description: `Save Note to ${this.key}`,
+            cmd: ["run", "save_note", this.#key, value],
+            description: `Save Note to ${this.#key}`,
             cwd: workspace_controller.path!,
         })
 
-        await analysis_controller.load(true);
+        await analysis_controller.load("note");
 
     }
     get_note() {
@@ -98,7 +119,8 @@ export class Tab {
         return this.data.map(d => d.title)
     }
     constructor(key: string, data: { title: string, data: number[] }[], params: Record<string, ArchivedParams | Record<string, ArchivedParams>>, note: string) {
-        this.key = key
+        this.#key = $state(key)
+        this.#temp_key = $state(key)
         this.data = data
         this.#x = $state(data[0].title)
         this.#y = $state(data.slice(1).map(d => d.title))
@@ -189,7 +211,7 @@ class AnalysisController {
         })
     }
 
-    async load(focus_note?: boolean) {
+    async load(focus?: "note" | "key") {
         if (workspace_controller.path === null || !await exists(workspace_controller.path + "/data.h5")) return
 
         let raw = await readFile(workspace_controller.path + "/data.h5");
@@ -222,16 +244,20 @@ class AnalysisController {
                 await this.addTab()
                 continue
             }
-            if (this.#list.find(t => t.key === tab.key) === undefined) await this.addTab()
+            if (this.#list.find(t => t.key === tab.get_key()) === undefined) await this.addTab()
 
-            await this.addTab(tab.key)
+            await this.addTab(tab.get_key())
         }
 
         this.active_tab_index = old_active_tab_index
         await tick()
 
-        if (focus_note) {
+        if (focus === "note") {
             this.tabs[this.active_tab_index!]!.note_textarea!.focus()
+        }
+
+        if (focus === "key") {
+            this.tabs[this.active_tab_index!]!.key_input!.focus()
         }
 
     }

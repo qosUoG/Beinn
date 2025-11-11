@@ -59,7 +59,7 @@
 			<button
 				class={cn(
 					" rounded p-1 text-left grid grid-cols-2 bg-white border-2",
-					key === analysis_controller.active_tab?.key
+					key === analysis_controller.active_tab?.get_key()
 						? "  border-slate-700 "
 						: "border-white"
 				)}
