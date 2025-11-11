@@ -42,16 +42,16 @@ class Saver[T: Mapping[str, object]]:
 
     def save(self, data: T):
         if hasattr(self, "_attrs"):
-            self._store.append(f"pid{self.path}", pd.DataFrame(data))
+            self._store.append(f"{self.path}", pd.DataFrame(data))
             return
 
-        self._store.put(f"pid{self.path}", pd.DataFrame(data), format="table")
-        self._attrs = self._store.get_storer(f"pid{self.path}").attrs  # type: ignore
+        self._store.put(f"{self.path}", pd.DataFrame(data), format="table")
+        self._attrs = self._store.get_storer(f"{self.path}").attrs  # type: ignore
         self._attrs.metadata = json.dumps(self._metadata)  # type: ignore
 
     def saveNote(self, note: str):
         if not hasattr(self, "_attrs"):
-            self._attrs = self._store.get_storer(f"pid{self.path}").attrs  # type: ignore
+            self._attrs = self._store.get_storer(f"{self.path}").attrs  # type: ignore
         self._metadata["note"] = note
         self._attrs.metadata = json.dumps(self._metadata)  # type: ignore
 
