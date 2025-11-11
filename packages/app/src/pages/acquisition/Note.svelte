@@ -1,6 +1,6 @@
 <script lang="ts">
 	import { experiment_controller } from "$controllers/experiment.svelte";
-	import { debounce, throttle } from "$lib/utils";
+	import { debounce } from "$lib/utils";
 	import { NotepadText } from "@lucide/svelte";
 
 	const saveNoteDebounced = debounce((note) => {

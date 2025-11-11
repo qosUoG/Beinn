@@ -2,7 +2,6 @@
 	import { onMount } from "svelte";
 	import type { Chart } from "$controllers/charts/chart.svelte";
 	import { throttle } from "$lib/utils";
-	import { X } from "@lucide/svelte";
 
 	let canvas: HTMLCanvasElement | undefined = $state(undefined);
 

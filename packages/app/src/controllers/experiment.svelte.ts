@@ -1,4 +1,4 @@
-import { deepCopy, shell, sleep, type Prettify } from "$lib/utils"
+import { shell } from "$lib/utils.svelte"
 import { Child, Command } from "@tauri-apps/plugin-shell"
 import { EEBaseController, Instance, type ConcInstance, type InstanceSave } from "./_ee.svelte"
 import { Chart } from "./charts/chart.svelte"

@@ -4,7 +4,7 @@ import { workspace_controller } from "./workspace.svelte";
 import { tick } from "svelte";
 import { react, update, type Data } from "plotly.js-dist-min";
 import type { ArchivedParams } from "./params.svelte";
-import { shell } from "$lib/utils";
+import { shell } from "$lib/utils.svelte";
 const { FS } = await ready
 
 

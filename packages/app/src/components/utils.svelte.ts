@@ -1,6 +1,5 @@
 import { type ClassValue, clsx } from "clsx";
 import type { Action } from "svelte/action";
-import type { Attachment } from "svelte/attachments";
 import { on } from "svelte/events";
 import { twMerge } from "tailwind-merge";
 

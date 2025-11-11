@@ -1,10 +1,11 @@
-import { deepCopy, shell, type Prettify } from "$lib/utils"
+import { deepCopy, } from "$lib/utils"
 import { runtime2Save, save2Runtime, type AllParamTypes, type RuntimeAllParamTypes, type RuntimeEquipmentParam, type SelectFloatParam, type SelectStrParam } from "./params.svelte"
 import { dependency_controller } from "./dependency.svelte"
 import { workspace_controller } from "./workspace.svelte"
 import { tick } from "svelte"
 import { equipment_controller } from "./equipment.svelte"
 import { log_controller } from "./log.svelte"
+import { shell } from "$lib/utils.svelte"
 
 
 export type Imports = { module: string, cls: string }[]

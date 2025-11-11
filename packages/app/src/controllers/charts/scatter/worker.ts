@@ -1,4 +1,4 @@
-import { Chart, type ChartConfiguration, type ChartData, type Point } from "chart.js/auto";
+import { Chart, type ChartConfiguration } from "chart.js/auto";
 import type { ScatterConfig } from "./scatter";
 import type { fromWorkerChartMessages, toWorkerChartMessages } from "../types";
 import { cnoc_url, deepCopy } from "$lib/utils";

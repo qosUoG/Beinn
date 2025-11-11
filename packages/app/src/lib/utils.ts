@@ -1,7 +1,3 @@
-
-import { log_controller, type ShellEntry } from "$controllers/log.svelte"
-import { Command } from "@tauri-apps/plugin-shell"
-
 export const cnoc_url = "ws://localhost:8080/"
 
 export type Prettify<T> = {
@@ -49,81 +45,4 @@ export const throttle = (callback: (...args: any[]) => void, delay: number) => {
     };
 }
 
-export async function execute({ fn, cmd, cwd }: { fn: string, cmd: string | string[], cwd: string }) {
-    let stdout = ""
-    let error = ""
-    let code: number = 0
 
-    const handler = Command.create(
-        fn, typeof cmd === "string" ? cmd.split(" ") : cmd, {
-        encoding: "utf8",
-        cwd
-    })
-    handler.stdout.on("data", (line) => {
-        stdout += line
-    })
-    handler.stderr.on("data", (line) => error += line + "\n")
-
-    const p = new Promise((resolve) => {
-        handler.on("close", (data) => {
-            code = data.code ?? 0
-            resolve(undefined)
-        })
-        handler.on("error", (err) => {
-            error += err + "\n"
-            resolve(undefined)
-        })
-    })
-
-    await handler.spawn()
-    await p
-
-    if (error !== "" || code !== 0)
-        log_controller.appendError(`Error while executing ${fn} ${cmd}: ${error}`)
-
-    return { stdout, code }
-}
-
-
-export async function shell({ fn, cmd, description, cwd }:
-    { fn: string, cmd: string | string[], description: string, cwd: string }) {
-    const entry = log_controller.appendShell({
-        cwd,
-        command: fn + " " + (typeof cmd === "string" ? cmd : cmd.join(" ")),
-        description,
-        std: [],
-        err: "",
-        code: null
-    })
-
-    let stdout = ""
-
-    const handler = Command.create(
-        fn, typeof cmd === "string" ? cmd.split(" ") : cmd, {
-        encoding: "utf8",
-        cwd
-    })
-
-    handler.stdout.on("data", (line) => {
-        entry.std.push({ type: "stdout", data: line })
-        stdout += line
-    })
-    handler.stderr.on("data", (line) => entry.std.push({ type: "stderr", data: line }))
-
-    const p = new Promise((resolve) => {
-        handler.on("close", (data) => {
-            entry.code = data.code
-            resolve(undefined)
-        })
-        handler.on("error", (err) => {
-            entry.err = err
-            resolve(undefined)
-        })
-    })
-
-    await handler.spawn()
-    await p
-
-    return { stdout, code: entry.code }
-
-}
