@@ -1,11 +1,11 @@
 import { exists, readFile } from "@tauri-apps/plugin-fs";
-import h5wasm, { Dataset, Group } from "h5wasm";
+import { File, ready, type Dataset, type Group } from "h5wasm";
 import { workspace_controller } from "./workspace.svelte";
 import { tick } from "svelte";
-import Plotly, { type Data } from "plotly.js-dist-min";
+import { react, update, type Data } from "plotly.js-dist-min";
 import type { ArchivedParams } from "./params.svelte";
 import { shell } from "$lib/utils";
-
+const { FS } = await ready
 
 
 export class Tab {
@@ -55,14 +55,14 @@ export class Tab {
         this.x_label = value
 
 
-        Plotly.update("plotly:div", {}, { xaxis: { title: { text: value } } })
+        update("plotly:div", {}, { xaxis: { title: { text: value } } })
     }
 
     set_y_label(value: string) {
         this.y_label = value
 
 
-        Plotly.update("plotly:div", {}, { yaxis: { title: { text: value } } })
+        update("plotly:div", {}, { yaxis: { title: { text: value } } })
     }
 
 
@@ -83,7 +83,7 @@ export class Tab {
         this.mode = value
 
 
-        Plotly.update("plotly:div", { mode: value }, {})
+        update("plotly:div", { mode: value }, {})
     }
 
 
@@ -162,7 +162,7 @@ export class Tab {
                 }
             }
 
-        Plotly.react("plotly:div", traces as Data[], layout)
+        react("plotly:div", traces as Data[], layout)
     }
 }
 
@@ -199,10 +199,10 @@ class AnalysisController {
         let raw = await readFile(workspace_controller.path + "/data.h5");
 
 
-        const { FS } = await h5wasm.ready
+
         const randomuuid = crypto.randomUUID()
         FS.writeFile(randomuuid, raw);
-        const file = new h5wasm.File(randomuuid, "r");
+        const file = new File(randomuuid, "r");
 
         const keys = file.keys()
         const tabs: Tab[] = []

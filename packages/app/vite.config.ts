@@ -2,6 +2,7 @@ import { defineConfig } from 'vite'
 import { svelte } from '@sveltejs/vite-plugin-svelte'
 import path from "node:path"
 import tailwindcss from '@tailwindcss/vite'
+import wasm from "vite-plugin-wasm";
 
 const host = process.env.TAURI_DEV_HOST;
 
@@ -28,7 +29,7 @@ export default defineConfig({
     },
   },
   envPrefix: ['VITE_', 'TAURI_ENV_*'],
-  plugins: [svelte(), tailwindcss()],
+  plugins: [svelte(), tailwindcss(), wasm()],
   build: {
     outDir: "./dist",
     emptyOutDir: true,
@@ -53,7 +54,6 @@ export default defineConfig({
 
       $controllers: path.resolve("./src/controllers"),
     },
-    // dedupe: ['vscode']
   },
 
 })
