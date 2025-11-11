@@ -36,50 +36,32 @@ export class Tab {
     params: Record<string, ArchivedParams | Record<string, ArchivedParams>>
     composite_opens: Record<string, boolean>
     note_textarea: HTMLTextAreaElement | undefined = $state(undefined)
-    #plot_div: HTMLDivElement | undefined = $state(undefined)
-    mount(plot_div: HTMLDivElement) {
-        this.#plot_div = plot_div
 
-        tick().then(() => {
-            this.plot()
-        })
-    }
-    unmount() {
-        this.#plot_div = undefined
-    }
 
     get_x() {
         return this.#x
     }
     set_x(value: string) {
         this.#x = value
-        if (this.#plot_div === undefined) return
-
-        tick().then(() => {
-            this.plot()
-        })
+        this.plot()
     }
     #y: string[]
     y_includes(y: string) {
         return this.#y.includes(y)
     }
-    async toggle_y(value: string) {
+    toggle_y(value: string) {
         const index = this.#y.indexOf(value)
 
         if (index !== -1) this.#y.splice(index, 1)
         else this.#y.push(value);
-
-        if (this.#plot_div === undefined) return
-
-        await tick()
         this.plot()
     }
     #y_label: string = $state("")
     set_y_label(value: string) {
         this.#y_label = value
-        if (this.#plot_div === undefined) return
 
-        Plotly.update(this.#plot_div, {}, { yaxis: { title: { text: value } } })
+
+        Plotly.update("plotly:div", {}, { yaxis: { title: { text: value } } })
     }
     get_y_label() {
         return this.#y_label
@@ -105,13 +87,13 @@ export class Tab {
     }
 
     #mode: "lines" | "markers" | "lines+markers" = "lines"
-    set mode(value: "lines" | "markers" | "lines+markers") {
+    set_mode(value: "lines" | "markers" | "lines+markers") {
         this.#mode = value
-        if (this.#plot_div === undefined) return
 
-        Plotly.update(this.#plot_div, { mode: value }, {})
+
+        Plotly.update("plotly:div", { mode: value }, {})
     }
-    get mode() {
+    get_mode() {
         return this.#mode
     }
 
@@ -137,10 +119,8 @@ export class Tab {
     }
 
 
-    plot() {
-
-        if (this.#plot_div === undefined) return
-
+    async plot() {
+        await tick()
         const x = this.data.find(d => d.title === this.#x)!.data
         const traces = this.#y.map((y) => {
             return {
@@ -173,7 +153,7 @@ export class Tab {
                 }
             }
 
-        Plotly.react(this.#plot_div, traces as Data[], layout)
+        Plotly.react("plotly:div", traces as Data[], layout)
     }
 }
 
@@ -191,10 +171,6 @@ class AnalysisController {
     sort: "time_desc" | "time_asc" | "key_asc" | "key_desc" = $state("time_desc")
 
 
-
-    constructor() {
-
-    }
 
     get list() {
         return this.#list.toSorted((a, b) => {

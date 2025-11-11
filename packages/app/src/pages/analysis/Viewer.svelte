@@ -5,7 +5,6 @@
 	import { NotepadText, Trash2 } from "@lucide/svelte";
 	import { debounce } from "$lib/utils";
 	import Chart from "./Chart.svelte";
-	import ChartConfig from "./ChartConfig.svelte";
 
 	let { tab = $bindable() }: { tab: Tab } = $props();
 
@@ -39,7 +38,6 @@
 	</button>
 </div>
 
-<ChartConfig bind:tab />
 <Chart bind:tab />
 
 <div class=" bg-slate-800 rounded relative grow">
