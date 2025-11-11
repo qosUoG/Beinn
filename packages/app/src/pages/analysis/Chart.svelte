@@ -10,19 +10,19 @@
 	$effect(() => {
 		tab.plot();
 	});
+
+	const modes = ["lines", "markers", "lines+markers"] as const;
 </script>
 
-<div class="bg-slate-700 rounded p-2 fcol-1">
+<div class="bg-slate-700 rounded p-2 grid grid-cols-2 gap-2">
 	<div class="frow-4 items-center">
-		<div class="text-white">x axis:</div>
-		<div class="frow-1">
+		<div class="text-white">x axis</div>
+		<div class="frow-1 flex-wrap">
 			{#each tab.titles as title}
 				<button
 					class={cn(
 						"  rounded px-2 py-0.5 border text-white",
-						tab.get_x() === title
-							? "border-white"
-							: " border-slate-700"
+						tab.x === title ? "border-white" : " border-slate-700"
 					)}
 					onclick={() => {
 						tab.set_x(title);
@@ -33,13 +33,13 @@
 		</div>
 	</div>
 	<div class="frow-4 items-center">
-		<div class="text-white">y axis:</div>
+		<div class="text-white">y axis</div>
 		<div class="frow-1 flex-wrap">
 			{#each tab.titles as title}
 				<button
 					class={cn(
 						"  rounded px-2 py-0.5 border text-white",
-						tab.y_includes(title)
+						tab.y.includes(title)
 							? "border-white"
 							: " border-slate-700"
 					)}
@@ -52,13 +52,41 @@
 		</div>
 	</div>
 	<div class="frow-4 items-center">
-		<div class="text-white">y label:</div>
+		<div class="text-white">y label</div>
 		<input
 			class="border border-white w-32 rounded py-0.5 px-1 text-white"
 			bind:value={
-				() => tab.get_y_label(),
+				() => tab.y_label,
 				(value) => {
 					tab.set_y_label(value);
+				}
+			} />
+	</div>
+	<div class="frow-4 items-center">
+		<div class="text-white">mode</div>
+		<div class="frow-1">
+			{#each modes as mode}
+				<button
+					class={cn(
+						"  rounded px-2 py-0.5 border text-white",
+						tab.mode === mode ? "border-white" : " border-slate-700"
+					)}
+					onclick={() => {
+						tab.set_mode(mode);
+					}}>
+					{mode}
+				</button>
+			{/each}
+		</div>
+	</div>
+	<div class="frow-4 items-center">
+		<div class="text-white">x label</div>
+		<input
+			class="border border-white w-32 rounded py-0.5 px-1 text-white"
+			bind:value={
+				() => tab.x_label,
+				(value) => {
+					tab.set_x_label(value);
 				}
 			} />
 	</div>

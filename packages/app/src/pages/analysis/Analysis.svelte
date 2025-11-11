@@ -25,7 +25,7 @@
 				</div>
 			</div>
 
-			<div class="bg-slate-200 grow rounded-b p-2 fcol-2">
+			<div class="bg-slate-200 grow rounded p-2 fcol-2">
 				{#if analysis_controller.active_tab}
 					<Viewer bind:tab={analysis_controller.active_tab} />
 				{/if}

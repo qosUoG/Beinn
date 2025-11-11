@@ -21,11 +21,10 @@
 	<div class="underline underline-offset-4">
 		<input
 			class=" text-xl font-thin"
-			bind:this={tab.key_input}
 			bind:value={
-				() => tab.get_key(),
+				() => tab.temp_key,
 				(value) => {
-					tab.set_key(value);
+					tab.temp_key = value;
 					renameKeyDebounced(value);
 				}
 			} />
@@ -44,11 +43,10 @@
 
 <div class=" bg-slate-800 rounded relative grow">
 	<textarea
-		bind:this={tab.note_textarea}
 		bind:value={
-			() => tab.get_note(),
+			() => tab.note,
 			(value) => {
-				tab.set_note(value);
+				tab.note = value;
 				saveNoteDebounced(value);
 			}
 		}

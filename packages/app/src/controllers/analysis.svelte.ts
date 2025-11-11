@@ -1,5 +1,5 @@
-import { exists, readFile, readTextFile } from "@tauri-apps/plugin-fs";
-import h5wasm, { Dataset, Group, type File } from "h5wasm";
+import { exists, readFile } from "@tauri-apps/plugin-fs";
+import h5wasm, { Dataset, Group } from "h5wasm";
 import { workspace_controller } from "./workspace.svelte";
 import { tick } from "svelte";
 import Plotly, { type Data } from "plotly.js-dist-min";
@@ -9,118 +9,110 @@ import { shell } from "$lib/utils";
 
 
 export class Tab {
-    #key: string
-    #temp_key: string
+    x: string
+    y: string[]
+    y_label: string
+    x_label: string
+    mode: "lines" | "markers" | "lines+markers"
+
+    key: string
+
+    temp_key: string
     time: number
-    key_input: HTMLInputElement | undefined = $state(undefined)
-    set_key(value: string) {
-        this.#temp_key = value
-    }
+    data: { title: string, data: number[] }[]
+    params: Record<string, ArchivedParams | Record<string, ArchivedParams>>
+    composite_opens: Record<string, boolean>
+    note: string
+
     async rename_key(key: string) {
         await shell({
             fn: "uv",
-            cmd: ["run", "rename_dataset", this.#key, key],
-            description: `Rename dataset from ${this.#key} to ${key}`,
+            cmd: ["run", "rename_dataset", this.key, key],
+            description: `Rename dataset from ${this.key} to ${key}`,
             cwd: workspace_controller.path!,
         })
 
-        this.#key = key
-        this.#temp_key = key
-        await analysis_controller.load("key");
+        this.key = key
+        this.temp_key = key
+        await analysis_controller.load();
 
     }
-    get_key() {
-        return this.#temp_key
-    }
-    data: { title: string, data: number[] }[]
-    #x: string
-    params: Record<string, ArchivedParams | Record<string, ArchivedParams>>
-    composite_opens: Record<string, boolean>
-    note_textarea: HTMLTextAreaElement | undefined = $state(undefined)
 
-
-    get_x() {
-        return this.#x
-    }
-    set_x(value: string) {
-        this.#x = value
+    async set_x(value: string) {
+        this.x = value
+        await tick()
         this.plot()
     }
-    #y: string[]
-    y_includes(y: string) {
-        return this.#y.includes(y)
-    }
+
     toggle_y(value: string) {
-        const index = this.#y.indexOf(value)
+        const index = this.y.indexOf(value)
 
-        if (index !== -1) this.#y.splice(index, 1)
-        else this.#y.push(value);
+        if (index !== -1) this.y.splice(index, 1)
+        else this.y.push(value);
         this.plot()
     }
-    #y_label: string = $state("")
+    set_x_label(value: string) {
+        this.x_label = value
+
+
+        Plotly.update("plotly:div", {}, { xaxis: { title: { text: value } } })
+    }
+
     set_y_label(value: string) {
-        this.#y_label = value
+        this.y_label = value
 
 
         Plotly.update("plotly:div", {}, { yaxis: { title: { text: value } } })
     }
-    get_y_label() {
-        return this.#y_label
-    }
 
-    #note: string
-    set_note(value: string) {
-        this.#note = value
-    }
+
+
     async save_note(value: string) {
         await shell({
             fn: "uv",
-            cmd: ["run", "save_note", this.#key, value],
-            description: `Save Note to ${this.#key}`,
+            cmd: ["run", "save_note", this.key, value],
+            description: `Save Note to ${this.key}`,
             cwd: workspace_controller.path!,
         })
 
-        await analysis_controller.load("note");
+        await analysis_controller.load();
 
     }
-    get_note() {
-        return this.#note
-    }
 
-    #mode: "lines" | "markers" | "lines+markers" = "lines"
     set_mode(value: "lines" | "markers" | "lines+markers") {
-        this.#mode = value
+        this.mode = value
 
 
         Plotly.update("plotly:div", { mode: value }, {})
     }
-    get_mode() {
-        return this.#mode
-    }
+
 
     async delete() {
         await shell({
             fn: "uv",
-            cmd: ["run", "delete_dataset", this.#key],
-            description: `Delete dataset ${this.#key}`,
+            cmd: ["run", "delete_dataset", this.key],
+            description: `Delete dataset ${this.key}`,
             cwd: workspace_controller.path!,
         })
 
-        await analysis_controller.load("delete");
+        await analysis_controller.load();
     }
 
     get titles() {
         return this.data.map(d => d.title)
     }
-    constructor(key: string, data: { title: string, data: number[] }[], params: Record<string, ArchivedParams | Record<string, ArchivedParams>>, note: string, time: number) {
-        this.#key = $state(key)
-        this.#temp_key = $state(key)
+    constructor(key: string, data: { title: string, data: number[] }[], params: Record<string, ArchivedParams | Record<string, ArchivedParams>>, note: string, time: number, x: string, y: string[], x_label: string, y_label: string, mode: "lines" | "markers" | "lines+markers") {
+        this.key = $state(key)
+        this.temp_key = $state(key)
         this.data = data
-        this.#x = $state(data[0].title)
-        this.#y = $state(data.slice(1).map(d => d.title))
+        this.x = $state(x)
+        this.y = $state(y)
         this.params = $state(params)
-        this.#note = $state(note)
+        this.note = $state(note)
         this.time = time
+        this.y_label = $state(y_label)
+        this.x_label = $state(x_label)
+        this.mode = $state(mode)
 
         const composite_opens: Record<string, boolean> = {}
         for (const [key, param] of Object.entries(params)) {
@@ -134,12 +126,12 @@ export class Tab {
 
     async plot() {
         await tick()
-        const x = this.data.find(d => d.title === this.#x)!.data
-        const traces = this.#y.map((y) => {
+        const x = this.data.find(d => d.title === this.x)!.data
+        const traces = this.y.map((y) => {
             return {
                 x,
                 y: this.data.find(d => d.title === y)!.data,
-                mode: "markers",
+                mode: this.mode,
                 type: "scatter",
                 name: y,
             }
@@ -152,17 +144,21 @@ export class Tab {
                 pad: 4
             },
 
-            xaxis: {
-                title: {
-                    text: this.#x,
-                }
-            },
+
         }
 
-        if (this.#y_label !== "")
+        if (this.y_label !== "")
             layout["yaxis"] = {
                 title: {
-                    text: this.#y_label,
+                    text: this.y_label,
+                }
+
+            }
+
+        if (this.x_label !== "")
+            layout["xaxis"] = {
+                title: {
+                    text: this.x_label,
                 }
             }
 
@@ -182,8 +178,6 @@ class AnalysisController {
     }
     sort: "time_desc" | "time_asc" | "key_asc" | "key_desc" = $state("time_desc")
 
-
-
     get list() {
         return this.tabs.toSorted((a, b) => {
             switch (this.sort) {
@@ -192,17 +186,15 @@ class AnalysisController {
                 case "time_asc":
                     return a.time - b.time
                 case "key_desc":
-                    return b.get_key().localeCompare(a.get_key())
+                    return b.key.localeCompare(a.key)
                 case "key_asc":
-                    return a.get_key().localeCompare(b.get_key())
+                    return a.key.localeCompare(b.key)
             }
         })
     }
 
-    async load(mode?: "note" | "key" | "delete") {
+    async load(mode?: "delete") {
         if (workspace_controller.path === null || !await exists(workspace_controller.path + "/data.h5")) return
-
-        const old_active_tab_index = this.active_tab_index
 
         let raw = await readFile(workspace_controller.path + "/data.h5");
 
@@ -228,26 +220,28 @@ class AnalysisController {
             for (const vs of values)
                 for (let i = 1; i < vs.length; i++)
                     data[i - 1].data.push(...vs[i])
-            tabs.push(new Tab(key, data, metadata.params, metadata.note, metadata.time))
+
+            const old_tab = this.tabs.find(t => t.key === key)
+            if (old_tab !== undefined)
+                tabs.push(new Tab(key, data, metadata.params, metadata.note, metadata.time, old_tab.x, old_tab.y, old_tab.x_label, old_tab.y_label, old_tab.mode))
+
+            else
+                tabs.push(new Tab(key, data, metadata.params, metadata.note, metadata.time, data[0].title, [data[1].title], data[0].title, "", "lines"))
+
+
         }
 
         this.tabs = tabs
 
 
         // Try to reload the tabs
-        if (old_active_tab_index !== undefined)
-            this.active_tab_index = old_active_tab_index
+        if (mode === "delete") {
+            this.active_tab_index = undefined
 
-        await tick()
+            await tick()
 
-        if (mode === "note") {
-            this.tabs[this.active_tab_index!]!.note_textarea!.focus()
+
         }
-
-        if (mode === "key") {
-            this.tabs[this.active_tab_index!]!.key_input!.focus()
-        }
-
     }
 }
 export const analysis_controller = new AnalysisController();

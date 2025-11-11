@@ -59,7 +59,7 @@
 			<button
 				class={cn(
 					" rounded p-1 text-left grid grid-cols-2 bg-white border-2",
-					tab.get_key() === analysis_controller.active_tab?.get_key()
+					tab.key === analysis_controller.active_tab?.key
 						? "  border-slate-700 "
 						: "border-white"
 				)}
@@ -67,7 +67,7 @@
 					analysis_controller.active_tab_index = i;
 				}}>
 				<div class="text-start">
-					{tab.get_key()}
+					{tab.key}
 				</div>
 				<div class="text-center">
 					{time_str}
