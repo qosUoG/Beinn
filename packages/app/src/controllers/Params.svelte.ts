@@ -69,10 +69,6 @@ export type RuntimeAllParamTypes = (
     RuntimeEquipmentParam
 )
 
-
-
-
-
 export function runtime2Save(params: Record<string, RuntimeAllParamTypes | Record<string, RuntimeAllParamTypes>>) {
     const convert
         : (_: RuntimeAllParamTypes) => AllParamTypes
@@ -159,3 +155,10 @@ export function save2Runtime(params: Record<string, AllParamTypes | Record<strin
     }
     return res
 }
+
+
+export type ArchivedParams =
+    | { value: number, suffix?: string }
+    | { value: string | boolean }
+    | { value: string, params: Record<string, ArchivedParams> }
+

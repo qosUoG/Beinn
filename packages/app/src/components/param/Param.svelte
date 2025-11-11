@@ -4,7 +4,10 @@
 	import InputField from "$components/fields/InputField.svelte";
 	import TabSelect from "$components/fields/TabSelect.svelte";
 	import { equipment_controller } from "$controllers/equipment.svelte";
-	import type { RuntimeAllParamTypes } from "$controllers/params.svelte";
+	import type {
+		AllParamTypes,
+		RuntimeAllParamTypes,
+	} from "$controllers/params.svelte";
 
 	let {
 		label,
@@ -13,7 +16,7 @@
 		editable = true,
 	}: {
 		label: string;
-		param: RuntimeAllParamTypes;
+		param: RuntimeAllParamTypes | AllParamTypes;
 		saveFn: () => Promise<void>;
 		editable?: boolean;
 	} = $props();
@@ -84,36 +87,57 @@
 		}
 		options={param.options.map((o) => ({ key: `${o}`, value: o }))} />
 {:else if param.type === "instance.equipment"}
-	<DropSelect
-		{editable}
-		{label}
-		bind:value={
-			() => ({
-				key: param.value ?? "",
-				value: param.instance,
-			}),
-			(v) => {
-				param.value = v.key;
-				param.instance = v.value;
-				saveFn();
+	{#if "instance" in param}
+		<DropSelect
+			{editable}
+			{label}
+			bind:value={
+				() => ({
+					key: param.value ?? "",
+					value: param.instance,
+				}),
+				(v) => {
+					param.value = v.key;
+					param.instance = v.value;
+					saveFn();
+				}
 			}
-		}
-		options={[
-			...equipment_controller.equipment_names.map((n) => {
-				const equipment = equipment_controller.equipments.find(
-					(e) => e.name === n
-				);
-				return {
-					key: equipment?.name ?? "",
-					value: equipment,
-				};
-			}),
-			{ key: "", value: undefined },
-		]} />
-	<!-- {:else if param.type === "instance.experiment"} -->
-
-	<!-- <DropSelect
-		{label}
-		bind:value={param.name}
-		options={Object.keys(experiment_controller.experiments)} /> -->
+			options={[
+				...equipment_controller.equipment_names.map((n) => {
+					const equipment = equipment_controller.equipments.find(
+						(e) => e.name === n
+					);
+					return {
+						key: equipment?.name ?? "",
+						value: equipment,
+					};
+				}),
+				{ key: "", value: undefined },
+			]} />
+	{:else}
+		<DropSelect
+			{editable}
+			{label}
+			bind:value={
+				() => ({
+					key: param.value ?? "",
+					value: undefined,
+				}),
+				(v) => {
+					param.value = v.key;
+				}
+			}
+			options={[
+				...equipment_controller.equipment_names.map((n) => {
+					const equipment = equipment_controller.equipments.find(
+						(e) => e.name === n
+					);
+					return {
+						key: equipment?.name ?? "",
+						value: equipment,
+					};
+				}),
+				{ key: "", value: undefined },
+			]} />
+	{/if}
 {/if}

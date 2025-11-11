@@ -223,14 +223,14 @@ export class Experiment extends Instance {
             for (const saver_config of this.saver_configs) {
                 await shell({
                     fn: "uv",
-                    cmd: ["run", "save_note", saver_config],
+                    cmd: ["run", "save_note", saver_config, note],
                     description: `Save Note to ${saver_config}`,
                     cwd: workspace_controller.path!,
                 })
             }
         }
 
-        this.note = note
+
     }
 
     interpret() {

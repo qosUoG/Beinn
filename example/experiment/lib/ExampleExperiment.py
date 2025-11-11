@@ -73,7 +73,7 @@ class ExampleExperiment(ExperimentABC[Params]):
             mode="append",
         )
         manager.createChart(self.scatter_plot2)
-        self.saver = Saver[SaverRowType]("data.h5", self.params, SaverRowType)
+        self.saver = Saver[SaverRowType]("temp_data", self.params, SaverRowType)
 
         manager.createSaver(self.saver)
 

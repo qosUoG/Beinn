@@ -1,7 +1,7 @@
 <script lang="ts">
 	import { equipment_controller } from "$controllers/equipment.svelte";
 	import { ChevronDown, ChevronRight, ChevronsDown, X } from "@lucide/svelte";
-	import ParamList from "../_ee/ParamList.svelte";
+	import ParamList from "$components/param/ParamList.svelte";
 	import { cn } from "$components/utils.svelte";
 	import { onMount, tick } from "svelte";
 

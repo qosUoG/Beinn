@@ -1,7 +1,10 @@
 <script lang="ts">
 	import { ChevronDown, ChevronRight } from "@lucide/svelte";
 	import Param from "./Param.svelte";
-	import type { RuntimeAllParamTypes } from "$controllers/params.svelte";
+	import type {
+		AllParamTypes,
+		RuntimeAllParamTypes,
+	} from "$controllers/params.svelte";
 
 	let {
 		label,
@@ -11,7 +14,9 @@
 		editable = true,
 	}: {
 		label: string;
-		params: Record<string, RuntimeAllParamTypes>;
+		params:
+			| Record<string, RuntimeAllParamTypes>
+			| Record<string, AllParamTypes>;
 		open: boolean;
 		saveFn: () => Promise<void>;
 		editable?: boolean;

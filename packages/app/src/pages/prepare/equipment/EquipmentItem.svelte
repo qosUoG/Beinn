@@ -14,7 +14,7 @@
 
 	import { cn } from "$components/utils.svelte";
 	import { experiment_controller } from "$controllers/experiment.svelte";
-	import ParamList from "../_ee/ParamList.svelte";
+	import ParamList from "$components/param/ParamList.svelte";
 
 	import type { Instance } from "$controllers/_ee.svelte";
 	import { tick } from "svelte";

@@ -1,5 +1,8 @@
 <script lang="ts">
-	import type { RuntimeAllParamTypes } from "$controllers/params.svelte";
+	import type {
+		AllParamTypes,
+		RuntimeAllParamTypes,
+	} from "$controllers/params.svelte";
 	import Composite from "./Composite.svelte";
 	import Param from "./Param.svelte";
 
@@ -12,10 +15,12 @@
 	}: {
 		param_opens: boolean;
 		composite_opens: Record<string, boolean>;
-		params: Record<
-			string,
-			RuntimeAllParamTypes | Record<string, RuntimeAllParamTypes>
-		>;
+		params:
+			| Record<
+					string,
+					RuntimeAllParamTypes | Record<string, RuntimeAllParamTypes>
+			  >
+			| Record<string, AllParamTypes | Record<string, AllParamTypes>>;
 		saveFn: () => Promise<void>;
 		editable?: boolean;
 	} = $props();

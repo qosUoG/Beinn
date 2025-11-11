@@ -11,7 +11,7 @@
 	import { experiment_controller } from "$controllers/experiment.svelte";
 	import ExperimentSelector from "./ExperimentSelector.svelte";
 
-	import ParamList from "../_ee/ParamList.svelte";
+	import ParamList from "$components/param/ParamList.svelte";
 	import { workspace_controller } from "$controllers/workspace.svelte";
 </script>
 
