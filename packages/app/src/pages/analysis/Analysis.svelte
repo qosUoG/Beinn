@@ -24,53 +24,11 @@
 					{/if}
 				</div>
 			</div>
-			<div class="h-full grow rounded fcol">
-				<div class="h-6 frow gap-0.5">
-					{#each analysis_controller.tabs as tab, i}
-						<div
-							class={cn(
-								" rounded-t  px-2 border-b-2 box-border pr-6 relative h-full frow items-center",
-								i === analysis_controller.active_tab_index
-									? "border-slate-200 bg-slate-200"
-									: "border-white bg-slate-200/60 "
-							)}>
-							<button
-								class={cn(
-									"frow items-center h-full ",
-									tab === undefined ? "italic " : ""
-								)}
-								onclick={() => {
-									analysis_controller.active_tab_index = i;
-								}}>
-								{#if tab}
-									{tab.get_key()}
-								{:else}
-									New Tab
-								{/if}
-							</button>
-							<button
-								class="absolute h-4 w-4 p-0.5 right-1 top-1/2 -translate-y-1/2"
-								onclick={() => {
-									analysis_controller.removeTab(i);
-								}}>
-								<X />
-							</button>
-						</div>
-					{/each}
 
-					<button
-						class="icon-btn-sm rounded-b-none bg-slate-200 border-b-2 border-white box-border"
-						onclick={() => {
-							analysis_controller.addTab();
-						}}>
-						<Plus />
-					</button>
-				</div>
-				<div class="bg-slate-200 grow rounded-b p-2 fcol-2">
-					{#if analysis_controller.active_tab}
-						<Viewer bind:tab={analysis_controller.active_tab} />
-					{/if}
-				</div>
+			<div class="bg-slate-200 grow rounded-b p-2 fcol-2">
+				{#if analysis_controller.active_tab}
+					<Viewer bind:tab={analysis_controller.active_tab} />
+				{/if}
 			</div>
 		</div>
 	{/if}

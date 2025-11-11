@@ -54,22 +54,20 @@
 		</button>
 	</div>
 	<div class="fcol-1 overflow-y-scroll scrollbar-slate-400">
-		{#each analysis_controller.list as { key, time }}
-			{@const time_str = new Date(time).toLocaleString()}
+		{#each analysis_controller.list as tab, i}
+			{@const time_str = new Date(tab.time).toLocaleString()}
 			<button
 				class={cn(
 					" rounded p-1 text-left grid grid-cols-2 bg-white border-2",
-					key === analysis_controller.active_tab?.get_key()
+					tab.get_key() === analysis_controller.active_tab?.get_key()
 						? "  border-slate-700 "
 						: "border-white"
 				)}
 				onclick={() => {
-					if (analysis_controller.active_tab_index === undefined)
-						analysis_controller.addTab(key);
-					else analysis_controller.setTab(key);
+					analysis_controller.active_tab_index = i;
 				}}>
 				<div class="text-start">
-					{key}
+					{tab.get_key()}
 				</div>
 				<div class="text-center">
 					{time_str}

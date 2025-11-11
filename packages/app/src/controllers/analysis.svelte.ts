@@ -11,6 +11,7 @@ import { shell } from "$lib/utils";
 export class Tab {
     #key: string
     #temp_key: string
+    time: number
     key_input: HTMLInputElement | undefined = $state(undefined)
     set_key(value: string) {
         this.#temp_key = value
@@ -105,13 +106,13 @@ export class Tab {
             cwd: workspace_controller.path!,
         })
 
-        await analysis_controller.load(undefined, this.#key);
+        await analysis_controller.load("delete");
     }
 
     get titles() {
         return this.data.map(d => d.title)
     }
-    constructor(key: string, data: { title: string, data: number[] }[], params: Record<string, ArchivedParams | Record<string, ArchivedParams>>, note: string) {
+    constructor(key: string, data: { title: string, data: number[] }[], params: Record<string, ArchivedParams | Record<string, ArchivedParams>>, note: string, time: number) {
         this.#key = $state(key)
         this.#temp_key = $state(key)
         this.data = data
@@ -119,6 +120,7 @@ export class Tab {
         this.#y = $state(data.slice(1).map(d => d.title))
         this.params = $state(params)
         this.#note = $state(note)
+        this.time = time
 
         const composite_opens: Record<string, boolean> = {}
         for (const [key, param] of Object.entries(params)) {
@@ -171,35 +173,36 @@ export class Tab {
 class AnalysisController {
 
 
-    file: File | undefined = $state(undefined)
-    tabs: (Tab | undefined)[] = $state([])
+
+    tabs: Tab[] = $state([])
     active_tab_index: number | undefined = $state(undefined)
     get active_tab() {
         if (this.active_tab_index === undefined) return undefined
         return this.tabs[this.active_tab_index]
     }
-    #list: { time: number, key: string }[] = $state([])
     sort: "time_desc" | "time_asc" | "key_asc" | "key_desc" = $state("time_desc")
 
 
 
     get list() {
-        return this.#list.toSorted((a, b) => {
+        return this.tabs.toSorted((a, b) => {
             switch (this.sort) {
                 case "time_desc":
                     return b.time - a.time
                 case "time_asc":
                     return a.time - b.time
                 case "key_desc":
-                    return b.key.localeCompare(a.key)
+                    return b.get_key().localeCompare(a.get_key())
                 case "key_asc":
-                    return a.key.localeCompare(b.key)
+                    return a.get_key().localeCompare(b.get_key())
             }
         })
     }
 
-    async load(focus?: "note" | "key", del?: string) {
+    async load(mode?: "note" | "key" | "delete") {
         if (workspace_controller.path === null || !await exists(workspace_controller.path + "/data.h5")) return
+
+        const old_active_tab_index = this.active_tab_index
 
         let raw = await readFile(workspace_controller.path + "/data.h5");
 
@@ -210,112 +213,41 @@ class AnalysisController {
         const file = new h5wasm.File(randomuuid, "r");
 
         const keys = file.keys()
-        const list: { time: number, key: string }[] = []
+        const tabs: Tab[] = []
         for (const key of keys) {
             const metadata = JSON.parse((file.get(key) as Group).attrs["metadata"].value as string)
-            list.push({ time: metadata.time, key })
+
+            const data: { title: string, data: number[] }[] = [];
+
+            (metadata.columns as string[]).forEach((column) => {
+                data.push({ title: column, data: [] })
+            })
+
+            const values = (file.get(key + "/table")! as Dataset).value! as number[][][]
+
+            for (const vs of values)
+                for (let i = 1; i < vs.length; i++)
+                    data[i - 1].data.push(...vs[i])
+            tabs.push(new Tab(key, data, metadata.params, metadata.note, metadata.time))
         }
 
-        this.#list = list
-        this.file = file
+        this.tabs = tabs
+
 
         // Try to reload the tabs
-        const old_tabs = this.tabs.filter(t => t === undefined || t.get_key() !== del)
-        const old_active_tab_index = old_tabs.length === this.tabs.length ? this.active_tab_index : undefined
-        this.active_tab_index = undefined
-        this.tabs = []
+        if (old_active_tab_index !== undefined)
+            this.active_tab_index = old_active_tab_index
+
         await tick()
 
-        for (const tab of old_tabs) {
-            if (tab === undefined) {
-                await this.addTab()
-                continue
-            }
-            if (this.#list.find(t => t.key === tab.get_key()) === undefined) await this.addTab()
-
-            await this.addTab(tab.get_key())
-        }
-
-
-        this.active_tab_index = old_active_tab_index
-        await tick()
-
-        if (focus === "note") {
+        if (mode === "note") {
             this.tabs[this.active_tab_index!]!.note_textarea!.focus()
         }
 
-        if (focus === "key") {
+        if (mode === "key") {
             this.tabs[this.active_tab_index!]!.key_input!.focus()
         }
 
     }
-
-    async addTab(key?: string) {
-        if (key === undefined) {
-            this.tabs.push(undefined)
-            await tick()
-            this.active_tab_index = this.tabs.length - 1
-            return
-        }
-
-
-
-        const data: { title: string, data: number[] }[] = []
-
-        const metadata: any = JSON.parse((this.file!.get(key) as Group).attrs["metadata"].value as string);
-
-        (metadata.columns as string[]).forEach((column) => {
-            data.push({ title: column, data: [] })
-        })
-
-        const values = (this.file!.get(key + "/table")! as Dataset).value! as number[][][]
-
-        for (const vs of values)
-            for (let i = 1; i < vs.length; i++)
-                data[i - 1].data.push(...vs[i])
-
-        this.tabs.push(new Tab(key, data, metadata.params, metadata.note))
-        await tick()
-        this.active_tab_index = this.tabs.length - 1
-
-    }
-
-    setTab(key: string) {
-        const data: { title: string, data: number[] }[] = []
-        const metadata = JSON.parse((this.file!.get(key) as Group).attrs["metadata"].value as string);
-
-        (metadata.columns as string[]).forEach(column => {
-            data.push({ title: column, data: [] })
-        })
-
-        const values = (this.file!.get(key + "/table")! as Dataset).value! as number[][][]
-
-        for (const vs of values)
-            for (let i = 1; i < vs.length; i++)
-                data[i - 1].data.push(...vs[i])
-
-        this.tabs[this.active_tab_index!] = new Tab(key, data, metadata.params, metadata.note)
-    }
-
-    removeTab(index: number) {
-        this.tabs.splice(index, 1)
-
-        if (this.active_tab_index === undefined) return
-
-        if (index === this.active_tab_index) {
-            this.active_tab_index = undefined
-            return
-        }
-
-        if (this.active_tab_index > index) {
-            this.active_tab_index--
-            return
-        }
-    }
-
-
-
-
-
 }
 export const analysis_controller = new AnalysisController();

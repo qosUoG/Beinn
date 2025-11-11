@@ -22,6 +22,11 @@ class Saver[T: Mapping[str, object]]:
             if not key.startswith(path):
                 continue
 
+            # Without any number subscripts
+            if key == path:
+                maximum = max(maximum, 0)
+                continue
+
             # Parse the number after the path
             maybe_number: int
             try:
@@ -31,7 +36,11 @@ class Saver[T: Mapping[str, object]]:
                 continue
 
             maximum = max(maybe_number, maximum)
-        self.path = f"{path}{maximum + 1}"
+
+        if maximum >= 0:
+            self.path = f"{path}{maximum + 1}"
+        else:
+            self.path = path
 
         self._metadata: Metadata = {
             "time": int(datetime.now().timestamp() * 1000),
