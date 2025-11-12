@@ -7,6 +7,8 @@ overwrite: overwrites the y value of the specified x value
 
 import array
 from typing import Literal, override
+
+import numpy as np
 from ._chart import ChartABC
 
 
@@ -47,7 +49,7 @@ class Scatter(ChartABC):
         }
 
     @override
-    def plot(self, frame: dict[str, list[float]]):
+    def plot(self, frame: dict[str, np.typing.NDArray[np.float64] | list[float]]):
         """
         Plots a data point
 

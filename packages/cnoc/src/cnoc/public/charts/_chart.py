@@ -2,6 +2,8 @@ from abc import ABC, abstractmethod
 from threading import Lock
 from typing import Any, Callable
 
+import numpy as np
+
 
 class ChartABC(ABC):
     def __init__(self):
@@ -17,7 +19,9 @@ class ChartABC(ABC):
         raise NotImplementedError
 
     @abstractmethod
-    def plot(self, frame: dict[str, list[float]]) -> None:
+    def plot(
+        self, frame: dict[str, np.typing.NDArray[np.float64] | list[float]]
+    ) -> None:
         """
         When implementing this method, one must call _plot to ensure the frame is actually stored
         """
