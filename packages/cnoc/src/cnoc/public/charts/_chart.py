@@ -1,6 +1,6 @@
 from abc import ABC, abstractmethod
 from threading import Lock
-from typing import Any, Callable
+from typing import Any, Callable, Mapping
 
 import numpy as np
 
@@ -20,7 +20,7 @@ class ChartABC(ABC):
 
     @abstractmethod
     def plot(
-        self, frame: dict[str, np.typing.NDArray[np.float64] | list[float]]
+        self, frame: Mapping[str, np.typing.NDArray[np.float64] | list[float]]
     ) -> None:
         """
         When implementing this method, one must call _plot to ensure the frame is actually stored
