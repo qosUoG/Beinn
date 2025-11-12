@@ -116,26 +116,29 @@ handlers.ws_open = function ws_open() {
         const y_length = _chart_config.data.datasets.length
 
         const frames_bytes = new DataView(event.data)
-        // Frame size is assumed to be right, thus not checked
-
 
         function* parseFrames(frames_bytes: DataView<ArrayBuffer>) {
             let offset = 0
 
             while (offset < frames_bytes.byteLength) {
                 // yield frame by frame
+
+                // Get the x value
                 const res: (number | null)[] = [frames_bytes.getFloat64(offset, true)]
                 offset += 8
+
+                // Get the y values one by one
                 for (let i = 0; i < y_length; i++) {
                     const has_y = frames_bytes.getFloat64(offset, true)
                     offset += 8
 
                     if (has_y !== 0) {
-                        res.push(has_y ? frames_bytes.getFloat64(offset, true) : null)
+                        res.push(frames_bytes.getFloat64(offset, true))
                         offset += 8
                     } else
                         res.push(null)
                 }
+                // Yield frame
                 yield res
             }
         }

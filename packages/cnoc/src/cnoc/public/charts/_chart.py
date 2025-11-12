@@ -17,7 +17,7 @@ class ChartABC(ABC):
         raise NotImplementedError
 
     @abstractmethod
-    def plot(self, frame: dict[str, float]) -> None:
+    def plot(self, frame: dict[str, list[float]]) -> None:
         """
         When implementing this method, one must call _plot to ensure the frame is actually stored
         """

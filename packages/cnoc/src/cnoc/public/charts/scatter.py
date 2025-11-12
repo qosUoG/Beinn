@@ -47,7 +47,7 @@ class Scatter(ChartABC):
         }
 
     @override
-    def plot(self, frame: dict[str, float]):
+    def plot(self, frame: dict[str, list[float]]):
         """
         Plots a data point
 
@@ -60,18 +60,21 @@ class Scatter(ChartABC):
         try:
             # f64 byte array
             encoded = array.array("d")
+
             # 0: value of x
-            encoded.append(frame[self.x_name])
-            for y_name in self.y_names:
-                if y_name in frame:
-                    # If have value, takes two 8 byte floats.
-                    # First 8 byte has 1 for indicating have value,
-                    # Second 8 byte is the value itself
-                    encoded.append(1)
-                    encoded.append(frame[y_name])
-                else:
-                    # If without value, a 0 is put there
-                    encoded.append(0)
+            for i in range(len(frame[self.x_name])):
+                encoded.append(frame[self.x_name][i])
+                for y_name in self.y_names:
+                    if y_name in frame:
+                        # If have value, takes two 8 byte floats.
+                        # First 8 byte has 1 for indicating have value,
+                        # Second 8 byte is the value itself
+                        encoded.append(1)
+                        encoded.append(frame[y_name][i])
+
+                    else:
+                        # If without value, a 0 is put there
+                        encoded.append(0)
 
             self._plot(bytes(encoded))
         except KeyError as e:
