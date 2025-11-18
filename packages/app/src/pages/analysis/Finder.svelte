@@ -11,13 +11,14 @@
 				"bg-slate-700 text-slate-50 rounded pl-2 pr-1 w-full h-full frow items-center",
 				analysis_controller.sort.startsWith("key")
 					? "justify-between"
-					: "justify-center"
+					: "justify-center",
 			)}
 			onclick={() => {
 				if (analysis_controller.sort === "key_desc")
 					analysis_controller.sort = "key_asc";
 				else analysis_controller.sort = "key_desc";
-			}}>
+			}}
+		>
 			Dataset
 			{#if analysis_controller.sort.startsWith("key")}
 				<span class="text-white icon-btn-sm">
@@ -34,13 +35,14 @@
 				"bg-slate-700 text-slate-50 rounded pl-2 pr-1 w-full h-full frow items-center",
 				analysis_controller.sort.startsWith("time")
 					? "justify-between"
-					: "justify-center"
+					: "justify-center",
 			)}
 			onclick={() => {
 				if (analysis_controller.sort === "time_desc")
 					analysis_controller.sort = "time_asc";
 				else analysis_controller.sort = "time_desc";
-			}}>
+			}}
+		>
 			Time of Creation
 			{#if analysis_controller.sort.startsWith("time")}
 				<span class="text-white icon-btn-sm">
@@ -54,18 +56,20 @@
 		</button>
 	</div>
 	<div class="fcol-1 overflow-y-scroll scrollbar-slate-400">
-		{#each analysis_controller.list as tab, i}
+		{#each analysis_controller.list as { tab, id }}
 			{@const time_str = new Date(tab.time).toLocaleString()}
+			{console.log(tab)}
 			<button
 				class={cn(
 					" rounded p-1 text-left grid grid-cols-2 bg-white border-2",
 					tab.key === analysis_controller.active_tab?.key
 						? "  border-slate-700 "
-						: "border-white"
+						: "border-white",
 				)}
 				onclick={() => {
-					analysis_controller.active_tab_index = i;
-				}}>
+					analysis_controller.active_tab_index = id;
+				}}
+			>
 				<div class="text-start">
 					{tab.key}
 				</div>

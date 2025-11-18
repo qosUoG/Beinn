@@ -36,7 +36,7 @@
 				experiment_controller.experiment!.cli.command =
 					experiment_controller.experiment!.cli.command.slice(
 						0,
-						offset
+						offset,
 					) +
 					"    " +
 					experiment_controller.experiment!.cli.command.slice(offset);
@@ -67,7 +67,7 @@
 		if (small === undefined) return;
 
 		experiment_controller.experiment!.cli.command;
-		experiment_controller.experiment!.cli.logs.entries;
+		experiment_controller.experiment!.cli.logs.entries.length;
 
 		if (experiment_controller.experiment!.cli.follow_scroll) {
 			experiment_controller.experiment!.cli.small_scroll_height =
@@ -86,25 +86,28 @@
 				"rounded border border-slate-200 ml-1 mt-1",
 				experiment_controller.experiment!.cli.follow_scroll
 					? "bg-slate-200 text-slate-50 "
-					: ""
+					: "",
 			)}
 			onclick={() => {
 				experiment_controller.experiment!.cli.follow_scroll =
 					!experiment_controller.experiment!.cli.follow_scroll;
-			}}>
+			}}
+		>
 			<div
 				class={cn(
 					"icon-btn-sm ",
 					experiment_controller.experiment!.cli.follow_scroll
 						? "animate-pulse text-slate-800"
-						: "text-slate-200"
-				)}>
+						: "text-slate-200",
+				)}
+			>
 				<ChevronsDown />
 			</div>
 		</button>
 		{#if experiment_controller.experiment!.state === "looping" || experiment_controller.experiment!.state.startsWith("paus")}
 			<div
-				class="text-white font-mono text-[11px] whitespace-pre-wrap ml-1 mb-1.5 self-end">
+				class="text-white font-mono text-[11px] whitespace-pre-wrap ml-1 mb-1.5 self-end"
+			>
 				{`>>>`}
 			</div>
 		{/if}
@@ -115,7 +118,8 @@
 			onclick={(e) => {
 				show_cli = !show_cli;
 				e.stopPropagation();
-			}}>
+			}}
+		>
 			<div
 				role={"cli"}
 				bind:this={small}
@@ -126,16 +130,18 @@
 				onmouseleave={() => {
 					onCli = false;
 				}}
-				onscroll={() => {
+				onwheel={(t) => {
 					experiment_controller.experiment!.cli.small_scroll_height =
 						small!.scrollTop;
 
 					if (onCli)
 						experiment_controller.experiment!.cli.follow_scroll = false;
-				}}>
+				}}
+			>
 				{#each experiment_controller.experiment!.cli.logs.entries as entry}
 					<div
-						class="text-white text-left font-mono whitespace-pre-wrap break-all text-[11px]">
+						class="text-white text-left font-mono whitespace-pre-wrap break-all text-[11px]"
+					>
 						{entry}
 					</div>
 				{/each}
@@ -150,8 +156,8 @@
 				spellcheck="false"
 				autocapitalize="off"
 				onkeydown={keyDownHandler}
-				role={"input of repl"}>
-			</div>
+				role={"input of repl"}
+			></div>
 		{/if}
 	</div>
 </div>

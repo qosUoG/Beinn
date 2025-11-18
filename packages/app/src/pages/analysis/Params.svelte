@@ -26,8 +26,9 @@
 			<div
 				class={cn(
 					"fcol-1 bg-slate-700 rounded px-2 pt-1",
-					tab.composite_opens[key] ? "pb-2" : "pb-1"
-				)}>
+					tab.composite_opens[key] ? "pb-2" : "pb-1",
+				)}
+			>
 				<button
 					class="text-left text-white frow-2 justify-between items-center"
 					onclick={() => {

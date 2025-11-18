@@ -6,7 +6,7 @@
 	import { onMount } from "svelte";
 	import Viewer from "./Viewer.svelte";
 	import Finder from "./Finder.svelte";
-	import Params from "./Params.svelte";
+	import Params from "./params.svelte";
 
 	onMount(() => {
 		analysis_controller.load();

@@ -47,7 +47,8 @@
 			if (e.key === "." && param.type === "float") return;
 
 			e.preventDefault();
-		}} />
+		}}
+	/>
 {:else if param.type === "str"}
 	<ContentEditable
 		{editable}
@@ -58,7 +59,8 @@
 				param.value = v;
 				saveFn();
 			}
-		} />
+		}
+	/>
 {:else if param.type === "bool"}
 	<TabSelect
 		{editable}
@@ -73,7 +75,8 @@
 		items={[
 			{ key: "True", value: true },
 			{ key: "False", value: false },
-		]} />
+		]}
+	/>
 {:else if param.type === "select.float" || param.type === "select.int" || param.type === "select.str"}
 	<DropSelect
 		{editable}
@@ -85,7 +88,8 @@
 				saveFn();
 			}
 		}
-		options={param.options.map((o) => ({ key: `${o}`, value: o }))} />
+		options={param.options.map((o) => ({ key: `${o}`, value: o }))}
+	/>
 {:else if param.type === "instance.equipment"}
 	{#if "instance" in param}
 		<DropSelect
@@ -105,7 +109,7 @@
 			options={[
 				...equipment_controller.equipment_names.map((n) => {
 					const equipment = equipment_controller.equipments.find(
-						(e) => e.name === n
+						(e) => e.name === n,
 					);
 					return {
 						key: equipment?.name ?? "",
@@ -113,7 +117,8 @@
 					};
 				}),
 				{ key: "", value: undefined },
-			]} />
+			]}
+		/>
 	{:else}
 		<DropSelect
 			{editable}
@@ -130,7 +135,7 @@
 			options={[
 				...equipment_controller.equipment_names.map((n) => {
 					const equipment = equipment_controller.equipments.find(
-						(e) => e.name === n
+						(e) => e.name === n,
 					);
 					return {
 						key: equipment?.name ?? "",
@@ -138,6 +143,7 @@
 					};
 				}),
 				{ key: "", value: undefined },
-			]} />
+			]}
+		/>
 	{/if}
 {/if}

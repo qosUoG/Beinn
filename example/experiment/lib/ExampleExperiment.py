@@ -27,7 +27,7 @@ class CompositeParamsType:
 
 @dataclass
 class Params:
-    strparam: P.Str = p.str()
+    strparam: P.Str = p.str("wowow")
     floatparam: P.Float = p.float(suffix="W")
     intparam: P.Int = p.int()
     boolparam: P.Bool = p.boolean(False)
@@ -120,7 +120,7 @@ class ExampleExperiment(ExperimentABC[Params]):
             }
         )
         self.saver.save({"index": [index], "temperature": [value]})
-        print("experiment loop", index, flush=True)
+        print("experiment loop", index)
 
         if index >= 9:
             raise ExperimentEnded

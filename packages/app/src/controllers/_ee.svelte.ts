@@ -1,4 +1,3 @@
-import { deepCopy, } from "$lib/utils"
 import { runtime2Save, save2Runtime, type AllParamTypes, type RuntimeAllParamTypes, type RuntimeEquipmentParam, type SelectFloatParam, type SelectStrParam } from "./params.svelte"
 import { dependency_controller } from "./dependency.svelte"
 import { workspace_controller } from "./workspace.svelte"
@@ -26,7 +25,6 @@ export type InstanceSave = {
 }
 
 export class Instance {
-    initialized: boolean = $state(false)
 
     module: string
     cls: string
@@ -66,50 +64,12 @@ export class Instance {
             if (!("type" in value) && this.composite_opens[key] === undefined)
                 this.composite_opens[key] = true
 
-        this.initialized = true
     }
 
     async reload() {
         this.reloading = true
         await tick()
-
-        const temp: {
-            params: Record<string, RuntimeAllParamTypes | Record<string, RuntimeAllParamTypes>>,
-            composite_opens: Record<string, boolean>,
-        } = deepCopy({
-            params: this.params,
-            composite_opens: this.composite_opens,
-        })
-
-        // Get the default params list of the instance
-        const res = await this.getParams()
-
-        if (res === undefined) {
-            this.reloading = false
-            return
-        }
-
-        this.params = save2Runtime(res.params)
-
-
-        await tick()
-
-        await this.assignParams(temp.params)
-
-        await tick()
-
-        // Remove composite_opens keys that are not in the new params
-        for (const key of Object.keys(this.composite_opens))
-            if (!(key in this.params))
-                delete this.composite_opens[key]
-
-        await tick()
-
-        // Add composite_opens keys that are in the new params
-        for (const [key, value] of Object.entries(this.params))
-            if (!("type" in value) && this.composite_opens[key] === undefined)
-                this.composite_opens[key] = true
-
+        await this.initialize()
         this.reloading = false
     }
 

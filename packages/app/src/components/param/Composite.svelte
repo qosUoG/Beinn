@@ -27,7 +27,8 @@
 	class=" py-1.5 underline underline-offset-2 text-left bg-slate-200 frow items-center"
 	onclick={() => {
 		open = !open;
-	}}>
+	}}
+>
 	<span class="h-3">
 		{#if !open}
 			<ChevronRight strokeWidth="3px" />

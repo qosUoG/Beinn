@@ -36,7 +36,7 @@
 				experiment_controller.experiment!.cli.command =
 					experiment_controller.experiment!.cli.command.slice(
 						0,
-						offset
+						offset,
 					) +
 					"    " +
 					experiment_controller.experiment!.cli.command.slice(offset);
@@ -77,29 +77,33 @@
 </script>
 
 <div
-	class="absolute top-0 left-0 w-full h-full z-1000 flex justify-center items-center backdrop-blur-2xl">
+	class="absolute top-0 left-0 w-full h-full z-1000 flex justify-center items-center backdrop-blur-2xl"
+>
 	<div class="bg-slate-800 rounded w-xl h-3/4">
 		<div
 			class="fcol-2 p-2 min-h-0 h-full w-full relative"
-			{@attach clickoutside}>
+			{@attach clickoutside}
+		>
 			<button
 				class={cn(
 					"absolute top-0 left-0 rounded border border-slate-200 ml-2 mt-2",
 					experiment_controller.experiment!.cli.follow_scroll
 						? "bg-slate-200 text-slate-50 "
-						: ""
+						: "",
 				)}
 				onclick={() => {
 					experiment_controller.experiment!.cli.follow_scroll =
 						!experiment_controller.experiment!.cli.follow_scroll;
-				}}>
+				}}
+			>
 				<div
 					class={cn(
 						"icon-btn-sm ",
 						experiment_controller.experiment!.cli.follow_scroll
 							? "animate-pulse text-slate-800"
-							: "text-slate-200"
-					)}>
+							: "text-slate-200",
+					)}
+				>
 					<ChevronsDown />
 				</div>
 			</button>
@@ -114,15 +118,17 @@
 					onCli = false;
 				}}
 				role={"cli"}
-				onscroll={() => {
+				onwheel={() => {
 					experiment_controller.experiment!.cli.large_scroll_height =
 						large!.scrollTop;
 					if (onCli)
 						experiment_controller.experiment!.cli.follow_scroll = false;
-				}}>
+				}}
+			>
 				{#each experiment_controller.experiment!.cli.logs.entries as entry}
 					<div
-						class="text-white whitespace-pre-wrap break-all grow font-mono text-[11px] max-w-full">
+						class="text-white whitespace-pre-wrap break-all font-mono text-[11px] max-w-full h-fit"
+					>
 						{entry}
 					</div>
 				{/each}
@@ -130,9 +136,11 @@
 			{#if experiment_controller.experiment!.state === "looping" || experiment_controller.experiment!.state.startsWith("paus")}
 				<div
 					class="text-white frow font-mono text-[11px] whitespace-pre-wrap break-all
-					">
+					"
+				>
 					<div
-						class="text-white font-mono text-[11px] text-nowrap whitespace-break-spaces min-w-7">
+						class="text-white font-mono text-[11px] text-nowrap whitespace-break-spaces min-w-7"
+					>
 						{`>>> `}
 					</div>
 					<div
@@ -145,8 +153,8 @@
 						spellcheck="false"
 						autocapitalize="off"
 						onkeydown={keyDownHandler}
-						role={"input of repl"}>
-					</div>
+						role={"input of repl"}
+					></div>
 				</div>
 			{/if}
 		</div>

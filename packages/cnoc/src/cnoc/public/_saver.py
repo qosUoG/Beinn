@@ -16,9 +16,11 @@ class Metadata(TypedDict):
 
 class Saver[T: Mapping[str, object]]:
     def __init__(self, path: str, params: DataclassInstance, type: type[T]):
+        path = path.replace(" ", "_")
         self._store = pd.HDFStore("data.h5")
         maximum = -1
         for key in self._store.keys():
+            key = key[1:]
             if not key.startswith(path):
                 continue
 

@@ -134,16 +134,23 @@ export class Experiment extends Instance {
         const handler = Command.create("uv", ["run", "experiment"], { cwd: workspace_controller.path! })
 
         handler.stdout.on("data", (line) => {
+
+
+
             let raw: any
 
             try {
                 raw = JSON.parse(line)
             } catch (e) {
+                if (line === "\n" && this.cli.logs.entries.at(-1) === "\n") return
+                if (line === "\r\n" && this.cli.logs.entries.at(-1) === "\r\n") return
                 this.cli.logs.append(line)
                 return
             }
 
             if (raw.event !== "started") {
+                if (line === "\n" && this.cli.logs.entries.at(-1) === "\n") return
+                if (line === "\r\n" && this.cli.logs.entries.at(-1) === "\r\n") return
                 this.cli.logs.append(line)
                 return
             }
@@ -184,6 +191,8 @@ export class Experiment extends Instance {
             return
         })
         handler.stderr.on("data", (line) => {
+
+
             this.cli.logs.append(line)
         })
 

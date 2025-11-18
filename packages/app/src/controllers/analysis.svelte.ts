@@ -170,8 +170,8 @@ class AnalysisController {
 
 
 
-    tabs: Tab[] = $state([])
-    active_tab_index: number | undefined = $state(undefined)
+    tabs: Record<string, Tab> = $state({})
+    active_tab_index: string | undefined = $state(undefined)
     get active_tab() {
         if (this.active_tab_index === undefined) return undefined
         return this.tabs[this.active_tab_index]
@@ -179,7 +179,7 @@ class AnalysisController {
     sort: "time_desc" | "time_asc" | "key_asc" | "key_desc" = $state("time_desc")
 
     get list() {
-        return this.tabs.toSorted((a, b) => {
+        return Object.entries(this.tabs).map(([k, v]) => ({ id: k, tab: v })).toSorted(({ tab: a }, { tab: b }) => {
             switch (this.sort) {
                 case "time_desc":
                     return b.time - a.time
@@ -205,7 +205,7 @@ class AnalysisController {
         const file = new File(randomuuid, "r");
 
         const keys = file.keys()
-        const tabs: Tab[] = []
+        const tabs: Record<string, Tab> = {}
         for (const key of keys) {
             const metadata = JSON.parse((file.get(key) as Group).attrs["metadata"].value as string)
 
@@ -221,12 +221,12 @@ class AnalysisController {
                 for (let i = 1; i < vs.length; i++)
                     data[i - 1].data.push(...vs[i])
 
-            const old_tab = this.tabs.find(t => t.key === key)
+            const old_tab = Object.values(this.tabs).find(t => t.key === key)
             if (old_tab !== undefined)
-                tabs.push(new Tab(key, data, metadata.params, metadata.note, metadata.time, old_tab.x, old_tab.y, old_tab.x_label, old_tab.y_label, old_tab.mode))
+                tabs[crypto.randomUUID()] = new Tab(key, data, metadata.params, metadata.note, metadata.time, old_tab.x, old_tab.y, old_tab.x_label, old_tab.y_label, old_tab.mode)
 
             else
-                tabs.push(new Tab(key, data, metadata.params, metadata.note, metadata.time, data[0].title, [data[1].title], data[0].title, "", "lines"))
+                tabs[crypto.randomUUID()] = new Tab(key, data, metadata.params, metadata.note, metadata.time, data[0].title, [data[1].title], data[0].title, "", "lines")
 
 
         }
