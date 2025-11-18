@@ -75,6 +75,8 @@
 			small.scrollTop = small.scrollHeight;
 		}
 	});
+
+	let onCli = $state(false);
 </script>
 
 <div class="frow-1 grow bg-slate-800 rounded p-1 relative">
@@ -100,10 +102,12 @@
 				<ChevronsDown />
 			</div>
 		</button>
-		<div
-			class="text-white font-mono text-[11px] whitespace-pre-wrap ml-1 mb-1.5 self-end">
-			{`>>>`}
-		</div>
+		{#if experiment_controller.experiment!.state === "looping" || experiment_controller.experiment!.state.startsWith("paus")}
+			<div
+				class="text-white font-mono text-[11px] whitespace-pre-wrap ml-1 mb-1.5 self-end">
+				{`>>>`}
+			</div>
+		{/if}
 	</div>
 	<div class="fcol w-full min-h-0 ml-8">
 		<button
@@ -113,11 +117,21 @@
 				e.stopPropagation();
 			}}>
 			<div
+				role={"cli"}
 				bind:this={small}
 				class="overflow-y-scroll fcol text-white min-h-0 h-full scrollbar-slate-300 w-full"
+				onmouseenter={() => {
+					onCli = true;
+				}}
+				onmouseleave={() => {
+					onCli = false;
+				}}
 				onscroll={() => {
 					experiment_controller.experiment!.cli.small_scroll_height =
 						small!.scrollTop;
+
+					if (onCli)
+						experiment_controller.experiment!.cli.follow_scroll = false;
 				}}>
 				{#each experiment_controller.experiment!.cli.logs.entries as entry}
 					<div
@@ -127,17 +141,18 @@
 				{/each}
 			</div>
 		</button>
-
-		<div
-			contenteditable="plaintext-only"
-			bind:innerText={experiment_controller.experiment!.cli.command}
-			bind:this={editable}
-			class=" text-white font-mono text-[11px] whitespace-break-spaces break-all min-h-4 grow focus:outline-none"
-			spellcheck="false"
-			autocapitalize="off"
-			onkeydown={keyDownHandler}
-			role={"input of repl"}>
-		</div>
+		{#if experiment_controller.experiment!.state === "looping" || experiment_controller.experiment!.state.startsWith("paus")}
+			<div
+				contenteditable="plaintext-only"
+				bind:innerText={experiment_controller.experiment!.cli.command}
+				bind:this={editable}
+				class=" text-white font-mono text-[11px] whitespace-break-spaces break-all min-h-4 focus:outline-none"
+				spellcheck="false"
+				autocapitalize="off"
+				onkeydown={keyDownHandler}
+				role={"input of repl"}>
+			</div>
+		{/if}
 	</div>
 </div>
 
