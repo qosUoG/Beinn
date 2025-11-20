@@ -11,6 +11,7 @@ import time
 from cnoc import charts, p, Saver, ExperimentABC, Manager, ExperimentEnded, P
 
 from examplelib.ExampleDriver import ExampleEquipment
+import numpy as np
 
 
 @dataclass
@@ -41,7 +42,7 @@ class SaverRowType(TypedDict):
     index: list[int]
     t1: list[float]
     t2: list[float]
-    t3: list[float]
+    t3: np.typing.NDArray[np.float64]
     i2: list[int]
 
 
@@ -127,7 +128,13 @@ class ExampleExperiment(ExperimentABC[Params]):
             }
         )
         self.saver.save(
-            {"index": [index], "t1": [v1], "t2": [v2], "t3": [v3], "i2": [index * 2]}
+            {
+                "index": [index],
+                "t1": [v1],
+                "t2": [v2],
+                "t3": np.array([v3]),
+                "i2": [index * 2],
+            }
         )
         print("experiment loop", index)
 

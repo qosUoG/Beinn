@@ -33,7 +33,7 @@ class Saver[
         # Find the maximum existing subscript for this path
         maximum = -1
         for existing_key in os.listdir("data"):
-            existing_key = existing_key.replace(".arrow", "")
+            existing_key = existing_key.replace(".parquet", "")
 
             if not existing_key.startswith(key):
                 continue
@@ -54,9 +54,9 @@ class Saver[
             maximum = max(maybe_number, maximum)
 
         if maximum >= 0:
-            self.path = f"{key}{maximum + 1}.arrow"
+            self.path = f"{key}{maximum + 1}.parquet"
         else:
-            self.path = key + ".arrow"
+            self.path = key + ".parquet"
 
         self._note = ""
 
