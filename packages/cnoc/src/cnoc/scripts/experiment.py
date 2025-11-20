@@ -102,7 +102,7 @@ class Runner:
 
             try:
                 with self._experiment_lock:
-                    res = eval(command, globals=globals())
+                    res = eval(command, globals=globals(), local=locals())
                 print(
                     f"{res}",
                     flush=True,
@@ -121,7 +121,7 @@ class Runner:
                 with redirect_stdout(f):
                     with redirect_stderr(sys.stdout):
                         with self._experiment_lock:
-                            exec(command, globals=globals())
+                            exec(command, globals=globals(), local=locals())
 
                 return
 
