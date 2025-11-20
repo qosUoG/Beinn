@@ -1,7 +1,7 @@
 from datetime import datetime
 import json
 import os
-from typing import Any, Mapping, TypedDict
+from typing import Any, Mapping, TypedDict, cast
 import numpy as np
 import pyarrow as pa
 import pyarrow.parquet as pq
@@ -17,15 +17,7 @@ class Metadata(TypedDict):
     # columns: list[str]
 
 
-class Saver[
-    T: Mapping[
-        str,
-        list[int]
-        | list[float]
-        | np.typing.NDArray[np.float64]
-        | np.typing.NDArray[np.int64],
-    ]
-]:
+class Saver[T: Mapping[str, object]]:
     def __init__(self, key: str, params: DataclassInstance, schema: type[T]):
         # All space characters are replaced with underscores
         key = key.replace(" ", "_")
@@ -84,7 +76,20 @@ class Saver[
         )
 
     def save(self, data: T):
-        self._writer.write(pa.RecordBatch.from_pydict(data))
+        self._writer.write(
+            pa.RecordBatch.from_pydict(
+                cast(
+                    Mapping[
+                        str,
+                        list[int]
+                        | list[float]
+                        | np.typing.NDArray[np.float64]
+                        | np.typing.NDArray[np.int64],
+                    ],
+                    data,
+                )
+            )
+        )
 
     def saveNote(self, note: str):
         self._writer.add_key_value_metadata({"note": note})

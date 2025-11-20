@@ -2,7 +2,7 @@ import json
 import time
 from typing import Any, Mapping, TypedDict, cast
 
-import numpy as np
+
 import pandas as pd
 from ._saver import Saver as _S
 from ._utils import DataclassInstance
@@ -15,15 +15,7 @@ class Metadata(TypedDict):
     note: str
 
 
-class Saver[
-    T: Mapping[
-        str,
-        list[int]
-        | list[float]
-        | np.typing.NDArray[np.float64]
-        | np.typing.NDArray[np.int64],
-    ]
-]:
+class Saver[T: Mapping[str, object]]:
     def __init__(self, path: str, params: DataclassInstance, type: type[T]):
         self._saver = _S[T](path, params, type)
 

@@ -11,6 +11,8 @@ import pyarrow as pa
 
 from cnoc.public._params import params2Save
 
+from cnoc.public.saver import Reader
+
 
 class SaverRowType(TypedDict):
     index: list[int]
@@ -25,7 +27,7 @@ class Params:
     strparam: P.Str = p.str("wowow")
 
 
-def main():
+def main1():
     params = Params()
 
     schema_fields: list[pa.Field[Any]] = []
@@ -103,6 +105,14 @@ def main():
     metadata = pq.read_metadata("data/wow.parquet").metadata[b"notes"]
     print(int(metadata))
     # saver.saver.saveNote("wowow")
+
+
+def main():
+    r = Reader("data/temp_data.parquet")
+    print(r.data)
+    print(r.time)
+    print(r.params)
+    print(r.note)
 
 
 if __name__ == "__main__":
