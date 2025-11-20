@@ -1,8 +1,7 @@
 from datetime import datetime
-import inspect
-import json
-from typing import Mapping, TypedDict
-import pandas as pd
+import os
+from typing import Any, Mapping, TypedDict
+import pyarrow as pa  # pyright: ignore[reportMissingTypeStubs]
 from ._utils import DataclassInstance
 from ._params import AllParamSaveType, params2Save
 
@@ -11,28 +10,31 @@ class Metadata(TypedDict):
     time: int
     params: dict[str, AllParamSaveType | dict[str, AllParamSaveType]]
     note: str
-    columns: list[str]
+    # columns: list[str]
 
 
 class Saver[T: Mapping[str, object]]:
-    def __init__(self, path: str, params: DataclassInstance, type: type[T]):
-        path = path.replace(" ", "_")
-        self._store = pd.HDFStore("data.h5")
+    def __init__(self, key: str, params: DataclassInstance, schema: type[T]):
+        # All space characters are replaced with underscores
+        key = key.replace(" ", "_")
+
+        # Find the maximum existing subscript for this path
         maximum = -1
-        for key in self._store.keys():
-            key = key[1:]
-            if not key.startswith(path):
+        for existing_key in os.listdir("data"):
+            existing_key = existing_key.replace(".arrow", "")
+
+            if not existing_key.startswith(key):
                 continue
 
             # Without any number subscripts
-            if key == path:
+            if existing_key == key:
                 maximum = max(maximum, 0)
                 continue
 
             # Parse the number after the path
             maybe_number: int
             try:
-                maybe_number = int(key.replace(path, ""))
+                maybe_number = int(existing_key.replace(key, ""))
             except ValueError:
                 # If not a number, then it is not the same path
                 continue
@@ -40,31 +42,42 @@ class Saver[T: Mapping[str, object]]:
             maximum = max(maybe_number, maximum)
 
         if maximum >= 0:
-            self.path = f"{path}{maximum + 1}"
+            self.path = f"{key}{maximum + 1}.arrow"
         else:
-            self.path = path
+            self.path = key + ".arrow"
 
         self._metadata: Metadata = {
             "time": int(datetime.now().timestamp() * 1000),
             "params": params2Save(params),
             "note": "",
-            "columns": list(tuple(inspect.get_annotations(type).keys())),
+            # "columns": list(tuple(inspect.get_annotations(type).keys())),
         }
 
-    def save(self, data: T):
-        if hasattr(self, "_attrs"):
-            self._store.append(f"{self.path}", pd.DataFrame(data))
-            return
+        self._sink = pa.OSFile("arraydata.arrow", "wb")
 
-        self._store.put(f"{self.path}", pd.DataFrame(data), format="table")
-        self._attrs = self._store.get_storer(f"{self.path}").attrs  # type: ignore
-        self._attrs.metadata = json.dumps(self._metadata)  # type: ignore
+        # Construct the schema object from Typeddict
+        schema_fields: list[pa.Field[Any]] = []
+        for column_name, column_type in schema.__annotations__.items():
+            schema_fields.append(
+                pa.field(
+                    column_name,
+                    pa.int64() if column_type.__args__[0] is int else pa.float64(),
+                )
+            )
+
+        self._writer: pa.RecordBatchFileWriter = pa.ipc.new_file(
+            self._sink,
+            pa.schema(schema_fields),
+            metadata=self._metadata,  # type: ignore
+        )
+
+    def save(self, data: T):
+        self._writer.write_batch(pa.RecordBatch.from_pydict(data))  # type: ignore
 
     def saveNote(self, note: str):
-        if not hasattr(self, "_attrs"):
-            self._attrs = self._store.get_storer(f"{self.path}").attrs  # type: ignore
         self._metadata["note"] = note
-        self._attrs.metadata = json.dumps(self._metadata)  # type: ignore
+        self._writer.write_batch(pa.RecordBatch(), self._metadata)  # type: ignore
 
     def close(self):
-        self._store.close()
+        self._writer.close()
+        self._sink.close()

@@ -112,9 +112,15 @@ class Dependencies {
         this.dependencies.find(d => d.name === name)!.uninstalling = true
         await tick()
 
+        const temp = this.#toSave(this.dependencies.filter(d => d.name !== name))
+
         await shell({ fn: "uv", cmd: "remove " + name, cwd: path, description: `Uninstalling ${name}` })
         // Refresh the dependencies
         await this.readPyprojectToml({ path })
+
+        await tick()
+
+        this.#loadSave(temp)
     }
 
     async update({ name }: { name: string }) {
@@ -122,6 +128,8 @@ class Dependencies {
         dependency.updating = true
 
         await tick()
+
+
 
         await shell({ fn: "uv", cmd: `lock --upgrade-package ${name}`, cwd: workspace_controller.path!, description: `Updating dependency ${name}` })
 
@@ -131,6 +139,9 @@ class Dependencies {
     }
 
     async install({ path, source }: { path: string, source: DependencySource }) {
+
+        const temp = this.#toSave(this.dependencies)
+
         switch (source.type) {
             case "git": {
                 await shell({
@@ -155,26 +166,36 @@ class Dependencies {
         // Refresh the dependencies
         await this.readPyprojectToml({ path })
 
+        await tick()
+
+        this.#loadSave(temp)
+
     }
 
-
-
-    async save() {
-        await writeTextFile(workspace_controller.path! + "/.beinn/dependencies.json",
-            JSON.stringify(this.dependencies.map(({ source, name, fullname, has_driver }) => ({
-                source, name, fullname, has_driver,
-            }))))
+    #toSave(dependencies: Dependency[]) {
+        return dependencies.map(({ source, name, fullname, has_driver }) => ({
+            source, name, fullname, has_driver,
+        }))
     }
 
-    async loadSave(path: string) {
-        if (!await exists(path + "/.beinn/dependencies.json")) return
-        const save = JSON.parse(await readTextFile(path + "/.beinn/dependencies.json")) as DependencySave[]
-
+    #loadSave(save: DependencySave[]) {
         for (const s of save) {
             const dependency = this.dependencies.find(d => d.name === s.name)
             if (s.has_driver && dependency !== undefined)
                 dependency.has_driver = true
         }
+    }
+
+    async saveToDisk() {
+        await writeTextFile(workspace_controller.path! + "/.beinn/dependencies.json",
+            JSON.stringify(this.#toSave($state.snapshot(this.dependencies))))
+    }
+
+    async loadSaveFromDisk(path: string) {
+        if (!await exists(path + "/.beinn/dependencies.json")) return
+        const save = JSON.parse(await readTextFile(path + "/.beinn/dependencies.json")) as DependencySave[]
+
+        this.#loadSave(save)
     }
 
     async toggleDriver(name: string) {

@@ -85,7 +85,16 @@
 	});
 </script>
 
-<div class={cn("  absolute ", clazz)} bind:this={target}>
+<div
+	class={cn("  absolute ", clazz)}
+	bind:this={target}
+	role={"chart wrapper"}
+	onmouseup={() => {
+		if (onmouseup) onmouseup(target!);
+	}}
+	onmousedown={(e) => {
+		if (onmousedown) onmousedown(target!);
+	}}>
 	<div
 		class={cn("cursor-ns-resize", getStyle("top", null))}
 		{@attach resize("top", null, parent, target, onresize)}>
@@ -128,12 +137,6 @@
 				? "cursor-grabbing **:cursor-grabbing"
 				: "cursor-grab **:cursor-grab"
 		)}
-		onmouseup={() => {
-			if (onmouseup) onmouseup(target!);
-		}}
-		onmousedown={(e) => {
-			if (onmousedown) onmousedown(target!);
-		}}
 		{@attach move(parent, target, moving, onmove)}>
 		<GripHorizontal />
 	</div>

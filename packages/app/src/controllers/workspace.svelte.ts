@@ -57,7 +57,7 @@ class WorkspaceController {
         await writeTextFile(path + "/pyproject.toml", stringify(parsed))
 
         // Check what needs to be installed
-        const required_packages = ["pandas", "tables", "numpy"];
+        const required_packages = ["pyarrow", "numpy"];
         let install_command = ["add"];
         for (const pkg of required_packages) {
             if (!(parsed.project.dependencies as string[]).find(dep => dep.startsWith(pkg)))
@@ -74,14 +74,20 @@ class WorkspaceController {
 
         await dependency_controller.readPyprojectToml({ path })
 
+        // Check if .data exists
+        const data_exists = await exists(path + "/.data")
+        if (!data_exists) {
+            await mkdir(path + "/.data")
+        }
+
         // Check if .beinn exists
         const save_exists = await exists(path + "/.beinn")
         if (!save_exists) {
             await mkdir(path + "/.beinn")
-            await dependency_controller.save()
+            await dependency_controller.saveToDisk()
         }
         else {
-            await dependency_controller.loadSave(path)
+            await dependency_controller.loadSaveFromDisk(path)
         }
 
         await Promise.all([equipment_controller.updateImports(), experiment_controller.updateImports()])
@@ -91,10 +97,7 @@ class WorkspaceController {
         await equipment_controller.loadSave(path)
         await experiment_controller.loadSave(path)
 
-
-
         this.status = "ready"
-
 
     }
 }
