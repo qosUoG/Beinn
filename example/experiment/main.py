@@ -83,6 +83,7 @@ def main():
 
     pqwriter.add_key_value_metadata({"params": json.dumps(params2Save(params))})
     pqwriter.add_key_value_metadata({"params2": json.dumps(params2Save(params))})
+    pqwriter.add_key_value_metadata({"notes": str(3)})
 
     # print("write_table three times", time.perf_counter() - start_time)
     # start_time = time.perf_counter()
@@ -99,8 +100,8 @@ def main():
 
     print(res)
 
-    metadata = pq.read_metadata("data/wow.parquet").metadata[b"params"]
-    print(json.loads(metadata))
+    metadata = pq.read_metadata("data/wow.parquet").metadata[b"notes"]
+    print(int(metadata))
     # saver.saver.saveNote("wowow")
 
 
