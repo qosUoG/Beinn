@@ -38,6 +38,7 @@ class Runner:
         self,
         experiment: ExperimentABC[Any],
         manager: Manager,
+        equipments: EquipmentABC[Any],
         onLoopStart: Callable[[int], None],
         onPause: Callable[[], None],
         onEnd: Callable[[bool], None],
@@ -45,6 +46,8 @@ class Runner:
         self.experiment = experiment
         self.manager = manager
         self._experiment_lock = Lock()
+
+        self.equipments = equipments
 
         self._onLoopStart = onLoopStart
         self._onPause = onPause
@@ -204,11 +207,11 @@ class ExperimentWsHandle:
         pass
 
     async def handler(
-        self, ws: ServerConnection, experiment: ExperimentABC[Any], manager: Manager
+        self, ws: ServerConnection, experiment: ExperimentABC[Any], manager: Manager, equipments: dict[str,EquipmentABC[Any]]
     ):
         self.ws = ws
         self.runner = Runner(
-            experiment, manager, self.onLoopStart, self.onPause, self.onEnd
+            experiment, manager,equipments, self.onLoopStart, self.onPause, self.onEnd
         )
         asyncio.create_task(asyncio.to_thread(self.runner.run))
         self.runner.start()
@@ -269,10 +272,11 @@ class ExperimentWsHandle:
 
 
 class AsyncApp:
-    def __init__(self, manager: Manager, experiment: ExperimentABC[Any]):
+    def __init__(self, manager: Manager, experiment: ExperimentABC[Any], equipments: dict[str, EquipmentABC[Any]]):
         self.task: asyncio.Task[Any] | None = None
         self.manager = manager
         self.experiment = experiment
+        self.equipments = equipments
         self.wss: list[ServerConnection] = []
         self._experiment_ws_handle: ExperimentWsHandle | None = None
 
@@ -287,7 +291,7 @@ class AsyncApp:
         # Multiplex
         if path == "/experiment":
             self.experiment_ws_handle = ExperimentWsHandle()
-            await self.experiment_ws_handle.handler(ws, self.experiment, self.manager)
+            await self.experiment_ws_handle.handler(ws, self.experiment, self.manager, self.equipments)
             self.wss.remove(ws)
             for ws in self.wss:
                 await ws.close()
@@ -343,7 +347,7 @@ class App:
             saver.saver.close()
 
     async def start(self):
-        async_app = AsyncApp(self.manager, self.experiment)
+        async_app = AsyncApp(self.manager, self.experiment, self.equipments)
 
         await async_app.startServer()
 
