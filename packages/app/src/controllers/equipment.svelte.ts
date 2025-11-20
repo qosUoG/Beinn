@@ -100,8 +100,9 @@ export class EquipmentController extends EEBaseController {
 
         // Create temporary file for repl initialization
         let text = [
-            "from cnoc.public._params import dict2Params",
-            "import json"
+            "import json",
+            "from typing import Any",
+            "from cnoc import EquipmentABC"
         ];
 
         let equipments: Instance[]
@@ -138,10 +139,13 @@ export class EquipmentController extends EEBaseController {
         for (const equipment of equipments)
             text.push(`${equipment.name} = ${equipment.cls}()`)
 
-        text.push(`equipments = [${equipments.map(e => e.name).join(", ")}]`)
+        text.push("equipments: dict[str,EquipmentABC[Any]] = {}")
+        for (const equipment of equipments)
+            text.push(`equipments["${equipment.name}"] = ${equipment.name}`)
 
         for (const equipment of equipments)
-            text.push(`${equipment.name}.params = dict2Params(json.loads("""${JSON.stringify(equipment.params)}"""),equipments)\n`)
+            text.push(`${equipment.name}.setParams(json.loads("""${JSON.stringify(equipment.params)}"""),equipments,${equipment.name}.params.__class__)\n`)
+
         for (const equipment of equipments)
             text.push(`${equipment.name}.interactive()`)
 

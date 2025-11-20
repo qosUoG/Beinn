@@ -2,7 +2,9 @@
 	"$schema": "../gen/schemas/desktop-schema.json",
 	"identifier": "default",
 	"description": "enables the default permissions",
-	"windows": ["main"],
+	"windows": [
+		"main"
+	],
 	"permissions": [
 		"core:default",
 		"shell:default",
@@ -110,6 +112,11 @@
 				{
 					"name": ".venv/bin/python",
 					"cmd": ".venv/bin/python",
+					"args": true
+				},
+				{
+					"name": ".venv/Scripts/python.exe",
+					"cmd": ".venv/Scripts/python.exe",
 					"args": true
 				},
 				{

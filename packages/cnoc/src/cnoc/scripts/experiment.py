@@ -85,7 +85,7 @@ class Runner:
                     saver.saver.saveNote(note)
 
     def interpret(self, command: str, name: str | None = None):
-        with self._experiment_lock:
+        
             try:
                 if name is not None:
                     command = command.replace(name, f"self.equipments['{name}']")
@@ -99,10 +99,11 @@ class Runner:
 
             try:
                 with self._experiment_lock:
-                    print(
-                        f"{eval(command, globals=globals())}",
-                        flush=True,
-                    )
+                    res = eval(command, globals=globals())
+                print(
+                    f"{res}",
+                    flush=True,
+                )
                 return
 
             except SyntaxError:
@@ -116,7 +117,8 @@ class Runner:
 
                 with redirect_stdout(f):
                     with redirect_stderr(sys.stdout):
-                        exec(command, globals=globals())
+                        with self._experiment_lock:
+                            exec(command, globals=globals())
 
                 return
 

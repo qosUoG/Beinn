@@ -128,7 +128,9 @@ export class Tab {
 
 
     async delete() {
-        await remove("data/" + this.key + ".parquet");
+        await remove(workspace_controller.path + "/data/" + this.key + ".parquet");
+
+        await analysis_controller.load("delete")
     }
 
     async loadContent() {

@@ -2,7 +2,6 @@ import { workspace_controller } from "$controllers/workspace.svelte"
 import { Child, Command } from "@tauri-apps/plugin-shell"
 import type { Instance } from "./_ee.svelte"
 
-
 export class Repl {
     process: Child | undefined = undefined
     instances: Instance[]
@@ -11,8 +10,11 @@ export class Repl {
     constructor(preload: string, instances: Instance[]) {
 
         this.instances = $state(instances)
+        const commands = ["run", "python", "-u", "-i", "./.beinn/repl.py"]
+
+
         const handler = Command.create(
-            ".venv/bin/python", ["-u", "-i", "./.beinn/repl.py"], {
+            "uv", commands, {
             encoding: "utf8",
             cwd: workspace_controller.path!,
         })
