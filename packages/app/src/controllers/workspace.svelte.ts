@@ -75,9 +75,9 @@ class WorkspaceController {
         await dependency_controller.readPyprojectToml({ path })
 
         // Check if .data exists
-        const data_exists = await exists(path + "/.data")
+        const data_exists = await exists(path + "/data")
         if (!data_exists) {
-            await mkdir(path + "/.data")
+            await mkdir(path + "/data")
         }
 
         // Check if .beinn exists

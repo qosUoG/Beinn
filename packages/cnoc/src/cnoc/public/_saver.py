@@ -53,7 +53,7 @@ class Saver[T: Mapping[str, object]]:
             # "columns": list(tuple(inspect.get_annotations(type).keys())),
         }
 
-        self._sink = pa.OSFile("arraydata.arrow", "wb")
+        self._sink = pa.OSFile("data/" + self.path, "wb")
 
         # Construct the schema object from Typeddict
         schema_fields: list[pa.Field[Any]] = []

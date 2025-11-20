@@ -12,7 +12,5 @@ wheels/
 # Virtual environments
 .venv
 
-app
-meall
 
 *.h5
