@@ -1,7 +1,11 @@
 from datetime import datetime
+import json
 import os
 from typing import Any, Mapping, TypedDict
-import pyarrow as pa  # pyright: ignore[reportMissingTypeStubs]
+import numpy as np
+import pyarrow as pa
+import pyarrow.parquet as pq
+
 from ._utils import DataclassInstance
 from ._params import AllParamSaveType, params2Save
 
@@ -13,7 +17,15 @@ class Metadata(TypedDict):
     # columns: list[str]
 
 
-class Saver[T: Mapping[str, object]]:
+class Saver[
+    T: Mapping[
+        str,
+        list[int]
+        | list[float]
+        | np.typing.NDArray[np.float64]
+        | np.typing.NDArray[np.int64],
+    ]
+]:
     def __init__(self, key: str, params: DataclassInstance, schema: type[T]):
         # All space characters are replaced with underscores
         key = key.replace(" ", "_")
@@ -46,14 +58,7 @@ class Saver[T: Mapping[str, object]]:
         else:
             self.path = key + ".arrow"
 
-        self._metadata: Metadata = {
-            "time": int(datetime.now().timestamp() * 1000),
-            "params": params2Save(params),
-            "note": "",
-            # "columns": list(tuple(inspect.get_annotations(type).keys())),
-        }
-
-        self._sink = pa.OSFile("data/" + self.path, "wb")
+        self._note = ""
 
         # Construct the schema object from Typeddict
         schema_fields: list[pa.Field[Any]] = []
@@ -65,19 +70,21 @@ class Saver[T: Mapping[str, object]]:
                 )
             )
 
-        self._writer: pa.RecordBatchFileWriter = pa.ipc.new_file(
-            self._sink,
-            pa.schema(schema_fields),
-            metadata=self._metadata,  # type: ignore
+        self._writer = pq.ParquetWriter("data/" + self.path, pa.schema(schema_fields))
+
+        self._writer.add_key_value_metadata(
+            {
+                "time": str(int(datetime.now().timestamp() * 1000)),
+                "params": json.dumps(params2Save(params)),
+                "note": "",
+            }
         )
 
     def save(self, data: T):
-        self._writer.write_batch(pa.RecordBatch.from_pydict(data))  # type: ignore
+        self._writer.write(pa.RecordBatch.from_pydict(data))
 
     def saveNote(self, note: str):
-        self._metadata["note"] = note
-        self._writer.write_batch(pa.RecordBatch(), self._metadata)  # type: ignore
+        self._writer.add_key_value_metadata({"note": note})
 
     def close(self):
         self._writer.close()
-        self._sink.close()
