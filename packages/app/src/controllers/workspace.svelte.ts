@@ -57,7 +57,7 @@ class WorkspaceController {
         await writeTextFile(path + "/pyproject.toml", stringify(parsed))
 
         // Check what needs to be installed
-        const required_packages = ["pyarrow", "numpy"];
+        const required_packages = ["numpy"];
         let install_command = ["add"];
         for (const pkg of required_packages) {
             if (!(parsed.project.dependencies as string[]).find(dep => dep.startsWith(pkg)))
