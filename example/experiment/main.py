@@ -1,23 +1,16 @@
-from dataclasses import asdict, dataclass, field
-from typing import cast
-
-from examplelib.ExampleDriver import ExampleEquipment, Params
-
-from cnoc.public._params import params2Dict
+from typing import TypedDict
 
 
-@dataclass
-class Nested:
-    x: int = field(default=0)
-
-
-@dataclass
-class Parent:
-    nested: Nested = field(default_factory=Nested)
+class SaverRowType(TypedDict):
+    index: list[int]
+    t1: list[float]
+    t2: list[float]
+    t3: list[float]
+    i2: list[int]
 
 
 def main():
-    print(ExampleEquipment.params.__dict__)
+    print(list(SaverRowType.__annotations__.values())[1].__args__[0] is float)
 
 
 if __name__ == "__main__":

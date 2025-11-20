@@ -39,7 +39,10 @@ class Params:
 
 class SaverRowType(TypedDict):
     index: list[int]
-    temperature: list[float]
+    t1: list[float]
+    t2: list[float]
+    t3: list[float]
+    i2: list[int]
 
 
 class ExampleExperiment(ExperimentABC[Params]):
@@ -60,7 +63,7 @@ class ExampleExperiment(ExperimentABC[Params]):
             x_axis="index",
             x_name="index",
             y_axis="C",
-            y_names=["temperature"],
+            y_names=["t1", "t2", "t3"],
             mode="append",
         )
         manager.createChart(self.scatter_plot1)
@@ -69,7 +72,7 @@ class ExampleExperiment(ExperimentABC[Params]):
             x_axis="index",
             x_name="index",
             y_axis="C",
-            y_names=["temperature"],
+            y_names=["t1", "t2", "t3"],
             mode="append",
         )
         manager.createChart(self.scatter_plot2)
@@ -112,14 +115,20 @@ class ExampleExperiment(ExperimentABC[Params]):
 
         # Raise an exception such that qoslapapp knows experiment is ended
         # print(f"loop: {index}")
-        value = random.random()
+        v1 = random.random()
+        v2 = random.random()
+        v3 = random.random()
         self.scatter_plot1.plot(
             {
-                "index": index,
-                "temperature": value,
+                "index": [index],
+                "t1": [v1],
+                "t2": [v2],
+                "t3": [v3],
             }
         )
-        self.saver.save({"index": [index], "temperature": [value]})
+        self.saver.save(
+            {"index": [index], "t1": [v1], "t2": [v2], "t3": [v3], "i2": [index * 2]}
+        )
         print("experiment loop", index)
 
         if index >= 9:
