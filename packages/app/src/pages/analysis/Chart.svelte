@@ -22,7 +22,9 @@
 				<button
 					class={cn(
 						"  rounded px-2 py-0.5 border text-white",
-						tab.x === title ? "border-white" : " border-slate-700"
+						tab.content!.x === title
+							? "border-white"
+							: " border-slate-700"
 					)}
 					onclick={() => {
 						tab.set_x(title);
@@ -39,7 +41,7 @@
 				<button
 					class={cn(
 						"  rounded px-2 py-0.5 border text-white",
-						tab.y.includes(title)
+						tab.content!.y.includes(title)
 							? "border-white"
 							: " border-slate-700"
 					)}
@@ -56,7 +58,7 @@
 		<input
 			class="border border-white w-32 rounded py-0.5 px-1 text-white"
 			bind:value={
-				() => tab.y_label,
+				() => tab.content!.y_label,
 				(value) => {
 					tab.set_y_label(value);
 				}
@@ -69,7 +71,9 @@
 				<button
 					class={cn(
 						"  rounded px-2 py-0.5 border text-white",
-						tab.mode === mode ? "border-white" : " border-slate-700"
+						tab.content!.mode === mode
+							? "border-white"
+							: " border-slate-700"
 					)}
 					onclick={() => {
 						tab.set_mode(mode);
@@ -84,7 +88,7 @@
 		<input
 			class="border border-white w-32 rounded py-0.5 px-1 text-white"
 			bind:value={
-				() => tab.x_label,
+				() => tab.content!.x_label,
 				(value) => {
 					tab.set_x_label(value);
 				}

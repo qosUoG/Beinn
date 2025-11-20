@@ -25,7 +25,15 @@
 			]
 		},
 		{
-			"identifier": "fs:allow-read",
+			"identifier": "fs:allow-read-file",
+			"allow": [
+				{
+					"path": "**/*"
+				}
+			]
+		},
+		{
+			"identifier": "fs:allow-write-file",
 			"allow": [
 				{
 					"path": "**/*"
@@ -58,6 +66,22 @@
 		},
 		{
 			"identifier": "fs:allow-exists",
+			"allow": [
+				{
+					"path": "**/*"
+				}
+			]
+		},
+		{
+			"identifier": "fs:allow-remove",
+			"allow": [
+				{
+					"path": "**/*"
+				}
+			]
+		},
+		{
+			"identifier": "fs:allow-rename",
 			"allow": [
 				{
 					"path": "**/*"

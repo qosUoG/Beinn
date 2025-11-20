@@ -1,137 +1,205 @@
-import { exists, readFile } from "@tauri-apps/plugin-fs";
-import { File, ready, type Dataset, type Group } from "h5wasm";
+import { exists, readDir, readFile, remove, rename, writeFile } from "@tauri-apps/plugin-fs";
 import { workspace_controller } from "./workspace.svelte";
 import { tick } from "svelte";
 import { react, update, type Data } from "plotly.js-dist-min";
 import type { ArchivedParams } from "./params.svelte";
-import { shell } from "$lib/utils.svelte";
-const { FS } = await ready
+import wasmInit, { ParquetFile, readParquet, writeParquet, WriterPropertiesBuilder } from "parquet-wasm/esm";
+import * as arrow from "@apache-arrow/ts";
+import wasmUrl from "parquet-wasm/esm/parquet_wasm_bg.wasm?url";
+
+await wasmInit(wasmUrl);
+
 
 
 export class Tab {
-    x: string
-    y: string[]
-    y_label: string
-    x_label: string
-    mode: "lines" | "markers" | "lines+markers"
 
     key: string
-
     temp_key: string
     time: number
-    data: { title: string, data: number[] }[]
-    params: Record<string, ArchivedParams | Record<string, ArchivedParams>>
-    composite_opens: Record<string, boolean>
-    note: string
+
+    content: {
+        x: string
+        y: string[]
+        y_label: string
+        x_label: string
+        data: { title: string, data: number[] }[]
+        params: Record<string, ArchivedParams | Record<string, ArchivedParams>>
+        note: string
+        composite_opens: Record<string, boolean>
+        mode: "lines" | "markers" | "lines+markers",
+
+    } | undefined
 
     async rename_key(key: string) {
-        await shell({
-            fn: "uv",
-            cmd: ["run", "rename_dataset", this.key, key],
-            description: `Rename dataset from ${this.key} to ${key}`,
-            cwd: workspace_controller.path!,
-        })
+        if (analysis_controller.list.find(v => v.tab.key === key) !== undefined) return
 
+        await rename(workspace_controller.path + "/data/" + this.key + ".parquet", workspace_controller.path + "/data/" + key + ".parquet");
         this.key = key
         this.temp_key = key
         await analysis_controller.load();
-
     }
 
     async set_x(value: string) {
-        this.x = value
-        await tick()
-        this.plot()
+        if (this.content === undefined) {
+            await this.loadContent()
+            this.content!.x = value
+            await tick()
+            this.plot()
+
+        }
+        else {
+            this.content!.x = value
+            await tick()
+            this.plot()
+        }
     }
 
     toggle_y(value: string) {
-        const index = this.y.indexOf(value)
-
-        if (index !== -1) this.y.splice(index, 1)
-        else this.y.push(value);
-        this.plot()
+        if (this.content === undefined) this.loadContent().then(() => {
+            const index = this.content!.y.indexOf(value)
+            if (index !== -1) this.content!.y.splice(index, 1)
+            else this.content!.y.push(value);
+            this.plot()
+        })
+        else {
+            const index = this.content!.y.indexOf(value)
+            if (index !== -1) this.content!.y.splice(index, 1)
+            else this.content!.y.push(value);
+            this.plot()
+        }
     }
     set_x_label(value: string) {
-        this.x_label = value
-
-
-        update("plotly:div", {}, { xaxis: { title: { text: value } } })
+        if (this.content === undefined) this.loadContent().then(() => {
+            this.content!.x_label = value
+            update("plotly:div", {}, { xaxis: { title: { text: value } } })
+        })
+        else {
+            this.content!.x_label = value
+            update("plotly:div", {}, { xaxis: { title: { text: value } } })
+        }
     }
 
     set_y_label(value: string) {
-        this.y_label = value
+        if (this.content === undefined) this.loadContent().then(() => {
+            this.content!.y_label = value
+            update("plotly:div", {}, { yaxis: { title: { text: value } } })
+        })
 
-
-        update("plotly:div", {}, { yaxis: { title: { text: value } } })
+        else {
+            this.content!.y_label = value
+            update("plotly:div", {}, { yaxis: { title: { text: value } } })
+        }
     }
 
 
 
     async save_note(value: string) {
-        await shell({
-            fn: "uv",
-            cmd: ["run", "save_note", this.key, value],
-            description: `Save Note to ${this.key}`,
-            cwd: workspace_controller.path!,
-        })
+        const raw = await readFile(workspace_controller.path + "/data/" + this.key + ".parquet");
+        const file = await ParquetFile.fromFile(new Blob([raw]));
+        const metadata = file.metadata().fileMetadata().keyValueMetadata();
+        metadata.set("note", value)
 
-        await analysis_controller.load();
+
+
+        const bytes = writeParquet(await file.read(), new WriterPropertiesBuilder().setKeyValueMetadata(metadata).build());
+
+        await writeFile(workspace_controller.path + "/data/" + this.key + ".parquet", bytes);
+
+        file.free();
 
     }
 
     set_mode(value: "lines" | "markers" | "lines+markers") {
-        this.mode = value
+        if (this.content === undefined) this.loadContent().then(() => {
+            this.content!.mode = value
+            update("plotly:div", { mode: value }, {})
+        })
 
+        else {
+            this.content!.mode = value
+            update("plotly:div", { mode: value }, {})
+        }
 
-        update("plotly:div", { mode: value }, {})
+    }
+
+    get titles() {
+        return this.content!.data.map(d => d.title)
     }
 
 
     async delete() {
-        await shell({
-            fn: "uv",
-            cmd: ["run", "delete_dataset", this.key],
-            description: `Delete dataset ${this.key}`,
-            cwd: workspace_controller.path!,
-        })
-
-        await analysis_controller.load();
+        await remove("data/" + this.key + ".parquet");
     }
 
-    get titles() {
-        return this.data.map(d => d.title)
-    }
-    constructor(key: string, data: { title: string, data: number[] }[], params: Record<string, ArchivedParams | Record<string, ArchivedParams>>, note: string, time: number, x: string, y: string[], x_label: string, y_label: string, mode: "lines" | "markers" | "lines+markers") {
-        this.key = $state(key)
-        this.temp_key = $state(key)
-        this.data = data
-        this.x = $state(x)
-        this.y = $state(y)
-        this.params = $state(params)
-        this.note = $state(note)
-        this.time = time
-        this.y_label = $state(y_label)
-        this.x_label = $state(x_label)
-        this.mode = $state(mode)
+    async loadContent() {
+        const raw = await readFile(workspace_controller.path + "/data/" + this.key + ".parquet");
+        const file = await ParquetFile.fromFile(new Blob([raw]));
+        const metadata = file.metadata().fileMetadata().keyValueMetadata()
 
+        const data: { title: string, data: number[] }[] = [];
+
+        const table = arrow.tableFromIPC(readParquet(raw).intoIPCStream());
+        for (const column of table.schema.fields) {
+            data.push({ title: column.name, data: Array.from(table.getChild(column.name)!.toArray()).map(v => Number(v)) })
+        }
+        const params: Record<string, ArchivedParams | Record<string, ArchivedParams>> = JSON.parse(metadata.get("params"))
         const composite_opens: Record<string, boolean> = {}
         for (const [key, param] of Object.entries(params)) {
             if ("value" in param)
                 continue
             composite_opens[key] = true
         }
-        this.composite_opens = $state(composite_opens)
+
+        this.content = {
+            x: data[0].title,
+            y: [data[1].title],
+            y_label: "",
+            x_label: data[0].title,
+            data,
+            params,
+            note: metadata.get("note"),
+            composite_opens,
+            mode: "lines",
+        }
+
+        file.free();
+    }
+
+    constructor(
+        key: string,
+        time: number,
+        content: {
+            x: string, y: string[], y_label: string, x_label: string,
+            data: { title: string, data: number[] }[],
+            params: Record<string, ArchivedParams | Record<string, ArchivedParams>>,
+            composite_opens: Record<string, boolean>
+            note: string,
+            mode: "lines" | "markers" | "lines+markers",
+
+        } | undefined = undefined) {
+
+        this.content = $state(content)
+        this.key = $state(key)
+        this.temp_key = $state(key)
+        this.time = time
     }
 
 
     async plot() {
+        if (this.content === undefined) await this.loadContent()
+
+
+        const {
+            x, y, y_label, x_label, data, mode
+        } = this.content!
+
         await tick()
-        const x = this.data.find(d => d.title === this.x)!.data
-        const traces = this.y.map((y) => {
+        const x_data = data.find(d => d.title === x)!.data
+        const traces = y.map((y) => {
             return {
-                x,
-                y: this.data.find(d => d.title === y)!.data,
-                mode: this.mode,
+                x: x_data,
+                y: data.find(d => d.title === y)!.data,
+                mode: mode,
                 type: "scatter",
                 name: y,
             }
@@ -147,20 +215,22 @@ export class Tab {
 
         }
 
-        if (this.y_label !== "")
+        if (y_label !== "")
             layout["yaxis"] = {
                 title: {
-                    text: this.y_label,
+                    text: y_label,
                 }
 
             }
 
-        if (this.x_label !== "")
+        if (x_label !== "")
             layout["xaxis"] = {
                 title: {
-                    text: this.x_label,
+                    text: x_label,
                 }
             }
+
+
 
         react("plotly:div", traces as Data[], layout)
     }
@@ -170,16 +240,14 @@ class AnalysisController {
 
 
 
-    tabs: Record<string, Tab> = $state({})
-    active_tab_index: string | undefined = $state(undefined)
-    get active_tab() {
-        if (this.active_tab_index === undefined) return undefined
-        return this.tabs[this.active_tab_index]
-    }
+    active_tab: Tab | undefined = $state(undefined)
+
+
     sort: "time_desc" | "time_asc" | "key_asc" | "key_desc" = $state("time_desc")
+    #tabs: Record<string, Tab> = $state({})
 
     get list() {
-        return Object.entries(this.tabs).map(([k, v]) => ({ id: k, tab: v })).toSorted(({ tab: a }, { tab: b }) => {
+        return Object.entries(this.#tabs).map(([k, v]) => ({ id: k, tab: v })).toSorted(({ tab: a }, { tab: b }) => {
             switch (this.sort) {
                 case "time_desc":
                     return b.time - a.time
@@ -194,53 +262,34 @@ class AnalysisController {
     }
 
     async load(mode?: "delete") {
-        if (workspace_controller.path === null || !await exists(workspace_controller.path + "/data.h5")) return
+        if (workspace_controller.path === null || !await exists(workspace_controller.path + "/data")) return
 
-        let raw = await readFile(workspace_controller.path + "/data.h5");
+        let directory =
+            (await readDir(workspace_controller.path + "/data"))
+                .filter((entry) => entry.name.endsWith(".parquet"))
+                .map(({ name }) => name.replace(".parquet", ""));
 
-
-
-        const randomuuid = crypto.randomUUID()
-        FS.writeFile(randomuuid, raw);
-        const file = new File(randomuuid, "r");
-
-        const keys = file.keys()
-        const tabs: Record<string, Tab> = {}
-        for (const key of keys) {
-            const metadata = JSON.parse((file.get(key) as Group).attrs["metadata"].value as string)
-
-            const data: { title: string, data: number[] }[] = [];
-
-            (metadata.columns as string[]).forEach((column) => {
-                data.push({ title: column, data: [] })
-            })
-
-            const values = (file.get(key + "/table")! as Dataset).value! as number[][][]
-
-            for (const vs of values)
-                for (let i = 1; i < vs.length; i++)
-                    data[i - 1].data.push(...vs[i])
-
-            const old_tab = Object.values(this.tabs).find(t => t.key === key)
-            if (old_tab !== undefined)
-                tabs[crypto.randomUUID()] = new Tab(key, data, metadata.params, metadata.note, metadata.time, old_tab.x, old_tab.y, old_tab.x_label, old_tab.y_label, old_tab.mode)
-
-            else
-                tabs[crypto.randomUUID()] = new Tab(key, data, metadata.params, metadata.note, metadata.time, data[0].title, [data[1].title], data[0].title, "", "lines")
+        const tabs: Record<string, Tab> = {};
+        for (const key of directory) {
+            const raw = await readFile(workspace_controller.path + "/data/" + key + ".parquet");
+            const file = await ParquetFile.fromFile(new Blob([raw]));
+            const metadata = file.metadata().fileMetadata().keyValueMetadata()
+            const time = parseInt(metadata.get("time"));
 
 
+
+
+            const old_tab = Object.values(this.#tabs).find(t => t.key === key)
+            tabs[crypto.randomUUID()] = new Tab(key, time, old_tab?.content)
         }
 
-        this.tabs = tabs
+        this.#tabs = tabs
 
 
         // Try to reload the tabs
         if (mode === "delete") {
-            this.active_tab_index = undefined
-
+            this.active_tab = undefined
             await tick()
-
-
         }
     }
 }

@@ -1,7 +1,5 @@
 <script lang="ts">
 	import { Tab } from "$controllers/analysis.svelte";
-
-	import { cn } from "$components/utils.svelte";
 	import { NotepadText, Trash2 } from "@lucide/svelte";
 	import { debounce } from "$lib/utils";
 	import Chart from "./Chart.svelte";
@@ -44,9 +42,9 @@
 <div class=" bg-slate-800 rounded relative grow">
 	<textarea
 		bind:value={
-			() => tab.note,
+			() => tab.content!.note,
 			(value) => {
-				tab.note = value;
+				tab.content!.note = value;
 				saveNoteDebounced(value);
 			}
 		}

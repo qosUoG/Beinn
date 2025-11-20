@@ -1,12 +1,10 @@
 <script lang="ts">
-	import { cn } from "$components/utils.svelte";
 	import { analysis_controller } from "$controllers/analysis.svelte";
 	import { workspace_controller } from "$controllers/workspace.svelte";
-	import { X, Plus } from "@lucide/svelte";
 	import { onMount } from "svelte";
 	import Viewer from "./Viewer.svelte";
 	import Finder from "./Finder.svelte";
-	import Params from "./params.svelte";
+	import Params from "./Params.svelte";
 
 	onMount(() => {
 		analysis_controller.load();
