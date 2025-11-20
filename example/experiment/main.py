@@ -4,7 +4,7 @@ import time
 from typing import Any, TypedDict
 
 from cnoc import P, p
-import numpy
+import numpy as np
 import pandas as pd
 import pyarrow.parquet as pq
 import pyarrow as pa
@@ -16,7 +16,7 @@ class SaverRowType(TypedDict):
     index: list[int]
     t1: list[float]
     t2: list[float]
-    t3: list[float]
+    t3: np.typing.NDArray[np.float64]
     i2: list[int]
 
 
@@ -30,6 +30,7 @@ def main():
 
     schema_fields: list[pa.Field[Any]] = []
     for column_name, column_type in SaverRowType.__annotations__.items():
+        print(column_type == np.typing.NDArray[np.float64])
         schema_fields.append(
             pa.field(
                 column_name,
@@ -51,7 +52,7 @@ def main():
         pa.RecordBatch.from_pydict(
             {
                 "index": [1, 2, 3],
-                "t1": numpy.array([1.1, 2.2, 3.3]),
+                "t1": np.array([1.1, 2.2, 3.3]),
                 "t2": [1.1, 2.2, 3.3],
                 "t3": [1.1, 2.2, 3.3],
                 "i2": [13, 14, 15],

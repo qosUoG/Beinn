@@ -63,12 +63,15 @@ class Saver[
         # Construct the schema object from Typeddict
         schema_fields: list[pa.Field[Any]] = []
         for column_name, column_type in schema.__annotations__.items():
-            schema_fields.append(
-                pa.field(
-                    column_name,
-                    pa.int64() if column_type.__args__[0] is int else pa.float64(),
-                )
-            )
+            if (
+                column_type == np.typing.NDArray[np.float64]
+                or column_type == list[float]
+            ):
+                schema_fields.append(pa.field(column_name, pa.float64()))
+            elif column_type == np.typing.NDArray[np.int64] or column_type == list[int]:
+                schema_fields.append(pa.field(column_name, pa.int64()))
+            else:
+                raise TypeError(f"Unsupported type: {column_type}")
 
         self._writer = pq.ParquetWriter("data/" + self.path, pa.schema(schema_fields))
 
