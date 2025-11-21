@@ -1,8 +1,11 @@
 import { workspace_controller } from "$controllers/workspace.svelte"
 import { Child, Command } from "@tauri-apps/plugin-shell"
 import type { Instance } from "./_ee.svelte"
+import { Cli } from "./cli.svelte"
 
 export class Repl {
+    cli: Cli = $state(new Cli())
+
     process: Child | undefined = undefined
     instances: Instance[]
     online: boolean = $state(false)
@@ -20,11 +23,11 @@ export class Repl {
         })
 
         handler.stdout.on("data", (line) => {
-            this.log += line;
+            this.cli.logs.append(line);
 
         })
         handler.stderr.on("data", (line) => {
-            this.log += line;
+            this.cli.logs.append(line);
 
 
         })
@@ -41,17 +44,17 @@ export class Repl {
         handler.spawn().then(async (process) => {
             this.process = process
             this.online = true
+            this.cli.logs.append(">>> " + preload);
 
-            this.log += ">>> " + preload + "\n";
         })
 
     }
 
     async write(code: string) {
         if (!this.process) return
-
-        this.log += ">>> " + code;
-        await this.process!.write(code)
+        this.cli.logs.append(">>> " + code);
+        this.cli.history.add(code);
+        await this.process.write(code)
     }
 
 
@@ -59,11 +62,5 @@ export class Repl {
     async kill() {
         await this.process!.kill()
     }
-
-
-
-    log = $state("")
-
-
 
 }

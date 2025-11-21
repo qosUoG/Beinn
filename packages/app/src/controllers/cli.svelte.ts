@@ -1,7 +1,7 @@
 import { deepCopy } from "$lib/utils";
 
 
-class Logs {
+export class Logs {
     entries: string[] = $state([])
 
     append(entry: string) {
@@ -13,7 +13,7 @@ class Logs {
     }
 }
 
-class History {
+export class History {
     // FILO 
     history: string[] = []
 

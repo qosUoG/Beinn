@@ -18,6 +18,16 @@
 				equipment_controller.repl.write(input + "\n");
 				input = "";
 				return;
+			case "ArrowDown": {
+				e.preventDefault();
+				equipment_controller.repl.cli.next();
+				return;
+			}
+			case "ArrowUp": {
+				e.preventDefault();
+				equipment_controller.repl.cli.prev();
+				return;
+			}
 
 			case "Tab":
 				e.preventDefault();
