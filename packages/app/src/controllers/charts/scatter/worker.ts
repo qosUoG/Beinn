@@ -1,4 +1,4 @@
-import { Chart, type ChartConfiguration } from "chart.js/auto";
+import { Chart, type ChartConfiguration, type Point } from "chart.js/auto";
 import type { ScatterConfig } from "./scatter";
 import type { fromWorkerChartMessages, toWorkerChartMessages } from "../types";
 import { cnoc_url, deepCopy } from "$lib/utils";
@@ -163,10 +163,7 @@ handlers.ws_open = function ws_open() {
             }
         }
 
-        if (_chart === undefined) return
-
-        _chart.data.datasets = _datasets
-        _chart!.update()
+        decimate_datasets_and_update_chart()
     }
 }
 
@@ -216,7 +213,7 @@ handlers.resize = function resize({ width, height }) {
     _canvas.width = width
     _canvas.height = height
     _chart.resize(width, height)
-    _chart.update()
+    decimate_datasets_and_update_chart()
 }
 
 handlers.zoom = function zoom({ direction, x, y }) {
@@ -256,7 +253,7 @@ handlers.zoom = function zoom({ direction, x, y }) {
         _chart.options!.scales!.y!.max = new_y_max
     }
 
-    _chart.update()
+    decimate_datasets_and_update_chart()
 }
 
 
@@ -283,7 +280,7 @@ handlers.pan = function pan({ old_x, old_y, new_x, new_y }) {
     _chart.options!.scales!.y!.min = _chart.scales.y.min - y_offset
     _chart.options!.scales!.y!.max = _chart.scales.y.max - y_offset
 
-    _chart.update()
+    decimate_datasets_and_update_chart()
 }
 
 handlers.auto_axis = function auto_axis() {
@@ -294,7 +291,7 @@ handlers.auto_axis = function auto_axis() {
     _chart.options!.scales!.y!.min = undefined
     _chart.options!.scales!.y!.max = undefined
 
-    _chart.update()
+    decimate_datasets_and_update_chart()
 }
 
 handlers.enable_tooltip = function enable_tooltip({ x, y }) {
@@ -313,11 +310,11 @@ handlers.enable_tooltip = function enable_tooltip({ x, y }) {
     // Find the nearest datapoint
     let datasetIndex = 0
     let index = 0
-    let distance = Math.abs(_datasets[0].data[0].x! - x_value) + Math.abs(_datasets[0].data[0].y! - y_value)
-    _datasets.forEach((dataset, di) => {
-        dataset.data.forEach(({ x: data_x, y: data_y }, i) => {
-            const distance_x = Math.abs(x_value - data_x)
-            const distance_y = Math.abs(y_value - data_y)
+    let distance = Math.abs((_chart.data.datasets[0].data[0]! as Point).x! - x_value) + Math.abs((_chart.data.datasets[0].data[0]! as Point).y! - y_value)
+    _chart.data.datasets.forEach((dataset, di) => {
+        (dataset.data as Point[]).forEach(({ x: data_x, y: data_y }, i) => {
+            const distance_x = Math.abs(x_value - data_x!)
+            const distance_y = Math.abs(y_value - data_y!)
             if (distance_x + distance_y < distance) {
                 distance = distance_x + distance_y
                 datasetIndex = di
@@ -355,3 +352,58 @@ onmessage = function (event: MessageEvent<toWorkerChartMessages>) {
 
 }
 
+function decimate_datasets_and_update_chart() {
+    // Determine if the chart should be decimated
+    if (_chart === undefined || _canvas === undefined) return
+
+    const axis_x_min = _chart.scales.x.min
+    const axis_x_max = _chart.scales.x.max
+
+    const chart_datasets = []
+    for (const dataset of _datasets) {
+        let axis_x_min_index = dataset.data.findIndex(v => v.x <= axis_x_min)
+        if (axis_x_min_index === -1) axis_x_min_index = 0
+        let axis_x_max_index = dataset.data.findIndex(v => v.x >= axis_x_max)
+        if (axis_x_max_index === -1) axis_x_max_index = dataset.data.length - 1
+
+        const ratio = Math.floor((axis_x_max_index - axis_x_min_index) / _canvas.width)
+
+        if (ratio < 4) {
+            chart_datasets.push(dataset)
+            continue
+        }
+
+        chart_datasets.push({ data: decimate(dataset.data, ratio), label: dataset.label })
+    }
+
+    _chart.data.datasets = chart_datasets
+    _chart.update()
+}
+
+function decimate(data: { x: number, y: number }[], decimation: number) {
+    const res: { x: number, y: number }[] = []
+
+    for (let i = 0; i < data.length; i += decimation) {
+        if (i + decimation > data.length) break
+
+        const decimation_range = data.slice(i, i + decimation)
+        const min = Math.min(...decimation_range.map(v => v.y))
+        const max = Math.max(...decimation_range.map(v => v.y))
+
+        if (decimation % 2 === 1) {
+            res.push({ x: data[i + (decimation - 1) / 2].x, y: min })
+            res.push({ x: data[i + (decimation - 1) / 2].x, y: max })
+            continue
+        }
+
+        const x = (
+            data[Math.floor(i + decimation / 2)].x +
+            data[Math.ceil(i + decimation / 2)].x
+        ) / 2
+
+        res.push({ x, y: min })
+        res.push({ x, y: max })
+    }
+
+    return res
+}

@@ -30,7 +30,7 @@
 					{#if experiment.state === "ready" && experiment.process === undefined}
 						- / -
 					{:else if experiment.expected_loop_count === -1}
-						∞
+						{experiment.loop_count} / ∞
 					{:else}
 						{experiment.loop_count} / {experiment.expected_loop_count}
 					{/if}

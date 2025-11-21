@@ -95,7 +95,7 @@ class ExampleExperiment(ExperimentABC[Params]):
         #     XYFloatSaver.kwargs(title="ExampleSqlSaver", y_names=["temperature"]),
         # )
 
-        manager.expected_loop_count = 10
+        # manager.expected_loop_count = 10
 
     @override
     def loop(self, index: int, shouldStop: Callable[[], bool]):
@@ -112,7 +112,7 @@ class ExampleExperiment(ExperimentABC[Params]):
         # self.saver.save({"index": index, "temperature": temp})
 
         # # This is here just to not make everything happening too quickly
-        time.sleep(0.5)
+        time.sleep(0.01)
 
         # Raise an exception such that qoslapapp knows experiment is ended
         # print(f"loop: {index}")
@@ -136,10 +136,10 @@ class ExampleExperiment(ExperimentABC[Params]):
                 "i2": [index * 2],
             }
         )
-        print("experiment loop", index)
+        # print("experiment loop", index)
 
-        if index >= 9:
-            raise ExperimentEnded
+        # if index >= 9:
+        #     raise ExperimentEnded
 
     @override
     def cleanup(self):
