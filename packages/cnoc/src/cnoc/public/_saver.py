@@ -103,15 +103,15 @@ class Saver[T: Mapping[str, object]]:
         )
 
     def saveNote(self, note: str):
-        self.initWriter()
-        self._writer.add_key_value_metadata({"note": note})
+        if hasattr(self, "_writer"):
+            self._writer.add_key_value_metadata({"note": note})
 
     def saveMetadata(self, key: str, value: Any):
-        self.initWriter()
         self.experiment_metadata[key] = value
-        self._writer.add_key_value_metadata(
-            {"experiment_metadata": json.dumps(self.experiment_metadata)}
-        )
+        if hasattr(self, "_writer"):
+            self._writer.add_key_value_metadata(
+                {"experiment_metadata": json.dumps(self.experiment_metadata)}
+            )
 
     def close(self):
         if not hasattr(self, "_writer"):
