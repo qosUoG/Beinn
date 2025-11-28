@@ -105,6 +105,7 @@ class Saver[T: Mapping[str, object]]:
         self._writer.add_key_value_metadata({"note": note})
 
     def saveMetadata(self, key: str, value: Any):
+        self.initWriter()
         self._writer.add_key_value_metadata({key: json.dumps(value)})
 
     def close(self):
