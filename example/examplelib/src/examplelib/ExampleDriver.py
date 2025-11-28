@@ -127,3 +127,7 @@ class ExampleEquipment(EquipmentABC[Params]):
     @override
     def interactive(self):
         pass
+
+    @override
+    def snapshot(self):
+        return {"power": self.power}

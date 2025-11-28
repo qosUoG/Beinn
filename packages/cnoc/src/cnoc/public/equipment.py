@@ -80,3 +80,11 @@ class EquipmentABC[T: DataclassInstance](ABC):
         Code to run before REPL mode is entered
         """
         raise NotImplementedError
+
+    @abstractmethod
+    def snapshot(self) -> Any:
+        """
+        Take a snapshot of equipment status and return as a dict.
+        Use in conjunction with saver.saveMetadata
+        """
+        raise NotImplementedError

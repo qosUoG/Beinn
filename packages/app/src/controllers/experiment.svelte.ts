@@ -243,19 +243,19 @@ export class Experiment extends Instance {
     }
 
     interpret() {
-        if (this.cli.command === "") return
+        if (this.cli.command === "" || this.ws === undefined) return
 
         const command = this.cli.record();
 
         // Check if the command is an equipment code
         for (const name of equipment_controller.equipment_names) {
             if (command.match(name)) {
-                this.ws!.send(JSON.stringify({ event: "interpret", value: { command, name } }))
+                this.ws.send(JSON.stringify({ event: "interpret", value: { command, name } }))
                 return
             }
         }
 
-        this.ws!.send(JSON.stringify({ event: "interpret", value: { command } }))
+        this.ws.send(JSON.stringify({ event: "interpret", value: { command } }))
     }
 
     startWebsocket() {

@@ -22,6 +22,9 @@ class Saver[T: Mapping[str, object]]:
     def save(self, data: T):
         self._saver.save(data)
 
+    def saveMetadata(self, key: str, value: Any):
+        self._saver.saveMetadata(key, value)
+
     @property
     def saver(self):
         return self._saver

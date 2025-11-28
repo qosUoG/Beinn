@@ -81,6 +81,11 @@ class ExampleExperiment(ExperimentABC[Params]):
 
         manager.createSaver(self.saver)
 
+        self.saver.saveMetadata(
+            self.params.composite.compinstanceequipmentparam.value,
+            self.params.composite.compinstanceequipmentparam.instance.snapshot(),
+        )
+
         # self.xyplot2: XY = manager.createChart(
         #     XY,
         #     XY.kwargs(

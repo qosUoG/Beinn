@@ -22,6 +22,8 @@ class Saver[T: Mapping[str, object]]:
         # All space characters are replaced with underscores
         key = key.replace(" ", "_")
 
+        self.params = params
+
         # Find the maximum existing subscript for this path
         maximum = -1
         for existing_key in os.listdir("data"):
@@ -53,29 +55,36 @@ class Saver[T: Mapping[str, object]]:
         self._note = ""
 
         # Construct the schema object from Typeddict
-        schema_fields: list[pa.Field[Any]] = []
+        self.schema_fields: list[pa.Field[Any]] = []
         for column_name, column_type in schema.__annotations__.items():
             if (
                 column_type == np.typing.NDArray[np.float64]
                 or column_type == list[float]
             ):
-                schema_fields.append(pa.field(column_name, pa.float64()))
+                self.schema_fields.append(pa.field(column_name, pa.float64()))
             elif column_type == np.typing.NDArray[np.int64] or column_type == list[int]:
-                schema_fields.append(pa.field(column_name, pa.int64()))
+                self.schema_fields.append(pa.field(column_name, pa.int64()))
             else:
                 raise TypeError(f"Unsupported type: {column_type}")
 
-        self._writer = pq.ParquetWriter("data/" + self.path, pa.schema(schema_fields))
+    def initWriter(self):
+        if hasattr(self, "_writer"):
+            return
+        self._writer = pq.ParquetWriter(
+            "data/" + self.path, pa.schema(self.schema_fields)
+        )
 
         self._writer.add_key_value_metadata(
             {
                 "time": str(int(datetime.now().timestamp() * 1000)),
-                "params": json.dumps(params2Save(params)),
+                "params": json.dumps(params2Save(self.params)),
                 "note": "",
+                "experiment_metadata": "",
             }
         )
 
     def save(self, data: T):
+        self.initWriter()
         self._writer.write(
             pa.RecordBatch.from_pydict(
                 cast(
@@ -92,7 +101,13 @@ class Saver[T: Mapping[str, object]]:
         )
 
     def saveNote(self, note: str):
+        self.initWriter()
         self._writer.add_key_value_metadata({"note": note})
 
+    def saveMetadata(self, key: str, value: Any):
+        self._writer.add_key_value_metadata({key: json.dumps(value)})
+
     def close(self):
+        if not hasattr(self, "_writer"):
+            return
         self._writer.close()

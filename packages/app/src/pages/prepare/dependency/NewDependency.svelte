@@ -44,7 +44,7 @@
 				break;
 		}
 
-		await dependency_controller.save();
+		await dependency_controller.saveToDisk();
 		await tick();
 		await Promise.all([
 			equipment_controller.updateImports(),
@@ -61,12 +61,14 @@
 			<button
 				class="absolute right-0 top-0 flex items-center h-full bg-blue-600 rounded aspect-square justify-center icon-btn-sm text-white"
 				aria-label="Add dependency"
-				onclick={install}>
+				onclick={install}
+			>
 				<Plus />
 			</button>
 		{:else}
 			<span
-				class="absolute right-0 top-0 flex items-center h-full bg-slate-300 rounded aspect-square justify-center icon-btn-sm text-white">
+				class="absolute right-0 top-0 flex items-center h-full bg-slate-300 rounded aspect-square justify-center icon-btn-sm text-white"
+			>
 				<Plus />
 			</span>
 		{/if}
@@ -75,7 +77,7 @@
 		<button
 			class={cn(
 				" border-slate-400   py-0.5",
-				source.type === type ? "bg-slate-300 font-semibold " : ""
+				source.type === type ? "bg-slate-300 font-semibold " : "",
 			)}
 			onclick={() => {
 				switch (type) {
@@ -94,10 +96,12 @@
 						source = { type: "path", path: "", editable: false };
 						break;
 				}
-			}}>{type}</button>
+			}}>{type}</button
+		>
 	{/snippet}
 	<div
-		class="fcol *:border *:border-slate-400 *:border-b-0 last:border-b last:border-b-slate-400">
+		class="fcol *:border *:border-slate-400 *:border-b-0 last:border-b last:border-b-slate-400"
+	>
 		<div class="frow items-stretch">
 			<div class="min-w-16 px-1 h-full flex items-center">
 				type<span class="text-red-500">*</span>
@@ -116,7 +120,8 @@
 				label="url"
 				bind:value={source.git}
 				placeholder="https:// ... (without .git)"
-				mandatory />
+				mandatory
+			/>
 			<InputField label="branch" bind:value={source.branch} />
 			<InputField label="subdirectory" bind:value={source.subdirectory} />
 		{:else if source.type === "path"}
@@ -128,7 +133,8 @@
 					{ key: "True", value: true },
 					{ key: "False", value: false },
 				]}
-				mandatory />
+				mandatory
+			/>
 		{/if}
 	</div>
 </div>

@@ -50,7 +50,7 @@ export class History {
         this.#query = ""
     }
 
-    getPrev() {
+    getNext() {
         if (this.search_index === -1) return ""
 
         // Set the search index to the lower index
@@ -66,7 +66,7 @@ export class History {
 
     }
 
-    getNext() {
+    getPrev() {
         if (this.search_index < this.search_cache.length - 1)
             this.search_index += 1
 
@@ -79,9 +79,7 @@ export class Cli {
     logs: Logs = $state(new Logs())
 
     follow_scroll: boolean = $state(true)
-    small_scroll_height: number = $state(0)
-    large_scroll_height: number = $state(0)
-
+    scroll_height: number = $state(0)
     #command: string = $state("")
 
     get command() {

@@ -16,7 +16,7 @@
 		await dependency_controller.update({
 			name: dependency.name,
 		});
-		await dependency_controller.save();
+		await dependency_controller.saveToDisk();
 		await tick();
 		await Promise.all([
 			equipment_controller.updateImports(),
@@ -29,7 +29,7 @@
 			name: dependency.name,
 			path: workspace_controller.path!,
 		});
-		await dependency_controller.save();
+		await dependency_controller.saveToDisk();
 		await tick();
 		await Promise.all([
 			equipment_controller.updateImports(),
@@ -39,7 +39,7 @@
 
 	async function toggleDriver() {
 		await dependency_controller.toggleDriver(dependency.name);
-		await dependency_controller.save();
+		await dependency_controller.saveToDisk();
 		await tick();
 		await Promise.all([
 			equipment_controller.updateImports(),
@@ -51,7 +51,8 @@
 <div class="bg-white rounded p-1 fcol-1">
 	<div class="flex items-center w-full justify-between">
 		<div
-			class="  font-medium border-l-3 border-slate-400 pl-1 min-h-6 flex items-center">
+			class="  font-medium border-l-3 border-slate-400 pl-1 min-h-6 flex items-center"
+		>
 			{dependency.name}
 		</div>
 		{#if experiment_controller.editable}
@@ -65,7 +66,8 @@
 				{:else}
 					<button
 						class={cn("icon-btn-sm text-white bg-blue-600")}
-						onclick={update}>
+						onclick={update}
+					>
 						<ArrowUp />
 					</button>
 				{/if}
@@ -74,16 +76,18 @@
 						dependency.has_driver
 							? " border-green-500 text-white bg-green-500"
 							: "border-slate-500 text-slate-500 line-through",
-						"border rounded px-1 box-border"
+						"border rounded px-1 box-border",
 					)}
-					onclick={toggleDriver}>
+					onclick={toggleDriver}
+				>
 					Driver / Script
 				</button>
 				{#if !dependency.uninstalling}
 					<button
 						aria-label="Remove dependency"
 						class="bg-red-600 icon-btn-sm text-white"
-						onclick={uninstall}>
+						onclick={uninstall}
+					>
 						<Trash2 />
 					</button>
 				{:else}

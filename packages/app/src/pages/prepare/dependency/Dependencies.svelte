@@ -13,7 +13,7 @@
 			await dependency_controller.update({
 				name: dependency.name,
 			});
-			await dependency_controller.save();
+			await dependency_controller.saveToDisk();
 			await tick();
 		}
 		await Promise.all([
@@ -37,14 +37,16 @@
 				{:else if experiment_controller.editable}
 					<button
 						class=" icon-btn-sm text-white bg-blue-600"
-						onclick={update}>
+						onclick={update}
+					>
 						<ArrowBigUpDash />
 					</button>
 				{/if}
 			{/if}
 		</div>
 		<div
-			class="fcol-2 overflow-y-scroll scrollbar-slate-400 -mr-2 grow pb-8">
+			class="fcol-2 overflow-y-scroll scrollbar-slate-400 -mr-2 grow pb-8"
+		>
 			{#if workspace_controller.status === "ready"}
 				{#each dependency_controller.dependencies as dependency}
 					<DependencyItem bind:dependency />

@@ -22,10 +22,12 @@
 			spellcheck="false"
 			autocomplete="off"
 			autocapitalize="off"
-			placeholder="Type your notes here..."></textarea>
+			placeholder="Type your notes here..."
+		></textarea>
 	{/if}
 	<span
-		class=" text-slate-50/30 absolute w-full h-full p-6 top-0 left-0 pointer-events-none">
+		class=" text-slate-50/30 absolute w-24 h-24 p-6 top-1/2 left-1/2 -translate-x-1/2 -translate-y-1/2 pointer-events-none"
+	>
 		<NotepadText />
 	</span>
 </div>
