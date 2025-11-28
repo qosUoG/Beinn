@@ -8,7 +8,7 @@
 	}, 1000);
 </script>
 
-<div class=" bg-slate-800 rounded relative grow">
+<div class=" bg-slate-800 rounded relative min-h-0 row-span-1">
 	{#if experiment_controller.experiment?.note !== undefined}
 		<textarea
 			bind:value={
@@ -18,12 +18,13 @@
 					saveNoteDebounced(value);
 				}
 			}
-			class=" resize-none w-full h-full outline-none focus:outline-none scrollbar-slate-400 text-white p-2 placeholder:text-white/80"
+			class=" resize-none w-full min-h-0 h-full outline-none focus:outline-none scrollbar-slate-400 text-white p-2 placeholder:text-white/80"
 			spellcheck="false"
 			autocomplete="off"
 			autocapitalize="off"
 			placeholder="Type your notes here..."
 		></textarea>
+	{:else}<div></div>
 	{/if}
 	<span
 		class=" text-slate-50/30 absolute w-24 h-24 p-6 top-1/2 left-1/2 -translate-x-1/2 -translate-y-1/2 pointer-events-none"

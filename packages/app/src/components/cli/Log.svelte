@@ -1,8 +1,10 @@
 <script lang="ts">
+    import { cn } from "$components/utils.svelte";
     import type { Cli } from "$controllers/cli.svelte";
     import { onMount } from "svelte";
 
-    let { cli = $bindable() }: { cli: Cli } = $props();
+    let { cli = $bindable(), class: clazz }: { cli: Cli; class?: string } =
+        $props();
 
     let hovering = $state(false);
     let element: HTMLDivElement | undefined = $state(undefined);
@@ -27,7 +29,10 @@
 <div
     role={"cli"}
     bind:this={element}
-    class="overflow-y-scroll fcol text-white min-h-0 h-full scrollbar-slate-300 w-full"
+    class={cn(
+        "overflow-y-scroll fcol text-white h-full scrollbar-slate-300 w-full",
+        clazz,
+    )}
     onmouseenter={() => {
         hovering = true;
     }}

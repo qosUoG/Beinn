@@ -55,7 +55,7 @@
     contenteditable="plaintext-only"
     bind:innerText={cli.command}
     bind:this={editable}
-    class=" text-white font-mono text-[11px] whitespace-break-spaces break-all min-h-4 focus:outline-none"
+    class=" text-white font-mono text-[11px] whitespace-break-spaces break-all min-h-4 focus:outline-none grow"
     spellcheck="false"
     autocapitalize="off"
     onkeydown={keyDownHandler}

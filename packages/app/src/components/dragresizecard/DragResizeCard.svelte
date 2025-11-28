@@ -47,7 +47,7 @@
 
 	const getStyle = (
 		v: "top" | "bottom" | null,
-		h: "left" | "right" | null
+		h: "left" | "right" | null,
 	) => {
 		let style = "absolute mx-1   ";
 		switch (h) {
@@ -79,6 +79,16 @@
 
 	let moving = $state(false);
 
+	function mouseupHandler() {
+		moving = false;
+		if (onmouseup) onmouseup(target!);
+	}
+
+	function mousedownHandler() {
+		moving = true;
+		if (onmousedown) onmousedown(target!);
+	}
+
 	onMount(() => {
 		if (target)
 			target.style = `top: ${top}px; left: ${left}px; width: ${width}px; height: ${height}px;`;
@@ -94,40 +104,41 @@
 	}}
 	onmousedown={(e) => {
 		if (onmousedown) onmousedown(target!);
-	}}>
+	}}
+>
 	<div
 		class={cn("cursor-ns-resize", getStyle("top", null))}
-		{@attach resize("top", null, parent, target, onresize)}>
-	</div>
+		{@attach resize("top", null, parent, target, onresize)}
+	></div>
 	<div
 		class={cn("cursor-ew-resize", getStyle(null, "right"))}
-		{@attach resize(null, "right", parent, target, onresize)}>
-	</div>
+		{@attach resize(null, "right", parent, target, onresize)}
+	></div>
 	<div
 		class={cn("cursor-ns-resize", getStyle("bottom", null))}
-		{@attach resize("bottom", null, parent, target, onresize)}>
-	</div>
+		{@attach resize("bottom", null, parent, target, onresize)}
+	></div>
 	<div
 		class={cn("cursor-ew-resize", getStyle(null, "left"))}
-		{@attach resize(null, "left", parent, target, onresize)}>
-	</div>
+		{@attach resize(null, "left", parent, target, onresize)}
+	></div>
 
 	<div
 		class={cn("cursor-nwse-resize", getStyle("top", "left"))}
-		{@attach resize("top", "left", parent, target, onresize)}>
-	</div>
+		{@attach resize("top", "left", parent, target, onresize)}
+	></div>
 	<div
 		class={cn("cursor-nesw-resize", getStyle("top", "right"))}
-		{@attach resize("top", "right", parent, target, onresize)}>
-	</div>
+		{@attach resize("top", "right", parent, target, onresize)}
+	></div>
 	<div
 		class={cn("cursor-nwse-resize", getStyle("bottom", "right"))}
-		{@attach resize("bottom", "right", parent, target, onresize)}>
-	</div>
+		{@attach resize("bottom", "right", parent, target, onresize)}
+	></div>
 	<div
 		class={cn("cursor-nesw-resize", getStyle("bottom", "left"))}
-		{@attach resize("bottom", "left", parent, target, onresize)}>
-	</div>
+		{@attach resize("bottom", "left", parent, target, onresize)}
+	></div>
 
 	<div
 		role={"chart move"}
@@ -135,9 +146,10 @@
 			"absolute top-1 left-1/2 -translate-x-1/2 rounded w-6 text-center h-6 py-1 text-slate-600 bg-slate-200 ",
 			moving
 				? "cursor-grabbing **:cursor-grabbing"
-				: "cursor-grab **:cursor-grab"
+				: "cursor-grab **:cursor-grab",
 		)}
-		{@attach move(parent, target, moving, onmove)}>
+		{@attach move(parent, target, onmove, mouseupHandler, mousedownHandler)}
+	>
 		<GripHorizontal />
 	</div>
 	{@render children?.()}

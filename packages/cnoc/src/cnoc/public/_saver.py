@@ -67,6 +67,8 @@ class Saver[T: Mapping[str, object]]:
             else:
                 raise TypeError(f"Unsupported type: {column_type}")
 
+        self.experiment_metadata: dict[str, Any] = {}
+
     def initWriter(self):
         if hasattr(self, "_writer"):
             return
@@ -106,7 +108,10 @@ class Saver[T: Mapping[str, object]]:
 
     def saveMetadata(self, key: str, value: Any):
         self.initWriter()
-        self._writer.add_key_value_metadata({key: json.dumps(value)})
+        self.experiment_metadata[key] = value
+        self._writer.add_key_value_metadata(
+            {"experiment_metadata": json.dumps(self.experiment_metadata)}
+        )
 
     def close(self):
         if not hasattr(self, "_writer"):

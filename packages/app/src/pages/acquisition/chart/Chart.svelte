@@ -14,20 +14,18 @@
 		parent = $bindable(),
 	}: { chart: Chart; parent: HTMLElement } = $props();
 
-	let target: HTMLDivElement | undefined = $state(undefined);
-
 	$effect(() => {
 		if (
 			chart.config.title !==
 			experiment_controller.experiment!.chart_in_focus
 		)
-			target!.style.zIndex = "0";
+			chart.element!.style.zIndex = "0";
 	});
 </script>
 
 <DragResizeCard
 	bind:parent
-	bind:target
+	bind:target={chart.element}
 	top={chart.top}
 	left={chart.left}
 	width={chart.width}
@@ -46,7 +44,8 @@
 		experiment_controller.experiment!.chart_in_focus = chart.config.title;
 		target.style.zIndex = "10";
 	}}
-	class="bg-white rounded border-slate-800 shadow-lg">
+	class="bg-white rounded border-slate-800 shadow-lg"
+>
 	<div class="fcol-2">
 		<div class="frow justify-between p-1">
 			<div class="title bg-slate-200 wrapped w-fit">
@@ -58,12 +57,13 @@
 						"border border-slate-400 px-2 h-full rounded text-[11px]",
 						chart.auto_axis
 							? "bg-slate-400 text-slate-50 cursor-default"
-							: "text-slate-400"
+							: "text-slate-400",
 					)}
 					onclick={() => {
 						if (chart.auto_axis) return;
 						chart.auto_axis = true;
-					}}>
+					}}
+				>
 					AUTO AXIS
 				</button>
 				<button
@@ -71,21 +71,24 @@
 						"icon-btn-sm border border-slate-400  rounded ",
 						chart.tooltip_mode
 							? "bg-slate-400 text-slate-50"
-							: "text-slate-400"
+							: "text-slate-400",
 					)}
 					onclick={() => {
 						chart.tooltip_mode = !chart.tooltip_mode;
-					}}>
+					}}
+				>
 					<Icon iconNode={crosshairPlus} />
 				</button>
 				<button
 					class="icon-btn-sm bg-slate-400 rounded text-slate-50"
 					onclick={() => {
-						if (!chart.showing && target)
-							target.style.height = `${chart.height}px`;
-						else if (target) target.style.height = "32px";
+						if (!chart.showing && chart.element)
+							chart.element.style.height = `${chart.height}px`;
+						else if (chart.element)
+							chart.element.style.height = "32px";
 						chart.showing = !chart.showing;
-					}}>
+					}}
+				>
 					{#if chart.showing}
 						<Eye />
 					{:else}
@@ -96,7 +99,8 @@
 					class="icon-btn-sm bg-slate-400 rounded text-slate-50"
 					onclick={() => {
 						chart.is_drawing_points = !chart.is_drawing_points;
-					}}>
+					}}
+				>
 					{#if chart.is_drawing_points}
 						<Circle />
 					{:else}

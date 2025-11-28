@@ -15,13 +15,13 @@ export function hover(): Attachment<HTMLElement> {
 export function move(
     parent: HTMLElement,
     target: HTMLElement,
-    moving: boolean,
-
     onmove: ({ top, left }: { top: number, left: number }) => void,
+    onmouseup?: () => void,
+    onmousedown?: () => void
 ): Attachment<HTMLElement> {
     return (e) => {
         const r = {
-
+            moving: false,
             t: 0,
             l: 0,
             x: 0,
@@ -36,7 +36,8 @@ export function move(
 
 
             const cancel_mousedown = on(e, "mousedown", (m) => {
-                moving = true;
+                m.stopPropagation()
+                r.moving = true;
                 const { left, top } = target.getBoundingClientRect();
                 const { left: parent_left, top: parent_top } = parent.getBoundingClientRect();
                 r.t = top - parent_top
@@ -44,17 +45,18 @@ export function move(
                 r.x = m.clientX;
                 r.y = m.clientY;
 
+                setTimeout(() => {
+                    if (onmousedown) onmousedown()
+                })
 
             });
 
             const cancel_mousemove = on(window, "mousemove", (m) => {
-                if (!moving) return;
+
+                if (!r.moving) return;
+                m.stopPropagation()
                 let top = r.t + m.clientY - r.y;
                 let left = r.l + m.clientX - r.x;
-
-                if (top < 8) top = 8
-                if (left < 8) left = 8
-
 
 
                 target.style.top = `${top}px`;
@@ -67,8 +69,14 @@ export function move(
 
             });
 
-            const cancel_mouseup = on(window, "mouseup", () => {
-                moving = false;
+            const cancel_mouseup = on(e, "mouseup", (m) => {
+                m.stopPropagation()
+                r.moving = false;
+                console.log(r)
+                setTimeout(() => {
+
+                    if (onmouseup) onmouseup()
+                })
             });
 
             return () => {

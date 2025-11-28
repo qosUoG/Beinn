@@ -22,6 +22,7 @@ export class Chart<T extends ChartConfigs = ChartConfigs> {
     }
 
     // width and height
+    element: HTMLDivElement | undefined = $state(undefined)
     top: number
     left: number
     #width = $state(DEFAULT_WIDTH)

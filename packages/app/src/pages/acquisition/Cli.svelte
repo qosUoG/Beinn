@@ -1,13 +1,8 @@
 <script lang="ts">
 	import { cn, getClickOutsideAttachment } from "$components/utils.svelte";
 	import { experiment_controller } from "$controllers/experiment.svelte";
-	import {
-		ChevronsDown,
-		Maximize2,
-		SquareTerminal,
-		Terminal,
-	} from "@lucide/svelte";
-	import { onMount } from "svelte";
+	import { ChevronsDown, Maximize2 } from "@lucide/svelte";
+
 	import CliModal from "./CliModal.svelte";
 
 	import Cli from "$components/cli/Cli";
@@ -19,17 +14,8 @@
 	let show_cli = $state(false);
 </script>
 
-<div class=" grow bg-slate-800 rounded p-2 relative">
-	<div class="absolute top-1 right-1 frow-2">
-		<button
-			class=" rounded border border-slate-200 icon-btn-sm text-white"
-			onclick={(e) => {
-				show_cli = !show_cli;
-				e.stopPropagation();
-			}}
-		>
-			<Maximize2 />
-		</button>
+<div class="  bg-slate-800 rounded relative h-full row-span-1">
+	<div class="absolute top-1 right-4 frow-2">
 		<button
 			class={cn(
 				"rounded border border-slate-200 icon-btn-sm ",
@@ -53,15 +39,27 @@
 				<ChevronsDown />
 			</div>
 		</button>
+		<button
+			class=" rounded border border-slate-200 bg-slate-200 icon-btn-sm"
+			onclick={(e) => {
+				show_cli = !show_cli;
+				e.stopPropagation();
+			}}
+		>
+			<Maximize2 />
+		</button>
 	</div>
-	<div class="fcol w-full min-h-0 mt-8">
-		<Cli.Log bind:cli={experiment_controller.experiment!.cli} />
+	<div class="fcol w-full h-full">
+		<Cli.Log
+			bind:cli={experiment_controller.experiment!.cli}
+			class="pl-2 pt-8"
+		/>
 
 		{#if experiment_controller.experiment!.state === "looping" || experiment_controller.experiment!.state.startsWith("paus")}
 			<div
-				class="text-white font-mono text-[11px] whitespace-pre-wrap ml-1 mb-1.5 self-end"
+				class="text-white font-mono text-[11px] whitespace-pre-wrap frow"
 			>
-				{`>>>`}<Cli.Input
+				{`>>> `}<Cli.Input
 					bind:cli={experiment_controller.experiment!.cli}
 					onEnter={() => {
 						experiment_controller.experiment!.interpret();
