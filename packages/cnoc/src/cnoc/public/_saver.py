@@ -10,49 +10,43 @@ from ._utils import DataclassInstance
 from ._params import AllParamSaveType, params2Save
 
 
-class Metadata(TypedDict):
-    time: int
-    params: dict[str, AllParamSaveType | dict[str, AllParamSaveType]]
-    note: str
-    # columns: list[str]
+class Metadata:
+    def __init__(self, dir: str):
+        self._dir = dir
+
+    @property
+    def params(self) -> DataclassInstance:
+        return self.params
+
+    @params.setter
+    def _(self, params: DataclassInstance):
+        self.params = params
+        self._saveMetadata()
+
+    @property
+    def note(self) -> str:
+        return self.note
+
+    @note.setter
+    def _(self, note: str):
+        self.note = note
+        self._saveMetadata()
+
+    def _saveMetadata(self):
+        with open(dir + "/" + "metadata.json", "w") as f:
+            f.write(
+                json.dumps(
+                    {"params": json.dumps(params2Save(self.params)), "note": self.note}
+                )
+            )
 
 
 class Saver[T: Mapping[str, object]]:
-    def __init__(self, key: str, params: DataclassInstance, schema: type[T]):
-        # All space characters are replaced with underscores
-        key = key.replace(" ", "_")
+    def __init__(self, dir: str, key: str, params: DataclassInstance, schema: type[T]):
+        self.dir = dir
+        self.path = key.replace(" ", "_") + ".parquet"
 
-        self.params = params
-
-        # Find the maximum existing subscript for this path
-        maximum = -1
-        for existing_key in os.listdir("data"):
-            existing_key = existing_key.replace(".parquet", "")
-
-            if not existing_key.startswith(key):
-                continue
-
-            # Without any number subscripts
-            if existing_key == key:
-                maximum = max(maximum, 0)
-                continue
-
-            # Parse the number after the path
-            maybe_number: int
-            try:
-                maybe_number = int(existing_key.replace(key, ""))
-            except ValueError:
-                # If not a number, then it is not the same path
-                continue
-
-            maximum = max(maybe_number, maximum)
-
-        if maximum >= 0:
-            self.path = f"{key}{maximum + 1}.parquet"
-        else:
-            self.path = key + ".parquet"
-
-        self._note = ""
+        # path = str(int(datetime.now().timestamp() * 1000))
 
         # Construct the schema object from Typeddict
         self.schema_fields: list[pa.Field[Any]] = []
@@ -67,26 +61,14 @@ class Saver[T: Mapping[str, object]]:
             else:
                 raise TypeError(f"Unsupported type: {column_type}")
 
-        self.experiment_metadata: dict[str, Any] = {}
-
-    def initWriter(self):
-        if hasattr(self, "_writer"):
-            return
         self._writer = pq.ParquetWriter(
-            "data/" + self.path, pa.schema(self.schema_fields)
+            "data/" + self.dir + "/" + self.path, pa.schema(self.schema_fields)
         )
 
-        self._writer.add_key_value_metadata(
-            {
-                "time": str(int(datetime.now().timestamp() * 1000)),
-                "params": json.dumps(params2Save(self.params)),
-                "note": "",
-                "experiment_metadata": "",
-            }
-        )
+        self.metadata = Metadata(self._writer)
+        self.metadata.params = params
 
     def save(self, data: T):
-        self.initWriter()
         self._writer.write(
             pa.RecordBatch.from_pydict(
                 cast(
@@ -102,18 +84,5 @@ class Saver[T: Mapping[str, object]]:
             )
         )
 
-    def saveNote(self, note: str):
-        if hasattr(self, "_writer"):
-            self._writer.add_key_value_metadata({"note": note})
-
-    def saveMetadata(self, key: str, value: Any):
-        self.experiment_metadata[key] = value
-        if hasattr(self, "_writer"):
-            self._writer.add_key_value_metadata(
-                {"experiment_metadata": json.dumps(self.experiment_metadata)}
-            )
-
     def close(self):
-        if not hasattr(self, "_writer"):
-            return
         self._writer.close()
