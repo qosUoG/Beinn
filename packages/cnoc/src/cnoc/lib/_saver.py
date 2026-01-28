@@ -1,5 +1,5 @@
-from typing import Any, Mapping, cast
-from .manager import Manager
+from typing import Any, Callable, Coroutine, Mapping, cast
+
 import numpy as np
 import pyarrow as pa
 from websockets import ServerConnection
@@ -55,8 +55,13 @@ class _PyArrow:
 
 
 class Saver[T: Mapping[str, object]]:
-    def __init__(self, dir: str, title: str, schema: type[T], manager: Manager):
-        self._manager = manager
+    def __init__(
+        self,
+        dir: str,
+        title: str,
+        schema: type[T],
+        run_coroutine_threadsafe: Callable[[Coroutine[Any, Any, Any]], None],
+    ):
         self._schema = _TypedDict2Schema(schema)
 
         self._history = _PyArrow(self._schema)
@@ -69,6 +74,7 @@ class Saver[T: Mapping[str, object]]:
             "title": title,
             "config": _TypedDict2Config(schema),
         }
+        self._run_coroutine_threadsafe = run_coroutine_threadsafe
 
     def save(self, data: T):
         batch = pa.RecordBatch.from_pydict(
@@ -84,7 +90,7 @@ class Saver[T: Mapping[str, object]]:
             )
         )
 
-        self._manager._run_coroutine_threadsafe(self._save(batch))  # pyright: ignore[reportPrivateUsage]
+        self._run_coroutine_threadsafe(self._save(batch))  # pyright: ignore[reportPrivateUsage]
 
     async def _save(self, batch: pa.RecordBatch):
         # Write to history

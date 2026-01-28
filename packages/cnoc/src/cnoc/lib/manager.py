@@ -56,7 +56,7 @@ class Manager:
     def createSaver[T: Mapping[str, object]](
         self, title: str, schema: type[T]
     ) -> Saver[T]:
-        saver = Saver[T](self._data_dir, title, schema, self)
+        saver = Saver[T](self._data_dir, title, schema, self._run_coroutine_threadsafe)
         self._savers[title] = saver
         return saver
 

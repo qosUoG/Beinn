@@ -1,6 +1,5 @@
 from dataclasses import dataclass
 import math
-from random import random
 from typing import override
 from cnoc import EquipmentABC, p, P
 
@@ -116,9 +115,6 @@ class ExampleEquipment(EquipmentABC[Params]):
         return input
 
     # While you may implement everything with @property, I like to define read only with methods and treat them as instead
-
-    def measureTemp(self):
-        return random() * 100 * self._power
 
     @override
     def cleanup(self):

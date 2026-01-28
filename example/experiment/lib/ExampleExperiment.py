@@ -8,7 +8,7 @@ from typing import Callable, TypedDict, override
 import time
 
 
-from cnoc import charts, p, Saver, ExperimentABC, Manager, ExperimentEnded, P
+from cnoc import p, ExperimentABC, Manager, P
 
 from examplelib.ExampleDriver import ExampleEquipment
 import numpy as np
@@ -59,32 +59,12 @@ class ExampleExperiment(ExperimentABC[Params]):
         # self.inputs = numpy.arange(self.params["intparam"].value)
 
         # # # After the params, instantiate charts and sql savers as needed
-        self.scatter_plot1: charts.Scatter = charts.Scatter(
-            title="Example Scatter Plot1",
-            x_axis="index",
-            x_name="index",
-            y_axis="C",
-            y_names=["t1", "t2", "t3"],
-            mode="append",
-        )
-        manager.createChart(self.scatter_plot1)
-        self.scatter_plot2: charts.Scatter = charts.Scatter(
-            title="Example Scatter Plot2",
-            x_axis="index",
-            x_name="index",
-            y_axis="C",
-            y_names=["t1", "t2", "t3"],
-            mode="append",
-        )
-        manager.createChart(self.scatter_plot2)
-        self.saver = Saver[SaverRowType]("temp_data", self.params, SaverRowType)
+        self._saver = manager.createSaver("plot_1", SaverRowType)
 
-        manager.createSaver(self.saver)
-
-        self.saver.saveMetadata(
-            self.params.composite.compinstanceequipmentparam.value,
-            self.params.composite.compinstanceequipmentparam.instance.snapshot(),
-        )
+        # self.saver.saveMetadata(
+        #     self.params.composite.compinstanceequipmentparam.value,
+        #     self.params.composite.compinstanceequipmentparam.instance.snapshot(),
+        # )
 
         # self.xyplot2: XY = manager.createChart(
         #     XY,
@@ -124,22 +104,9 @@ class ExampleExperiment(ExperimentABC[Params]):
         v1 = random.random()
         v2 = random.random()
         v3 = random.random()
-        self.scatter_plot1.plot(
-            {
-                "index": [index],
-                "t1": [v1],
-                "t2": [v2],
-                "t3": [v3],
-            }
-        )
-        self.saver.save(
-            {
-                "index": [index],
-                "t1": [v1],
-                "t2": [v2],
-                "t3": np.array([v3]),
-                "i2": [index * 2],
-            }
+
+        self._saver.save(
+            {"index": [index], "t1": [v1], "t2": [v2], "t3": np.array([v3]), "i2": [3]}
         )
         # print("experiment loop", index)
 
