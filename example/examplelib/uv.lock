@@ -5,7 +5,7 @@ requires-python = ">=3.13"
 [[package]]
 name = "cnoc"
 version = "0.1.0"
-source = { git = "https://github.com/qosUoG/Beinn?subdirectory=packages%2Fcnoc#2a82a611ea90e7cb3ebd0ad38be8c77e4ce6c685" }
+source = { git = "https://github.com/qosUoG/Beinn?subdirectory=packages%2Fcnoc#541074e74d9b4858a8525ad3966753e52cd2f4d5" }
 dependencies = [
     { name = "numpy" },
     { name = "pyarrow" },
