@@ -1,15 +1,13 @@
-from .public.equipment import EquipmentABC
-from .public.exceptions import ExperimentEnded
-from .public.experiment import ExperimentABC
-from .public.params import p, P
+from .lib.equipment import EquipmentABC
+from .lib.exceptions import ExperimentEnded
+from .lib.experiment import ExperimentABC
+from .lib.params import p, P
 
-from .public.manager import Manager
-from .public import charts
-from .public.saver import Saver
+from .lib.manager import Manager
+from .lib.saver import Saver
 
 
 __all__ = [
-    "charts",
     "EquipmentABC",
     "ExperimentEnded",
     "ExperimentABC",
