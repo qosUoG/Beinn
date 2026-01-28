@@ -3,6 +3,7 @@ from contextlib import (
     redirect_stderr,
     redirect_stdout,
 )
+import datetime
 import importlib
 from io import StringIO
 
@@ -13,19 +14,17 @@ from traceback import print_tb
 from urllib.parse import unquote
 import json
 from typing import Any, Callable, TypedDict, cast
+from ..lib.saver import Saver
 from websockets import ConnectionClosed, Request, ServerConnection
+from ..lib.exceptions import ExperimentEnded
 
-
-from ..public.charts._chart import ChartABC
-from ..public.exceptions import ExperimentEnded
-
-from ..public.manager import Manager
+from ..lib.manager import Manager
 
 from .utils import preloadLocal
 
-from ..public.experiment import ExperimentABC
+from ..lib.experiment import ExperimentABC
 
-from ..public.equipment import EquipmentABC
+from ..lib.equipment import EquipmentABC
 from websockets.asyncio.server import serve
 
 
@@ -38,7 +37,7 @@ class Runner:
         self,
         experiment: ExperimentABC[Any],
         manager: Manager,
-        equipments: EquipmentABC[Any],
+        equipments: dict[str, EquipmentABC[Any]],
         onLoopStart: Callable[[int], None],
         onPause: Callable[[], None],
         onEnd: Callable[[bool], None],
@@ -82,10 +81,7 @@ class Runner:
         self._should_run.set()
 
     def saveNote(self, note: str):
-        with self._experiment_lock:
-            if self.manager.savers:
-                for saver in self.manager.savers:
-                    saver.saver.saveNote(note)
+        self.manager._metadata._note = note  # pyright: ignore[reportPrivateUsage]
 
     def interpret(self, command: str, name: str | None = None):
         try:
@@ -166,37 +162,25 @@ class Runner:
     def close(self):
         self.stop()
         self.experiment.cleanup()
-        for saver in self.manager.savers:
-            saver.saver.close()
+        for saver in self.manager._savers.values():  # pyright: ignore[reportPrivateUsage]
+            saver._saver.close()  # pyright: ignore[reportPrivateUsage]
 
 
-class ChartWsHandle:
-    def __init__(
-        self,
-        chart: ChartABC,
-        ws: ServerConnection,
-    ):
-        self.chart = chart
-        self.ws = ws
-
-    def send(self, data: bytes):
-        asyncio.run_coroutine_threadsafe(self.ws.send(data), self.ws.loop)
-
-    async def handler(self):
-        future: asyncio.Future[Any] = asyncio.Future()
-        while True:
-            try:
-                self.chart.subscribe(self.send)
-                await future
-            except ConnectionClosed:
-                pass
-            except Exception as e:
-                print(f"Error in chart websocket handler: {e}", flush=True)
-                print(e, flush=True)
-                print_tb(sys.exc_info()[2])
-            finally:
-                self.chart.unsubscribe()
-                future.cancel()
+async def chart_handler(saver: Saver[Any], ws: ServerConnection):
+    future: asyncio.Future[Any] = asyncio.Future()
+    while True:
+        try:
+            saver._saver._subscribe(ws)  # pyright: ignore[reportPrivateUsage]
+            await future
+        except ConnectionClosed:
+            pass
+        except Exception as e:
+            print(f"Error in chart websocket handler: {e}", flush=True)
+            print(e, flush=True)
+            print_tb(sys.exc_info()[2])
+        finally:
+            saver._saver._unsubscribe()  # pyright: ignore[reportPrivateUsage]
+            future.cancel()
 
 
 class ExperimentWsHandle:
@@ -214,7 +198,9 @@ class ExperimentWsHandle:
         self.runner = Runner(
             experiment, manager, equipments, self.onLoopStart, self.onPause, self.onEnd
         )
-        asyncio.create_task(asyncio.to_thread(self.runner.run))
+        self.manager = manager
+        self.manager._run_coroutine_threadsafe(asyncio.to_thread(self.runner.run))  # pyright: ignore[reportPrivateUsage]
+
         self.runner.start()
         try:
             async for message in ws:
@@ -251,23 +237,20 @@ class ExperimentWsHandle:
     # START OF METHODS CALLED BY RUNNER
 
     def onLoopStart(self, loop_count: int):
-        asyncio.run_coroutine_threadsafe(
+        self.manager._run_coroutine_threadsafe(  # pyright: ignore[reportPrivateUsage]
             self.ws.send(json.dumps({"event": "loop_start", "loop_count": loop_count})),
-            self.ws.loop,
         )
 
     def onPause(self):
-        asyncio.run_coroutine_threadsafe(
-            self.ws.send(json.dumps({"event": "paused"})), self.ws.loop
+        self.manager._run_coroutine_threadsafe(  # pyright: ignore[reportPrivateUsage]
+            self.ws.send(json.dumps({"event": "paused"}))
         )
 
     def onEnd(self, loop_ended: bool):
-        asyncio.run_coroutine_threadsafe(
-            self.ws.send(json.dumps({"event": "ended", "loop_ended": loop_ended})),
-            self.ws.loop,
+        self.manager._run_coroutine_threadsafe(  # pyright: ignore[reportPrivateUsage]
+            self.ws.send(json.dumps({"event": "ended", "loop_ended": loop_ended}))
         )
-
-        asyncio.run_coroutine_threadsafe(self.ws.close(), self.ws.loop)
+        self.manager._run_coroutine_threadsafe(self.ws.close())  # pyright: ignore[reportPrivateUsage]
 
     # END OF METHODS CALLED BY RUNNER
 
@@ -279,12 +262,12 @@ class AsyncApp:
         experiment: ExperimentABC[Any],
         equipments: dict[str, EquipmentABC[Any]],
     ):
-        self.task: asyncio.Task[Any] | None = None
         self.manager = manager
         self.experiment = experiment
         self.equipments = equipments
+
+        self.task: asyncio.Task[Any] | None = None
         self.wss: list[ServerConnection] = []
-        self._experiment_ws_handle: ExperimentWsHandle | None = None
 
     async def startServer(self):
         server = await serve(self.handler, "localhost", 8080)
@@ -296,27 +279,33 @@ class AsyncApp:
 
         # Multiplex
         if path == "/experiment":
-            self.experiment_ws_handle = ExperimentWsHandle()
-            await self.experiment_ws_handle.handler(
-                ws, self.experiment, self.manager, self.equipments
-            )
+            ws_handle = ExperimentWsHandle()
+
+            await ws_handle.handler(ws, self.experiment, self.manager, self.equipments)
+
+            await ws.close()
             self.wss.remove(ws)
-            for ws in self.wss:
-                await ws.close()
-            if self.task:
-                self.task.cancel()
 
         elif path.startswith("/chart"):
             # unquote.split => ["", "chart", "<chart_title>"]
-            await ChartWsHandle(
-                self.manager.charts[unquote(path).split("/")[2]], ws
-            ).handler()
+            await chart_handler(
+                self.manager._savers[unquote(path).split("/")[2]],  # pyright: ignore[reportPrivateUsage]
+                ws,
+            )
             self.wss.remove(ws)
 
 
 class App:
     def __init__(self):
-        self.manager = Manager()
+        def parseSave(save: Save):
+            name = save["name"]
+            module = save["module"]
+            cls = save["cls"]
+            params = save["params"]
+            instance = getattr(importlib.reload(importlib.import_module(module)), cls)()
+
+            return name, instance, params
+
         self.equipments: dict[str, EquipmentABC[Any]] = {}
 
         # Load equipments
@@ -346,15 +335,19 @@ class App:
                 params, self.equipments, self.experiment.params.__class__
             )
 
-    def initiate(self):
-        self.experiment.start(self.manager)
-
     def close(self):
         self.experiment.cleanup()
-        for saver in self.manager.savers:
-            saver.saver.close()
+        self.manager._close()  # pyright: ignore[reportPrivateUsage]
 
     async def start(self):
+        self.manager = Manager(
+            int(datetime.datetime.now().timestamp() * 1000),
+            asyncio.get_running_loop(),
+            self.experiment.params,
+        )
+
+        self.experiment.start(self.manager)
+
         async_app = AsyncApp(self.manager, self.experiment, self.equipments)
 
         await async_app.startServer()
@@ -365,10 +358,10 @@ class App:
                 {
                     "event": "started",
                     "expected_loop_count": self.manager.expected_loop_count,
-                    "chart_configs": {
-                        k: v.getConfig() for k, v in self.manager.charts.items()
+                    "saver_configs": {
+                        k: v._saver.config  # pyright: ignore[reportPrivateUsage]
+                        for k, v in self.manager._savers.items()  # pyright: ignore[reportPrivateUsage]
                     },
-                    "saver_configs": [s.saver.path for s in self.manager.savers],
                 }
             ),
             flush=True,
@@ -393,24 +386,11 @@ class Save(TypedDict):
     params: dict[str, Any]
 
 
-def parseSave(save: Save):
-    name = save["name"]
-    module = save["module"]
-    cls = save["cls"]
-    params = save["params"]
-    instance = getattr(importlib.reload(importlib.import_module(module)), cls)()
-
-    return name, instance, params
-
-
 def main():
     app: App | None = None
     try:
         preloadLocal()
         app = App()
-
-        # Initiate the experiment
-        app.initiate()
 
     except Exception as e:
         if app:

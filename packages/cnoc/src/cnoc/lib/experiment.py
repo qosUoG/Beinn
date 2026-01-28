@@ -44,6 +44,7 @@ class ExperimentABC[T: DataclassInstance](ABC):
     def start(self, manager: Manager) -> None:
         raise NotImplementedError
 
+    # In another thread
     @abstractmethod
     def loop(self, index: int, shouldStop: Callable[[], bool]) -> None:
         raise NotImplementedError

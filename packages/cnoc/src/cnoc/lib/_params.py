@@ -394,8 +394,6 @@ def dict2Params[T: DataclassInstance](
                 return Select.Float.fromDict(v)
             case "instance.equipment":
                 return Equipment[EquipmentABC[Any]].fromDict(v, equipments)
-            case _:
-                raise ValueError(f"Invalid type {v['type']}")
 
     res = {}
     for k, v in data.items():

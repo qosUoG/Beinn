@@ -9,8 +9,8 @@ from typing import Any, TypedDict
 from .utils import Runtime, preloadLocal
 
 
-from ..public.equipment import EquipmentABC
-from ..public.experiment import ExperimentABC
+from ..lib.equipment import EquipmentABC
+from ..lib.experiment import ExperimentABC
 
 runtime = Runtime()
 

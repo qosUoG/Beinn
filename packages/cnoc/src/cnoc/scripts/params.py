@@ -5,7 +5,7 @@ from traceback import print_tb
 from .utils import preloadLocal, Runtime
 
 
-from ..public._params import params2Dict
+from ..lib._params import params2Dict
 
 runtime = Runtime()
 
