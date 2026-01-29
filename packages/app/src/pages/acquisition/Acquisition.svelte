@@ -39,15 +39,11 @@
 				y: m.clientY,
 			};
 		}
-
-		console.log($state.snapshot(move_context));
 	}
 
 	function mouseupHandler(m: MouseEvent) {
 		move_context.moving = false;
 		move_context.chart_positions = {};
-
-		console.log($state.snapshot(move_context));
 	}
 
 	function mousemoveHandler(m: MouseEvent) {
@@ -90,16 +86,14 @@
 			onmousedown={mousedownHandler}
 			onmouseup={mouseupHandler}
 			onmousemove={mousemoveHandler}
-			role={"chart panning"}
-		>
+			role={"chart panning"}>
 			{#if experiment_controller.experiment}
 				{#each Object.keys(experiment_controller.experiment.charts) as name}
 					<Chart
 						bind:chart={
 							experiment_controller.experiment.charts[name]
 						}
-						bind:parent
-					/>
+						bind:parent />
 				{/each}
 			{/if}
 		</div>

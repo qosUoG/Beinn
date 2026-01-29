@@ -8,6 +8,7 @@ export type ChartConfig = {
 
 export type toWorkerChartMessages =
     | { command: "set_config", payload: { config: ChartConfig } }
+    | { command: "x_key", payload: { x_key: string } }
     | { command: "destroy", payload?: undefined }
 
     | { command: "ws_open", payload?: undefined }

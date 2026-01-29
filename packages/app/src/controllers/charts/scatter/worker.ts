@@ -1,7 +1,7 @@
 import { Chart, type ChartConfiguration, type Point } from "chart.js/auto";
 import type { ChartConfig, fromWorkerChartMessages, toWorkerChartMessages } from "../types";
 import { cnoc_url, deepCopy } from "$lib/utils";
-import { RecordBatchReader, tableFromIPC, Table } from "apache-arrow";
+import { tableFromIPC } from "apache-arrow";
 
 
 // Worker local variables
@@ -10,9 +10,13 @@ let _canvas: OffscreenCanvas | undefined = undefined
 
 
 let _config: ChartConfig | undefined = undefined
+let _x_key: string | undefined = undefined
+
 let _ws: WebSocket | undefined = undefined
 
+let _columns: Record<string, number[]> = {}
 let _datasets: { data: { x: number, y: number }[], label: string }[] = []
+
 
 function postErr(message: string) {
     postMessage({ command: "error", payload: { error: message } } satisfies Extract<fromWorkerChartMessages, { command: "error" }>)
@@ -72,6 +76,7 @@ type Handler = {
 }
 const handlers: Handler = {
     set_config: function () { },
+    x_key: function () { },
     destroy: function () { },
     ws_open: function () { },
     ws_close: function () { },
@@ -89,9 +94,18 @@ const handlers: Handler = {
 handlers.set_config = function set_config({ config }) {
     _config = config
     _chart_config.data.datasets = config.columns.map(label => ({ data: [], label }))
+    _columns = {}
+    for (const column of config.columns) {
+        _columns[column] = []
+    }
+    _datasets = config.columns.map(label => ({ data: [], label }))
+
     // _chart_config.options.scales.x.title.text = _scatter_config.x_axis
     // _chart_config.options.scales.y.title.text = _scatter_config.y_axis
-    _datasets = config.columns.map(label => ({ data: [], label }))
+}
+
+handlers.x_key = function x_key({ x_key }) {
+    _x_key = x_key
 }
 
 handlers.destroy = function clear() {
@@ -100,80 +114,33 @@ handlers.destroy = function clear() {
     _canvas = undefined
 }
 
-let table: undefined | Table = undefined
-
 handlers.ws_open = function ws_open() {
     if (_ws !== undefined && (_ws.readyState === WebSocket.OPEN || _ws.readyState === WebSocket.CONNECTING))
         postErr("Scatter worker: WebSocket is already connected")
 
-    post(_config)
-
-    _ws = new WebSocket(cnoc_url + "chart/" + _config.title)
+    _ws = new WebSocket(cnoc_url + "chart/" + _config!.title)
     _ws.binaryType = "arraybuffer"
 
     _ws.onclose = (event) => {
         post({ command: "ws_closed" })
     }
 
-
     _ws.onmessage = (event: MessageEvent<ArrayBuffer>) => {
-        const y_length = _chart_config.data.datasets.length
+        const table = tableFromIPC(event.data)
 
-        const new_table = tableFromIPC(event.data)
-        if (table === undefined) {
-            table = new_table
-        } else {
-            table = table.concat(new_table)
-        }
+        const x_column = table.getChild(_x_key!)!
 
-        console.log(table)
+        for (const column of table.schema.fields) {
+            for (let i = 0; i < table.getChild(column.name)!.length; i++) {
+                // Update the columns
+                _columns[column.name].push(Number(table.getChild(column.name)!.get(i)!))
 
-        const frames_bytes = new DataView(event.data)
-
-        function* parseFrames(frames_bytes: DataView<ArrayBuffer>) {
-            let offset = 0
-
-            while (offset < frames_bytes.byteLength) {
-                // yield frame by frame
-
-                // Get the x value
-                const res: (number | null)[] = [frames_bytes.getFloat64(offset, true)]
-                offset += 8
-
-                // Get the y values one by one
-                for (let i = 0; i < y_length; i++) {
-                    const has_y = frames_bytes.getFloat64(offset, true)
-                    offset += 8
-
-                    if (has_y !== 0) {
-                        res.push(frames_bytes.getFloat64(offset, true))
-                        offset += 8
-                    } else
-                        res.push(null)
-                }
-                // Yield frame
-                yield res
-            }
-        }
-
-        let checked = false
-        for (const frame of parseFrames(frames_bytes)) {
-            if (!checked) {
-                // Frame size is assumed to be right, as such only size of the first frame is checked
-                if (frame.length !== y_length + 1) throw Error("Frame size does not match with the config of the chart")
-
-                checked = true
+                // Update the datasets
+                if (column.name === _x_key) continue
+                const dataset = _datasets.find(dataset => dataset.label === column.name)!
+                dataset.data.push({ x: Number(x_column.get(i)!), y: Number(table.getChild(column.name)!.get(i)!) })
             }
 
-            const x = frame[0] as number
-
-            // append y value to each dataset
-            for (let frame_y_index = 1; frame_y_index < frame.length; frame_y_index++) {
-                const y = frame[frame_y_index]
-                if (y === null) continue
-
-                _datasets[frame_y_index - 1].data.push({ x, y })
-            }
         }
 
         decimate_datasets_and_update_chart()
@@ -182,6 +149,8 @@ handlers.ws_open = function ws_open() {
 
 handlers.ws_close = function ws_close() {
     if (_ws === undefined) return
+    _datasets = []
+    _columns = {}
     _ws.close()
 }
 
@@ -197,7 +166,7 @@ handlers.mount = function mount({ canvas, width, height }) {
     }
 
     _chart = new Chart(_canvas as unknown as HTMLCanvasElement, deepCopy(_chart_config))
-    _chart.data.datasets = _datasets
+    decimate_datasets_and_update_chart()
     _chart!.update()
 }
 
@@ -373,20 +342,47 @@ function decimate_datasets_and_update_chart() {
     const axis_x_max = _chart.scales.x.max
 
     const chart_datasets = []
-    for (const dataset of _datasets) {
-        let axis_x_min_index = dataset.data.findIndex(v => v.x <= axis_x_min)
-        if (axis_x_min_index === -1) axis_x_min_index = 0
-        let axis_x_max_index = dataset.data.findIndex(v => v.x >= axis_x_max)
-        if (axis_x_max_index === -1) axis_x_max_index = dataset.data.length - 1
 
-        const ratio = Math.floor((axis_x_max_index - axis_x_min_index) / _canvas.width)
+
+
+    // Determine the range of x index
+    let x_min_index = 0
+    let x_max_index = _columns[_x_key!].length - 1
+
+    if (_chart.options!.scales!.x!.min !== undefined) {
+        let x_min_found = false
+        let x_max_found = false
+        x_min_index = -1
+        for (let i = 0; i < _columns[_x_key!].length; i++) {
+            const x = _columns[_x_key!][i]
+            if (x >= axis_x_min && !x_min_found) {
+                x_min_index = i;
+                if (x_min_index > 0) x_min_index -= 1
+                x_min_found = true
+            }
+            if (x >= axis_x_max && !x_max_found) { x_max_index = i - 1; x_max_found = true }
+            if (x_min_found && x_max_found) break
+        }
+
+        // Skip rendering if the x range is out of bounds
+        if (x_min_index === -1) return
+    }
+    const ratio = Math.floor((x_max_index - x_min_index) / _canvas.width)
+
+    // Construct the chart datasets
+    for (const column of _config!.columns) {
+        if (column === _x_key) continue
+        const data: { x: number, y: number }[] = []
+        for (let i = x_min_index; i <= x_max_index; i++) {
+            data.push({ x: _columns[_x_key!][i], y: _columns[column][i] })
+        }
 
         if (ratio < 4) {
-            chart_datasets.push(dataset)
+            chart_datasets.push({ data, label: column })
             continue
         }
 
-        chart_datasets.push({ data: decimate(dataset.data, ratio), label: dataset.label })
+        chart_datasets.push({ data: decimate(data, ratio), label: column })
     }
 
     _chart.data.datasets = chart_datasets

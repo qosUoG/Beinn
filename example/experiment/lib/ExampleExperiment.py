@@ -105,13 +105,17 @@ class ExampleExperiment(ExperimentABC[Params]):
         v2 = random.random()
         v3 = random.random()
 
-        self._saver.save(
-            {"index": [index], "t1": [v1], "t2": [v2], "t3": np.array([v3]), "i2": [3]}
-        )
-        # print("experiment loop", index)
+        frame: SaverRowType = {
+            "index": [index],
+            "t1": [v1],
+            "t2": [v2],
+            "t3": np.array([v3]),
+            "i2": [3],
+        }
 
-        # if index >= 9:
-        #     raise ExperimentEnded
+        self._saver.save(frame)
+
+        time.sleep(1)
 
     @override
     def cleanup(self):

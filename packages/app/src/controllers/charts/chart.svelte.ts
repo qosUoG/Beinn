@@ -56,9 +56,12 @@ export class Chart {
 
     showing = $state(true)
 
+    config: ChartConfig
+
     constructor(config: ChartConfig, top: number, left: number, onWsClose: (chart: Chart) => void) {
         this.top = $state(top)
         this.left = $state(left)
+        this.config = $state(config)
 
 
         this.worker = new Worker(new URL("./scatter/worker.js", import.meta.url), { type: "module" })
@@ -77,12 +80,8 @@ export class Chart {
         }
         this.worker.onerror = console.log
         this.worker.onmessageerror = console.log
-
-
-        console.log({ config })
-
-
         this.worker.postMessage({ command: "set_config", payload: { config } } satisfies toWorkerChartMessages)
+        this.worker.postMessage({ command: "x_key", payload: { x_key: config.columns[0]! } } satisfies toWorkerChartMessages)
         this.auto_axis = true
         this.tooltip_mode = false
     }
