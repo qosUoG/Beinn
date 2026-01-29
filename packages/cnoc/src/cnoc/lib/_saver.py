@@ -20,8 +20,8 @@ def _TypedDict2Schema(schema: type[Mapping[str, object]]) -> pa.Schema:
     return pa.schema(schema_fields)
 
 
-def _TypedDict2Config(schema: type[Mapping[str, object]]) -> list[str]:
-    config_fields: list[str] = []
+def _TypedDict2Columns(schema: type[Mapping[str, object]]) -> list[str]:
+    columns: list[str] = []
     for column_name, column_type in schema.__annotations__.items():
         # Array of number
         if (
@@ -30,12 +30,12 @@ def _TypedDict2Config(schema: type[Mapping[str, object]]) -> list[str]:
             or (column_type == np.typing.NDArray[np.int64])
             or (column_type == list[int])
         ):
-            config_fields.append(column_name)
+            columns.append(column_name)
 
         else:
             raise TypeError(f"Unsupported type of key {column_name}: {column_type}")
 
-    return config_fields
+    return columns
 
 
 class _PyArrow:
@@ -72,7 +72,7 @@ class Saver[T: Mapping[str, object]]:
 
         self.config = {
             "title": title,
-            "config": _TypedDict2Config(schema),
+            "columns": _TypedDict2Columns(schema),
         }
         self._run_coroutine_threadsafe = run_coroutine_threadsafe
 

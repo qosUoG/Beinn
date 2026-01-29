@@ -1,13 +1,13 @@
 
 import { log_controller } from "$controllers/log.svelte";
-import type { ChartConfigs, fromWorkerChartMessages, toWorkerChartMessages } from "./types";
+import type { ChartConfig, fromWorkerChartMessages, toWorkerChartMessages } from "./types";
 
 export const DEFAULT_WIDTH = 560
 export const DEFAULT_HEIGHT = 400
 
 
 
-export class Chart<T extends ChartConfigs = ChartConfigs> {
+export class Chart {
     worker: Worker
 
     // is_drawing_points
@@ -54,41 +54,35 @@ export class Chart<T extends ChartConfigs = ChartConfigs> {
         this.worker.postMessage({ command: "resize", payload: { width, height } } satisfies toWorkerChartMessages)
     }
 
-    config: T
-
     showing = $state(true)
 
-    constructor(config: T, top: number, left: number, onWsClose: (chart: Chart) => void) {
+    constructor(config: ChartConfig, top: number, left: number, onWsClose: (chart: Chart) => void) {
         this.top = $state(top)
         this.left = $state(left)
 
-        switch (config.type) {
-            case "chart:scatter": {
-                this.worker = new Worker(new URL("./scatter/worker.js", import.meta.url), { type: "module" })
-                this.worker.onmessage = (e) => {
-                    const res = e.data as fromWorkerChartMessages
-                    switch (res.command) {
-                        case "error": {
-                            console.log(res.payload.error)
-                            break
-                        }
-                        case "ws_closed": {
-                            onWsClose(this)
-                            break
-                        }
-                    }
+
+        this.worker = new Worker(new URL("./scatter/worker.js", import.meta.url), { type: "module" })
+        this.worker.onmessage = (e) => {
+            const res = e.data as fromWorkerChartMessages
+            switch (res.command) {
+                case "error": {
+                    console.log(res.payload.error)
+                    break
                 }
-                this.worker.onerror = console.log
-                this.worker.onmessageerror = console.log
-                break
+                case "ws_closed": {
+                    onWsClose(this)
+                    break
+                }
             }
         }
+        this.worker.onerror = console.log
+        this.worker.onmessageerror = console.log
 
-        if (this.worker === undefined) log_controller.appendError(`Worker script of ${config.type} is undefined`)
+
+        console.log({ config })
 
 
-        this.config = config
-        this.worker.postMessage({ command: "set_config", payload: { config: this.config } } satisfies toWorkerChartMessages)
+        this.worker.postMessage({ command: "set_config", payload: { config } } satisfies toWorkerChartMessages)
         this.auto_axis = true
         this.tooltip_mode = false
     }

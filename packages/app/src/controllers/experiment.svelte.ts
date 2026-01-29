@@ -2,7 +2,7 @@ import { shell } from "$lib/utils.svelte"
 import { Child, Command } from "@tauri-apps/plugin-shell"
 import { EEBaseController, Instance, type ConcInstance, type InstanceSave } from "./_ee.svelte"
 import { Chart } from "./charts/chart.svelte"
-import type { ChartConfigs } from "./charts/types"
+
 
 import { workspace_controller } from "./workspace.svelte"
 import { save2Runtime, type AllParamTypes, type RuntimeAllParamTypes } from "./params.svelte"
@@ -91,8 +91,8 @@ export class Experiment extends Instance {
 
     starting_time_total: number | undefined = $state(undefined)
 
-    note: string | undefined = $state(undefined)
-    saver_configs: string[] = []
+    note: string = $state("")
+    saver_configs: Record<string, { title: string, columns: string[] }> = $state({})
 
     cli: Cli = $state(new Cli())
 
@@ -112,8 +112,8 @@ export class Experiment extends Instance {
 
         this.starting_time_total = undefined
 
-        this.note = undefined
-        this.saver_configs = []
+
+        this.saver_configs = {}
 
         this.cli = new Cli()
 
@@ -155,12 +155,11 @@ export class Experiment extends Instance {
                 return
             }
 
-            let { expected_loop_count, chart_configs, saver_configs } = raw as
+            let { expected_loop_count, saver_configs } = raw as
                 {
                     event: "started"
                     expected_loop_count: number
-                    chart_configs: Record<string, ChartConfigs>
-                    saver_configs: string[]
+                    saver_configs: Record<string, { title: string, columns: string[] }>
                 }
             this.expected_loop_count = expected_loop_count
             this.saver_configs = saver_configs
@@ -169,7 +168,7 @@ export class Experiment extends Instance {
             let left = 16
             let names: Set<string> = new Set()
 
-            for (const config of Object.values(chart_configs)) {
+            for (const config of Object.values(saver_configs)) {
                 if (names.has(config.title)) {
                     this.cli.logs.append(`ERROR:Chart with title ${config.title} already exists`)
                     continue
@@ -185,7 +184,7 @@ export class Experiment extends Instance {
                 left += 8
             }
 
-            if (saver_configs.length > 0) this.note = ""
+
 
             this.startWebsocket()
             return
@@ -225,22 +224,22 @@ export class Experiment extends Instance {
         this.ws!.send(JSON.stringify({ event: "continue" }))
     }
 
-    async saveNote(note: string) {
-        if (this.ws)
-            this.ws!.send(JSON.stringify({ event: "save_note", value: note }))
-        else {
-            for (const saver_config of this.saver_configs) {
-                await shell({
-                    fn: "uv",
-                    cmd: ["run", "save_note", saver_config, note],
-                    description: `Save Note to ${saver_config}`,
-                    cwd: workspace_controller.path!,
-                })
-            }
-        }
+    // async saveNote(note: string) {
+    //     if (this.ws)
+    //         this.ws!.send(JSON.stringify({ event: "save_note", value: note }))
+    //     else {
+    //         for (const saver_config of this.saver_configs) {
+    //             await shell({
+    //                 fn: "uv",
+    //                 cmd: ["run", "save_note", saver_config, note],
+    //                 description: `Save Note to ${saver_config}`,
+    //                 cwd: workspace_controller.path!,
+    //             })
+    //         }
+    //     }
 
 
-    }
+    // }
 
     interpret() {
         if (this.cli.command === "" || this.ws === undefined) return

@@ -1,7 +1,7 @@
 import { Chart, type ChartConfiguration, type Point } from "chart.js/auto";
-import type { ScatterConfig } from "./scatter";
-import type { fromWorkerChartMessages, toWorkerChartMessages } from "../types";
+import type { ChartConfig, fromWorkerChartMessages, toWorkerChartMessages } from "../types";
 import { cnoc_url, deepCopy } from "$lib/utils";
+import { RecordBatchReader, tableFromIPC, Table } from "apache-arrow";
 
 
 // Worker local variables
@@ -9,7 +9,7 @@ let _chart: Chart | undefined = undefined
 let _canvas: OffscreenCanvas | undefined = undefined
 
 
-let _scatter_config: ScatterConfig
+let _config: ChartConfig | undefined = undefined
 let _ws: WebSocket | undefined = undefined
 
 let _datasets: { data: { x: number, y: number }[], label: string }[] = []
@@ -87,11 +87,11 @@ const handlers: Handler = {
 }
 
 handlers.set_config = function set_config({ config }) {
-    _scatter_config = config
-    _chart_config.data.datasets = _scatter_config.y_names.map(label => ({ data: [], label }))
-    _chart_config.options.scales.x.title.text = _scatter_config.x_axis
-    _chart_config.options.scales.y.title.text = _scatter_config.y_axis
-    _datasets = _scatter_config.y_names.map(label => ({ data: [], label }))
+    _config = config
+    _chart_config.data.datasets = config.columns.map(label => ({ data: [], label }))
+    // _chart_config.options.scales.x.title.text = _scatter_config.x_axis
+    // _chart_config.options.scales.y.title.text = _scatter_config.y_axis
+    _datasets = config.columns.map(label => ({ data: [], label }))
 }
 
 handlers.destroy = function clear() {
@@ -100,11 +100,15 @@ handlers.destroy = function clear() {
     _canvas = undefined
 }
 
+let table: undefined | Table = undefined
+
 handlers.ws_open = function ws_open() {
     if (_ws !== undefined && (_ws.readyState === WebSocket.OPEN || _ws.readyState === WebSocket.CONNECTING))
         postErr("Scatter worker: WebSocket is already connected")
 
-    _ws = new WebSocket(cnoc_url + "chart/" + _scatter_config.title)
+    post(_config)
+
+    _ws = new WebSocket(cnoc_url + "chart/" + _config.title)
     _ws.binaryType = "arraybuffer"
 
     _ws.onclose = (event) => {
@@ -114,6 +118,15 @@ handlers.ws_open = function ws_open() {
 
     _ws.onmessage = (event: MessageEvent<ArrayBuffer>) => {
         const y_length = _chart_config.data.datasets.length
+
+        const new_table = tableFromIPC(event.data)
+        if (table === undefined) {
+            table = new_table
+        } else {
+            table = table.concat(new_table)
+        }
+
+        console.log(table)
 
         const frames_bytes = new DataView(event.data)
 

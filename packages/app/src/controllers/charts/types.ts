@@ -1,10 +1,13 @@
-import type { ScatterConfig } from "./scatter/scatter"
 
 
-export type ChartConfigs = ScatterConfig
+
+export type ChartConfig = {
+    title: string
+    columns: string[]
+}
 
 export type toWorkerChartMessages =
-    | { command: "set_config", payload: { config: ChartConfigs } }
+    | { command: "set_config", payload: { config: ChartConfig } }
     | { command: "destroy", payload?: undefined }
 
     | { command: "ws_open", payload?: undefined }
