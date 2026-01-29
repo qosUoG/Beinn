@@ -31,9 +31,7 @@ class _Metadata:
             f.write(
                 json.dumps(
                     {
-                        "params": json.dumps(params2Save(self._params))
-                        if self._params
-                        else "{}",
+                        "params": params2Save(self._params) if self._params else "{}",
                         "note": self._note,
                     }
                 )

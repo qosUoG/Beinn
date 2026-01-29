@@ -39,6 +39,7 @@
 				y: m.clientY,
 			};
 		}
+		m.stopImmediatePropagation();
 	}
 
 	function mouseupHandler(m: MouseEvent) {
@@ -65,9 +66,9 @@
 
 			chart.left = left;
 			chart.top = top;
-
-			console.log($state.snapshot({ l: chart.left, t: chart.top }));
 		}
+
+		m.stopImmediatePropagation();
 	}
 </script>
 

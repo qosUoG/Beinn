@@ -33,6 +33,8 @@
 		is_panning = true;
 		old_x = e.offsetX - 8;
 		old_y = e.offsetY;
+
+		e.stopImmediatePropagation();
 	}
 
 	function handleMouseUp(e: MouseEvent) {
@@ -48,6 +50,8 @@
 		old_y = e.offsetY;
 
 		chart.auto_axis = false;
+
+		e.stopImmediatePropagation();
 	}
 
 	let x_down = $state(false);

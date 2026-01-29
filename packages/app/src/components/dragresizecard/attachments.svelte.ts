@@ -72,7 +72,7 @@ export function move(
             const cancel_mouseup = on(e, "mouseup", (m) => {
                 m.stopPropagation()
                 r.moving = false;
-                console.log(r)
+
                 setTimeout(() => {
 
                     if (onmouseup) onmouseup()
