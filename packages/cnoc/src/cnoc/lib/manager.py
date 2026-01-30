@@ -66,10 +66,8 @@ class Manager:
     def _call_soon_threadsafe(self, callback: Callable[[], None]) -> None:
         self._loop.call_soon_threadsafe(callback)
 
-    async def _wait_tasks(self) -> None:
+    async def _close(self) -> None:
         await asyncio.gather(*self._tasks)
         self._tasks = []
-
-    def _close(self) -> None:
         for saver in self._savers.values():
             saver._saver.close()  # pyright: ignore[reportPrivateUsage]

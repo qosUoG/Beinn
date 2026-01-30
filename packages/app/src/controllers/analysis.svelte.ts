@@ -134,6 +134,9 @@ export class Tab {
     }
 
     async loadContent() {
+
+
+
         const raw = await readFile(workspace_controller.path + "/data/" + this.key + ".parquet");
         const file = await ParquetFile.fromFile(new Blob([raw]));
         const metadata = file.metadata().fileMetadata().keyValueMetadata()

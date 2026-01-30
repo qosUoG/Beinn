@@ -162,8 +162,6 @@ class Runner:
     def close(self):
         self.stop()
         self.experiment.cleanup()
-        for saver in self.manager._savers.values():  # pyright: ignore[reportPrivateUsage]
-            saver._saver.close()  # pyright: ignore[reportPrivateUsage]
 
 
 async def chart_handler(saver: Saver[Any], ws: ServerConnection):
@@ -212,8 +210,6 @@ class ExperimentWsHandle:
                         self.runner.stop()
                     case "continue":
                         self.runner.cont()
-                    case "save_note":
-                        self.runner.saveNote(res["value"])
                     case "interpret":
                         if "name" in res["value"]:
                             self.runner.interpret(
@@ -285,9 +281,16 @@ class AsyncApp:
 
             await ws.close()
             self.wss.remove(ws)
+
+            await self.manager._close()  # pyright: ignore[reportPrivateUsage]
+
             for ws in self.wss:
                 await ws.close()
+
             self.wss = []
+
+            if self.task:
+                self.task.cancel()
 
         elif path.startswith("/chart"):
             # unquote.split => ["", "chart", "<chart_title>"]
@@ -337,10 +340,6 @@ class App:
             self.experiment.setParams(
                 params, self.equipments, self.experiment.params.__class__
             )
-
-    def close(self):
-        self.experiment.cleanup()
-        self.manager._close()  # pyright: ignore[reportPrivateUsage]
 
     async def start(self):
         self.manager = Manager(
@@ -396,8 +395,6 @@ def main():
         app = App()
 
     except Exception as e:
-        if app:
-            app.close()
         print(e, flush=True)
         print_tb(sys.exc_info()[2])
         sys.exit(1)

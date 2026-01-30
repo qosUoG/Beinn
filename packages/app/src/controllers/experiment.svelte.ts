@@ -104,6 +104,8 @@ export class Experiment extends Instance {
         this.charts = {}
         this.chart_in_focus = undefined
 
+        await tick()
+
         this.loop_count = 0
         this.expected_loop_count = -1
 
