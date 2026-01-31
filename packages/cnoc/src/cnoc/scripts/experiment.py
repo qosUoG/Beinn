@@ -14,6 +14,8 @@ from traceback import print_tb
 from urllib.parse import unquote
 import json
 from typing import Any, Callable, TypedDict, cast
+
+from ..lib._params import params2Save
 from ..lib.saver import Saver
 from websockets import ConnectionClosed, Request, ServerConnection
 from ..lib.exceptions import ExperimentEnded
@@ -79,9 +81,6 @@ class Runner:
 
     def cont(self):
         self._should_run.set()
-
-    def saveNote(self, note: str):
-        self.manager._metadata._note = note  # pyright: ignore[reportPrivateUsage]
 
     def interpret(self, command: str, name: str | None = None):
         try:
@@ -342,10 +341,10 @@ class App:
             )
 
     async def start(self):
+        self.timestamp = int(datetime.datetime.now().timestamp() * 1000)
         self.manager = Manager(
-            int(datetime.datetime.now().timestamp() * 1000),
+            self.timestamp,
             asyncio.get_running_loop(),
-            self.experiment.params,
         )
 
         self.experiment.start(self.manager)
@@ -354,11 +353,25 @@ class App:
 
         await async_app.startServer()
 
+        with open(f"./data/{self.timestamp}/snapshot.json", "w") as f:
+            snapshots = {}
+            for name, equipment in self.equipments.items():
+                snapshots[name] = equipment.snapshot()
+            json.dump(snapshots, f)
+
+        with open(f"./data/{self.timestamp}/params.json", "w") as f:
+            params = {}
+            for name, equipment in self.equipments.items():
+                params[name] = params2Save(equipment.params)
+            params["experiment"] = params2Save(self.experiment.params)
+            json.dump(params, f)
+
         # This asks beinn to connect to the websocket server
         print(
             json.dumps(
                 {
                     "event": "started",
+                    "timestamp": self.timestamp,
                     "expected_loop_count": self.manager.expected_loop_count,
                     "saver_configs": {
                         k: v._saver.config  # pyright: ignore[reportPrivateUsage]

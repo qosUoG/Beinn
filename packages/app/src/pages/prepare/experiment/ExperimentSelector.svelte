@@ -16,58 +16,12 @@
 	<div class=" bg-white rounded min-h-6">
 		<div
 			{@attach clickoutside}
-			class=" py-0.5 px-1 frow text-center relative">
+			class=" py-0.5 px-1 frow text-center relative min-h-0">
 			{#if open}
 				<div
-					class="bg-slate-200 absolute bottom-0 left-0 w-full rounded border p-2">
+					class="bg-white absolute top-0 left-0 w-full rounded border shadow-lg max-h-84 overflow-y-scroll scrollbar-slate-400 fcol-1 z-1">
 					{#each experiment_controller.imports as { cls, module }}
-						<button
-							class={cn(
-								"text-slate-400 wrapped  w-full",
-								experiment_controller.cls === cls &&
-									experiment_controller.module === module
-									? "bg-slate-700 text-slate-500"
-									: "hover:bg-slate-300"
-							)}
-							onclick={async () => {
-								if (
-									experiment_controller.cls === cls &&
-									experiment_controller.module === module
-								)
-									return;
-
-								experiment_controller.module = module;
-								experiment_controller.cls = cls;
-
-								open = false;
-								await tick();
-								await experiment_controller.loadExperiment();
-
-								await experiment_controller.save();
-							}}>
-							from
-							<span
-								class={cn(
-									" font-semibold",
-									experiment_controller.cls === cls &&
-										experiment_controller.module === module
-										? "text-white"
-										: "text-slate-950"
-								)}>
-								{module}
-							</span>
-							import
-							<span
-								class={cn(
-									" font-semibold",
-									experiment_controller.cls === cls &&
-										experiment_controller.module === module
-										? "text-white"
-										: "text-slate-950"
-								)}>
-								{cls}
-							</span>
-						</button>
+						{@render option(cls, module)}
 					{:else}
 						<span
 							class="text-slate-400 wrapped italic select-none cursor-default">
@@ -132,3 +86,53 @@
 		</div>
 	</div>
 {/if}
+
+{#snippet option(cls: string, module: string)}
+	<button
+		class={cn(
+			"text-slate-400 p-1  w-full",
+			experiment_controller.cls === cls &&
+				experiment_controller.module === module
+				? "bg-slate-700 text-slate-400"
+				: "hover:bg-slate-300",
+		)}
+		onclick={async () => {
+			if (
+				experiment_controller.cls === cls &&
+				experiment_controller.module === module
+			)
+				return;
+
+			experiment_controller.module = module;
+			experiment_controller.cls = cls;
+
+			open = false;
+			await tick();
+			await experiment_controller.loadExperiment();
+
+			await experiment_controller.save();
+		}}>
+		from
+		<span
+			class={cn(
+				" font-semibold",
+				experiment_controller.cls === cls &&
+					experiment_controller.module === module
+					? "text-white"
+					: "text-slate-950",
+			)}>
+			{module}
+		</span>
+		import
+		<span
+			class={cn(
+				" font-semibold",
+				experiment_controller.cls === cls &&
+					experiment_controller.module === module
+					? "text-white"
+					: "text-slate-950",
+			)}>
+			{cls}
+		</span>
+	</button>
+{/snippet}

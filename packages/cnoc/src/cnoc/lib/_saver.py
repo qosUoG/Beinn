@@ -116,13 +116,14 @@ class Saver[T: Mapping[str, object]]:
             return
 
         if not self._sent_history:
-            file = pa.OSFile(self._file_path, "rb")
-            b = file.read()
-            file.close()
+            self._file.close()
 
-            await self._ws.send(b)
+            with pa.OSFile(self._file_path, "rb") as source:
+                await self._ws.send(source.read_buffer().to_pybytes())
+
+            self._file = pa.ipc.new_file(self._file_path, self._schema)
+
             self._sent_history = True
-
             return
 
         snapshot = _PyArrow(self._schema)

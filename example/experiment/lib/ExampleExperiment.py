@@ -8,7 +8,7 @@ from typing import Callable, TypedDict, override
 import time
 
 
-from cnoc import p, ExperimentABC, Manager, P
+from cnoc import p, ExperimentABC, Manager, P, ExperimentEnded
 
 from examplelib.ExampleDriver import ExampleEquipment
 import numpy as np
@@ -115,7 +115,8 @@ class ExampleExperiment(ExperimentABC[Params]):
 
         self._saver.save(frame)
 
-        time.sleep(1)
+        if index == 10:
+            raise ExperimentEnded()
 
     @override
     def cleanup(self):

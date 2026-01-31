@@ -93,7 +93,7 @@ export class Experiment extends Instance {
 
     note: string = $state("")
     saver_configs: Record<string, { title: string, columns: string[] }> = $state({})
-
+    timestamp: number | undefined = $state(undefined)
     cli: Cli = $state(new Cli())
 
     ws: WebSocket | undefined = undefined
@@ -103,7 +103,7 @@ export class Experiment extends Instance {
         Object.values(this.charts).forEach(chart => chart.destroy())
         this.charts = {}
         this.chart_in_focus = undefined
-
+        this.timestamp = undefined
         await tick()
 
         this.loop_count = 0
@@ -157,14 +157,16 @@ export class Experiment extends Instance {
                 return
             }
 
-            let { expected_loop_count, saver_configs } = raw as
+            let { expected_loop_count, saver_configs, timestamp } = raw as
                 {
                     event: "started"
+                    timestamp: number
                     expected_loop_count: number
                     saver_configs: Record<string, { title: string, columns: string[] }>
                 }
             this.expected_loop_count = expected_loop_count
             this.saver_configs = saver_configs
+            this.timestamp = timestamp
 
             let top = 16
             let left = 16
@@ -226,22 +228,11 @@ export class Experiment extends Instance {
         this.ws!.send(JSON.stringify({ event: "continue" }))
     }
 
-    // async saveNote(note: string) {
-    //     if (this.ws)
-    //         this.ws!.send(JSON.stringify({ event: "save_note", value: note }))
-    //     else {
-    //         for (const saver_config of this.saver_configs) {
-    //             await shell({
-    //                 fn: "uv",
-    //                 cmd: ["run", "save_note", saver_config, note],
-    //                 description: `Save Note to ${saver_config}`,
-    //                 cwd: workspace_controller.path!,
-    //             })
-    //         }
-    //     }
-
-
-    // }
+    async saveNote(note: string) {
+        if (this.timestamp === undefined) return
+        await writeTextFile(workspace_controller.path! + "data/" + this.timestamp + "/note.txt",
+            note)
+    }
 
     interpret() {
         if (this.cli.command === "" || this.ws === undefined) return

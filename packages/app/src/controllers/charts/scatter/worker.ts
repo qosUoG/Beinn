@@ -126,7 +126,10 @@ handlers.ws_open = function ws_open() {
     }
 
     _ws.onmessage = (event: MessageEvent<ArrayBuffer>) => {
+
         const table = tableFromIPC(event.data)
+
+
 
         const x_column = table.getChild(_x_key!)!
 
@@ -384,6 +387,8 @@ function decimate_datasets_and_update_chart() {
 
         chart_datasets.push({ data: decimate(data, ratio), label: column })
     }
+
+    postErr({ data: chart_datasets, x_min_index, x_max_index })
 
     _chart.data.datasets = chart_datasets
     _chart.update()
