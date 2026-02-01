@@ -1,5 +1,6 @@
 import asyncio
 
+import json
 import os
 from typing import Any, Callable, Coroutine, Mapping
 
@@ -24,6 +25,21 @@ class Manager:
         saver = Saver[T](self._data_dir, title, schema, self._run_coroutine_threadsafe)
         self._savers[title] = saver
         return saver
+
+    """The value should be json serializable"""
+
+    def saveMetadata(self, key: str, value: Any):
+        if not os.path.exists(f"{self._data_dir}/metadata.json"):
+            with open(f"{self._data_dir}/metadata.json", "w") as f:
+                json.dump({key: value}, f)
+            return
+
+        with open(f"{self._data_dir}/metadata.json", "r") as f:
+            metadata = json.load(f)
+            metadata[key] = value
+
+        with open(f"{self._data_dir}/metadata.json", "w") as f:
+            json.dump(metadata, f)
 
     def _run_coroutine_threadsafe(self, coroutine: Coroutine[Any, Any, Any]) -> None:
         self._loop.call_soon_threadsafe(

@@ -353,13 +353,13 @@ class App:
 
         await async_app.startServer()
 
-        with open(f"./data/{self.timestamp}/snapshot.json", "w") as f:
+        with open(f"./data/{self.timestamp}/snapshot.json", "w+") as f:
             snapshots = {}
             for name, equipment in self.equipments.items():
                 snapshots[name] = equipment.snapshot()
             json.dump(snapshots, f)
 
-        with open(f"./data/{self.timestamp}/params.json", "w") as f:
+        with open(f"./data/{self.timestamp}/params.json", "w+") as f:
             params = {}
             for name, equipment in self.equipments.items():
                 params[name] = params2Save(equipment.params)
