@@ -230,7 +230,7 @@ export class Experiment extends Instance {
 
     async saveNote(note: string) {
         if (this.timestamp === undefined) return
-        await writeTextFile(workspace_controller.path! + "data/" + this.timestamp + "/note.txt",
+        await writeTextFile(workspace_controller.path! + "/data/" + this.timestamp + "/note.txt",
             note)
     }
 

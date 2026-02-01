@@ -4,9 +4,9 @@
 	let { time, class: clazz = "" }: { time: number; class?: string } =
 		$props();
 
-	const hour = Math.floor(time / 3600000);
-	const minuet = Math.floor((time % 3600000) / 60000);
-	const second = Math.floor((time % 60000) / 1000);
+	const hour = $derived(Math.floor(time / 3600000));
+	const minuet = $derived(Math.floor((time % 3600000) / 60000));
+	const second = $derived(Math.floor((time % 60000) / 1000));
 </script>
 
 <div class={clazz}>

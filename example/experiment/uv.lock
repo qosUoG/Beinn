@@ -68,7 +68,7 @@ wheels = [
 [[package]]
 name = "cnoc"
 version = "0.1.0"
-source = { git = "https://github.com/qosUoG/Beinn?subdirectory=packages%2Fcnoc#8879b30051c724aee1cb46827d80f4682ce83fe2" }
+source = { git = "https://github.com/qosUoG/Beinn?subdirectory=packages%2Fcnoc#2a91eff4d1bd2e3927ec1bce3f3df0150d40f952" }
 dependencies = [
     { name = "numpy" },
     { name = "pyarrow" },
