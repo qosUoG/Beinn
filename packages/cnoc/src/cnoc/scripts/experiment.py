@@ -196,7 +196,7 @@ class ExperimentWsHandle:
             experiment, manager, equipments, self.onLoopStart, self.onPause, self.onEnd
         )
         self.manager = manager
-        self.manager._run_coroutine_threadsafe(asyncio.to_thread(self.runner.run))  # pyright: ignore[reportPrivateUsage]
+        self.task = asyncio.create_task(asyncio.to_thread(self.runner.run))
 
         self.runner.start()
         try:
@@ -228,6 +228,7 @@ class ExperimentWsHandle:
             print_tb(sys.exc_info()[2])
         finally:
             self.runner.close()
+            self.task.cancel()
 
     # START OF METHODS CALLED BY RUNNER
 
