@@ -14,7 +14,7 @@ let _x_key: string | undefined = undefined
 
 let _ws: WebSocket | undefined = undefined
 
-let _columns: Record<string, number[]> = {}
+let _columns: Record<string, { value: number, occurence: number }[]> = {}
 let _datasets: { data: { x: number, y: number }[], label: string }[] = []
 
 
@@ -136,12 +136,30 @@ handlers.ws_open = function ws_open() {
         for (const column of table.schema.fields) {
             for (let i = 0; i < table.getChild(column.name)!.length; i++) {
                 // Update the columns
-                _columns[column.name].push(Number(table.getChild(column.name)!.get(i)!))
+                const y = Number(table.getChild(column.name)!.get(i)!)
+                const x = Number(x_column.get(i)!)
+                const x_index = _columns[_x_key!].findIndex(v => v.value === x)
+
+                let value = y
+
+                if (x_index !== -1 && _columns[column.name][x_index]) {
+                    postErr(_columns[column.name][x_index])
+                    const old_data = _columns[column.name][x_index]
+                    value = (old_data.value * old_data.occurence + y) / (old_data.occurence + 1)
+                    _columns[column.name][x_index] = { value, occurence: old_data.occurence + 1 }
+                }
+                else
+                    _columns[column.name].push({ value, occurence: 1 })
+
 
                 // Update the datasets
                 if (column.name === _x_key) continue
                 const dataset = _datasets.find(dataset => dataset.label === column.name)!
-                dataset.data.push({ x: Number(x_column.get(i)!), y: Number(table.getChild(column.name)!.get(i)!) })
+                if (x_index !== -1)
+                    dataset.data[x_index] = { x, y: value }
+                else
+                    dataset.data.push({ x, y: value })
+
             }
 
         }
@@ -357,7 +375,7 @@ function decimate_datasets_and_update_chart() {
         let x_max_found = false
         x_min_index = -1
         for (let i = 0; i < _columns[_x_key!].length; i++) {
-            const x = _columns[_x_key!][i]
+            const x = _columns[_x_key!][i].value
             if (x >= axis_x_min && !x_min_found) {
                 x_min_index = i;
                 if (x_min_index > 0) x_min_index -= 1
@@ -377,7 +395,7 @@ function decimate_datasets_and_update_chart() {
         if (column === _x_key) continue
         const data: { x: number, y: number }[] = []
         for (let i = x_min_index; i <= x_max_index; i++) {
-            data.push({ x: _columns[_x_key!][i], y: _columns[column][i] })
+            data.push({ x: _columns[_x_key!][i].value, y: _columns[column][i].value })
         }
 
         if (ratio < 4) {
@@ -388,7 +406,6 @@ function decimate_datasets_and_update_chart() {
         chart_datasets.push({ data: decimate(data, ratio), label: column })
     }
 
-    postErr({ data: chart_datasets, x_min_index, x_max_index })
 
     _chart.data.datasets = chart_datasets
     _chart.update()

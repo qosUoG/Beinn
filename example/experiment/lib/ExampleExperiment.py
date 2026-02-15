@@ -40,10 +40,10 @@ class Params:
 
 class SaverRowType(TypedDict):
     index: list[int]
-    t1: list[float]
-    t2: list[float]
-    t3: np.typing.NDArray[np.float64]
-    i2: list[int]
+    t1: list[int]
+    # t2: list[float]
+    # t3: np.typing.NDArray[np.float64]
+    # i2: list[int]
 
 
 class ExampleExperiment(ExperimentABC[Params]):
@@ -106,16 +106,18 @@ class ExampleExperiment(ExperimentABC[Params]):
         v3 = random.random()
 
         frame: SaverRowType = {
-            "index": [index],
-            "t1": [v1],
-            "t2": [v2],
-            "t3": np.array([v3]),
-            "i2": [3],
+            "index": [index % 10],
+            "t1": [index % 10],
+            # "t2": [v2],
+            # "t3": np.array([v3]),
+            # "i2": [3],
         }
 
         self._saver.save(frame)
 
-        if index == 10:
+        time.sleep(0.1)
+
+        if index == 100:
             raise ExperimentEnded()
 
     @override

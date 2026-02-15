@@ -71,7 +71,8 @@ class Saver[T: Mapping[str, object]]:
 
         self._file_path = f"{dir}/{title}.arrow"
 
-        self._file = pa.ipc.new_file(self._file_path, self._schema)
+        self._osfile = pa.OSFile(self._file_path, "wb")
+        self._file_writer = pa.ipc.new_file(self._osfile, self._schema)
 
         self._ws: ServerConnection | None = None
 
@@ -95,11 +96,11 @@ class Saver[T: Mapping[str, object]]:
             )
         )
 
-        self._run_coroutine_threadsafe(self._save(batch))  # pyright: ignore[reportPrivateUsage]
+        self._run_coroutine_threadsafe(self._save(batch))
 
     async def _save(self, batch: pa.RecordBatch):
         # Write to disk
-        self._file.write_batch(batch)
+        self._file_writer.write_batch(batch)
 
         # Plot the data
         await self._plot(batch)
@@ -116,12 +117,14 @@ class Saver[T: Mapping[str, object]]:
             return
 
         if not self._sent_history:
-            self._file.close()
+            self._file_writer.close()
+            self._osfile.close()
 
             with pa.OSFile(self._file_path, "rb") as source:
                 await self._ws.send(source.read_buffer().to_pybytes())
 
-            self._file = pa.ipc.new_file(self._file_path, self._schema)
+            self._osfile = pa.OSFile(self._file_path, "ab")
+            self._file_writer = pa.ipc.new_file(self._osfile, self._schema)
 
             self._sent_history = True
             return
@@ -135,4 +138,5 @@ class Saver[T: Mapping[str, object]]:
         snapshot.close()
 
     def close(self):
-        self._file.close()
+        self._file_writer.close()
+        self._osfile.close()
