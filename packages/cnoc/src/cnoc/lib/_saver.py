@@ -100,6 +100,7 @@ class Saver[T: Mapping[str, object]]:
 
     async def _save(self, batch: pa.RecordBatch):
         # Write to disk
+        print("save", batch)
         self._file_writer.write_batch(batch)
 
         # Plot the data
@@ -120,11 +121,16 @@ class Saver[T: Mapping[str, object]]:
             self._file_writer.close()
             self._osfile.close()
 
-            with pa.OSFile(self._file_path, "rb") as source:
-                await self._ws.send(source.read_buffer().to_pybytes())
+            with pa.ipc.open_file(self._file_path) as source:
+                table = source.read_all()
+                sink = pa.BufferOutputStream()
+                stream = pa.ipc.new_stream(sink, self._schema)
+                stream.write_table(table)
+                await self._ws.send(sink.read_buffer().to_pybytes())
 
-            self._osfile = pa.OSFile(self._file_path, "ab")
-            self._file_writer = pa.ipc.new_file(self._osfile, self._schema)
+                self._osfile = pa.OSFile(self._file_path, "wb")
+                self._file_writer = pa.ipc.new_file(self._osfile, self._schema)
+                self._file_writer.write_table(table)
 
             self._sent_history = True
             return
