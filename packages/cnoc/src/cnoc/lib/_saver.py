@@ -126,11 +126,11 @@ class Saver[T: Mapping[str, object]]:
                 sink = pa.BufferOutputStream()
                 stream = pa.ipc.new_stream(sink, self._schema)
                 stream.write_table(table)
-                await self._ws.send(sink.read_buffer().to_pybytes())
+                await self._ws.send(sink.getvalue().to_pybytes())
 
-                self._osfile = pa.OSFile(self._file_path, "wb")
-                self._file_writer = pa.ipc.new_file(self._osfile, self._schema)
-                self._file_writer.write_table(table)
+            self._osfile = pa.OSFile(self._file_path, "wb")
+            self._file_writer = pa.ipc.new_file(self._osfile, self._schema)
+            self._file_writer.write_table(table)
 
             self._sent_history = True
             return
