@@ -4,6 +4,15 @@ import { cnoc_url, deepCopy } from "$lib/utils";
 import { tableFromIPC } from "apache-arrow";
 
 
+function mean(indexes: number[], data: number[]) {
+    let res = 0
+    for (const index of indexes)
+        res += data[index]
+
+    return res / indexes.length
+
+}
+
 // Worker local variables
 let _chart: Chart | undefined = undefined
 let _canvas: OffscreenCanvas | undefined = undefined
@@ -14,8 +23,9 @@ let _x_key: string | undefined = undefined
 
 let _ws: WebSocket | undefined = undefined
 
-let _columns: Record<string, { value: number, occurence: number }[]> = {}
-let _datasets: { data: { x: number, y: number }[], label: string }[] = []
+let _columns: Record<string, number[]> = {}
+let _cached_x_indexes: Record<number, number[]> = {}
+let _datasets: Record<string, { x: number, y: number }[]> = {}
 
 
 function postErr(message: string) {
@@ -98,7 +108,8 @@ handlers.set_config = function set_config({ config }) {
     for (const column of config.columns) {
         _columns[column] = []
     }
-    _datasets = config.columns.map(label => ({ data: [], label }))
+    _datasets = {}
+    config.columns.forEach(label => { _datasets[label] = [] })
 
     // _chart_config.options.scales.x.title.text = _scatter_config.x_axis
     // _chart_config.options.scales.y.title.text = _scatter_config.y_axis
@@ -127,38 +138,36 @@ handlers.ws_open = function ws_open() {
 
     _ws.onmessage = (event: MessageEvent<ArrayBuffer>) => {
 
-        const table = tableFromIPC(event.data)
+        const frame = tableFromIPC(event.data)
+        const x_column = frame.getChild(_x_key!)!
 
+        for (let i = 0; i < x_column.length; i++) {
+            // Update x column
+            const x = Number(x_column.get(i)!)
+            const x_index = _columns[_x_key!].findIndex(v => v === x)
 
+            _columns[_x_key!].push(x)
 
-        const x_column = table.getChild(_x_key!)!
+            // Record x entry
+            if (x_index === -1)
+                _cached_x_indexes[x] = [_columns[_x_key!].length - 1]
+            else
+                _cached_x_indexes[x].push(_columns[_x_key!].length - 1)
 
-        for (const column of table.schema.fields) {
-            for (let i = 0; i < table.getChild(column.name)!.length; i++) {
+            for (const column of frame.schema.fields) {
+                if (column.name === _x_key) continue
+
                 // Update the columns
-                const y = Number(table.getChild(column.name)!.get(i)!)
-                const x = Number(x_column.get(i)!)
-                const x_index = _columns[_x_key!].findIndex(v => v.value === x)
-
-                let value = y
-
-                if (x_index !== -1 && _columns[column.name][x_index]) {
-                    postErr(_columns[column.name][x_index])
-                    const old_data = _columns[column.name][x_index]
-                    value = (old_data.value * old_data.occurence + y) / (old_data.occurence + 1)
-                    _columns[column.name][x_index] = { value, occurence: old_data.occurence + 1 }
-                }
-                else
-                    _columns[column.name].push({ value, occurence: 1 })
-
+                const y = Number(frame.getChild(column.name)!.get(i)!)
+                _columns[column.name].push(y)
 
                 // Update the datasets
-                if (column.name === _x_key) continue
-                const dataset = _datasets.find(dataset => dataset.label === column.name)!
-                if (x_index !== -1)
-                    dataset.data[x_index] = { x, y: value }
+                const dataset = _datasets[column.name]!
+                const point = { x, y: mean(_cached_x_indexes[x], _columns[column.name]) }
+                if (x_index === -1)
+                    dataset.push(point)
                 else
-                    dataset.data.push({ x, y: value })
+                    dataset[x_index] = point
 
             }
 
@@ -170,7 +179,7 @@ handlers.ws_open = function ws_open() {
 
 handlers.ws_close = function ws_close() {
     if (_ws === undefined) return
-    _datasets = []
+    _datasets = {}
     _columns = {}
     _ws.close()
 }
@@ -364,40 +373,44 @@ function decimate_datasets_and_update_chart() {
 
     const chart_datasets = []
 
-
-
     // Determine the range of x index
+    const xs = Object.keys(_cached_x_indexes).map(s => Number(s))
+    xs.sort()
     let x_min_index = 0
-    let x_max_index = _columns[_x_key!].length - 1
+    let x_max_index = xs.length - 1
 
     if (_chart.options!.scales!.x!.min !== undefined) {
         let x_min_found = false
         let x_max_found = false
-        x_min_index = -1
-        for (let i = 0; i < _columns[_x_key!].length; i++) {
-            const x = _columns[_x_key!][i].value
-            if (x >= axis_x_min && !x_min_found) {
-                x_min_index = i;
-                if (x_min_index > 0) x_min_index -= 1
-                x_min_found = true
+
+        for (let i = 0; i < xs.length; i++) {
+            // Update new x_min if no x_min_found
+            if (!x_min_found) {
+                if (xs[i] >= axis_x_min) x_min_found = true
+                else {
+                    x_min_index = i
+                }
             }
-            if (x >= axis_x_max && !x_max_found) { x_max_index = i - 1; x_max_found = true }
+
+            // Similar for x_max
+            if (!x_max_found && xs[i] >= axis_x_max) {
+                x_max_found = true
+                x_max_index = i
+
+            }
+
             if (x_min_found && x_max_found) break
         }
 
         // Skip rendering if the x range is out of bounds
-        if (x_min_index === -1) return
+        if (!x_min_found) return
     }
     const ratio = Math.floor((x_max_index - x_min_index) / _canvas.width)
 
     // Construct the chart datasets
     for (const column of _config!.columns) {
         if (column === _x_key) continue
-        const data: { x: number, y: number }[] = []
-        for (let i = x_min_index; i <= x_max_index; i++) {
-            data.push({ x: _columns[_x_key!][i].value, y: _columns[column][i].value })
-        }
-
+        const data = _datasets[column].slice(x_min_index, x_max_index + 1)
         if (ratio < 4) {
             chart_datasets.push({ data, label: column })
             continue

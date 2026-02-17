@@ -41,9 +41,9 @@ class Params:
 class SaverRowType(TypedDict):
     index: list[int]
     t1: list[int]
-    # t2: list[float]
-    # t3: np.typing.NDArray[np.float64]
-    # i2: list[int]
+    t2: list[float]
+    t3: np.typing.NDArray[np.float64]
+    i2: list[int]
 
 
 class ExampleExperiment(ExperimentABC[Params]):
@@ -80,7 +80,7 @@ class ExampleExperiment(ExperimentABC[Params]):
         #     XYFloatSaver.kwargs(title="ExampleSqlSaver", y_names=["temperature"]),
         # )
 
-        # manager.expected_loop_count = 10
+        manager.expected_loop_count = 100
 
     @override
     def loop(self, index: int, shouldStop: Callable[[], bool]):
@@ -101,23 +101,21 @@ class ExampleExperiment(ExperimentABC[Params]):
 
         # Raise an exception such that qoslapapp knows experiment is ended
         # print(f"loop: {index}")
-        v1 = random.random()
+        # v1 = random.random()
         v2 = random.random()
         v3 = random.random()
 
         frame: SaverRowType = {
             "index": [index % 10],
             "t1": [index % 10],
-            # "t2": [v2],
-            # "t3": np.array([v3]),
-            # "i2": [3],
+            "t2": [v2],
+            "t3": np.array([v3]),
+            "i2": [3],
         }
 
         self._saver.save(frame)
 
-        time.sleep(0.1)
-
-        if index == 100:
+        if index == 100 - 1:
             raise ExperimentEnded()
 
     @override
