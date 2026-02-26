@@ -19,7 +19,8 @@ let _canvas: OffscreenCanvas | undefined = undefined
 
 
 let _config: ChartConfig | undefined = undefined
-let _x_key: string | undefined = undefined
+let _x_axis: string | undefined = undefined
+let _y_axis: string[] = []
 
 let _ws: WebSocket | undefined = undefined
 
@@ -86,7 +87,7 @@ type Handler = {
 }
 const handlers: Handler = {
     set_config: function () { },
-    x_key: function () { },
+    xy_axis: function () { },
     destroy: function () { },
     ws_open: function () { },
     ws_close: function () { },
@@ -115,8 +116,37 @@ handlers.set_config = function set_config({ config }) {
     // _chart_config.options.scales.y.title.text = _scatter_config.y_axis
 }
 
-handlers.x_key = function x_key({ x_key }) {
-    _x_key = x_key
+handlers.xy_axis = function xy_axis({ x_axis, y_axis }) {
+
+    _x_axis = x_axis
+    _y_axis = y_axis
+    _cached_x_indexes = {}
+    _datasets = {}
+    _config!.columns.forEach(label => { _datasets[label] = [] })
+
+    for (let i = 0; i < _columns[_x_axis].length; i++) {
+        // Update x column
+        const x = _columns[_x_axis][i]
+        const x_index = _columns[_x_axis].findIndex(v => v === x)
+
+        // Record x entry
+        if (x_index === -1 || _cached_x_indexes[x] === undefined)
+            _cached_x_indexes[x] = [i]
+        else
+            _cached_x_indexes[x].push(i)
+    }
+
+    // Update the datasets
+    const xs = Object.keys(_cached_x_indexes).map(s => Number(s))
+    xs.sort()
+    for (const x of xs) {
+        for (const column of _y_axis) {
+            const dataset = _datasets[column]
+            const point = { x, y: mean(_cached_x_indexes[x], _columns[column]) }
+            dataset.push(point)
+        }
+    }
+    handlers.auto_axis(undefined)
 }
 
 handlers.destroy = function clear() {
@@ -139,23 +169,23 @@ handlers.ws_open = function ws_open() {
     _ws.onmessage = (event: MessageEvent<ArrayBuffer>) => {
 
         const frame = tableFromIPC(event.data)
-        const x_column = frame.getChild(_x_key!)!
+        const x_column = frame.getChild(_x_axis!)!
 
         for (let i = 0; i < x_column.length; i++) {
             // Update x column
             const x = Number(x_column.get(i)!)
-            const x_index = _columns[_x_key!].findIndex(v => v === x)
+            const x_index = _columns[_x_axis!].findIndex(v => v === x)
 
-            _columns[_x_key!].push(x)
+            _columns[_x_axis!].push(x)
 
             // Record x entry
-            if (x_index === -1)
-                _cached_x_indexes[x] = [_columns[_x_key!].length - 1]
+            if (x_index === -1 || _cached_x_indexes[x] === undefined)
+                _cached_x_indexes[x] = [_columns[_x_axis!].length - 1]
             else
-                _cached_x_indexes[x].push(_columns[_x_key!].length - 1)
+                _cached_x_indexes[x].push(_columns[_x_axis!].length - 1)
 
             for (const column of frame.schema.fields) {
-                if (column.name === _x_key) continue
+                if (column.name === _x_axis) continue
 
                 // Update the columns
                 const y = Number(frame.getChild(column.name)!.get(i)!)
@@ -172,6 +202,8 @@ handlers.ws_open = function ws_open() {
             }
 
         }
+
+
 
         decimate_datasets_and_update_chart()
     }
@@ -409,7 +441,8 @@ function decimate_datasets_and_update_chart() {
 
     // Construct the chart datasets
     for (const column of _config!.columns) {
-        if (column === _x_key) continue
+        if (column === _x_axis || !_y_axis.includes(column)) continue
+
         const data = _datasets[column].slice(x_min_index, x_max_index + 1)
         if (ratio < 4) {
             chart_datasets.push({ data, label: column })

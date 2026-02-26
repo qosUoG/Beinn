@@ -104,41 +104,40 @@
 	}}
 	onmousedown={(e) => {
 		if (onmousedown) onmousedown(target!);
-	}}
->
+	}}>
 	<div
 		class={cn("cursor-ns-resize", getStyle("top", null))}
-		{@attach resize("top", null, parent, target, onresize)}
-	></div>
+		{@attach resize("top", null, parent, target, onresize)}>
+	</div>
 	<div
 		class={cn("cursor-ew-resize", getStyle(null, "right"))}
-		{@attach resize(null, "right", parent, target, onresize)}
-	></div>
+		{@attach resize(null, "right", parent, target, onresize)}>
+	</div>
 	<div
 		class={cn("cursor-ns-resize", getStyle("bottom", null))}
-		{@attach resize("bottom", null, parent, target, onresize)}
-	></div>
+		{@attach resize("bottom", null, parent, target, onresize)}>
+	</div>
 	<div
 		class={cn("cursor-ew-resize", getStyle(null, "left"))}
-		{@attach resize(null, "left", parent, target, onresize)}
-	></div>
+		{@attach resize(null, "left", parent, target, onresize)}>
+	</div>
 
 	<div
 		class={cn("cursor-nwse-resize", getStyle("top", "left"))}
-		{@attach resize("top", "left", parent, target, onresize)}
-	></div>
+		{@attach resize("top", "left", parent, target, onresize)}>
+	</div>
 	<div
 		class={cn("cursor-nesw-resize", getStyle("top", "right"))}
-		{@attach resize("top", "right", parent, target, onresize)}
-	></div>
+		{@attach resize("top", "right", parent, target, onresize)}>
+	</div>
 	<div
 		class={cn("cursor-nwse-resize", getStyle("bottom", "right"))}
-		{@attach resize("bottom", "right", parent, target, onresize)}
-	></div>
+		{@attach resize("bottom", "right", parent, target, onresize)}>
+	</div>
 	<div
 		class={cn("cursor-nesw-resize", getStyle("bottom", "left"))}
-		{@attach resize("bottom", "left", parent, target, onresize)}
-	></div>
+		{@attach resize("bottom", "left", parent, target, onresize)}>
+	</div>
 
 	<div
 		role={"chart move"}
@@ -148,8 +147,13 @@
 				? "cursor-grabbing **:cursor-grabbing"
 				: "cursor-grab **:cursor-grab",
 		)}
-		{@attach move(parent, target, onmove, mouseupHandler, mousedownHandler)}
-	>
+		{@attach move(
+			parent,
+			target,
+			onmove,
+			mouseupHandler,
+			mousedownHandler,
+		)}>
 		<GripHorizontal />
 	</div>
 	{@render children?.()}

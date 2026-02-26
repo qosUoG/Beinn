@@ -1,6 +1,8 @@
 
 import { log_controller } from "$controllers/log.svelte";
+import { tick } from "svelte";
 import type { ChartConfig, fromWorkerChartMessages, toWorkerChartMessages } from "./types";
+import { deepCopy } from "$lib/utils";
 
 export const DEFAULT_WIDTH = 560
 export const DEFAULT_HEIGHT = 400
@@ -58,6 +60,40 @@ export class Chart {
 
     config: ChartConfig
 
+    #x_axis: string | undefined = $state(undefined)
+    #y_axis: string[] = $state([])
+
+    get x_axis() {
+        return this.#x_axis
+    }
+
+    get y_axis() {
+        return this.#y_axis
+    }
+
+    get available_y_axis() {
+        return this.config.columns.filter(col => col !== this.#x_axis)
+    }
+
+    async set_x_axis(x_key: string) {
+        this.#x_axis = x_key
+        if (this.#y_axis.includes(x_key)) {
+            this.#y_axis = this.#y_axis.filter(y => y !== x_key)
+        }
+        await tick()
+        this.worker.postMessage({ command: "xy_axis", payload: { x_axis: x_key, y_axis: deepCopy(this.#y_axis) } } satisfies toWorkerChartMessages)
+    }
+
+    async toggle_y_axis(y_key: string) {
+        if (!this.#y_axis.includes(y_key)) {
+            this.#y_axis.push(y_key)
+        } else {
+            this.#y_axis = this.#y_axis.filter(y => y !== y_key)
+        }
+        await tick()
+        this.worker.postMessage({ command: "xy_axis", payload: { x_axis: this.#x_axis!, y_axis: deepCopy(this.#y_axis) } } satisfies toWorkerChartMessages)
+    }
+
     constructor(config: ChartConfig, top: number, left: number, onWsClose: (chart: Chart) => void) {
         this.top = $state(top)
         this.left = $state(left)
@@ -81,7 +117,9 @@ export class Chart {
         this.worker.onerror = console.log
         this.worker.onmessageerror = console.log
         this.worker.postMessage({ command: "set_config", payload: { config } } satisfies toWorkerChartMessages)
-        this.worker.postMessage({ command: "x_key", payload: { x_key: config.columns[0]! } } satisfies toWorkerChartMessages)
+        this.worker.postMessage({ command: "xy_axis", payload: { x_axis: config.columns[0]!, y_axis: config.columns.toSpliced(0, 1) } } satisfies toWorkerChartMessages)
+        this.#x_axis = config.columns[0]
+        this.#y_axis = config.columns.toSpliced(0, 1)
         this.auto_axis = true
         this.tooltip_mode = false
     }

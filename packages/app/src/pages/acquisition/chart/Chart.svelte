@@ -1,7 +1,14 @@
 <script lang="ts">
 	import DragResizeCard from "$components/dragresizecard/DragResizeCard.svelte";
 	import type { Chart } from "$controllers/charts/chart.svelte";
-	import { Circle, CircleSlash2, Eye, EyeOff } from "@lucide/svelte";
+	import {
+		Circle,
+		CircleSlash2,
+		Eye,
+		EyeOff,
+		Settings,
+		X,
+	} from "@lucide/svelte";
 	import ChartCanvas from "./ChartCanvas.svelte";
 	import { cn } from "$components/utils.svelte";
 
@@ -44,12 +51,77 @@
 		experiment_controller.experiment!.chart_in_focus = chart.config.title;
 		target.style.zIndex = "10";
 	}}
-	class="bg-white rounded border-slate-800 shadow-lg"
->
+	class={cn(
+		"bg-white rounded border-slate-800 shadow-lg",
+		`[anchor-name:--${chart.config.title}]`,
+	)}>
+	<div
+		id={chart.config.title}
+		class={cn(
+			" bg-white rounded p-1 ",
+			`absolute [position-anchor:--${chart.config.title}] top-[anchor(top)] left-[anchor(left)] m-0 inset-auto`,
+		)}
+		style={`width: ${chart.width}px; height: ${chart.height}px`}
+		popover>
+		<div class="fcol-4">
+			<button
+				class="icon-btn-sm bg-slate-400 rounded text-slate-50"
+				popovertarget={chart.config.title}
+				popovertargetaction="hide">
+				<X />
+			</button>
+			<div class="fcol-2 bg-slate-100 rounded p-2">
+				<div class="title text-center">X Axis</div>
+				<div class="frow flex-wrap gap-1 p-1">
+					{#each chart.config.columns as column}
+						<button
+							class={cn(
+								"border border-slate-600 text-slate-600 px-2 rounded",
+								chart.x_axis === column
+									? "text-slate-50 bg-slate-600"
+									: "",
+							)}
+							onclick={() => {
+								chart.set_x_axis(column);
+							}}>
+							{column}
+						</button>
+					{/each}
+				</div>
+			</div>
+			<div class="fcol-2 bg-slate-100 rounded p-2">
+				<div class="title text-center">Y Axis</div>
+				<div class="frow flex-wrap gap-1 p-1">
+					{#each chart.available_y_axis as column}
+						<button
+							class={cn(
+								"border border-slate-600 text-slate-600 px-2 rounded",
+								chart.y_axis.includes(column)
+									? "text-slate-50 bg-slate-600"
+									: "",
+							)}
+							onclick={() => {
+								chart.toggle_y_axis(column);
+							}}>
+							{column}
+						</button>
+					{/each}
+				</div>
+			</div>
+		</div>
+	</div>
+
 	<div class="fcol-2">
 		<div class="frow justify-between p-1">
-			<div class="title bg-slate-200 wrapped w-fit">
-				{chart.config.title}
+			<div class="frow-2">
+				<div class="title bg-slate-200 wrapped w-fit">
+					{chart.config.title}
+				</div>
+				<button
+					class="icon-btn-sm bg-slate-400 rounded text-slate-50"
+					popovertarget={chart.config.title}>
+					<Settings />
+				</button>
 			</div>
 			<div class="frow-1">
 				<button
@@ -62,8 +134,7 @@
 					onclick={() => {
 						if (chart.auto_axis) return;
 						chart.auto_axis = true;
-					}}
-				>
+					}}>
 					AUTO AXIS
 				</button>
 				<button
@@ -75,8 +146,7 @@
 					)}
 					onclick={() => {
 						chart.tooltip_mode = !chart.tooltip_mode;
-					}}
-				>
+					}}>
 					<Icon iconNode={crosshairPlus} />
 				</button>
 				<button
@@ -87,8 +157,7 @@
 						else if (chart.element)
 							chart.element.style.height = "32px";
 						chart.showing = !chart.showing;
-					}}
-				>
+					}}>
 					{#if chart.showing}
 						<Eye />
 					{:else}
@@ -99,8 +168,7 @@
 					class="icon-btn-sm bg-slate-400 rounded text-slate-50"
 					onclick={() => {
 						chart.is_drawing_points = !chart.is_drawing_points;
-					}}
-				>
+					}}>
 					{#if chart.is_drawing_points}
 						<Circle />
 					{:else}
