@@ -112,8 +112,7 @@ handlers.set_config = function set_config({ config }) {
     _datasets = {}
     config.columns.forEach(label => { _datasets[label] = [] })
 
-    // _chart_config.options.scales.x.title.text = _scatter_config.x_axis
-    // _chart_config.options.scales.y.title.text = _scatter_config.y_axis
+
 }
 
 handlers.xy_axis = function xy_axis({ x_axis, y_axis }) {
@@ -146,6 +145,10 @@ handlers.xy_axis = function xy_axis({ x_axis, y_axis }) {
             dataset.push(point)
         }
     }
+
+    _chart_config.options.scales.x.title.text = _x_axis
+    if (_chart) (_chart.options.scales!.x as any).title!.text = _x_axis
+
     handlers.auto_axis(undefined)
 }
 
