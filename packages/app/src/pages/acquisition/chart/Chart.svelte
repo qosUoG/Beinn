@@ -28,6 +28,8 @@
 		)
 			chart.element!.style.zIndex = "0";
 	});
+
+	let chart_title_nospace = $derived(chart.config.title.replace(" ", ""));
 </script>
 
 <DragResizeCard
@@ -51,23 +53,21 @@
 		experiment_controller.experiment!.chart_in_focus = chart.config.title;
 		target.style.zIndex = "10";
 	}}
-	class={cn(
-		"bg-white rounded border-slate-800 shadow-lg",
-		`[anchor-name:--${chart.config.title}]`,
-	)}>
+	class={cn("bg-white rounded border-slate-800 shadow-lg")}
+	style={`anchor-name:--${chart_title_nospace};`}
+>
 	<div
 		id={chart.config.title}
-		class={cn(
-			" bg-white rounded p-1 ",
-			`absolute [position-anchor:--${chart.config.title}] top-[anchor(top)] left-[anchor(left)] m-0 inset-auto`,
-		)}
-		style={`width: ${chart.width}px; height: ${chart.height}px`}
-		popover>
+		class={cn(" bg-white rounded p-1 absolute m-0 inset-auto")}
+		style={`width: ${chart.width}px; height: ${chart.height}px; position-anchor:--${chart_title_nospace}; top: anchor(--${chart_title_nospace} top); left: anchor(--${chart_title_nospace} left);`}
+		popover
+	>
 		<div class="fcol-4">
 			<button
 				class="icon-btn-sm bg-slate-400 rounded text-slate-50"
 				popovertarget={chart.config.title}
-				popovertargetaction="hide">
+				popovertargetaction="hide"
+			>
 				<X />
 			</button>
 			<div class="fcol-2 bg-slate-100 rounded p-2">
@@ -83,7 +83,8 @@
 							)}
 							onclick={() => {
 								chart.set_x_axis(column);
-							}}>
+							}}
+						>
 							{column}
 						</button>
 					{/each}
@@ -102,7 +103,8 @@
 							)}
 							onclick={() => {
 								chart.toggle_y_axis(column);
-							}}>
+							}}
+						>
 							{column}
 						</button>
 					{/each}
@@ -119,7 +121,8 @@
 				</div>
 				<button
 					class="icon-btn-sm bg-slate-400 rounded text-slate-50"
-					popovertarget={chart.config.title}>
+					popovertarget={chart.config.title}
+				>
 					<Settings />
 				</button>
 			</div>
@@ -134,7 +137,8 @@
 					onclick={() => {
 						if (chart.auto_axis) return;
 						chart.auto_axis = true;
-					}}>
+					}}
+				>
 					AUTO AXIS
 				</button>
 				<button
@@ -146,7 +150,8 @@
 					)}
 					onclick={() => {
 						chart.tooltip_mode = !chart.tooltip_mode;
-					}}>
+					}}
+				>
 					<Icon iconNode={crosshairPlus} />
 				</button>
 				<button
@@ -157,7 +162,8 @@
 						else if (chart.element)
 							chart.element.style.height = "32px";
 						chart.showing = !chart.showing;
-					}}>
+					}}
+				>
 					{#if chart.showing}
 						<Eye />
 					{:else}
@@ -168,7 +174,8 @@
 					class="icon-btn-sm bg-slate-400 rounded text-slate-50"
 					onclick={() => {
 						chart.is_drawing_points = !chart.is_drawing_points;
-					}}>
+					}}
+				>
 					{#if chart.is_drawing_points}
 						<Circle />
 					{:else}
