@@ -75,6 +75,14 @@ class EquipmentABC[T: DataclassInstance](ABC):
         raise NotImplementedError
 
     @abstractmethod
+    def initialize(self) -> None:
+        """
+        Code to run before  the equipment is actually usable.
+        Params are loaded before running this function.
+        """
+        raise NotImplementedError
+
+    @abstractmethod
     def interactive(self) -> None:
         """
         Code to run before REPL mode is entered

@@ -330,6 +330,9 @@ class App:
                         params, self.equipments, self.equipments[name].params.__class__
                     )
 
+                for equipment in self.equipments.values():
+                    equipment.initialize()
+
         # Load experiment
         with open("./.beinn/experiment.json") as f:
             experiment_res: Save = json.loads(f.read())
