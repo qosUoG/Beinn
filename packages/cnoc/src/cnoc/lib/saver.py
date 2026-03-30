@@ -17,11 +17,3 @@ class Saver[T: Mapping[str, object]]:
     # Thread safe
     def save(self, data: T):
         self._saver.save(data)
-
-
-# class Reader:
-#     def __init__(self, path: str):
-#         self.data = pd.read_parquet(path)  # type: ignore
-#         self.time = int(pq.read_metadata(path).metadata[b"time"])  # type: ignore
-#         self.params = json.loads(pq.read_metadata(path).metadata[b"params"])  # type: ignore
-#         self.note = cast(str, pq.read_metadata(path).metadata[b"note"].decode())  # type: ignore
