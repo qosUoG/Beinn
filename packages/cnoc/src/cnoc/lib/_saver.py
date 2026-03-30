@@ -100,7 +100,6 @@ class Saver[T: Mapping[str, object]]:
 
     async def _save(self, batch: pa.RecordBatch):
         # Write to disk
-        print("save", batch)
         self._file_writer.write_batch(batch)
 
         # Plot the data
