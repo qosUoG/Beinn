@@ -51,8 +51,11 @@ class Select:
             if default is not None and default in self.options:
                 self.value = default
 
-            else:
+            elif len(self.options) > 0:
                 self.value = self.options[0]
+
+            else:
+                self.value = 0
 
         class DictType(TypedDict):
             type: Literal["select.int"]
@@ -87,8 +90,11 @@ class Select:
             if default is not None and default in self.options:
                 self.value = default
 
-            else:
+            elif len(self.options) > 0:
                 self.value = self.options[0]
+
+            else:
+                self.value = 0
 
         class DictType(TypedDict):
             type: Literal["select.float"]
@@ -123,8 +129,11 @@ class Select:
             if default is not None and default in self.options:
                 self.value = default
 
-            else:
+            elif len(self.options) > 0:
                 self.value = self.options[0]
+
+            else:
+                self.value = ""
 
         class DictType(TypedDict):
             type: Literal["select.str"]
